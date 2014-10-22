@@ -395,17 +395,38 @@ namespace VTDev.Projects.CEX.CryptoGraphic
             for (int i = Nk; i < keySize; i++)
             {
                 UInt32 temp = _exKey[i - 1];
-                if (i % Nk == 0)
+
+                // if it is a 512 bit key, maintain step 8 interval for 
+                // additional processing steps, equal to a 256 key distribution
+                if (Nk > 8)
                 {
-                    // round the key
-                    UInt32 rot = (UInt32)((temp << 8) | ((temp >> 24) & 0xff));
-                    // subbyte step
-                    temp = SubByte(rot) ^ Rcon[i / Nk];
+                    if (i % Nk == 0 || i % Nk == 8)
+                    {
+                        // round the key
+                        UInt32 rot = (UInt32)((temp << 8) | ((temp >> 24) & 0xff));
+                        // subbyte step
+                        temp = SubByte(rot) ^ Rcon[i / Nk];
+                    }
+                    // step ik + 4
+                    else if ((i % Nk) == 4 || (i % Nk) == 12)
+                    {
+                        temp = SubByte(temp);
+                    }
                 }
-                // step Nk + 4
-                else if (Nk > 6 && (i % Nk) == 4)
+                else
                 {
-                    temp = SubByte(temp);
+                    if (i % Nk == 0)
+                    {
+                        // round the key
+                        UInt32 rot = (UInt32)((temp << 8) | ((temp >> 24) & 0xff));
+                        // subbyte step
+                        temp = SubByte(rot) ^ Rcon[i / Nk];
+                    }
+                    // step ik + 4
+                    else if (Nk > 6 && (i % Nk) == 4)
+                    {
+                        temp = SubByte(temp);
+                    }
                 }
                 // w[i-Nk] ^ w[i]
                 _exKey[i] = (UInt32)_exKey[i - Nk] ^ temp;
