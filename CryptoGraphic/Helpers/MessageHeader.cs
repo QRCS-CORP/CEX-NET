@@ -2,7 +2,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace VTDev.Projects.CEX.CryptoGraphic.Helpers
+namespace VTDev.Projects.CEX.Cryptographic.Helpers
 {
     #region MessageHeaderStruct
     [Serializable]

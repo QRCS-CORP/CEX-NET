@@ -1,10 +1,12 @@
-﻿
-namespace VTDev.Projects.CEX.CryptoGraphic
+﻿using System;
+using VTDev.Projects.CEX.Cryptographic.Ciphers;
+
+namespace VTDev.Projects.CEX.Cryptographic.Modes
 {
     /// <summary>
     /// Cipher Mode Interface
     /// </summary>
-    public interface ICipherMode
+    public interface ICipherMode : IDisposable
     {
         /// <summary>
         /// Unit block size of internal cipher.
@@ -20,6 +22,11 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         /// Cipher name
         /// </summary>
         string Name { get; }
+
+        /// <summary>
+        /// Underlying Cipher
+        /// </summary>
+        IBlockCipher Cipher { get; set; }
 
         /// <summary>
         /// Intitialization Vector

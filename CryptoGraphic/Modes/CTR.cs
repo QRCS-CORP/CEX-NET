@@ -1,17 +1,19 @@
 ﻿using System;
+using VTDev.Projects.CEX.Cryptographic.Ciphers;
 
-namespace VTDev.Projects.CEX.CryptoGraphic
+namespace VTDev.Projects.CEX.Cryptographic.Modes
 {
     /// <summary>
     /// Implements Segmented Integer Counter (SIC-CTR) mode
     /// </summary>
-    public class CTR : ICipherMode
+    public class CTR : ICipherMode, IDisposable
     {
         #region Fields
         private IBlockCipher _blockCipher;
         private int _blockSize = 16;
         private byte[] _ctrVector;
         private byte[] _ctrTemp;
+        private bool _isDisposed = false;
         private bool _isEncryption = false;
         #endregion
 
@@ -22,6 +24,15 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         public int BlockSize
         {
             get { return _blockCipher.BlockSize; }
+        }
+
+        /// <summary>
+        /// Underlying Cipher
+        /// </summary>
+        public IBlockCipher Cipher
+        {
+            get { return _blockCipher; }
+            set { _blockCipher = value; }
         }
 
         /// <summary>
@@ -66,10 +77,10 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         /// <summary>
         /// Initialize the Cipher
         /// </summary>
-        /// <param name="Transform">Underlying encryption algorithm</param>
-        public CTR(IBlockCipher Transform)
+        /// <param name="Cipher">Underlying encryption algorithm</param>
+        public CTR(IBlockCipher Cipher)
         {
-            _blockCipher = Transform;
+            _blockCipher = Cipher;
             _blockSize = this.BlockSize;
         }
         #endregion
@@ -112,18 +123,43 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         {
             ProcessBlock(Input, InOffset, Output, OutOffset);
         }
+        #endregion
 
+        #region IDispose
         /// <summary>
         /// Dispose of this class and the underlying cipher
         /// </summary>
         public void Dispose()
         {
-            if (_blockCipher != null)
-                _blockCipher.Dispose();
-            if (_ctrVector != null)
-                Array.Clear(_ctrVector, 0, _ctrVector.Length);
-            if (_ctrTemp != null)
-                Array.Clear(_ctrTemp, 0, _ctrTemp.Length);
+            Dispose(true);
+        }
+
+        void IDisposable.Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool Disposing)
+        {
+            if (!_isDisposed && Disposing)
+            {
+                if (_blockCipher != null)
+                    _blockCipher.Dispose();
+
+                if (_ctrVector != null)
+                {
+                    Array.Clear(_ctrVector, 0, _ctrVector.Length);
+                    _ctrVector = null;
+                }
+                if (_ctrTemp != null)
+                {
+                    Array.Clear(_ctrTemp, 0, _ctrTemp.Length);
+                    _ctrTemp = null;
+                }
+
+                _isDisposed = true;
+            }
         }
         #endregion
 

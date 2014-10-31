@@ -8,7 +8,7 @@
 /// permit persons to whom the Software is furnished to do so, subject to
 /// the following conditions:
 /// 
-/// The above copyright notice and this permission notice shall be
+/// The copyright notice and this permission notice shall be
 /// included in all copies or substantial portions of the Software.
 /// 
 /// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
@@ -33,7 +33,7 @@
 /// Written by John Underhill, September 12, 2014.
 /// contact: steppenwolfe_2000@yahoo.com
 
-namespace VTDev.Projects.CEX.CryptoGraphic
+namespace VTDev.Projects.CEX.Cryptographic.Ciphers
 {
     /// <summary>
     /// RSX: An extended implementation of the Rijndael encryption algorithm, 
@@ -472,7 +472,6 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         #endregion
 
         #region SBox Calculations
-
         private void Sb0(uint a, uint b, uint c, uint d)
         {
             uint t1 = a ^ d;
@@ -636,18 +635,22 @@ namespace VTDev.Projects.CEX.CryptoGraphic
             Nb = this.BlockSize / 4;
             Nk = Key.Length / 4;
 
+            // rounds calculation
             if (Nb == 16 || Nk == 16)
                 Nr = 22;
             else if (Nb == 8 || Nk == 8)
                 Nr = 14;
 
+            // expanded key size
             int keySize = Nb * (Nr + 1);
 
-            // get the key
+            // get the expanded key
             _exKey = SerpentKey(Key);
 
+            // inverse cipher
             if (!this.IsEncryption)
             {
+                // reverse key
                 for (int i = 0, k = keySize - Nb; i < k; i += Nb, k -= Nb)
                 {
                     for (int j = 0; j < Nb; j++)
@@ -657,7 +660,7 @@ namespace VTDev.Projects.CEX.CryptoGraphic
                         _exKey[k + j] = temp;
                     }
                 }
-
+                // apply inverse sbox
                 for (int i = Nb; i < keySize - Nb; i++)
                 {
                     _exKey[i] = IT0[SBox[(_exKey[i] >> 24)]] ^
@@ -1313,15 +1316,16 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         /// <summary>
         /// Dispose of this class
         /// </summary>
-        private void Dispose(bool disposing)
+        private void Dispose(bool Disposing)
         {
-            if (!_isDisposed)
+            if (!_isDisposed && Disposing)
             {
-                if (disposing)
+                if (_exKey != null)
                 {
-                    if (_exKey != null)
-                        Array.Clear(_exKey, 0, _exKey.Length);
+                    Array.Clear(_exKey, 0, _exKey.Length);
+                    _exKey = null;
                 }
+
                 _isDisposed = true;
             }
         }

@@ -8,7 +8,7 @@
 /// permit persons to whom the Software is furnished to do so, subject to
 /// the following conditions:
 /// 
-/// The above copyright notice and this permission notice shall be
+/// The copyright notice and this permission notice shall be
 /// included in all copies or substantial portions of the Software.
 /// 
 /// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
@@ -27,7 +27,7 @@
 /// Written by John Underhill, September 10, 2014
 /// contact: steppenwolfe_2000@yahoo.com
 
-namespace VTDev.Projects.CEX.CryptoGraphic
+namespace VTDev.Projects.CEX.Cryptographic.Ciphers
 {
     /// <summary>
     /// RDX: An extended implementation of the Rijndael encryption algorithm.
@@ -116,7 +116,7 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         /// <summary>
         /// Initialize the class
         /// </summary>
-        /// <param name="BlockSize">Algorithm input block size</param>
+        /// <param name="BlockSize">Cipher input block size</param>
         public RDX(int BlockSize = BLOCK_SIZE)
         {
             if (this.BlockSize != 16 && this.BlockSize != 32)
@@ -1102,15 +1102,16 @@ namespace VTDev.Projects.CEX.CryptoGraphic
             GC.SuppressFinalize(this);
         }
 
-        private void Dispose(bool disposing)
+        private void Dispose(bool Disposing)
         {
-            if (!_isDisposed)
+            if (!_isDisposed && Disposing)
             {
-                if (disposing)
+                if (_exKey != null)
                 {
-                    if (_exKey != null)
-                        Array.Clear(_exKey, 0, _exKey.Length);
+                    Array.Clear(_exKey, 0, _exKey.Length);
+                    _exKey = null;
                 }
+
                 _isDisposed = true;
             }
         }

@@ -1,12 +1,13 @@
 ﻿using System;
+using VTDev.Projects.CEX.Cryptographic.Ciphers;
 
-namespace VTDev.Projects.CEX.CryptoGraphic
+namespace VTDev.Projects.CEX.Cryptographic.Modes
 {
     /// <summary>
     /// Implements Parallel Segmented (Integer) Counter (PSC-CTR) mode.
     /// A Parallel processing segmented integer counter implementation.
     /// </summary>
-    public class PSC : ICipherMode
+    public class PSC : ICipherMode, IDisposable
     {
         #region Constants
         private const Int32 MIN_PARALLEL = 1024;
@@ -16,6 +17,7 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         #region Fields
         private IBlockCipher _blockCipher;
         private int _blockSize = 16;
+        private bool _isDisposed = false;
         private bool _isEncryption = false;
         private bool _isParallel = false;
         private byte[] _pscVector;
@@ -29,6 +31,15 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         public int BlockSize
         {
             get { return _blockCipher.BlockSize; }
+        }
+
+        /// <summary>
+        /// Underlying Cipher
+        /// </summary>
+        public IBlockCipher Cipher
+        {
+            get { return _blockCipher; }
+            set { _blockCipher = value; }
         }
 
         /// <summary>
@@ -101,10 +112,10 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         /// <summary>
         /// Initialize the Cipher
         /// </summary>
-        /// <param name="Transform">Underlying encryption algorithm</param>
-        public PSC(IBlockCipher Transform)
+        /// <param name="Cipher">Underlying encryption algorithm</param>
+        public PSC(IBlockCipher Cipher)
         {
-            _blockCipher = Transform;
+            _blockCipher = Cipher;
             _blockSize = this.BlockSize;
 
             this.ProcessorCount = Environment.ProcessorCount;
@@ -290,18 +301,44 @@ namespace VTDev.Projects.CEX.CryptoGraphic
 
             return buffer;
         }
+        #endregion
 
+        #region IDispose
         /// <summary>
         /// Dispose of this class and the underlying cipher
         /// </summary>
         public void Dispose()
         {
-            if (_blockCipher != null)
-                _blockCipher.Dispose();
-            if (_pscVector != null)
-                Array.Clear(_pscVector, 0, _pscVector.Length);
-            if (_pscTemp != null)
-                Array.Clear(_pscTemp, 0, _pscTemp.Length);
+            Dispose(true);
+        }
+
+        void IDisposable.Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool Disposing)
+        {
+            if (!_isDisposed && Disposing)
+            {
+
+                if (_blockCipher != null)
+                    _blockCipher.Dispose();
+
+                if (_pscVector != null)
+                {
+                    Array.Clear(_pscVector, 0, _pscVector.Length);
+                    _pscVector = null;
+                }
+                if (_pscTemp != null)
+                {
+                    Array.Clear(_pscTemp, 0, _pscTemp.Length);
+                    _pscTemp = null;
+                }
+
+                _isDisposed = true;
+            }
         }
         #endregion
     }

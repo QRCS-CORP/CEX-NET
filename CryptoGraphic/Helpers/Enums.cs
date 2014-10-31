@@ -2,7 +2,7 @@
 /// <summary>
 /// Encryption Algorithm
 /// </summary>
-public enum Algorithms : int
+public enum Engines : int
 {
     RDX,
     RSX,
@@ -47,6 +47,7 @@ public enum CipherModes : int
     CBC,
     CTR,
     PSC,
+    ECB,
 }
 
 /// <summary>

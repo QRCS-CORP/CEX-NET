@@ -1,63 +1,63 @@
 ﻿using System;
 
-namespace VTDev.Projects.CEX.CryptoGraphic
+/// Adapted from the BouncyCastle implementation: http://bouncycastle.org/
+/// Refactoring, a couple of small optimizations, Dispose, and a ComputeHash method added.
+/// Many thanks to the authors of BouncyCastle for their great contributions.. j.u.
+namespace VTDev.Projects.CEX.Cryptographic.Digests
 {
-    internal class SHA256HMAC : IDisposable
+    public class SHA256Digest : IDigest, IDisposable
     {
         #region Constants
-        private const Int32 BLOCK_SIZE = 64;
-        private const Int32 DIGEST_SIZE = 32;
-        private const byte IPAD = (byte)0x36;
-        private const byte OPAD = (byte)0x5C;
+        private Int32 BLOCK_SIZE = 64;
+        private Int32 DIGEST_SIZE = 32;
         #endregion
 
         #region Fields
         private Int32 _bufferOffset = 0;
         private Int64 _byteCount = 0;
-        private UInt32[] _hashTable = new UInt32[8];
-        private byte[] _inputPad = new byte[BLOCK_SIZE];
-        private bool _isDisposed = false;
-        private byte[] _outputPad = new byte[BLOCK_SIZE];
         private byte[] _processBuffer = new byte[4];
+        private UInt32[] _hashTable = new UInt32[8];
+        private bool _isDisposed = false;
         private UInt32[] _wordBuffer = new uint[64];
         private Int32 _wordOffset = 0;
         #endregion
 
         #region Constructor
-        public SHA256HMAC(byte[] Key)
+        public SHA256Digest()
         {
-            // The first 32 bits of the fractional parts of the square roots of the first eight prime numbers
-            _hashTable = new UInt32[8] { 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 };
+            Init();
+        }
+        #endregion
 
-            int keyLength = Key.Length;
-
-            if (keyLength > BLOCK_SIZE)
-            {
-                BlockUpdate(Key, 0, Key.Length);
-                HashFinalize(_inputPad, 0);
-
-                keyLength = DIGEST_SIZE;
-            }
-            else
-            {
-                Array.Copy(Key, 0, _inputPad, 0, keyLength);
-            }
-
-            Array.Clear(_inputPad, keyLength, BLOCK_SIZE - keyLength);
-            Array.Copy(_inputPad, 0, _outputPad, 0, BLOCK_SIZE);
-
-            for (int i = 0; i < _inputPad.Length; ++i)
-                _inputPad[i] ^= IPAD;
-
-            for (int i = 0; i < _outputPad.Length; ++i)
-                _outputPad[i] ^= OPAD;
-
-            // Initialise the digest
-            BlockUpdate(_inputPad, 0, _inputPad.Length);
+        #region Properties
+        /// <summary>
+        /// The Digests internal blocksize in bytes
+        /// </summary>
+        public int BlockSize
+        {
+            get { return BLOCK_SIZE; }
         }
 
         /// <summary>
-        /// Update the hash buffer
+        /// Size of returned digest in bytes
+        /// </summary>
+        public int DigestSize
+        {
+            get { return DIGEST_SIZE; }
+        }
+
+        /// <summary>
+        /// Digest name
+        /// </summary>
+        public string Name
+        {
+            get { return "SHA256"; }
+        }
+        #endregion
+
+        #region Public Methods
+        /// <summary>
+        /// Update the SHA256 buffer
         /// </summary>
         /// <param name="Input">Input data [bytes]</param>
         /// <param name="InputOffset">Offset within Input</param>
@@ -108,70 +108,59 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         }
 
         /// <summary>
-        /// Process the last block of data
-        /// </summary>
-        /// <param name="Output">The hash value return</param>
-        /// <param name="Offset">The offset in the data</param>
-        /// <returns>bytes processed</returns>
-        public int DoFinal(byte[] Output, int Offset)
-        {
-            byte[] tmp = new byte[DIGEST_SIZE];
-            HashFinalize(tmp, 0);
-
-            BlockUpdate(_outputPad, 0, _outputPad.Length);
-            BlockUpdate(tmp, 0, tmp.Length);
-
-            int len = HashFinalize(Output, Offset);
-            // Initialise the digest
-            BlockUpdate(_inputPad, 0, _inputPad.Length);
-
-            return len;
-        }
-        #endregion
-
-        #region Properties
-        /// <summary>
-        /// The Ciphers internal blocksize in bytes
-        /// </summary>
-        public int BlockSize
-        {
-            get { return BLOCK_SIZE; }
-        }
-
-        /// <summary>
-        /// Size of returned digest in bytes
-        /// </summary>
-        public int DigestSize
-        {
-            get { return DIGEST_SIZE; }
-        }
-        #endregion
-
-        #region Private Methods
-        /// <summary>
         /// Do final processing
         /// </summary>
         /// <param name="Output">Inputs the final block, and returns the Hash value</param>
-        /// <param name="OutputOffset">The starting positional offset within the Output array</param>
+        /// <param name="OutOffset">The starting positional offset within the Output array</param>
         /// <returns>Size of Hash value, Always 32 bytes</returns>
-        private Int32 HashFinalize(byte[] Output, Int32 OutputOffset)
+        public Int32 DoFinal(byte[] Output, Int32 OutOffset)
         {
             Finish();
 
-            UInt32ToBE((uint)_hashTable[0], Output, OutputOffset);
-            UInt32ToBE((uint)_hashTable[1], Output, OutputOffset + 4);
-            UInt32ToBE((uint)_hashTable[2], Output, OutputOffset + 8);
-            UInt32ToBE((uint)_hashTable[3], Output, OutputOffset + 12);
-            UInt32ToBE((uint)_hashTable[4], Output, OutputOffset + 16);
-            UInt32ToBE((uint)_hashTable[5], Output, OutputOffset + 20);
-            UInt32ToBE((uint)_hashTable[6], Output, OutputOffset + 24);
-            UInt32ToBE((uint)_hashTable[7], Output, OutputOffset + 28);
+            UInt32ToBE((uint)_hashTable[0], Output, OutOffset);
+            UInt32ToBE((uint)_hashTable[1], Output, OutOffset + 4);
+            UInt32ToBE((uint)_hashTable[2], Output, OutOffset + 8);
+            UInt32ToBE((uint)_hashTable[3], Output, OutOffset + 12);
+            UInt32ToBE((uint)_hashTable[4], Output, OutOffset + 16);
+            UInt32ToBE((uint)_hashTable[5], Output, OutOffset + 20);
+            UInt32ToBE((uint)_hashTable[6], Output, OutOffset + 24);
+            UInt32ToBE((uint)_hashTable[7], Output, OutOffset + 28);
 
             Reset();
 
             return DIGEST_SIZE;
         }
 
+        /// <summary>
+        /// Reset the internal state
+        /// </summary>
+        public void Reset()
+        {
+            _byteCount = 0;
+            _bufferOffset = 0;
+            Array.Clear(_processBuffer, 0, _processBuffer.Length);
+            Init();
+        }
+
+        /// <summary>
+        /// Update the message digest with a single byte
+        /// </summary>
+        /// <param name="Input">Input byte</param>
+        public void Update(byte Input)
+        {
+            _processBuffer[_bufferOffset++] = Input;
+
+            if (_bufferOffset == _processBuffer.Length)
+            {
+                ProcessWord(_processBuffer, 0);
+                _bufferOffset = 0;
+            }
+
+            _byteCount++;
+        }
+        #endregion
+
+        #region Private Methods
         private void Finish()
         {
             Int64 bitLength = (_byteCount << 3);
@@ -183,6 +172,12 @@ namespace VTDev.Projects.CEX.CryptoGraphic
 
             ProcessLength(bitLength);
             ProcessBlock();
+        }
+
+        private void Init()
+        {
+            // The first 32 bits of the fractional parts of the square roots of the first eight prime numbers
+            _hashTable = new UInt32[8] { 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 };
         }
 
         private void ProcessBlock()
@@ -271,26 +266,6 @@ namespace VTDev.Projects.CEX.CryptoGraphic
             if (++_wordOffset == 16)
                 ProcessBlock();
         }
-
-        private void Reset()
-        {
-            _byteCount = 0;
-            _bufferOffset = 0;
-            Array.Clear(_processBuffer, 0, _processBuffer.Length);
-        }
-
-        private void Update(byte Input)
-        {
-            _processBuffer[_bufferOffset++] = Input;
-
-            if (_bufferOffset == _processBuffer.Length)
-            {
-                ProcessWord(_processBuffer, 0);
-                _bufferOffset = 0;
-            }
-
-            _byteCount++;
-        }
         #endregion
 
         #region Helpers
@@ -342,7 +317,7 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         /// <summary>
         /// the first 32 bits of the fractional parts of the cube roots of the first sixty-four prime numbers)
         /// </summary>
-        private readonly uint[] K1C = { 
+        private static readonly uint[] K1C = { 
             0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
             0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
             0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
@@ -376,17 +351,20 @@ namespace VTDev.Projects.CEX.CryptoGraphic
                 if (Disposing)
                 {
                     if (_hashTable != null)
+                    {
                         Array.Clear(_hashTable, 0, _hashTable.Length);
-                    if (_inputPad != null)
-                        Array.Clear(_inputPad, 0, _inputPad.Length);
-                    if (_outputPad != null)
-                        Array.Clear(_outputPad, 0, _outputPad.Length);
+                        _hashTable = null;
+                    }
                     if (_processBuffer != null)
+                    {
                         Array.Clear(_processBuffer, 0, _processBuffer.Length);
+                        _processBuffer = null;
+                    }
                     if (_wordBuffer != null)
+                    {
                         Array.Clear(_wordBuffer, 0, _wordBuffer.Length);
-                    if (K1C != null)
-                        Array.Clear(K1C, 0, K1C.Length);
+                        _wordBuffer = null;
+                    }
                 }
                 _isDisposed = true;
             }

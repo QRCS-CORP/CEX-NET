@@ -1,11 +1,12 @@
 ﻿using System;
+using VTDev.Projects.CEX.Cryptographic.Ciphers;
 
-namespace VTDev.Projects.CEX.CryptoGraphic
+namespace VTDev.Projects.CEX.Cryptographic.Modes
 {
     /// <summary>
     /// Implements Cipher FeedBack (CFB) mode
     /// </summary>
-    public class CFB : ICipherMode
+    public class CFB : ICipherMode, IDisposable
     {
         #region Fields
         private IBlockCipher _blockCipher;
@@ -13,6 +14,7 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         private byte[] _cfbIv;
         private byte[] _cfbBuffer;
         private int _feedbackSize = 8;
+        private bool _isDisposed = false;
         private bool _isEncryption = false;
         #endregion
 
@@ -23,6 +25,15 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         public int BlockSize
         {
             get { return _blockCipher.BlockSize; }
+        }
+
+        /// <summary>
+        /// Underlying Cipher
+        /// </summary>
+        public IBlockCipher Cipher
+        {
+            get { return _blockCipher; }
+            set { _blockCipher = value; }
         }
 
         /// <summary>
@@ -78,10 +89,10 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         /// <summary>
         /// Initialize the Cipher
         /// </summary>
-        /// <param name="Transform">Underlying encryption algorithm</param>
-        public CFB(IBlockCipher Transform)
+        /// <param name="Cipher">Underlying encryption algorithm</param>
+        public CFB(IBlockCipher Cipher)
         {
-            _blockCipher = Transform;
+            _blockCipher = Cipher;
             _blockSize = this.BlockSize;
         }
         #endregion
@@ -208,18 +219,43 @@ namespace VTDev.Projects.CEX.CryptoGraphic
             Buffer.BlockCopy(_cfbIv, _feedbackSize, _cfbIv, 0, _cfbIv.Length - _feedbackSize);
             Buffer.BlockCopy(Output, OutOffset, _cfbIv, _cfbIv.Length - _feedbackSize, _feedbackSize);
         }
+        #endregion
 
+        #region IDispose
         /// <summary>
-        /// Dispose of this class
+        /// Dispose of this class and the underlying cipher
         /// </summary>
         public void Dispose()
         {
-            if (_blockCipher != null)
-                _blockCipher.Dispose();
-            if (_cfbIv != null)
-                Array.Clear(_cfbIv, 0, _cfbIv.Length);
-            if (_cfbBuffer != null)
-                Array.Clear(_cfbBuffer, 0, _cfbBuffer.Length);
+            Dispose(true);
+        }
+
+        void IDisposable.Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool Disposing)
+        {
+            if (!_isDisposed && Disposing)
+            {
+                if (_blockCipher != null)
+                    _blockCipher.Dispose();
+
+                if (_cfbIv != null)
+                {
+                    Array.Clear(_cfbIv, 0, _cfbIv.Length);
+                    _cfbIv = null;
+                }
+                if (_cfbBuffer != null)
+                {
+                    Array.Clear(_cfbBuffer, 0, _cfbBuffer.Length);
+                    _cfbBuffer = null;
+                }
+
+                _isDisposed = true;
+            }
         }
         #endregion
     }

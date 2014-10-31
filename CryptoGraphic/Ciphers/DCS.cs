@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 
 /// Permission is hereby granted, free of charge, to any person obtaining
 /// a copy of this software and associated documentation files (the
@@ -9,7 +8,7 @@ using System.Linq;
 /// permit persons to whom the Software is furnished to do so, subject to
 /// the following conditions:
 /// 
-/// The above copyright notice and this permission notice shall be
+/// The copyright notice and this permission notice shall be
 /// included in all copies or substantial portions of the Software.
 /// 
 /// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
@@ -21,36 +20,35 @@ using System.Linq;
 /// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///
 /// 
-/// A stream cipher implementation using a dual AES CTR xor:
+/// A stream cipher implementation using a dual AES CTR Xor:
 /// Dual CTR Stream (DCS)
 /// Valid Key size is 768 bit (96 bytes).
 /// Written by John Underhill, September 21, 2014
 /// contact: steppenwolfe_2000@yahoo.com
 
-namespace VTDev.Projects.CEX.CryptoGraphic
+namespace VTDev.Projects.CEX.Cryptographic.Ciphers
 {
     /// <summary>
     /// DCS: A parallelized stream cipher implementation.
     /// Uses a dual AES CTR XOR; (R_k1(C1) ^ R_k2(C2)) ^ P.
     /// Valid Key size is 768 bit (96 bytes).
-    /// Minimum size required for parallel processing is 1024 bytes.
+    /// Minimum input size required for parallel processing is 1024 bytes.
     /// </summary>
-    public class DCS : IDisposable
+    public class DCS : IStreamCipher, IDisposable
     {
         #region Constants
         private const Int32 BLOCK_SIZE = 16;
         private const Int32 ENGINE_MAXPULL = 102400000;
         private const Int32 EXPANDED_KEYSIZE = 120;
-        private const Int32 KEY_BITS = 256;
-        private const Int32 KEY_BYTES = 32;
+        private const Int32 AESKEY_BITS = 256;
+        private const Int32 AESKEY_BYTES = 32;
         private const Int64 MAX_COUNTER = Int64.MaxValue - ENGINE_MAXPULL + 1;
         private const Int32 MIN_PARALLEL = 1024;
-        private const Int32 SEED_BYTES = 96;
-        private const Int32 SEED_BITS = 768;
-        private const UInt32 SUPPRESSOR = 64;
-        private Int32 NB = 4;
-        private Int32 NK = 8;
-        private Int32 NR = 14;
+        private const Int32 KEY_BITS = 768;
+        private const Int32 KEY_BYTES = 96;
+        private Int32 Nb = 4;
+        private Int32 Nk = 8;
+        private Int32 Nr = 14;
         #endregion
 
         #region Fields
@@ -59,11 +57,21 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         private UInt32[] _exKey1;
         private UInt32[] _exKey2;
         private bool _isDisposed = false;
+        private bool _isInitialized = false;
         private bool _isParallel = false;
-        private byte[] _seedBuffer = new byte[96];
+        private byte[] _keyBuffer = new byte[96];
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Key has been expanded
+        /// </summary>
+        public bool IsInitialized
+        {
+            get { return _isInitialized; }
+            private set { _isInitialized = value; }
+        }
+
         /// <summary>
         /// Get/Set Automatic processor parallelization
         /// </summary>
@@ -101,20 +109,20 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         private int ProcessorCount { get; set; }
 
         /// <summary>
-        /// Algorithm seed
+        /// Cipher key
         /// </summary>
-        public byte[] Seed
+        public byte[] Key
         {
-            get { return _seedBuffer; }
-            private set { _seedBuffer = value; }
+            get { return _keyBuffer; }
+            private set { _keyBuffer = value; }
         }
 
         /// <summary>
-        /// Seed Size in bits 768 or 96 bytes
+        /// Seed Size in bits; 768 or 96 bytes
         /// </summary>
-        public Int32 SeedSize
+        public Int32[] KeySizes
         {
-            get { return SEED_BITS; }
+            get { return new Int32[] { KEY_BITS }; }
         }
         #endregion
 
@@ -137,41 +145,43 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         /// <summary>
         /// Initialize the algorithm, must be called before processing
         /// </summary>
-        /// <param name="Seed">96 byte (768 bit) random seed value</param>
-        public void Init(byte[] Seed)
+        /// <param name="Key">96 byte (768 bit) random key value</param>
+        public void Init(byte[] Key)
         {
-            if (Seed == null)
+            if (Key == null)
                 throw new ArgumentOutOfRangeException("Invalid seed! Seed can not be null.");
-            if (Seed.Length != 96)
+            if (Key.Length != 96)
                 throw new ArgumentOutOfRangeException("Invalid seed size! Seed must be 96 bytes.");
-            if (ZerosFrequency(Seed) > 24)
+            if (ZerosFrequency(Key) > 24)
                 throw new ArgumentException("Bad seed! Seed material contains too many zeroes.");
-            if (!EvaluateSeed(Seed))
+            if (!EvaluateSeed(Key))
                 throw new ArgumentException("Bad seed! Seed material contains repeating squence.");
 
             // copy seed
-            Buffer.BlockCopy(Seed, 0, _seedBuffer, 0, _seedBuffer.Length);
+            Buffer.BlockCopy(Key, 0, _keyBuffer, 0, _keyBuffer.Length);
 
-            byte[] keyBuffer1 = new byte[KEY_BYTES];
-            byte[] keyBuffer2 = new byte[KEY_BYTES];
+            byte[] keyBuffer1 = new byte[AESKEY_BYTES];
+            byte[] keyBuffer2 = new byte[AESKEY_BYTES];
 
             // copy seed to keys
-            Buffer.BlockCopy(Seed, 0, keyBuffer1, 0, KEY_BYTES);
-            Buffer.BlockCopy(Seed, KEY_BYTES, keyBuffer2, 0, KEY_BYTES);
+            Buffer.BlockCopy(Key, 0, keyBuffer1, 0, AESKEY_BYTES);
+            Buffer.BlockCopy(Key, AESKEY_BYTES, keyBuffer2, 0, AESKEY_BYTES);
 
-            if (keyBuffer1.SequenceEqual(keyBuffer2))
+            if (IsEqual(keyBuffer1, keyBuffer2))
                 throw new ArgumentException("Bad seed! Seed material is a repeating sequence.");
 
             // copy seed to counters
-            Buffer.BlockCopy(Seed, KEY_BYTES * 2, _ctrBuffer1, 0, BLOCK_SIZE);
-            Buffer.BlockCopy(Seed, (KEY_BYTES * 2) + BLOCK_SIZE, _ctrBuffer2, 0, BLOCK_SIZE);
+            Buffer.BlockCopy(Key, AESKEY_BYTES * 2, _ctrBuffer1, 0, BLOCK_SIZE);
+            Buffer.BlockCopy(Key, (AESKEY_BYTES * 2) + BLOCK_SIZE, _ctrBuffer2, 0, BLOCK_SIZE);
 
-            if (_ctrBuffer1.SequenceEqual(_ctrBuffer2))
+            if (IsEqual(_ctrBuffer1, _ctrBuffer2))
                 throw new ArgumentException("Bad seed! Seed material is a repeating sequence.");
 
             // expand AES keys
             _exKey1 = ExpandKey(keyBuffer1);
             _exKey2 = ExpandKey(keyBuffer2);
+
+            this.IsInitialized = true;
         }
 
         /// <summary>
@@ -241,6 +251,31 @@ namespace VTDev.Projects.CEX.CryptoGraphic
                 Buffer.BlockCopy(counters[count - 1], 0, _ctrBuffer1, 0, _ctrBuffer1.Length);
                 Buffer.BlockCopy(counters[dimensions - 1], 0, _ctrBuffer2, 0, _ctrBuffer2.Length);
             }
+        }
+
+        /// <summary>
+        /// Transform a block of bytes within an array.
+        /// Init must be called before this method can be used.
+        /// </summary>
+        /// <param name="Input">Bytes to Encrypt</param>
+        /// <param name="InOffset">Offset within the Input array</param>
+        /// <param name="Output">Encrypted bytes</param>
+        /// <param name="OutOffset">Offset within the Output array</param>
+        public void Transform(byte[] Input, int InOffset, byte[] Output, int OutOffset)
+        {
+            int size = Output.Length - OutOffset;
+
+            if (Input.Length - InOffset < size)
+                throw new ArgumentOutOfRangeException("Invalid input array! Size can not be less than output array.");
+
+            byte[] inData = new byte[size];
+            byte[] outData = new byte[size];
+
+            Buffer.BlockCopy(Input, InOffset, inData, 0, size);
+
+            Transform(inData, outData);
+
+            Buffer.BlockCopy(outData, 0, Output, OutOffset, size);
         }
         #endregion
 
@@ -330,7 +365,6 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         #endregion
 
         #region Rijndael
-        #region ExpandKey
         /// <summary>
         /// Expand the key and set state variables
         /// </summary>
@@ -338,17 +372,17 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         private UInt32[] ExpandKey(byte[] Key)
         {
             // rounds calculation
-            NB = 4;
-            NK = Key.Length / 4;
-            NR = NK + 6;
+            Nb = 4;
+            Nk = Key.Length / 4;
+            Nr = Nk + 6;
 
             // setup expanded key
-            Int32 keySize = NB * (NR + 1);
+            Int32 keySize = Nb * (Nr + 1);
             UInt32[] exKey = new UInt32[keySize];
             int pos = 0;
 
             // add key to beginning of array
-            for (int i = 0; i < NK; i++)
+            for (int i = 0; i < Nk; i++)
             {
                 UInt32 value = ((UInt32)Key[pos++] << 24);
                 value |= ((UInt32)Key[pos++] << 16);
@@ -358,26 +392,24 @@ namespace VTDev.Projects.CEX.CryptoGraphic
             }
 
             // build the remaining round keys
-            for (int i = NK; i < keySize; i++)
+            for (int i = Nk; i < keySize; i++)
             {
                 UInt32 temp = exKey[i - 1];
-                if (i % NK == 0)
+                if (i % Nk == 0)
                 {
                     UInt32 rot = (UInt32)((temp << 8) | ((temp >> 24) & 0xff));
-                    temp = SubByte(rot) ^ Rcon[i / NK];
+                    temp = SubByte(rot) ^ Rcon[i / Nk];
                 }
-                else if (NK > 6 && (i % NK) == 4)
+                else if (Nk > 6 && (i % Nk) == 4)
                 {
                     temp = SubByte(temp);
                 }
-                exKey[i] = (UInt32)exKey[i - NK] ^ temp;
+                exKey[i] = (UInt32)exKey[i - Nk] ^ temp;
             }
 
             return exKey;
         }
-        #endregion
 
-        #region AES Encrypt
         private void AesTransform(byte[] Input, byte[] Output, UInt32[] Key)
         {
             int ct = 0;
@@ -394,7 +426,7 @@ namespace VTDev.Projects.CEX.CryptoGraphic
             C2 = T0[R2 >> 24] ^ T1[(byte)(R3 >> 16)] ^ T2[(byte)(R0 >> 8)] ^ T3[(byte)R1] ^ Key[ct++];
             C3 = T0[R3 >> 24] ^ T1[(byte)(R0 >> 16)] ^ T2[(byte)(R1 >> 8)] ^ T3[(byte)R2] ^ Key[ct++];
 
-            while (ct < NR * NB)
+            while (ct < Nr * Nb)
             {
                 R0 = T0[C0 >> 24] ^ T1[(byte)(C1 >> 16)] ^ T2[(byte)(C2 >> 8)] ^ T3[(byte)C3] ^ Key[ct++];
                 R1 = T0[C1 >> 24] ^ T1[(byte)(C2 >> 16)] ^ T2[(byte)(C3 >> 8)] ^ T3[(byte)C0] ^ Key[ct++];
@@ -424,9 +456,7 @@ namespace VTDev.Projects.CEX.CryptoGraphic
             Output[14] = (byte)(SBox[(byte)(C1 >> 8)] ^ (byte)(Key[ct] >> 8));
             Output[15] = (byte)(SBox[(byte)C2] ^ (byte)Key[ct]);
         }
-        #endregion
 
-        #region Helpers
         private UInt32 SubByte(UInt32 Rot)
         {
             UInt32 value = 0xff & Rot;
@@ -437,55 +467,6 @@ namespace VTDev.Projects.CEX.CryptoGraphic
             result |= (UInt32)SBox[value] << 16;
             value = 0xff & (Rot >> 24);
             return result | (UInt32)(SBox[value] << 24);
-        }
-
-        private bool EvaluateSeed(byte[] Seed)
-        {
-            int ct = 0;
-
-            // test for recurring values
-            for (int i = 0; i < 256; i++)
-            {
-                ct = 0;
-                for (int j = 0; j < 96; j++)
-                {
-                    if (Seed[j] == (byte)i)
-                        ct++;
-
-                    if (ct > 24)
-                        return false;
-                }
-            }
-
-            ct = 0;
-            // test for ascending run of 4
-            for (int i = 0; i < 256; i++)
-            {
-
-                if (Seed[i] == (byte)i && 
-                    Seed[i + 1] == (byte)(i + 1) && 
-                    Seed[i + 2] == (byte)(i + 2) && 
-                    Seed[i + 3] == (byte)(i + 3))
-                {
-                    ct++;
-                    if (ct > 4)
-                        return false;
-                }
-            }
-
-            return true;
-        }
-
-        private int ZerosFrequency(byte[] Seed)
-        {
-            int ct = 0;
-
-            // test for zeros freq
-            for (int i = 0; i < 96; i++)
-                if (Seed[i] == (byte)0)
-                    ct++;
-
-            return ct;
         }
         #endregion
 
@@ -815,6 +796,73 @@ namespace VTDev.Projects.CEX.CryptoGraphic
 			0xa8017139, 0x0cb3de08, 0xb4e49cd8, 0x56c19064, 0xcb84617b, 0x32b670d5, 0x6c5c7448, 0xb85742d0,
 		};
         #endregion
+
+        #region Helpers
+        private bool EvaluateSeed(byte[] Seed)
+        {
+            int ct = 0;
+
+            // test for recurring values
+            for (int i = 0; i < 256; i++)
+            {
+                ct = 0;
+                for (int j = 0; j < 96; j++)
+                {
+                    if (Seed[j] == (byte)i)
+                        ct++;
+
+                    if (ct > 24)
+                        return false;
+                }
+            }
+
+            ct = 0;
+            // test for ascending run of 4
+            for (int i = 0; i < 256; i++)
+            {
+
+                if (Seed[i] == (byte)i && 
+                    Seed[i + 1] == (byte)(i + 1) && 
+                    Seed[i + 2] == (byte)(i + 2) && 
+                    Seed[i + 3] == (byte)(i + 3))
+                {
+                    ct++;
+                    if (ct > 4)
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool IsEqual(byte[] a, byte[] b)
+        {
+            int i = a.Length;
+
+            if (i != b.Length)
+                return false;
+
+            while (i != 0)
+            {
+                --i;
+                if (a[i] != b[i])
+                    return false;
+            }
+
+            return true;
+        }
+
+        private int ZerosFrequency(byte[] Seed)
+        {
+            int ct = 0;
+
+            // test for zeros freq
+            for (int i = 0; i < 96; i++)
+                if (Seed[i] == (byte)0)
+                    ct++;
+
+            return ct;
+        }
         #endregion
 
         #region IDispose
@@ -832,23 +880,36 @@ namespace VTDev.Projects.CEX.CryptoGraphic
             GC.SuppressFinalize(this);
         }
 
-        private void Dispose(bool disposing)
+        private void Dispose(bool Disposing)
         {
-            if (!_isDisposed)
+            if (!_isDisposed && Disposing)
             {
-                if (disposing)
+                if (_ctrBuffer1 != null)
                 {
-                    if (_ctrBuffer1 != null)
-                        Array.Clear(_ctrBuffer1, 0, _ctrBuffer1.Length);
-                    if (_ctrBuffer2 != null)
-                        Array.Clear(_ctrBuffer2, 0, _ctrBuffer2.Length);
-                    if (_seedBuffer != null)
-                        Array.Clear(_seedBuffer, 0, _seedBuffer.Length);
-                    if (_exKey1 != null)
-                        Array.Clear(_exKey1, 0, _exKey1.Length);
-                    if (_exKey2 != null)
-                        Array.Clear(_exKey2, 0, _exKey2.Length);
+                    Array.Clear(_ctrBuffer1, 0, _ctrBuffer1.Length);
+                    _ctrBuffer1 = null;
                 }
+                if (_ctrBuffer2 != null)
+                {
+                    Array.Clear(_ctrBuffer2, 0, _ctrBuffer2.Length);
+                    _ctrBuffer2 = null;
+                }
+                if (_keyBuffer != null)
+                {
+                    Array.Clear(_keyBuffer, 0, _keyBuffer.Length);
+                    _keyBuffer = null;
+                }
+                if (_exKey1 != null)
+                {
+                    Array.Clear(_exKey1, 0, _exKey1.Length);
+                    _exKey1 = null;
+                }
+                if (_exKey2 != null)
+                {
+                    Array.Clear(_exKey2, 0, _exKey2.Length);
+                    _exKey2 = null;
+                }
+                
                 _isDisposed = true;
             }
         }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VTDev.Projects.CEX.CryptoGraphic
+namespace VTDev.Projects.CEX.Cryptographic.Padding
 {
     /// <summary>
     /// Zero Padding

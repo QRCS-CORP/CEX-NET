@@ -1,16 +1,19 @@
 ﻿using System;
-namespace VTDev.Projects.CEX.CryptoGraphic
+using VTDev.Projects.CEX.Cryptographic.Ciphers;
+
+namespace VTDev.Projects.CEX.Cryptographic.Modes
 {
     /// <summary>
     /// ECB mode (not recommended)
     /// </summary>
-    public class ECB : ICipherMode
+    public class ECB : ICipherMode, IDisposable
     {
         #region Fields
         private IBlockCipher _blockCipher;
         private int _blockSize = 16;
+        private bool _isDisposed = false;
         private bool _isEncryption = false;
-        private byte[] _nneVector;
+        private byte[] _ecbVector;
         #endregion
 
         #region Properties
@@ -20,6 +23,15 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         public int BlockSize
         {
             get { return _blockCipher.BlockSize; }
+        }
+
+        /// <summary>
+        /// Underlying Cipher
+        /// </summary>
+        public IBlockCipher Cipher
+        {
+            get { return _blockCipher; }
+            set { _blockCipher = value; }
         }
 
         /// <summary>
@@ -44,8 +56,8 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         /// </summary>
         public byte[] Vector
         {
-            get { return _nneVector; }
-            set { _nneVector = value; }
+            get { return _ecbVector; }
+            set { _ecbVector = value; }
         }
         #endregion
 
@@ -53,10 +65,10 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         /// <summary>
         /// Initialize the Cipher
         /// </summary>
-        /// <param name="Transform">Underlying encryption algorithm</param>
-        public ECB(IBlockCipher Transform)
+        /// <param name="Cipher">Underlying encryption algorithm</param>
+        public ECB(IBlockCipher Cipher)
         {
-            _blockCipher = Transform;
+            _blockCipher = Cipher;
             _blockSize = this.BlockSize;
         }
         #endregion
@@ -149,14 +161,38 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         {
             _blockCipher.EncryptBlock(Input, InOffset, Output, OutOffset);
         }
+        #endregion
 
+        #region IDispose
         /// <summary>
-        /// Dispose of this class
+        /// Dispose of this class and the underlying cipher
         /// </summary>
         public void Dispose()
         {
-            if (_blockCipher != null)
-                _blockCipher.Dispose();
+            Dispose(true);
+        }
+
+        void IDisposable.Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool Disposing)
+        {
+            if (!_isDisposed && Disposing)
+            {
+                if (_blockCipher != null)
+                    _blockCipher.Dispose();
+
+                if (_ecbVector != null)
+                {
+                    Array.Clear(_ecbVector, 0, _ecbVector.Length);
+                    _ecbVector = null;
+                }
+
+                _isDisposed = true;
+            }
         }
         #endregion
     }

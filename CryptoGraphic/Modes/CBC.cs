@@ -1,11 +1,12 @@
 ﻿using System;
+using VTDev.Projects.CEX.Cryptographic.Ciphers;
 
-namespace VTDev.Projects.CEX.CryptoGraphic
+namespace VTDev.Projects.CEX.Cryptographic.Modes
 {
     /// <summary>
     /// Implements Cipher Block Chaining (CBC) mode
     /// </summary>
-    public class CBC : ICipherMode
+    public class CBC : ICipherMode, IDisposable
     {
         #region Fields
         private IBlockCipher _blockCipher;
@@ -13,6 +14,7 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         private byte[] _cbcIv;
         private byte[] _cbcNextIv;
         private byte[] _cbcBuffer;
+        private bool _isDisposed = false;
         private bool _isEncryption = false;
         #endregion
 
@@ -23,6 +25,15 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         public int BlockSize
         {
             get { return _blockCipher.BlockSize; }
+        }
+
+        /// <summary>
+        /// Underlying Cipher
+        /// </summary>
+        public IBlockCipher Cipher
+        {
+            get { return _blockCipher; }
+            set { _blockCipher = value; }
         }
 
         /// <summary>
@@ -69,10 +80,10 @@ namespace VTDev.Projects.CEX.CryptoGraphic
         /// <summary>
         /// Initialize the Cipher
         /// </summary>
-        /// <param name="Transform">Underlying encryption algorithm</param>
-        public CBC(IBlockCipher Transform)
+        /// <param name="Cipher">Underlying encryption algorithm</param>
+        public CBC(IBlockCipher Cipher)
         {
-            _blockCipher = Transform;
+            _blockCipher = Cipher;
             _blockSize = this.BlockSize;
         }
         #endregion
@@ -200,20 +211,48 @@ namespace VTDev.Projects.CEX.CryptoGraphic
             // copy output to iv
             Buffer.BlockCopy(Output, OutOffset, _cbcIv, 0, _blockSize);
         }
+        #endregion
 
+        #region IDispose
         /// <summary>
-        /// Dispose of this class
+        /// Dispose of this class and the underlying cipher
         /// </summary>
         public void Dispose()
         {
-            if (_blockCipher != null)
-                _blockCipher.Dispose();
-            if (_cbcIv != null)
-                Array.Clear(_cbcIv, 0, _cbcIv.Length);
-            if (_cbcNextIv != null)
-                Array.Clear(_cbcNextIv, 0, _cbcNextIv.Length);
-            if (_cbcBuffer != null)
-                Array.Clear(_cbcBuffer, 0, _cbcBuffer.Length);
+            Dispose(true);
+        }
+
+        void IDisposable.Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool Disposing)
+        {
+            if (!_isDisposed && Disposing)
+            {
+                if (_blockCipher != null)
+                    _blockCipher.Dispose();
+
+                if (_cbcIv != null)
+                {
+                    Array.Clear(_cbcIv, 0, _cbcIv.Length);
+                    _cbcIv = null;
+                }
+                if (_cbcNextIv != null)
+                {
+                    Array.Clear(_cbcNextIv, 0, _cbcNextIv.Length);
+                    _cbcNextIv = null;
+                }
+                if (_cbcBuffer != null)
+                {
+                    Array.Clear(_cbcBuffer, 0, _cbcBuffer.Length);
+                    _cbcBuffer = null;
+                }
+
+                _isDisposed = true;
+            }
         }
         #endregion
     }

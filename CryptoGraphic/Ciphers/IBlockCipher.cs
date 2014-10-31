@@ -1,10 +1,11 @@
-﻿
-namespace VTDev.Projects.CEX.CryptoGraphic
+﻿using System;
+
+namespace VTDev.Projects.CEX.Cryptographic.Ciphers
 {
     /// <summary>
     /// Block Cipher Interface
     /// </summary>
-    public interface IBlockCipher
+    public interface IBlockCipher : IDisposable
     {
         /// <summary>
         /// Unit block size of internal cipher.

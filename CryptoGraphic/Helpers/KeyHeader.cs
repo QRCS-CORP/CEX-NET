@@ -2,14 +2,14 @@
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace VTDev.Projects.CEX.CryptoGraphic.Helpers
+namespace VTDev.Projects.CEX.Cryptographic.Helpers
 {
     #region KeyHeaderStruct
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     internal struct KeyHeaderStruct
     {
-        internal Int32 Algorithm;
+        internal Int32 Engine;
         internal Int32 KeySize;
         internal Int32 IvSize;
         internal Int32 CipherMode;
@@ -19,17 +19,20 @@ namespace VTDev.Projects.CEX.CryptoGraphic.Helpers
         internal byte[] KeyID;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
         internal byte[] ExtRandom;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
+        internal byte[] MessageKey;
 
-        internal KeyHeaderStruct(Algorithms engine, KeySizes keySize, IVSizes ivSize, CipherModes cipher, PaddingModes padding, BlockSizes block)
+        internal KeyHeaderStruct(Engines engine, KeySizes keySize, IVSizes ivSize, CipherModes cipher, PaddingModes padding, BlockSizes block)
         {
-            this.Algorithm = (Int32)engine;
+            this.Engine = (Int32)engine;
             this.KeySize = (Int32)keySize;
             this.IvSize = (Int32)ivSize;
             this.CipherMode = (Int32)cipher;
             this.PaddingMode = (Int32)padding;
             this.BlockSize = (Int32)block;
             this.KeyID = Guid.NewGuid().ToByteArray();
-            this.ExtRandom = KeyGenerator.GenerateIV(IVSizes.V128);
+            this.ExtRandom = KeyGenerator.GetSeed16();
+            this.MessageKey = KeyGenerator.GetSeed64();
         }
     }
     #endregion
@@ -45,6 +48,7 @@ namespace VTDev.Projects.CEX.CryptoGraphic.Helpers
         private const int SEEKTO_BLOCK = 20;
         private const int SEEKTO_ID = 24;
         private const int SEEKTO_RAND = 40;
+        private const int SEEKTO_MKEY = 56;
         private const int SIZE_ENGINE = 4;
         private const int SIZE_KEYSIZE = 4;
         private const int SIZE_IVSIZE = 4;
@@ -53,7 +57,8 @@ namespace VTDev.Projects.CEX.CryptoGraphic.Helpers
         private const int SIZE_BLOCK = 4;
         private const int SIZE_ID = 16;
         private const int SIZE_RAND = 16;
-        private const int SIZE_KEYHEADER = 56;
+        private const int SIZE_MKEY = 64;
+        private const int SIZE_KEYHEADER = 120;
         #endregion
 
         #region Properties
@@ -68,7 +73,7 @@ namespace VTDev.Projects.CEX.CryptoGraphic.Helpers
 
             using (BinaryReader reader = new BinaryReader(new FileStream(KeyFile, FileMode.Open, FileAccess.Read, FileShare.None)))
             {
-                keyStruct.Algorithm = reader.ReadInt32();
+                keyStruct.Engine = reader.ReadInt32();
                 keyStruct.KeySize = reader.ReadInt32();
                 keyStruct.IvSize = reader.ReadInt32();
                 keyStruct.CipherMode = reader.ReadInt32();
@@ -76,6 +81,7 @@ namespace VTDev.Projects.CEX.CryptoGraphic.Helpers
                 keyStruct.BlockSize = reader.ReadInt32();
                 keyStruct.KeyID = reader.ReadBytes(SIZE_ID);
                 keyStruct.ExtRandom = reader.ReadBytes(SIZE_RAND);
+                keyStruct.MessageKey = reader.ReadBytes(SIZE_MKEY);
             }
 
             return keyStruct;
@@ -87,7 +93,7 @@ namespace VTDev.Projects.CEX.CryptoGraphic.Helpers
 
             using (BinaryReader reader = new BinaryReader(DataStream))
             {
-                keyStruct.Algorithm = reader.ReadInt32();
+                keyStruct.Engine = reader.ReadInt32();
                 keyStruct.KeySize = reader.ReadInt32();
                 keyStruct.IvSize = reader.ReadInt32();
                 keyStruct.CipherMode = reader.ReadInt32();
@@ -95,6 +101,7 @@ namespace VTDev.Projects.CEX.CryptoGraphic.Helpers
                 keyStruct.BlockSize = reader.ReadInt32();
                 keyStruct.KeyID = reader.ReadBytes(SIZE_ID);
                 keyStruct.ExtRandom = reader.ReadBytes(SIZE_RAND);
+                keyStruct.MessageKey = reader.ReadBytes(SIZE_MKEY);
             }
 
             return keyStruct;
@@ -105,7 +112,7 @@ namespace VTDev.Projects.CEX.CryptoGraphic.Helpers
             MemoryStream stream = new MemoryStream(SIZE_KEYHEADER);
 
             BinaryWriter writer = new BinaryWriter(stream);
-            writer.Write(Header.Algorithm);
+            writer.Write(Header.Engine);
             writer.Write(Header.KeySize);
             writer.Write(Header.IvSize);
             writer.Write(Header.CipherMode);
@@ -113,13 +120,14 @@ namespace VTDev.Projects.CEX.CryptoGraphic.Helpers
             writer.Write(Header.BlockSize);
             writer.Write(Header.KeyID);
             writer.Write(Header.ExtRandom);
+            writer.Write(Header.MessageKey);
 
             return stream;
         }
         #endregion
 
         #region Getters
-        internal static Algorithms GetEngine(string KeyFile)
+        internal static Engines GetEngine(string KeyFile)
         {
             if (!File.Exists(KeyFile)) return 0;
             int flag = 0;
@@ -130,7 +138,7 @@ namespace VTDev.Projects.CEX.CryptoGraphic.Helpers
                 flag = reader.ReadInt32();
             }
 
-            return (Algorithms)flag;
+            return (Engines)flag;
         }
 
         internal static KeySizes GetKeySize(string KeyFile)
@@ -231,6 +239,20 @@ namespace VTDev.Projects.CEX.CryptoGraphic.Helpers
             return flag;
         }
 
+        internal static byte[] GetMessageKey(string KeyFile)
+        {
+            byte[] flag = new byte[64];
+            if (!File.Exists(KeyFile)) return flag;
+
+            using (BinaryReader reader = new BinaryReader(new FileStream(KeyFile, FileMode.Open, FileAccess.Read, FileShare.None)))
+            {
+                reader.BaseStream.Seek(SEEKTO_MKEY, SeekOrigin.Begin);
+                flag = reader.ReadBytes(SIZE_MKEY);
+            }
+
+            return flag;
+        }
+
         internal static bool IsValid(string KeyFile)
         {
             return ((int)GetEngine(KeyFile) < 4);
@@ -238,7 +260,7 @@ namespace VTDev.Projects.CEX.CryptoGraphic.Helpers
         #endregion
 
         #region Setters
-        internal static void SetEngine(string KeyFile, Algorithms Engine)
+        internal static void SetEngine(string KeyFile, Engines Engine)
         {
             using (BinaryWriter writer = new BinaryWriter(new FileStream(KeyFile, FileMode.Open, FileAccess.Write, FileShare.None)))
             {
