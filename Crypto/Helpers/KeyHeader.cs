@@ -2,12 +2,12 @@
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace VTDev.Projects.CEX.Crypto.Helpers
+namespace VTDev.Libraries.CEXEngine.Crypto.Helpers
 {
     #region KeyHeaderStruct
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
-    internal struct KeyHeaderStruct
+    public struct KeyHeaderStruct
     {
         internal Int32 Engine;
         internal Int32 KeySize;
@@ -23,7 +23,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
         internal byte[] MessageKey;
 
-        internal KeyHeaderStruct(Engines engine, KeySizes keySize, IVSizes ivSize, CipherModes cipher, PaddingModes padding, BlockSizes block, RoundCounts round)
+        public KeyHeaderStruct(Engines engine, KeySizes keySize, IVSizes ivSize, CipherModes cipher, PaddingModes padding, BlockSizes block, RoundCounts round)
         {
             this.Engine = (Int32)engine;
             this.KeySize = (Int32)keySize;
@@ -39,7 +39,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
     }
     #endregion
 
-    internal static class KeyHeader
+    public static class KeyHeader
     {
         #region Constants
         private const int SEEKTO_ENGINE = 0;
@@ -66,11 +66,11 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
         #endregion
 
         #region Properties
-        internal static int GetHeaderSize { get { return SIZE_KEYHEADER; } }
+        public static int GetHeaderSize { get { return SIZE_KEYHEADER; } }
         #endregion
 
         #region Serialize
-        internal static KeyHeaderStruct DeSerializeHeader(string KeyFile)
+        public static KeyHeaderStruct DeSerializeHeader(string KeyFile)
         {
             KeyHeaderStruct keyStruct = new KeyHeaderStruct();
             if (!File.Exists(KeyFile)) return keyStruct;
@@ -92,7 +92,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             return keyStruct;
         }
 
-        internal static KeyHeaderStruct DeSerializeHeader(Stream DataStream)
+        public static KeyHeaderStruct DeSerializeHeader(Stream DataStream)
         {
             KeyHeaderStruct keyStruct = new KeyHeaderStruct();
 
@@ -113,7 +113,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             return keyStruct;
         }
 
-        internal static Stream SerializeHeader(KeyHeaderStruct Header)
+        public static Stream SerializeHeader(KeyHeaderStruct Header)
         {
             MemoryStream stream = new MemoryStream(SIZE_KEYHEADER);
 
@@ -134,7 +134,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
         #endregion
 
         #region Getters
-        internal static Engines GetEngine(string KeyFile)
+        public static Engines GetEngine(string KeyFile)
         {
             if (!File.Exists(KeyFile)) return 0;
             int flag = 0;
@@ -148,7 +148,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             return (Engines)flag;
         }
 
-        internal static KeySizes GetKeySize(string KeyFile)
+        public static KeySizes GetKeySize(string KeyFile)
         {
             if (!File.Exists(KeyFile)) return 0;
             int flag = 0;
@@ -162,7 +162,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             return (KeySizes)flag;
         }
 
-        internal static IVSizes GetIvSize(string KeyFile)
+        public static IVSizes GetIvSize(string KeyFile)
         {
             if (!File.Exists(KeyFile)) return 0;
             int flag = 0;
@@ -176,7 +176,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             return (IVSizes)flag;
         }
 
-        internal static CipherModes GetCipherMode(string KeyFile)
+        public static CipherModes GetCipherMode(string KeyFile)
         {
             if (!File.Exists(KeyFile)) return 0;
             int flag = 0;
@@ -190,7 +190,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             return (CipherModes)flag;
         }
 
-        internal static PaddingModes GetPaddingMode(string KeyFile)
+        public static PaddingModes GetPaddingMode(string KeyFile)
         {
             if (!File.Exists(KeyFile)) return 0;
             int flag = 0;
@@ -204,7 +204,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             return (PaddingModes)flag;
         }
 
-        internal static BlockSizes GetBlockSize(string KeyFile)
+        public static BlockSizes GetBlockSize(string KeyFile)
         {
             if (!File.Exists(KeyFile)) return 0;
             int flag = 0;
@@ -218,7 +218,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             return (BlockSizes)flag;
         }
 
-        internal static RoundCounts GetRoundCount(string KeyFile)
+        public static RoundCounts GetRoundCount(string KeyFile)
         {
             if (!File.Exists(KeyFile)) return 0;
             int flag = 0;
@@ -232,7 +232,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             return (RoundCounts)flag;
         }
 
-        internal static Guid GetKeyId(string KeyFile)
+        public static Guid GetKeyId(string KeyFile)
         {
             if (!File.Exists(KeyFile)) return new Guid();
             byte[] flag = new byte[SIZE_ID];
@@ -246,7 +246,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             return new Guid(flag);
         }
 
-        internal static byte[] GetExtRandom(string KeyFile)
+        public static byte[] GetExtRandom(string KeyFile)
         {
             byte[] flag = new byte[SIZE_RAND];
             if (!File.Exists(KeyFile)) return flag;
@@ -260,7 +260,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             return flag;
         }
 
-        internal static byte[] GetMessageKey(string KeyFile)
+        public static byte[] GetMessageKey(string KeyFile)
         {
             byte[] flag = new byte[SIZE_MKEY];
             if (!File.Exists(KeyFile)) return flag;
@@ -274,14 +274,14 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             return flag;
         }
 
-        internal static bool IsValid(string KeyFile)
+        public static bool IsValid(string KeyFile)
         {
             return ((int)GetEngine(KeyFile) < 4);
         }
         #endregion
 
         #region Setters
-        internal static void SetEngine(string KeyFile, Engines Engine)
+        public static void SetEngine(string KeyFile, Engines Engine)
         {
             using (BinaryWriter writer = new BinaryWriter(new FileStream(KeyFile, FileMode.Open, FileAccess.Write, FileShare.None)))
             {
@@ -290,7 +290,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             }
         }
 
-        internal static void SetKeySize(string KeyFile, KeySizes KeySize)
+        public static void SetKeySize(string KeyFile, KeySizes KeySize)
         {
             using (BinaryWriter writer = new BinaryWriter(new FileStream(KeyFile, FileMode.Open, FileAccess.Write, FileShare.None)))
             {
@@ -299,7 +299,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             }
         }
 
-        internal static void SetIvSize(string KeyFile, IVSizes IvSize)
+        public static void SetIvSize(string KeyFile, IVSizes IvSize)
         {
             using (BinaryWriter writer = new BinaryWriter(new FileStream(KeyFile, FileMode.Open, FileAccess.Write, FileShare.None)))
             {
@@ -308,7 +308,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             }
         }
 
-        internal static void SetCipherMode(string KeyFile, CipherModes CipherMode)
+        public static void SetCipherMode(string KeyFile, CipherModes CipherMode)
         {
             using (BinaryWriter writer = new BinaryWriter(new FileStream(KeyFile, FileMode.Open, FileAccess.Write, FileShare.None)))
             {
@@ -317,7 +317,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             }
         }
 
-        internal static void SetPaddingMode(string KeyFile, PaddingModes PaddingMode)
+        public static void SetPaddingMode(string KeyFile, PaddingModes PaddingMode)
         {
             using (BinaryWriter writer = new BinaryWriter(new FileStream(KeyFile, FileMode.Open, FileAccess.Write, FileShare.None)))
             {
@@ -326,7 +326,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             }
         }
 
-        internal static void SetBlockSize(string KeyFile, BlockSizes BlockSize)
+        public static void SetBlockSize(string KeyFile, BlockSizes BlockSize)
         {
             using (BinaryWriter writer = new BinaryWriter(new FileStream(KeyFile, FileMode.Open, FileAccess.Write, FileShare.None)))
             {
@@ -335,7 +335,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             }
         }
 
-        internal static void SetRoundCount(string KeyFile, RoundCounts RoundCount)
+        public static void SetRoundCount(string KeyFile, RoundCounts RoundCount)
         {
             using (BinaryWriter writer = new BinaryWriter(new FileStream(KeyFile, FileMode.Open, FileAccess.Write, FileShare.None)))
             {
@@ -344,7 +344,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             }
         }
 
-        internal static void SetKeyId(string KeyFile, Guid KeyId)
+        public static void SetKeyId(string KeyFile, Guid KeyId)
         {
             using (BinaryWriter writer = new BinaryWriter(new FileStream(KeyFile, FileMode.Open, FileAccess.Write, FileShare.None)))
             {

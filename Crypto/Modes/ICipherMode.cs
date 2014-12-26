@@ -1,7 +1,7 @@
 ﻿using System;
-using VTDev.Projects.CEX.Crypto.Ciphers;
+using VTDev.Libraries.CEXEngine.Crypto.Ciphers;
 
-namespace VTDev.Projects.CEX.Crypto.Modes
+namespace VTDev.Libraries.CEXEngine.Crypto.Modes
 {
     /// <summary>
     /// Cipher Mode Interface
@@ -17,6 +17,11 @@ namespace VTDev.Projects.CEX.Crypto.Modes
         /// Used as encryptor, false for decryption. 
         /// </summary>
         bool IsEncryption { get; }
+
+        /// <summary>
+        /// Uses parallel processing. 
+        /// </summary>
+        bool IsParallel { get; set;  }
 
         /// <summary>
         /// Cipher name
@@ -39,7 +44,7 @@ namespace VTDev.Projects.CEX.Crypto.Modes
         /// <param name="Encryptor">Cipher is used for encryption, false to decrypt</param>
         /// <param name="Transform">Underlying encryption engine</param>
         /// <param name="KeyParam">Cipher key and Vector</param>
-        void Init(bool Encryptor, KeyParams KeyParam);
+        void Init(bool Encryption, KeyParams KeyParam);
 
         /// <summary>
         /// Transform a block of bytes.

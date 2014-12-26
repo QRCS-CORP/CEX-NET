@@ -1,15 +1,15 @@
 ﻿using System;
-using VTDev.Projects.CEX.Crypto.Digests;
-using VTDev.Projects.CEX.Crypto.Macs;
+using VTDev.Libraries.CEXEngine.Crypto.Digests;
+using VTDev.Libraries.CEXEngine.Crypto.Macs;
 
 /// C# implementation based in part on Bouncy Castles Java version HKDFBytesGenerator:
 /// http://grepcode.com/file/repo1.maven.org/maven2/org.bouncycastle/bcprov-ext-jdk15on/1.48/org/bouncycastle/crypto/generators/HKDFBytesGenerator.java
 /// RFC 5869: http://tools.ietf.org/html/rfc5869
 /// White Paper: http://eprint.iacr.org/2010/264.pdf
 
-namespace VTDev.Projects.CEX.Crypto.Generators
+namespace VTDev.Libraries.CEXEngine.Crypto.Generators
 {
-    public class HKDF : IDisposable
+    public class HKDF : IGenerator, IDisposable
     {
         #region Fields
         private byte[] _currentT;
@@ -20,7 +20,17 @@ namespace VTDev.Projects.CEX.Crypto.Generators
         private int _generatedBytes;
         #endregion
 
-        #region Public Methods
+        #region Properties
+        /// <summary>
+        /// Get: Cipher name
+        /// </summary>
+        public string Name
+        {
+            get { return "HKDF"; }
+        }
+        #endregion
+
+        #region Constructor
         /// <summary>
         /// Creates a HKDF Bytes Generator based on the given hash function
         /// </summary>
@@ -40,11 +50,13 @@ namespace VTDev.Projects.CEX.Crypto.Generators
             this._Hmac = Hmac;
             this._hashLength = Hmac.DigestSize;
         }
+        #endregion
 
+        #region Public Methods
         /// <summary>
-        /// Initialize the class
+        /// Initialize the algorithm
         /// </summary>
-        /// <param name="Salt">HMAC salt</param>
+        /// <param name="Salt">Salt value</param>
         public void Init(byte[] Salt)
         {
             _Hmac.Init(Salt);
@@ -53,9 +65,10 @@ namespace VTDev.Projects.CEX.Crypto.Generators
         }
 
         /// <summary>
-        /// Initialize the class
+        /// Initialize the algorithm
         /// </summary>
-        /// <param name="Salt">HMAC salt</param>
+        /// <param name="Salt">Salt value</param>
+        /// <param name="Ikm">Key material</param>
         public void Init(byte[] Salt, byte[] Ikm)
         {
             if (Ikm == null)
@@ -67,11 +80,11 @@ namespace VTDev.Projects.CEX.Crypto.Generators
         }
 
         /// <summary>
-        /// Initialize the class
+        /// Initialize the algorithm
         /// </summary>
         /// <param name="Salt">Salt value</param>
-        /// <param name="Ikm">HMAC key</param>
-        /// <param name="Ikm">Nonce value</param>
+        /// <param name="Ikm">Key material</param>
+        /// <param name="Info">Nonce value</param>
         public void Init(byte[] Salt, byte[] Ikm, byte[] Info)
         {
             if (Ikm == null)
@@ -84,6 +97,17 @@ namespace VTDev.Projects.CEX.Crypto.Generators
 
             _generatedBytes = 0;
             _currentT = new byte[_hashLength];
+        }
+
+        /// <summary>
+        /// Generate a block of bytes
+        /// </summary>
+        /// <param name="Output">Output array</param>
+        /// <param name="Size">Number of bytes to generate</param>
+        /// <returns>Number of bytes generated</returns>
+        public int Generate(int Size, byte[] Output)
+        {
+            return Generate(Size, Output, 0);
         }
 
         /// <summary>

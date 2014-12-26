@@ -1,13 +1,13 @@
 ﻿using System;
-using VTDev.Projects.CEX.Crypto.Macs;
-using VTDev.Projects.CEX.Crypto.Digests;
+using VTDev.Libraries.CEXEngine.Crypto.Macs;
+using VTDev.Libraries.CEXEngine.Crypto.Digests;
 
-namespace VTDev.Projects.CEX.Crypto.Helpers
+namespace VTDev.Libraries.CEXEngine.Crypto.Helpers
 {
-    internal static class KeyGenerator
+    public static class KeyGenerator
     {
         #region KeyParameter
-        internal static KeyParams GetParams(int KeySize, int IVSize = 0, bool UseSHA3 = false)
+        public static KeyParams GetParams(int KeySize, int IVSize = 0, bool UseSHA3 = false)
         {
             if (IVSize > 0)
                 return new KeyParams(Generate(KeySize, UseSHA3), Generate(IVSize, UseSHA3));
@@ -23,7 +23,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
         /// <param name="Size">Size of requested array</param>
         /// <param name="UseSHA3">Use an SHA-3 HMac or SHA-2 HMAC for extraction</param>
         /// <returns>Psuedo random bytes [byte[]]</returns>
-        internal static byte[] Generate(int Size, bool UseSHA3 = false)
+        public static byte[] Generate(int Size, bool UseSHA3 = false)
         {
             if (UseSHA3)
                 return GenerateKeyNg(Size);
@@ -36,7 +36,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
         /// </summary>
         /// <param name="Size">Key size in bytes [byte[]]</param>
         /// <returns>P-rand array [byte[]]</returns>
-        internal static byte[] GenerateKey(int Size)
+        public static byte[] GenerateKey(int Size)
         {
             byte[] key = new byte[Size];
 
@@ -67,7 +67,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
         /// </summary>
         /// <param name="Size">Key size in bytes [byte[]]</param>
         /// <returns>P-rand array [byte[]]</returns>
-        internal static byte[] GenerateKeyNg(int Size)
+        public static byte[] GenerateKeyNg(int Size)
         {
             byte[] key = new byte[Size];
 
@@ -100,7 +100,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
         /// </summary>
         /// <param name="Size">Size of request</param>
         /// <returns>P-Rand bytes [byte[]]</returns>
-        internal static byte[] GetRngBytes(int Size)
+        public static byte[] GetRngBytes(int Size)
         {
             byte[] data = new byte[Size];
 
@@ -114,7 +114,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
         /// Get a random seed value
         /// </summary>
         /// <returns>64 bytes of p-rand</returns>
-        internal static byte[] GetSeed64()
+        public static byte[] GetSeed64()
         {
             byte[] data = GetRngBytes(256);
             byte[] key = GetRngBytes(64);
@@ -127,7 +127,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
         /// Get a random seed value using an SHA3-512 HMAC
         /// </summary>
         /// <returns>64 bytes of p-rand</returns>
-        internal static byte[] GetSeed64Ng()
+        public static byte[] GetSeed64Ng()
         {
             byte[] data = GetRngBytes(144);    // 2x block per Nist sp800-90b
             byte[] key = GetRngBytes(64);      // key size per rfc 2104
@@ -140,7 +140,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
         /// Get a random seed value
         /// </summary>
         /// <returns>32 bytes of p-rand</returns>
-        internal static byte[] GetSeed32()
+        public static byte[] GetSeed32()
         {
             byte[] res = new byte[24];
 
@@ -153,7 +153,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
         /// Get a random seed value
         /// </summary>
         /// <returns>24 bytes of p-rand</returns>
-        internal static byte[] GetSeed24()
+        public static byte[] GetSeed24()
         {
             byte[] res = new byte[24];
 
@@ -166,7 +166,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
         /// Get a random seed value
         /// </summary>
         /// <returns>16 bytes of p-rand</returns>
-        internal static byte[] GetSeed16()
+        public static byte[] GetSeed16()
         {
             byte[] res = new byte[16];
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VTDev.Projects.CEX.Crypto.Macs
+namespace VTDev.Libraries.CEXEngine.Crypto.Macs
 {
     public class SHA512HMAC : IMac, IDisposable
     {

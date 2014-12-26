@@ -3,7 +3,7 @@
 /// Adapted from the BouncyCastle implementation: http://bouncycastle.org/
 /// Refactoring, a couple of small optimizations, Dispose, and a ComputeHash method added.
 /// Many thanks to the authors of BouncyCastle for their great contributions..
-namespace VTDev.Projects.CEX.Crypto.Digests
+namespace VTDev.Libraries.CEXEngine.Crypto.Digests
 {
     public class SHA512Digest : IDigest, IDisposable
     {

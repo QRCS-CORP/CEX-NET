@@ -1,7 +1,7 @@
 ﻿using System;
-using VTDev.Projects.CEX.Crypto.Ciphers;
+using VTDev.Libraries.CEXEngine.Crypto.Ciphers;
 
-namespace VTDev.Projects.CEX.Crypto.Modes
+namespace VTDev.Libraries.CEXEngine.Crypto.Modes
 {
     /// <summary>
     /// Implements Cipher FeedBack (CFB) mode
@@ -55,6 +55,11 @@ namespace VTDev.Projects.CEX.Crypto.Modes
         }
 
         /// <summary>
+        /// Uses parallel processing. 
+        /// </summary>
+        public bool IsParallel { get; set; }
+
+        /// <summary>
         /// Cipher name
         /// </summary>
         public string Name
@@ -101,9 +106,9 @@ namespace VTDev.Projects.CEX.Crypto.Modes
         /// <summary>
         /// Initialize the Cipher
         /// </summary>
-        /// <param name="Encryptor">Cipher is used for encryption, false to decrypt</param>
+        /// <param name="Encryption">Cipher is used for encryption, false to decrypt</param>
         /// <param name="KeyParam">KeyParam containing key and vector</param>
-        public void Init(bool Encryptor, KeyParams KeyParam)
+        public void Init(bool Encryption, KeyParams KeyParam)
         {
             if (KeyParam.Key == null)
                 throw new ArgumentNullException("Key can not be null!");
@@ -112,7 +117,7 @@ namespace VTDev.Projects.CEX.Crypto.Modes
 
             _blockCipher.Init(true, KeyParam);
             this.Vector = KeyParam.IV;
-            this.IsEncryption = Encryptor;
+            this.IsEncryption = Encryption;
         }
 
         /// <summary>

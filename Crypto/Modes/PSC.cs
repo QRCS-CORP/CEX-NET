@@ -130,9 +130,9 @@ namespace VTDev.Projects.CEX.Crypto.Modes
         /// <summary>
         /// Initialize the Cipher
         /// </summary>
-        /// <param name="Encryptor">Cipher is used for encryption, false to decrypt</param>
+        /// <param name="Encryption">Cipher is used for encryption, false to decrypt</param>
         /// <param name="KeyParam">KeyParam containing key and vector</param>
-        public void Init(bool Encryptor, KeyParams KeyParam)
+        public void Init(bool Encryption, KeyParams KeyParam)
         {
             if (KeyParam.Key == null)
                 throw new ArgumentNullException("Key can not be null!");
@@ -141,7 +141,7 @@ namespace VTDev.Projects.CEX.Crypto.Modes
 
             _blockCipher.Init(true, KeyParam);
             this.Vector = KeyParam.IV;
-            this.IsEncryption = Encryptor;
+            this.IsEncryption = Encryption;
         }
 
         /// <summary>
@@ -180,22 +180,20 @@ namespace VTDev.Projects.CEX.Crypto.Modes
             if (Output.Length > Input.Length)
                 throw new ArgumentOutOfRangeException("Invalid input array! Input array size can not be smaller than output array size.");
 
-            int outputSize = Output.Length;
-
-            if (!this.IsParallel || outputSize < MIN_PARALLEL)
+            if (!this.IsParallel || Output.Length < MIN_PARALLEL)
             {
                 // generate random
-                byte[] random = Generate(outputSize, _pscVector);
+                byte[] random = Generate(Output.Length, _pscVector);
 
                 // output is input xor with random
-                for (int i = 0; i < outputSize; i++)
+                for (int i = 0; i < Output.Length; i++)
                     Output[i] = (byte)(Input[i] ^ random[i]);
             }
             else
             {
                 // parallel ctr processing //
                 int count = this.ProcessorCount;
-                int alignedSize = outputSize / _blockSize;
+                int alignedSize = Output.Length / _blockSize;
                 int chunkSize = (alignedSize / count) * _blockSize;
                 int roundSize = chunkSize * count;
                 int subSize = (chunkSize / _blockSize);
@@ -218,9 +216,9 @@ namespace VTDev.Projects.CEX.Crypto.Modes
                 });
 
                 // last block processing
-                if (roundSize < outputSize)
+                if (roundSize < Output.Length)
                 {
-                    int finalSize = outputSize % roundSize;
+                    int finalSize = Output.Length % roundSize;
                     byte[] random = Generate(finalSize, counters[count - 1]);
 
                     for (int i = 0; i < finalSize; i++)
@@ -277,15 +275,8 @@ namespace VTDev.Projects.CEX.Crypto.Modes
         /// <param name="Counter">Counter</param>
         private void Increment(byte[] Counter)
         {
-            int carry = 1;
-
-            // increment by one bit
-            for (int i = 1; i <= Counter.Length; i++)
-            {
-                int res = (Counter[Counter.Length - i] & 0xff) + carry;
-                carry = (res > 0xff) ? 1 : 0;
-                Counter[Counter.Length - i] = (byte)res;
-            }
+            int j = Counter.Length;
+            while (--j >= 0 && ++Counter[j] == 0) { }
         }
 
                 /// <summary>

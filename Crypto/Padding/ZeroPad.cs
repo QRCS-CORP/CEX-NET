@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VTDev.Projects.CEX.Crypto.Padding
+namespace VTDev.Libraries.CEXEngine.Crypto.Padding
 {
     /// <summary>
     /// Zero Padding
@@ -59,6 +59,26 @@ namespace VTDev.Projects.CEX.Crypto.Padding
             for (int i = len; i > 0; i--)
             {
                 if (Input[i] != code)
+                    return (len - i);
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// Get the length of padding in an array
+        /// </summary>
+        /// <param name="Input">Padded array of bytes</param>
+        /// <param name="Offset">Offset into array</param>
+        /// <returns>Length of padding</returns>
+        public int GetPaddingLength(byte[] Input, int Offset)
+        {
+            int len = Input.Length - 1;
+            byte code = (byte)0;
+
+            for (int i = len; i > 0; i--)
+            {
+                if (Input[Offset + i] != code)
                     return (len - i);
             }
 

@@ -1,21 +1,27 @@
 ﻿using System;
-using VTDev.Projects.CEX.Crypto.Ciphers;
+using VTDev.Libraries.CEXEngine.Crypto.Ciphers;
 
-namespace VTDev.Projects.CEX.Crypto.Modes
+namespace VTDev.Libraries.CEXEngine.Crypto.Modes
 {
     /// <summary>
-    /// Implements Cipher Block Chaining (CBC) mode
+    /// Implements Cipher Block Chaining (CBC) mode.
+    /// Uses (default) parallel decryption, or linear decryption.
     /// </summary>
     public class CBC : ICipherMode, IDisposable
     {
+        #region Constants
+        private const Int32 MIN_PARALLEL = 1024;
+        private const Int32 MAX_PARALLEL = 1024;
+        #endregion
+
         #region Fields
         private IBlockCipher _blockCipher;
         private int _blockSize = 16;
         private byte[] _cbcIv;
         private byte[] _cbcNextIv;
-        private byte[] _cbcBuffer;
         private bool _isDisposed = false;
         private bool _isEncryption = false;
+        private bool _isParallel = false;
         #endregion
 
         #region Properties
@@ -46,6 +52,42 @@ namespace VTDev.Projects.CEX.Crypto.Modes
         }
 
         /// <summary>
+        /// Get/Set Automatic processor parallelization
+        /// </summary>
+        public bool IsParallel
+        {
+            get { return _isParallel; }
+            set
+            {
+                if (this.ProcessorCount == 1)
+                    this.IsParallel = false;
+                else
+                    _isParallel = value;
+            }
+        }
+
+        /// <summary>
+        /// Maximum input size with parallel processing
+        /// </summary>
+        public static int MaxParallelSize
+        {
+            get { return MAX_PARALLEL; }
+        }
+
+        /// <summary>
+        /// Minimum input size to trigger parallel processing
+        /// </summary>
+        public static int MinParallelSize
+        {
+            get { return MIN_PARALLEL; }
+        }
+
+        /// <summary>
+        /// Processor count
+        /// </summary>
+        private int ProcessorCount { get; set; }
+
+        /// <summary>
         /// Cipher name
         /// </summary>
         public string Name
@@ -69,7 +111,6 @@ namespace VTDev.Projects.CEX.Crypto.Modes
                 int vectorSize = value.Length;
                 _cbcIv = new byte[vectorSize];
                 _cbcNextIv = new byte[vectorSize];
-                _cbcBuffer = new byte[vectorSize];
 
                 Buffer.BlockCopy(value, 0, _cbcIv, 0, vectorSize);
             }
@@ -85,56 +126,32 @@ namespace VTDev.Projects.CEX.Crypto.Modes
         {
             _blockCipher = Cipher;
             _blockSize = this.BlockSize;
+
+            this.ProcessorCount = Environment.ProcessorCount;
+            if (this.ProcessorCount % 2 != 0)
+                this.ProcessorCount--;
+
+            this.IsParallel = this.ProcessorCount > 1;
         }
         #endregion
 
-        #region Methods
+        #region Public Methods
         /// <summary>
         /// Initialize the Cipher
         /// </summary>
-        /// <param name="Encryptor">Cipher is used for encryption, false to decrypt</param>
+        /// <param name="Encryption">Cipher is used for encryption, false to decrypt</param>
         /// <param name="KeyParam">KeyParam containing key and vector</param>
-        public void Init(bool Encryptor, KeyParams KeyParam)
+        public void Init(bool Encryption, KeyParams KeyParam)
         {
             if (KeyParam.Key == null)
                 throw new ArgumentNullException("Key can not be null!");
             if (KeyParam.IV == null)
                 throw new ArgumentNullException("IV can not be null!");
 
-            _blockCipher.Init(Encryptor, KeyParam);
+            _blockCipher.Init(Encryption, KeyParam);
             _blockSize = this.BlockSize;
             this.Vector = KeyParam.IV;
-            this.IsEncryption = Encryptor;
-        }
-
-        /// <summary>
-        /// Transform a block of bytes.
-        /// Init must be called before this method can be used.
-        /// </summary>
-        /// <param name="Input">Bytes to Encrypt/Decrypt</param>
-        /// <param name="Output">Encrypted or Decrypted bytes</param>
-        public void Transform(byte[] Input, byte[] Output)
-        {
-            if (this.IsEncryption)
-                EncryptBlock(Input, Output);
-            else
-                DecryptBlock(Input, Output);
-        }
-
-        /// <summary>
-        /// Transform a block of bytes within an array.
-        /// Init must be called before this method can be used.
-        /// </summary>
-        /// <param name="Input">Bytes to Encrypt</param>
-        /// <param name="InOffset">Offset with the Input array</param>
-        /// <param name="Output">Encrypted bytes</param>
-        /// <param name="OutOffset">Offset with the Output array</param>
-        public void Transform(byte[] Input, int InOffset, byte[] Output, int OutOffset)
-        {
-            if (this.IsEncryption)
-                EncryptBlock(Input, InOffset, Output, OutOffset);
-            else
-                DecryptBlock(Input, InOffset, Output, OutOffset);
+            this.IsEncryption = Encryption;
         }
 
         /// <summary>
@@ -144,18 +161,10 @@ namespace VTDev.Projects.CEX.Crypto.Modes
         /// <param name="Output">Decrypted bytes</param>
         public void DecryptBlock(byte[] Input, byte[] Output)
         {
-            // copy input to temp iv
-            Buffer.BlockCopy(Input, 0, _cbcNextIv, 0, _blockSize);
-            // decrypt input
-            _blockCipher.DecryptBlock(Input, Output);
-            // xor output and iv
-            for (int i = 0; i < _blockSize; i++)
-                Output[i] ^= _cbcIv[i];
-
-            // copy forward iv
-            Buffer.BlockCopy(_cbcIv, 0, _cbcBuffer, 0, _blockSize);
-            Buffer.BlockCopy(_cbcNextIv, 0, _cbcIv, 0, _blockSize);
-            Buffer.BlockCopy(_cbcBuffer, 0, _cbcNextIv, 0, _blockSize);
+            if (this.IsParallel && Output.Length >= MIN_PARALLEL)
+                ParallelDecrypt(Input, Output);
+            else
+                ProcessDecrypt(Input, Output);
         }
 
         /// <summary>
@@ -167,18 +176,10 @@ namespace VTDev.Projects.CEX.Crypto.Modes
         /// <param name="OutOffset">Offset with the Output array</param>
         public void DecryptBlock(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
-            // copy input to temp iv
-            Buffer.BlockCopy(Input, InOffset, _cbcNextIv, 0, _blockSize);
-            // decrypt input
-            _blockCipher.DecryptBlock(Input, InOffset, Output, OutOffset);
-            // xor output and iv
-            for (int i = 0; i < _blockSize; i++)
-                Output[OutOffset + i] ^= _cbcIv[i];
-
-            // copy forward iv
-            Buffer.BlockCopy(_cbcIv, 0, _cbcBuffer, 0, _blockSize);
-            Buffer.BlockCopy(_cbcNextIv, 0, _cbcIv, 0, _blockSize);
-            Buffer.BlockCopy(_cbcBuffer, 0, _cbcNextIv, 0, _blockSize);
+            if (this.IsParallel && Output.Length - OutOffset >= MIN_PARALLEL)
+                ParallelDecrypt(Input, InOffset, Output, OutOffset);
+            else
+                ProcessDecrypt(Input, InOffset, Output, OutOffset);
         }
 
         /// <summary>
@@ -189,8 +190,9 @@ namespace VTDev.Projects.CEX.Crypto.Modes
         public void EncryptBlock(byte[] Input, byte[] Output)
         {
             // xor iv and input
-            for (int i = 0; i < _blockSize; i++)
+            for (int i = 0; i < Input.Length; i++)
                 _cbcIv[i] ^= Input[i];
+
             // encrypt iv
             _blockCipher.EncryptBlock(_cbcIv, Output);
             // copy output to iv
@@ -209,10 +211,175 @@ namespace VTDev.Projects.CEX.Crypto.Modes
             // xor iv and input
             for (int i = 0; i < _blockSize; i++)
                 _cbcIv[i] ^= Input[InOffset + i];
+
             // encrypt iv
             _blockCipher.EncryptBlock(_cbcIv, 0, Output, OutOffset);
             // copy output to iv
             Buffer.BlockCopy(Output, OutOffset, _cbcIv, 0, _blockSize);
+        }
+
+        /// <summary>
+        /// Transform a block of bytes.
+        /// Init must be called before this method can be used.
+        /// </summary>
+        /// <param name="Input">Bytes to Encrypt/Decrypt</param>
+        /// <param name="Output">Encrypted or Decrypted bytes</param>
+        public void Transform(byte[] Input, byte[] Output)
+        {
+            if (this.IsEncryption)
+            {
+                EncryptBlock(Input, Output);
+            }
+            else
+            {
+                if (this.IsParallel && Output.Length >= MIN_PARALLEL)
+                    ParallelDecrypt(Input, Output);
+                else
+                    ProcessDecrypt(Input, Output);
+            }
+        }
+
+        /// <summary>
+        /// Transform a block of bytes within an array.
+        /// Init must be called before this method can be used.
+        /// </summary>
+        /// <param name="Input">Bytes to Encrypt</param>
+        /// <param name="InOffset">Offset with the Input array</param>
+        /// <param name="Output">Encrypted bytes</param>
+        /// <param name="OutOffset">Offset with the Output array</param>
+        public void Transform(byte[] Input, int InOffset, byte[] Output, int OutOffset)
+        {
+            if (this.IsEncryption)
+            {
+                EncryptBlock(Input, InOffset, Output, OutOffset);
+            }
+            else
+            {
+                if (this.IsParallel && Output.Length - OutOffset >= MIN_PARALLEL)
+                    ParallelDecrypt(Input, InOffset, Output, OutOffset);
+                else
+                    ProcessDecrypt(Input, InOffset, Output, OutOffset);
+            }
+        }
+        #endregion
+
+        #region Parallel Decrypt
+        private void ParallelDecrypt(byte[] Input, byte[] Output)
+        {
+            // parallel CBC decryption //
+            int prcCount = this.ProcessorCount;
+            int cnkSize = Output.Length / prcCount;
+            int blkCount = (cnkSize / _blockSize);
+            byte[][] vectors = new byte[prcCount][];
+
+            for (int i = 0; i < prcCount; i++)
+            {
+                vectors[i] = new byte[_blockSize];
+                // get the first iv
+                if (i != 0)
+                    Buffer.BlockCopy(Input, (i * cnkSize) - _blockSize, vectors[i], 0, _blockSize);
+                else
+                    Buffer.BlockCopy(_cbcIv, 0, vectors[i], 0, _blockSize);
+            }
+
+            System.Threading.Tasks.Parallel.For(0, prcCount, i =>
+            {
+                for (int j = 0; j < blkCount; j++)
+                    ProcessDecrypt(Input, (i * cnkSize) + (j * _blockSize), Output, (i * cnkSize) + (j * _blockSize), vectors[i]);
+            });
+
+            // copy the last vector to class variable
+            Buffer.BlockCopy(vectors[prcCount - 1], 0, _cbcIv, 0, _cbcIv.Length);
+        }
+
+        private void ParallelDecrypt(byte[] Input, int InOffset, byte[] Output, int OutOffset)
+        {
+            // parallel CBC decryption //
+            int prcCount = this.ProcessorCount;
+            int cnkSize = Output.Length / prcCount;
+            int blkCount = (cnkSize / _blockSize);
+            byte[][] vectors = new byte[prcCount][];
+
+            for (int i = 0; i < prcCount; i++)
+            {
+                vectors[i] = new byte[_blockSize];
+                // get the first iv
+                if (i != 0)
+                    Buffer.BlockCopy(Input, (InOffset + (i * cnkSize)) - _blockSize, vectors[i], 0, _blockSize);
+                else
+                    Buffer.BlockCopy(_cbcIv, 0, vectors[i], 0, _blockSize);
+            }
+
+            System.Threading.Tasks.Parallel.For(0, prcCount, i =>
+            {
+                for (int j = 0; j < blkCount; j++)
+                    ProcessDecrypt(Input, InOffset + (i * cnkSize) + (j * _blockSize), Output, OutOffset + (i * cnkSize) + (j * _blockSize), vectors[i]);
+            });
+
+            // copy the last vector to class variable
+            Buffer.BlockCopy(vectors[prcCount - 1], 0, _cbcIv, 0, _cbcIv.Length);
+        }
+        #endregion
+
+        #region Private Methods
+        private void ProcessDecrypt(byte[] Input, byte[] Output)
+        {
+            // copy input to temp iv
+            Buffer.BlockCopy(Input, 0, _cbcNextIv, 0, Input.Length);
+            // decrypt input
+            _blockCipher.DecryptBlock(Input, Output);
+            // xor output and iv
+            for (int i = 0; i < _cbcIv.Length; i++)
+                Output[i] ^= _cbcIv[i];
+
+            // copy forward iv
+            Buffer.BlockCopy(_cbcNextIv, 0, _cbcIv, 0, _cbcIv.Length);
+        }
+
+        private void ProcessDecrypt(byte[] Input, byte[] Output, byte[] Vector)
+        {
+            byte[] nextIv = new byte[Vector.Length];
+
+            // copy input to temp iv
+            Buffer.BlockCopy(Input, 0, nextIv, 0, _blockSize);
+            // decrypt input
+            _blockCipher.DecryptBlock(Input, Output);
+            // xor output and iv
+            for (int i = 0; i < Vector.Length; i++)
+                Output[i] ^= Vector[i];
+
+            // copy forward iv
+            Buffer.BlockCopy(nextIv, 0, Vector, 0, _blockSize);
+        }
+
+        private void ProcessDecrypt(byte[] Input, int InOffset, byte[] Output, int OutOffset)
+        {
+            // copy input to temp iv
+            Buffer.BlockCopy(Input, InOffset, _cbcNextIv, 0, _blockSize);
+            // decrypt input
+            _blockCipher.DecryptBlock(Input, InOffset, Output, OutOffset);
+            // xor output and iv
+            for (int i = 0; i < _cbcIv.Length; i++)
+                Output[OutOffset + i] ^= _cbcIv[i];
+
+            // copy forward iv
+            Buffer.BlockCopy(_cbcNextIv, 0, _cbcIv, 0, _cbcIv.Length);
+        }
+
+        private void ProcessDecrypt(byte[] Input, int InOffset, byte[] Output, int OutOffset, byte[] Vector)
+        {
+            byte[] nextIv = new byte[Vector.Length];
+
+            // copy input to temp iv
+            Buffer.BlockCopy(Input, InOffset, nextIv, 0, _blockSize);
+            // decrypt input
+            _blockCipher.DecryptBlock(Input, InOffset, Output, OutOffset);
+            // xor output and iv
+            for (int i = 0; i < Vector.Length; i++)
+                Output[OutOffset + i] ^= Vector[i];
+
+            // copy forward iv
+            Buffer.BlockCopy(nextIv, 0, Vector, 0, _blockSize);
         }
         #endregion
 
@@ -247,11 +414,6 @@ namespace VTDev.Projects.CEX.Crypto.Modes
                 {
                     Array.Clear(_cbcNextIv, 0, _cbcNextIv.Length);
                     _cbcNextIv = null;
-                }
-                if (_cbcBuffer != null)
-                {
-                    Array.Clear(_cbcBuffer, 0, _cbcBuffer.Length);
-                    _cbcBuffer = null;
                 }
 
                 _isDisposed = true;

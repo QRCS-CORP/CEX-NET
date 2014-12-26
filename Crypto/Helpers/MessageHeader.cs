@@ -2,12 +2,12 @@
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace VTDev.Projects.CEX.Crypto.Helpers
+namespace VTDev.Libraries.CEXEngine.Crypto.Helpers
 {
     #region MessageHeaderStruct
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
-    internal struct MessageHeaderStruct
+    public struct MessageHeaderStruct
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
         internal byte[] MessageID;
@@ -16,7 +16,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
         internal byte[] MessageHash;
 
-        internal MessageHeaderStruct(byte[] messageID, byte[] messageHash, byte[] extension)
+        public MessageHeaderStruct(byte[] messageID, byte[] messageHash, byte[] extension)
         {
             this.MessageID = messageID;
             this.Extension = new byte[16];
@@ -26,7 +26,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
     }
     #endregion
 
-    internal static class MessageHeader
+    public static class MessageHeader
     {
         #region Constants
         private const int SEEKTO_ID = 0;
@@ -39,7 +39,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
         #endregion
 
         #region Properties
-        internal static int GetHeaderSize { get { return SIZE_MESSAGEHEADER; } }
+        public static int GetHeaderSize { get { return SIZE_MESSAGEHEADER; } }
         #endregion
 
         #region Create
@@ -56,7 +56,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
         #endregion
 
         #region Serialize
-        internal static MessageHeaderStruct DeSerializeHeader(string MessageFile)
+        public static MessageHeaderStruct DeSerializeHeader(string MessageFile)
         {
             MessageHeaderStruct messageStruct = new MessageHeaderStruct();
             if (!File.Exists(MessageFile)) return messageStruct;
@@ -71,7 +71,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             return messageStruct;
         }
 
-        internal static MessageHeaderStruct DeSerializeHeader(Stream DataStream)
+        public static MessageHeaderStruct DeSerializeHeader(Stream DataStream)
         {
             MessageHeaderStruct messageStruct = new MessageHeaderStruct();
 
@@ -85,7 +85,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             return messageStruct;
         }
 
-        internal static MemoryStream SerializeHeader(MessageHeaderStruct Header)
+        public static MemoryStream SerializeHeader(MessageHeaderStruct Header)
         {
             MemoryStream stream = new MemoryStream(SIZE_MESSAGEHEADER);
 
@@ -111,7 +111,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             return FileGetSize(FilePath) > GetHeaderSize;
         }
 
-        internal static Guid GetMessageId(string MessageFile)
+        public static Guid GetMessageId(string MessageFile)
         {
             Guid flag = Guid.Empty;
             if (!File.Exists(MessageFile)) return flag;
@@ -172,7 +172,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             return data;
         }
 
-        internal static byte[] GetMessageHash(string MessageFile)
+        public static byte[] GetMessageHash(string MessageFile)
         {
             byte[] flag = new byte[SIZE_HASH];
             if (!File.Exists(MessageFile)) return flag;
@@ -188,7 +188,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
         #endregion
 
         #region Setters
-        internal static void SetMessageHash(string MessageFile, byte[] Data)
+        public static void SetMessageHash(string MessageFile, byte[] Data)
         {
             using (BinaryWriter writer = new BinaryWriter(new FileStream(MessageFile, FileMode.Open, FileAccess.Write, FileShare.None)))
             {
@@ -197,7 +197,7 @@ namespace VTDev.Projects.CEX.Crypto.Helpers
             }
         }
 
-        internal static void SetMessageId(string MessageFile, byte[] Data)
+        public static void SetMessageId(string MessageFile, byte[] Data)
         {
             using (BinaryWriter writer = new BinaryWriter(new FileStream(MessageFile, FileMode.Open, FileAccess.Write, FileShare.None)))
             {

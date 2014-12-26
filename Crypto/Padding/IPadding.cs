@@ -1,4 +1,4 @@
-﻿namespace VTDev.Projects.CEX.Crypto.Padding
+﻿namespace VTDev.Libraries.CEXEngine.Crypto.Padding
 {
     /// <summary>
     /// Padding Interface
@@ -33,5 +33,13 @@
         /// <param name="Input">Padded array of bytes</param>
         /// <returns>Length of padding</returns>
         int GetPaddingLength(byte[] Input);
+
+        /// <summary>
+        /// Get the length of padding in an array
+        /// </summary>
+        /// <param name="Input">Padded array of bytes</param>
+        /// <param name="Offset">Offset into array</param>
+        /// <returns>Length of padding</returns>
+        int GetPaddingLength(byte[] Input, int Offset);
     }
 }

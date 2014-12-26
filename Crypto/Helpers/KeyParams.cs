@@ -1,4 +1,4 @@
-﻿namespace VTDev.Projects.CEX.Crypto
+﻿namespace VTDev.Libraries.CEXEngine.Crypto
 {
     public class KeyParams
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
 
-namespace VTDev.Projects.CEX.Crypto.Padding
+namespace VTDev.Libraries.CEXEngine.Crypto.Padding
 {
     /// <summary>
     /// X923 Padding
@@ -55,6 +55,17 @@ namespace VTDev.Projects.CEX.Crypto.Padding
         /// <param name="Input">Padded array of bytes</param>
         /// <returns>Length of padding</returns>
         public int GetPaddingLength(byte[] Input)
+        {
+            return Input[Input.Length - 1] & 0xff;
+        }
+
+        /// <summary>
+        /// Get the length of padding in an array
+        /// </summary>
+        /// <param name="Input">Padded array of bytes</param>
+        /// <param name="Offset">Offset into array</param>
+        /// <returns>Length of padding</returns>
+        public int GetPaddingLength(byte[] Input, int Offset)
         {
             return Input[Input.Length - 1] & 0xff;
         }

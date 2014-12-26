@@ -1,4 +1,4 @@
-﻿namespace VTDev.Projects.CEX.Crypto.Digests
+﻿namespace VTDev.Libraries.CEXEngine.Crypto.Digests
 {
     public interface IDigest
     {

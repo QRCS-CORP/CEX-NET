@@ -1,11 +1,11 @@
 ﻿using System;
-using VTDev.Projects.CEX.Crypto.Digests;
+using VTDev.Libraries.CEXEngine.Crypto.Digests;
 
 /// Adapted from the Bouncy Castle HMAC class:
 /// http://grepcode.com/file/repo1.maven.org/maven2/org.bouncycastle/bcprov-ext-jdk15on/1.48/org/bouncycastle/crypto/macs/HMac.java#HMac
 /// H(K XOR opad, H(K XOR ipad, text))
 
-namespace VTDev.Projects.CEX.Crypto.Macs
+namespace VTDev.Libraries.CEXEngine.Crypto.Macs
 {
     public class HMAC : IMac, IDisposable
     {

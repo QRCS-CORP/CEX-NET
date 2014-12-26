@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace VTDev.Projects.CEX.Crypto.Macs
+namespace VTDev.Libraries.CEXEngine.Crypto.Macs
 {
     public interface IMac : IDisposable
     {

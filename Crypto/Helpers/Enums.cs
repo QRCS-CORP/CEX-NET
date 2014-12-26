@@ -1,17 +1,22 @@
 ﻿#region Enums
 /// <summary>
-/// Encryption Algorithm
+/// Encryption Algorithms
 /// </summary>
 public enum Engines : int
 {
     ChaCha,
+    Fusion,
     RDX,
     RHX,
+    RSM,
     RSX,
     DCS,
     Salsa,
     SPX,
-    SHX
+    SHX,
+    TFX,
+    THX,
+    TSM
 }
 
 /// <summary>
@@ -60,7 +65,6 @@ public enum CipherModes : int
     None = 0,
     CBC,
     CTR,
-    PSC,
     ECB
 }
 
@@ -93,8 +97,10 @@ public enum RoundCounts : int
     R28,
     R30,
     R32,
+    R34,
     R38,
     R40,
+    R42,
     R48,
     R56,
     R64,
