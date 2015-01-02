@@ -1,10 +1,63 @@
-﻿using System;
+﻿#region Directives
+using System;
+#endregion
 
-/// Adapted from the BouncyCastle implementation: http://bouncycastle.org/
+#region License Information
+/// <remarks>
+/// <para>Permission is hereby granted, free of charge, to any person obtaining
+/// a copy of this software and associated documentation files (the
+/// "Software"), to deal in the Software without restriction, including
+/// without limitation the rights to use, copy, modify, merge, publish,
+/// distribute, sublicense, and/or sell copies of the Software, and to
+/// permit persons to whom the Software is furnished to do so, subject to
+/// the following conditions:</para>
+/// 
+/// <para>The copyright notice and this permission notice shall be
+/// included in all copies or substantial portions of the Software.</para>
+/// 
+/// <para>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+/// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+/// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+/// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+/// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+/// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+/// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</para>
+#endregion
+
+#region Class Notes
+/// <para><description>Principal Algorithms:</description>
+/// An implementation of the SHA-2 digest with a 256 bit return size.
+/// SHA-2 <see cref="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf">Specification</see>.</para>
+/// 
+/// <para><description>Code Base Guides:</description>
+/// Portions of this code based on the Bouncy Castle 
+/// <see cref="http://grepcode.com/file/repo1.maven.org/maven2/org.bouncycastle/bcprov-ext-jdk15on/1.51/org/bouncycastle/crypto/digests/SHA512Digest.java?av=f">SHA512Digest</see> class.</para>
+/// 
+/// <para><description>Implementation Details:</description>
+/// An implementation of the SHA-2 digest with a 256 bit return size. 
 /// Refactoring, a couple of small optimizations, Dispose, and a ComputeHash method added.
-/// Many thanks to the authors of BouncyCastle for their great contributions.. j.u.
+/// Many thanks to the authors of BouncyCastle for their great contributions.
+/// Written by John Underhill, September 19, 2014
+/// contact: steppenwolfe_2000@yahoo.com</para>
+/// </remarks>
+#endregion
+
 namespace VTDev.Libraries.CEXEngine.Crypto.Digests
 {
+    /// <summary>
+    /// SHA256Digest: An implementation of the SHA-2 digest with a 256 bit return size.
+    /// 
+    /// <example>
+    /// <description>Example using an <c>IDigest</c> interface:</description>
+    /// <code>
+    /// using (IDigest hash = new SHA256Digest())
+    /// {
+    ///     // compute a hash
+    ///     byte[] Output = ComputeHash(Input);
+    /// }
+    /// </code>
+    /// </example>
+    /// </summary> 
     public class SHA256Digest : IDigest, IDisposable
     {
         #region Constants
@@ -22,16 +75,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
         private Int32 _wordOffset = 0;
         #endregion
 
-        #region Constructor
-        public SHA256Digest()
-        {
-            Init();
-        }
-        #endregion
-
         #region Properties
         /// <summary>
-        /// The Digests internal blocksize in bytes
+        /// Get: The Digests internal blocksize in bytes
         /// </summary>
         public int BlockSize
         {
@@ -39,7 +85,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
         }
 
         /// <summary>
-        /// Size of returned digest in bytes
+        /// Get: Size of returned digest in bytes
         /// </summary>
         public int DigestSize
         {
@@ -47,7 +93,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
         }
 
         /// <summary>
-        /// Digest name
+        /// Get: Digest name
         /// </summary>
         public string Name
         {
@@ -55,11 +101,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
         }
         #endregion
 
+        #region Constructor
+        /// <summary>
+        /// Initialize the digest
+        /// </summary>
+        public SHA256Digest()
+        {
+            Init();
+        }
+        #endregion
+
         #region Public Methods
         /// <summary>
         /// Update the SHA256 buffer
         /// </summary>
-        /// <param name="Input">Input data [bytes]</param>
+        /// 
+        /// <param name="Input">Input data</param>
         /// <param name="InputOffset">Offset within Input</param>
         /// <param name="Length">Amount of data to process in bytes</param>
         public void BlockUpdate(byte[] Input, int InputOffset, int Length)
@@ -95,7 +152,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
         /// <summary>
         /// Get the Hash value
         /// </summary>
-        /// <param name="Input">Input data [bytes]</param>
+        /// 
+        /// <param name="Input">Input data</param>
+        /// 
         /// <returns>Hash value [32 bytes]</returns>
         public byte[] ComputeHash(byte[] Input)
         {
@@ -110,8 +169,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
         /// <summary>
         /// Do final processing
         /// </summary>
+        /// 
         /// <param name="Output">Inputs the final block, and returns the Hash value</param>
         /// <param name="OutOffset">The starting positional offset within the Output array</param>
+        /// 
         /// <returns>Size of Hash value, Always 32 bytes</returns>
         public Int32 DoFinal(byte[] Output, Int32 OutOffset)
         {
@@ -146,6 +207,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
         /// <summary>
         /// Update the message digest with a single byte
         /// </summary>
+        /// 
         /// <param name="Input">Input byte</param>
         public void Update(byte Input)
         {
@@ -270,9 +332,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
         #endregion
 
         #region Helpers
-        /// <summary>
+        /// <remarks>
         /// Big Endian to UInt32
-        /// </summary>
+        /// </remarks>
         private uint BEToUInt32(byte[] bs, int off)
         {
             uint n = (uint)bs[off] << 24;
@@ -282,9 +344,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
             return n;
         }
 
-        /// <summary>
+        /// <remarks>
         /// UInt32 to Big Endian
-        /// </summary>
+        /// </remarks>
         private void UInt32ToBE(uint n, byte[] bs, int off)
         {
             bs[off] = (byte)(n >> 24);
@@ -315,9 +377,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
         #endregion
 
         #region Constant Tables
-        /// <summary>
+        /// <remarks>
         /// the first 32 bits of the fractional parts of the cube roots of the first sixty-four prime numbers)
-        /// </summary>
+        /// </remarks>
         private static readonly uint[] K1C = { 
             0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
             0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
@@ -332,7 +394,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
 
         #region IDispose
         /// <summary>
-        /// Dispose of this class, releasing the resources
+        /// Dispose of this class
         /// </summary>
         public void Dispose()
         {

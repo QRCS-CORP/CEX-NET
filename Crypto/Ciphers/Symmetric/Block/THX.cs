@@ -1,34 +1,48 @@
-﻿using System;
+﻿#region Directives
+using System;
 using VTDev.Libraries.CEXEngine.Crypto.Generators;
 using VTDev.Libraries.CEXEngine.Crypto.Macs;
+#endregion
 
-#region About
-/// Permission is hereby granted, free of charge, to any person obtaining
+#region License Information
+/// <remarks>
+/// <para>Permission is hereby granted, free of charge, to any person obtaining
 /// a copy of this software and associated documentation files (the
 /// "Software"), to deal in the Software without restriction, including
 /// without limitation the rights to use, copy, modify, merge, publish,
 /// distribute, sublicense, and/or sell copies of the Software, and to
 /// permit persons to whom the Software is furnished to do so, subject to
-/// the following conditions:
+/// the following conditions:</para>
 /// 
-/// The copyright notice and this permission notice shall be
-/// included in all copies or substantial portions of the Software.
+/// <para>The copyright notice and this permission notice shall be
+/// included in all copies or substantial portions of the Software.</para>
 /// 
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+/// <para>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 /// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 /// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 /// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 /// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 /// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-/// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-///
-/// Based on the Twofish block cipher designed by Bruce Schneier, John Kelsey, 
+/// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</para>
+#endregion
+
+#region Class Notes
+/// <para><description>Principal Algorithms:</description>
+/// Portions of this cipher partially based on the Twofish block cipher designed by Bruce Schneier, John Kelsey, 
 /// Doug Whiting, David Wagner, Chris Hall, and Niels Ferguson.
-/// Twofish white paper: https://www.schneier.com/paper-twofish-paper.pdf
+/// Twofish: <see cref="https://www.schneier.com/paper-twofish-paper.pdf">Specification</see>.</para>
 /// 
-/// Portions of this code based on Bouncy Castle Java release 1.51:
-/// http://bouncycastle.org/latest_releases.html
+/// <para><description>Guiding Publications:</description>
+/// HMAC: <see cref="http://tools.ietf.org/html/rfc2104">RFC 2104</see>.
+/// Fips: <see cref="http://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf">198.1</see>.
+/// HKDF: <see cref="http://tools.ietf.org/html/rfc5869">RFC 5869</see>.
+/// NIST: <see cref="http://csrc.nist.gov/publications/drafts/800-90/draft-sp800-90b.pdf">SP800-90B</see>.</para>
 /// 
+/// <para><description>Code Base Guides:</description>
+/// Portions of this code based on the Bouncy Castle Java 
+/// <see cref="http://bouncycastle.org/latest_releases.html">Release 1.51</see>.</para>
+/// 
+/// <para><description>Implementation Details:</description>
 /// An implementation based on the Twofish block cipher,
 /// using HKDF with a SHA512 HMAC for expanded key generation.
 /// TwoFish HKDF Extended (THX)
@@ -38,17 +52,35 @@ using VTDev.Libraries.CEXEngine.Crypto.Macs;
 /// The number of Diffusion Rounds are configuarable.
 /// Valid Rounds assignments are 16, 18, 20, 22, 24, 26, 28, 30 and 32, default is 16.
 /// Written by John Underhill, December 11, 2014
-/// contact: steppenwolfe_2000@yahoo.com
+/// contact: steppenwolfe_2000@yahoo.com</para>
+/// </remarks>
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 {
-    /// THX: Twofish HKDF Extended
-    /// Minimum key size is 192 bytes.
-    /// Valid Key sizes are 64 + multiples of 128 bytes (IKm + Salt).
-    /// Valid block sizes is 16 byte wide.
-    /// The number of Diffusion Rounds are configuarable.
-    /// Valid Rounds assignments are 16, 18, 20, 22, 24, 26, 28, 30 and 32, default is 16.
+    /// <summary>
+    /// THX: Twofish Cipher Extended with an HKDF Key Schedule.
+    /// 
+    /// <list type="bullet">
+    /// <item><description>Minimum key size is 192 bytes.</description></item>
+    /// <item><description>Valid Key sizes are 64 + multiples of 128 bytes (IKm + Salt).</description></item>
+    /// <item><description>Valid block size is 16 bytes wide.</description></item>
+    /// <item><description>Valid Rounds assignments are 16, 18, 20, 22, 24, 26, 28, 30 and 32, default is 16.</description></item>
+    /// </list>
+    /// 
+    /// <example>
+    /// <description>Example using an <c>ICipherMode</c> interface:</description>
+    /// <code>
+    /// using (ICipherMode mode = new CTR(new THX()))
+    /// {
+    ///     // initialize for encryption
+    ///     mode.Init(true, new KeyParams(Key));
+    ///     // encrypt a block
+    ///     mode.Transform(Input, Output);
+    /// }
+    /// </code>
+    /// </example>
+    /// </summary>
     public sealed class THX : IBlockCipher, IDisposable
     {
         #region Constants
@@ -81,12 +113,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         #region Properties
         /// <summary>
-        /// Get/Set: Unit block size of internal cipher
+        /// Get: Unit block size of internal cipher
+        /// <para>Block size must be 16 or 32 bytes wide</para>
         /// </summary>
         public int BlockSize
         {
             get { return BLOCK_SIZE; }
-            set { ; }
         }
 
         /// <summary>
@@ -100,7 +132,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         }
 
         /// <summary>
-        /// Get: Key has been expanded
+        /// Get: Cipher is ready to transform data
         /// </summary>
         public bool IsInitialized
         {
@@ -109,9 +141,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         }
 
         /// <summary>
+        /// Get: Available block sizes for this cipher
+        /// </summary>
+        public static int[] LegalBlockSizes
+        {
+            get { return new int[] { 16 }; }
+        }
+
+        /// <summary>
         /// Get: Available Encryption Key Sizes in bits (192, 320, 448, 576 bytes)
         /// </summary>
-        public static Int32[] KeySizes
+        public static Int32[] LegalKeySizes
         {
             get { return new Int32[] { 1536, 2560, 3584, 4608 }; }
         }
@@ -134,6 +174,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         #endregion
 
         #region Constructor
+        /// <summary>
+        /// Initialize the class
+        /// </summary>
+        /// 
+        /// <param name="Rounds">Number of diffusion rounds. The <see cref="LegalRounds"/> property contains available sizes.</param>
+        /// 
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid rounds count is chosen.</exception>
         public THX(int Rounds = DEFAULT_ROUNDS)
         {
             if (Rounds != 16 && Rounds != 18 && Rounds != 20 && Rounds != 22 && Rounds != 24 && Rounds != 26 && Rounds != 28 && Rounds != 30 && Rounds != 32)
@@ -146,9 +193,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         #region Public Methods
         /// <summary>
         /// Decrypt a single block of bytes.
-        /// Init must be called with the Encryption flag set to false before this method can be used.
-        /// Input and Output must be at least BlockSize in length.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called with the Encryption flag set to <c>false</c> before this method can be used.
+        /// Input and Output must be at least <see cref="BlockSize"/> in length.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Encrypted bytes</param>
         /// <param name="Output">Decrypted bytes</param>
         public void DecryptBlock(byte[] Input, byte[] Output)
@@ -158,9 +206,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         /// <summary>
         /// Decrypt a block of bytes within an array.
-        /// Init must be called with the Encryption flag set to false before this method can be used.
-        /// Input and Output + Offsets must be at least BlockSize in length.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called with the Encryption flag set to <c>false</c> before this method can be used.
+        /// Input and Output array lengths - Offset must be at least <see cref="BlockSize"/> in length.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Encrypted bytes</param>
         /// <param name="InOffset">Offset within the Input array</param>
         /// <param name="Output">Decrypted bytes</param>
@@ -172,8 +221,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         /// <summary>
         /// Encrypt a block of bytes.
-        /// Init must be called with the Encryption flag set to true before this method can be used.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called with the Encryption flag set to <c>true</c> before this method can be used.
+        /// Input and Output array lengths must be at least <see cref="BlockSize"/> in length.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="Output">Encrypted bytes</param>
         public void EncryptBlock(byte[] Input, byte[] Output)
@@ -183,8 +234,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         /// <summary>
         /// Encrypt a block of bytes within an array.
-        /// Init must be called with the Encryption flag set to true before this method can be used.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called with the Encryption flag set to <c>true</c> before this method can be used.
+        /// Input and Output array lengths - Offset must be at least <see cref="BlockSize"/> in length.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="InOffset">Offset within the Input array</param>
         /// <param name="Output">Encrypted bytes</param>
@@ -197,12 +250,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         /// <summary>
         /// Initialize the Cipher.
         /// </summary>
+        /// 
         /// <param name="Encryption">Using Encryption or Decryption mode</param>
-        /// <param name="KeyParam">Contains cipher key, valid sizes are: 128, 192, 256 and 512 bytes</param>
+        /// <param name="KeyParam">Cipher key container. The <see cref="LegalKeySizes"/> property contains valid sizes.</param>
+        /// 
+        /// <exception cref="System.ArgumentNullException">Thrown if a null key is used.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid key size is used.</exception>
         public void Init(bool Encryption, KeyParams KeyParam)
         {
             if (KeyParam.Key == null)
-                throw new ArgumentOutOfRangeException("Invalid key! Key can not be null.");
+                throw new ArgumentNullException("Invalid key! Key can not be null.");
             if (KeyParam.Key.Length < MIN_KEYSIZE)
                 throw new ArgumentOutOfRangeException("Invalid key size! Key must be at least " + MIN_KEYSIZE + " bytes (" + MIN_KEYSIZE * 8 + " bit).");
             if ((KeyParam.Key.Length - IKM_SIZE) % SALT_SIZE != 0)
@@ -214,9 +271,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         /// <summary>
         /// Transform a block of bytes.
-        /// Init must be called before this method can be used.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called before this method can be used.
+        /// Input and Output array lengths must be at least <see cref="BlockSize"/> in length.</para>
         /// </summary>
-        /// <param name="Input">Bytes to Encrypt/Decrypt</param>
+        /// 
+        /// <param name="Input">Bytes to Encrypt or Decrypt</param>
         /// <param name="Output">Encrypted or Decrypted bytes</param>
         public void Transform(byte[] Input, byte[] Output)
         {
@@ -228,8 +287,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         /// <summary>
         /// Transform a block of bytes within an array.
-        /// Init must be called before this method can be used.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called before this method can be used.
+        /// Input and Output array lengths - Offset must be at least <see cref="BlockSize"/> in length.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="InOffset">Offset within the Input array</param>
         /// <param name="Output">Encrypted bytes</param>

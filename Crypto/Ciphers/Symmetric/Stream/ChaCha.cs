@@ -1,49 +1,76 @@
-﻿using System;
+﻿#region Directives
+using System;
+#endregion
 
-#region About
-/// Permission is hereby granted, free of charge, to any person obtaining
+#region License Information
+/// <remarks>
+/// <para>Permission is hereby granted, free of charge, to any person obtaining
 /// a copy of this software and associated documentation files (the
 /// "Software"), to deal in the Software without restriction, including
 /// without limitation the rights to use, copy, modify, merge, publish,
 /// distribute, sublicense, and/or sell copies of the Software, and to
 /// permit persons to whom the Software is furnished to do so, subject to
-/// the following conditions:
+/// the following conditions:</para>
 /// 
-/// The copyright notice and this permission notice shall be
-/// included in all copies or substantial portions of the Software.
+/// <para>The copyright notice and this permission notice shall be
+/// included in all copies or substantial portions of the Software.</para>
 /// 
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+/// <para>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 /// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 /// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 /// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 /// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 /// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-/// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-///
-/// Based on the ChaCha stream cipher designed by Daniel J. Bernstein
-/// White paper: http://cr.yp.to/chacha/chacha-20080128.pdf
-/// Design: http://cr.yp.to/snuffle/design.pdf
+/// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</para>
+#endregion
+
+#region Class Notes
+/// <para><description>Principal Algorithms:</description>
+/// Portions of this cipher based on the ChaCha stream cipher designed by Daniel J. Bernstein:
+/// Salsa20 <see cref="http://cr.yp.to/chacha/chacha-20080128.pdf">Specification</see>.
 /// 
-/// Portions of this code based on Bouncy Castle Java release 1.51:
-/// http://bouncycastle.org/latest_releases.html
-/// Based on the Bouncy Castle version with changes made to improve speed, flexibility, a Dispose method added, and formatting changes
-/// http://grepcode.com/file/repo1.maven.org/maven2/org.bouncycastle/bcprov-ext-jdk15on/1.51/org/bouncycastle/crypto/engines/ChaChaEngine.java
+/// <para><description>Guiding Publications:</description>
+/// Salsa <see cref="http://cr.yp.to/snuffle/design.pdf">Design</see>.</para>
 /// 
+/// <para><description>Code Base Guides:</description>
+/// Portions of this code also based on the Bouncy Castle Java 
+/// <see cref="http://bouncycastle.org/latest_releases.html">Release 1.51</see>.</para>
+/// 
+/// <para><description>Implementation Details:</description>
 /// ChaCha20+
 /// An implementation based on the ChaCha stream cipher,
 /// using an extended key size, and higher variable rounds assignment.
 /// Valid Key sizes are 128, 256 and 384 (16, 32 and 48 bytes).
 /// Valid rounds are 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28 and 30.
 /// Written by John Underhill, October 21, 2014
-/// contact: steppenwolfe_2000@yahoo.com
+/// contact: steppenwolfe_2000@yahoo.com</para>
+/// </remarks>
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 {
-    /// ChaCha20+
-    /// Valid Key sizes are 128, 256 and 384 (16, 32 and 48 bytes).
-    /// Block size is 64 bytes wide.
-    /// Valid rounds are 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28 and 30.
+    /// <summary>
+    /// ChaCha+: A ChaCha stream cipher implementation.
+    /// 
+    /// <list type="bullet">
+    /// <item><description>Valid Key sizes are 128, 256 and 384 (16, 32 and 48 bytes).</description></item>
+    /// <item><description>Block size is 64 bytes wide.</description></item>
+    /// <item><description>Valid rounds are 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28 and 30.</description></item>
+    /// </list>
+    /// 
+    /// <example>
+    /// <description>Example using an <c>IStreamCipher</c> interface:</description>
+    /// <code>
+    /// using (IStreamCipher cipher = new ChaCha())
+    /// {
+    ///     // initialize for encryption
+    ///     cipher.cipher(new KeyParams(Key, IV));
+    ///     // encrypt a block
+    ///     cipher.Transform(Input, Output);
+    /// }
+    /// </code>
+    /// </example>
+    /// </summary>
     public sealed class ChaCha : IStreamCipher, IDisposable
     {
         #region Constants
@@ -57,7 +84,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         #region Fields
         private Int32 _Index = 0;
         private bool _isDisposed = false;
-        private bool _isEncryption = false;
         private bool _isInitialized = false;
         private byte[] _keyStream = new byte[STATE_SIZE * 4];
         private Int32 _Rounds = DEFAULT_ROUNDS;
@@ -67,35 +93,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         private Int32[] _workBuffer = new Int32[STATE_SIZE];
         #endregion
 
-        #region Constructor
-        public ChaCha()
-        {
-            this._Rounds = DEFAULT_ROUNDS;
-        }
-
-        public ChaCha(Int32 Rounds)
-        {
-            if (Rounds <= 0 || (Rounds & 1) != 0)
-                throw new ArgumentOutOfRangeException("Rounds must be a positive even number!");
-            if (Rounds < MIN_ROUNDS || Rounds > MAX_ROUNDS)
-                throw new ArgumentOutOfRangeException("Rounds must be between " + MIN_ROUNDS + " and " + MAX_ROUNDS + "!");
-            
-            this.Rounds = Rounds;
-        }
-        #endregion
-
         #region Properties
         /// <summary>
-        /// Get: Used as encryptor, false for decryption. 
-        /// </summary>
-        public bool IsEncryption
-        {
-            get { return _isEncryption; }
-            set { _isEncryption = value; }
-        }
-
-        /// <summary>
-        /// Get: Key has been expanded
+        /// Get: Cipher is ready to transform data
         /// </summary>
         public bool IsInitialized
         {
@@ -106,9 +106,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         /// <summary>
         /// Get: Available Encryption Key Sizes in bits
         /// </summary>
-        public static Int32[] KeySizes
+        public static Int32[] LegalKeySizes
         {
             get { return new Int32[] { 128, 256, 384, 448 }; }
+        }
+
+        /// <summary>
+        /// Get: Available number of rounds
+        /// </summary>
+        public static Int32[] LegalRounds
+        {
+            get { return new Int32[] { 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30 }; }
         }
 
         /// <summary>
@@ -129,19 +137,38 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         }
 
         /// <summary>
-        /// Get: Available number of rounds
-        /// </summary>
-        public static Int32[] RoundSizes
-        {
-            get { return new Int32[] { 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30 }; }
-        }
-
-        /// <summary>
         /// Get: Initialization vector size
         /// </summary>
         public static int VectorSize
         {
             get { return VECTOR_SIZE; }
+        }
+        #endregion
+
+        #region Constructor
+        /// <summary>
+        /// Initialize the class
+        /// </summary>
+        public ChaCha()
+        {
+            this._Rounds = DEFAULT_ROUNDS;
+        }
+
+        /// <summary>
+        /// Initialize the class
+        /// </summary>
+        /// 
+        /// <param name="Rounds">Number of diffusion rounds. The <see cref="LegalRounds"/> property contains available sizes.</param>
+        /// 
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid rounds count is chosen.</exception>
+        public ChaCha(Int32 Rounds)
+        {
+            if (Rounds <= 0 || (Rounds & 1) != 0)
+                throw new ArgumentOutOfRangeException("Rounds must be a positive even number!");
+            if (Rounds < MIN_ROUNDS || Rounds > MAX_ROUNDS)
+                throw new ArgumentOutOfRangeException("Rounds must be between " + MIN_ROUNDS + " and " + MAX_ROUNDS + "!");
+            
+            this.Rounds = Rounds;
         }
         #endregion
 
@@ -158,16 +185,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         /// <summary>
         /// Get the current counter value
         /// </summary>
-        /// <returns>Counter [long]</returns>
+        /// 
+        /// <returns>Counter</returns>
         public long GetCounter()
         {
             return ((long)_State[13] << 32) | (_State[12] & 0xffffffffL);
         }
 
         /// <summary>
-        /// Initialise the cipher
+        /// Initialize the Cipher.
         /// </summary>
-        /// <param name="Seed">Cipher key and vector</param>
+        /// 
+        /// <param name="Seed">Cipher key. The <see cref="LegalKeySizes"/> property contains valid sizes.</param>
+        /// 
+        /// <exception cref="System.ArgumentNullException">Thrown if a null key or iv is used.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid key size is used.</exception>
         public void Init(byte[] Seed)
         {
             if (Seed == null)
@@ -186,9 +218,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         }
 
         /// <summary>
-        /// Initialise the cipher
+        /// Initialize the Cipher.
         /// </summary>
-        /// <param name="KeyParam">KeyParam containing key and vector</param>
+        /// 
+        /// <param name="KeyParam">Cipher key container. The <see cref="LegalKeySizes"/> property contains valid sizes.</param>
+        /// 
+        /// <exception cref="System.ArgumentNullException">Thrown if a null key or iv is used.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid key or iv size is used.</exception>
         public void Init(KeyParams KeyParam)
         {
             if (KeyParam.IV == null)
@@ -237,7 +273,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         /// <summary>
         /// Return an transformed byte
         /// </summary>
+        /// 
         /// <param name="Input">Input byte</param>
+        /// 
         /// <returns>Transformed byte</returns>
         public byte ReturnByte(byte Input)
         {
@@ -260,7 +298,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         /// <summary>
         /// Skip a portion of the stream
         /// </summary>
+        /// 
         /// <param name="Length">Number of bytes to skip</param>
+        /// 
         /// <returns>Bytes skipped</returns>
         public long Skip(long Length)
         {
@@ -290,8 +330,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
             return Length;
         }
 
-        /// Encrypt/Decrypt an array of bytes
+        /// <summary>
+        /// Encrypt/Decrypt an array of bytes.
+        /// <para><see cref="Init(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Input bytes, plain text for encryption, cipher text for decryption</param>
         /// <param name="Output">Output bytes, array of at least equal size of input that receives processed bytes</param>
         public void Transform(byte[] Input, byte[] Output)
@@ -314,13 +357,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         }
 
         /// <summary>
-        /// Transform a block of bytes within an array.
-        /// Init must be called before this method can be used.
-        /// Block size is Output - OutOffset.
+        /// Encrypt/Decrypt an array of bytes.
+        /// <para><see cref="Init(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="InOffset">Offset within the Input array</param>
-        /// <param name="Output">Transformed bytes</param>
+        /// <param name="Output">Encrypted bytes</param>
         /// <param name="OutOffset">Offset within the Output array</param>
         public void Transform(byte[] Input, Int32 InOffset, byte[] Output, Int32 OutOffset)
         {
@@ -343,13 +386,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         }
 
         /// <summary>
-        /// Transform a range of bytes
+        /// Encrypt/Decrypt an array of bytes.
+        /// <para><see cref="Init(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
-        /// <param name="Input">Bytes to transform</param>
-        /// <param name="InOffset">Offset with the Input array</param>
+        /// 
+        /// <param name="Input">Bytes to Encrypt</param>
+        /// <param name="InOffset">Offset within the Input array</param>
         /// <param name="Length">Number of bytes to process</param>
-        /// <param name="Output">Output bytes</param>
-        /// <param name="OutOffset">Offset with the Output array</param>
+        /// <param name="Output">Encrypted bytes</param>
+        /// <param name="OutOffset">Offset within the Output array</param>
         public void Transform(byte[] Input, Int32 InOffset, Int32 Length, byte[] Output, Int32 OutOffset)
         {
             int ctr = 0;
@@ -646,7 +691,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         #region IDispose
         /// <summary>
-        /// Dispose of the class resources
+        /// Dispose of this class
         /// </summary>
         public void Dispose()
         {

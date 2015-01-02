@@ -1,38 +1,52 @@
-﻿using System;
+﻿#region Directives
+using System;
 using VTDev.Libraries.CEXEngine.Crypto.Generators;
 using VTDev.Libraries.CEXEngine.Crypto.Macs;
+#endregion
 
-#region About
-/// Permission is hereby granted, free of charge, to any person obtaining
+#region License Information
+/// <remarks>
+/// <para>Permission is hereby granted, free of charge, to any person obtaining
 /// a copy of this software and associated documentation files (the
 /// "Software"), to deal in the Software without restriction, including
 /// without limitation the rights to use, copy, modify, merge, publish,
 /// distribute, sublicense, and/or sell copies of the Software, and to
 /// permit persons to whom the Software is furnished to do so, subject to
-/// the following conditions:
+/// the following conditions:</para>
 /// 
-/// The copyright notice and this permission notice shall be
-/// included in all copies or substantial portions of the Software.
+/// <para>The copyright notice and this permission notice shall be
+/// included in all copies or substantial portions of the Software.</para>
 /// 
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+/// <para>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 /// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 /// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 /// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 /// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 /// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-/// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-///
-/// Based on the Serpent block cipher designed by Ross Anderson, Eli Biham and Lars Knudsen
-/// Serpent white paper: http://www.cl.cam.ac.uk/~rja14/Papers/serpent.pdf
+/// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</para>
+#endregion
+
+#region Class Notes
+/// <para><description>Principal Algorithms:</description>
+/// Portions of this cipher based on Serpent written by Ross Anderson, Eli Biham and Lars Knudsen:
+/// Serpent <see cref="http://www.cl.cam.ac.uk/~rja14/Papers/serpent.pdf">Specification</see>.</para>
 /// 
-/// The sboxes are based on the work of Brian Gladman and Sam Simpson.
-/// http://fp.gladman.plus.com/cryptography_technology/serpent/
+/// <para>The sboxes are based on the work of Brian Gladman and Sam Simpson.
+/// <see cref="http://fp.gladman.plus.com/cryptography_technology/serpent/">Specification</see>.
 /// Copyright: Dr B. R Gladman (gladman@seven77.demon.co.uk) and 
-/// Sam Simpson (s.simpson@mia.co.uk), 17th December 1998.
-///
-/// Portions of this code based on Bouncy Castle Java release 1.51:
-/// http://bouncycastle.org/latest_releases.html
+/// Sam Simpson (s.simpson@mia.co.uk), 17th December 1998.</para>
 /// 
+/// <para><description>Guiding Publications:</description>
+/// HMAC: <see cref="http://tools.ietf.org/html/rfc2104">RFC 2104</see>.
+/// Fips: <see cref="http://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf">198.1</see>.
+/// HKDF: <see cref="http://tools.ietf.org/html/rfc5869">RFC 5869</see>.
+/// NIST: <see cref="http://csrc.nist.gov/publications/drafts/800-90/draft-sp800-90b.pdf">SP800-90B</see>.</para>
+/// 
+/// <para><description>Code Base Guides:</description>
+/// Portions of this code based on the Bouncy Castle Java 
+/// <see cref="http://bouncycastle.org/latest_releases.html">Release 1.51</see>.</para>
+/// 
+/// <para><description>Implementation Details:</description>
 /// An implementation based on the Serpent block cipher,
 /// using HKDF with a SHA512 HMAC for expanded key generation.
 /// Serpent HKDF Extended (SHX)
@@ -42,17 +56,35 @@ using VTDev.Libraries.CEXEngine.Crypto.Macs;
 /// The number of Diffusion Rounds are configuarable.
 /// Valid Rounds assignments are 32, 40, 48, 56, 64, 80, 96 and 128, default is 64.
 /// Written by John Underhill, November 15, 2014
-/// contact: steppenwolfe_2000@yahoo.com
+/// contact: steppenwolfe_2000@yahoo.com</para>
+/// </remarks>
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 {
-    /// SHX: Serpent HKDF Extended
-    /// Minimum key size is 192 bytes.
-    /// Valid Key sizes are 64 + multiples of 128 bytes (IKm + Salt).
-    /// Valid block sizes is 16 byte wide.
-    /// The number of Diffusion Rounds are configuarable.
-    /// Valid Rounds assignments are 32, 40, 48, 56, 64, 80, 96 and 128, default is 64.
+    /// <summary>
+    /// SHX: Serpent Cipher Extended with an HKDF Key Schedule.
+    /// 
+    /// <list type="bullet">
+    /// <item><description>Minimum key size is 192 bytes.</description></item>
+    /// <item><description>Valid Key sizes are 64 + multiples of 128 bytes (IKm + Salt).</description></item>
+    /// <item><description>Valid block size is 16 bytes wide.</description></item>
+    /// <item><description>Valid Rounds assignments are 32, 40, 48, 56, 64, 80, 96 and 128, default is 64.</description></item>
+    /// </list>
+    /// 
+    /// <example>
+    /// <description>Example using an <c>ICipherMode</c> interface:</description>
+    /// <code>
+    /// using (ICipherMode mode = new CTR(new SHX()))
+    /// {
+    ///     // initialize for encryption
+    ///     mode.Init(true, new KeyParams(Key));
+    ///     // encrypt a block
+    ///     mode.Transform(Input, Output);
+    /// }
+    /// </code>
+    /// </example>
+    /// </summary>
     public sealed class SHX : IBlockCipher, IDisposable
     {
         #region Constants
@@ -78,21 +110,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         #region Properties
         /// <summary>
-        /// Unit block size of internal cipher.
+        /// Get: Unit block size of internal cipher
+        /// <para>Block size must be 16 or 32 bytes wide</para>
         /// </summary>
         public int BlockSize
         {
             get { return BLOCK_SIZE; }
-            set { ; }
-        }
-
-        /// <summary>
-        /// Get: Key has been expanded
-        /// </summary>
-        public bool IsInitialized
-        {
-            get { return _isInitialized; }
-            private set { _isInitialized = value; }
         }
 
         /// <summary>
@@ -106,11 +129,36 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         }
 
         /// <summary>
+        /// Get: Cipher is ready to transform data
+        /// </summary>
+        public bool IsInitialized
+        {
+            get { return _isInitialized; }
+            private set { _isInitialized = value; }
+        }
+
+        /// <summary>
+        /// Get: Available block sizes for this cipher
+        /// </summary>
+        public static int[] LegalBlockSizes
+        {
+            get { return new int[] { 16, 32 }; }
+        }
+
+        /// <summary>
         /// Get: Available Encryption Key Sizes in bits (192, 320, 448, 576 bytes)
         /// </summary>
-        public static Int32[] KeySizes
+        public static Int32[] LegalKeySizes
         {
             get { return new Int32[] { 1536, 2560, 3584, 4608 }; }
+        }
+
+        /// <summary>
+        /// Get: Available diffusion round assignments
+        /// </summary>
+        public static int[] LegalRounds
+        {
+            get { return new int[] { 32, 40, 48, 56, 64, 80, 96, 128 }; }
         }
 
         /// <summary>
@@ -120,17 +168,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         {
             get { return "SHX"; }
         }
-
-        /// <summary>
-        /// Get: Available diffusion round assignments
-        /// </summary>
-        public static Int32[] LegalRounds
-        {
-            get { return new Int32[] { 32, 40, 48, 56, 64, 80, 96, 128 }; }
-        }
         #endregion
 
         #region Constructor
+        /// <summary>
+        /// Initialize the class
+        /// </summary>
+        /// 
+        /// <param name="Rounds">Number of diffusion rounds. The <see cref="LegalRounds"/> property contains available sizes.</param>
+        /// 
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid rounds count is chosen.</exception>
         public SHX(int Rounds = DEFAULT_ROUNDS)
         {
             if (Rounds != 32 && Rounds != 40 && Rounds != 48 && Rounds != 56 && Rounds != 64 && Rounds != 80 && Rounds != 96 && Rounds != 128)
@@ -143,9 +190,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         #region Public Methods
         /// <summary>
         /// Decrypt a single block of bytes.
-        /// Init must be called with the Encryption flag set to false before this method can be used.
-        /// Input and Output must be at least BlockSize in length.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called with the Encryption flag set to <c>false</c> before this method can be used.
+        /// Input and Output must be at least <see cref="BlockSize"/> in length.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Encrypted bytes</param>
         /// <param name="Output">Decrypted bytes</param>
         public void DecryptBlock(byte[] Input, byte[] Output)
@@ -155,9 +203,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         /// <summary>
         /// Decrypt a block of bytes within an array.
-        /// Init must be called with the Encryption flag set to false before this method can be used.
-        /// Input and Output + Offsets must be at least BlockSize in length.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called with the Encryption flag set to <c>false</c> before this method can be used.
+        /// Input and Output array lengths - Offset must be at least <see cref="BlockSize"/> in length.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Encrypted bytes</param>
         /// <param name="InOffset">Offset within the Input array</param>
         /// <param name="Output">Decrypted bytes</param>
@@ -169,8 +218,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         /// <summary>
         /// Encrypt a block of bytes.
-        /// Init must be called with the Encryption flag set to true before this method can be used.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called with the Encryption flag set to <c>true</c> before this method can be used.
+        /// Input and Output array lengths must be at least <see cref="BlockSize"/> in length.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="Output">Encrypted bytes</param>
         public void EncryptBlock(byte[] Input, byte[] Output)
@@ -180,8 +231,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         /// <summary>
         /// Encrypt a block of bytes within an array.
-        /// Init must be called with the Encryption flag set to true before this method can be used.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called with the Encryption flag set to <c>true</c> before this method can be used.
+        /// Input and Output array lengths - Offset must be at least <see cref="BlockSize"/> in length.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="InOffset">Offset within the Input array</param>
         /// <param name="Output">Encrypted bytes</param>
@@ -194,12 +247,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         /// <summary>
         /// Initialize the Cipher.
         /// </summary>
-        /// <param name="Encryptor">Using Encryption or Decryption mode</param>
-        /// <param name="KeyParam">Cipher key, valid sizes are: 256 and 512 bytes</param>
+        /// 
+        /// <param name="Encryption">Using Encryption or Decryption mode</param>
+        /// <param name="KeyParam">Cipher key container. The <see cref="LegalKeySizes"/> property contains valid sizes.</param>
+        /// 
+        /// <exception cref="System.ArgumentNullException">Thrown if a null key is used.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid key size is used.</exception>
         public void Init(bool Encryption, KeyParams KeyParam)
         {
             if (KeyParam.Key == null)
-                throw new ArgumentOutOfRangeException("Invalid key! Key can not be null.");
+                throw new ArgumentNullException("Invalid key! Key can not be null.");
             if (KeyParam.Key.Length < MIN_KEYSIZE)
                 throw new ArgumentOutOfRangeException("Invalid key size! Key must be at least " + MIN_KEYSIZE + " bytes (" + MIN_KEYSIZE * 8 + " bit).");
             if ((KeyParam.Key.Length - IKM_SIZE) % SALT_SIZE != 0)
@@ -211,9 +268,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         /// <summary>
         /// Transform a block of bytes.
-        /// Init must be called before this method can be used.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called before this method can be used.
+        /// Input and Output array lengths must be at least <see cref="BlockSize"/> in length.</para>
         /// </summary>
-        /// <param name="Input">Bytes to Encrypt/Decrypt</param>
+        /// 
+        /// <param name="Input">Bytes to Encrypt or Decrypt</param>
         /// <param name="Output">Encrypted or Decrypted bytes</param>
         public void Transform(byte[] Input, byte[] Output)
         {
@@ -225,8 +284,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         /// <summary>
         /// Transform a block of bytes within an array.
-        /// Init must be called before this method can be used.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called before this method can be used.
+        /// Input and Output array lengths - Offset must be at least <see cref="BlockSize"/> in length.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="InOffset">Offset within the Input array</param>
         /// <param name="Output">Encrypted bytes</param>
@@ -243,7 +304,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         #region Transform
         private void Decrypt16(byte[] Input, Int32 InOffset, byte[] Output, Int32 OutOffset)
         {
-            // cr = 4 * 8 : 4cr = 132, 5cr = 164, 6cr = 196, 7cr = 228, 8cr = 260
             int keyCtr = _exKey.Length - 1;
 
             // input round
@@ -776,6 +836,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         #endregion
 
         #region IDispose
+        /// <summary>
+        /// Dispose of this class
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);

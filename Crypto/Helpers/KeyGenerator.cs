@@ -1,12 +1,26 @@
-﻿using System;
+﻿#region Directives
+using System;
 using VTDev.Libraries.CEXEngine.Crypto.Macs;
 using VTDev.Libraries.CEXEngine.Crypto.Digests;
+#endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Helpers
 {
+    /// <summary>
+    /// A class containing methods suitable for generating key material
+    /// </summary>
     public static class KeyGenerator
     {
         #region KeyParameter
+        /// <summary>
+        /// Wrapper for generator functions
+        /// </summary>
+        /// 
+        /// <param name="KeySize">Size of key to generate</param>
+        /// <param name="IVSize">Optional iv</param>
+        /// <param name="UseSHA3">Use SHA3 as the hashing algorithm</param>
+        /// 
+        /// <returns>A <see cref="KeyParams"/> structure</returns>
         public static KeyParams GetParams(int KeySize, int IVSize = 0, bool UseSHA3 = false)
         {
             if (IVSize > 0)
@@ -20,9 +34,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helpers
         /// <summary>
         /// Generate a psuedo random byte array
         /// </summary>
+        /// 
         /// <param name="Size">Size of requested array</param>
         /// <param name="UseSHA3">Use an SHA-3 HMac or SHA-2 HMAC for extraction</param>
-        /// <returns>Psuedo random bytes [byte[]]</returns>
+        /// 
+        /// <returns>Psuedo random bytes</returns>
         public static byte[] Generate(int Size, bool UseSHA3 = false)
         {
             if (UseSHA3)
@@ -34,8 +50,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helpers
         /// <summary>
         /// Generate an encryption key using an SHA-2 HMAC
         /// </summary>
-        /// <param name="Size">Key size in bytes [byte[]]</param>
-        /// <returns>P-rand array [byte[]]</returns>
+        /// 
+        /// <param name="Size">Key size in bytes</param>
+        /// 
+        /// <returns>P-rand array</returns>
         public static byte[] GenerateKey(int Size)
         {
             byte[] key = new byte[Size];
@@ -65,8 +83,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helpers
         /// <summary>
         /// Generate an encryption key using an SHA-3 HMAC
         /// </summary>
-        /// <param name="Size">Key size in bytes [byte[]]</param>
-        /// <returns>P-rand array [byte[]]</returns>
+        /// 
+        /// <param name="Size">Key size in bytes</param>
+        /// 
+        /// <returns>P-rand array</returns>
         public static byte[] GenerateKeyNg(int Size)
         {
             byte[] key = new byte[Size];
@@ -98,8 +118,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helpers
         /// <summary>
         /// Gets bytes p-rand from RNGCryptoServiceProvider
         /// </summary>
+        /// 
         /// <param name="Size">Size of request</param>
-        /// <returns>P-Rand bytes [byte[]]</returns>
+        /// 
+        /// <returns>P-Rand bytes</returns>
         public static byte[] GetRngBytes(int Size)
         {
             byte[] data = new byte[Size];
@@ -113,6 +135,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helpers
         /// <summary>
         /// Get a random seed value
         /// </summary>
+        /// 
         /// <returns>64 bytes of p-rand</returns>
         public static byte[] GetSeed64()
         {
@@ -126,6 +149,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helpers
         /// <summary>
         /// Get a random seed value using an SHA3-512 HMAC
         /// </summary>
+        /// 
         /// <returns>64 bytes of p-rand</returns>
         public static byte[] GetSeed64Ng()
         {
@@ -139,6 +163,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helpers
         /// <summary>
         /// Get a random seed value
         /// </summary>
+        /// 
         /// <returns>32 bytes of p-rand</returns>
         public static byte[] GetSeed32()
         {
@@ -152,6 +177,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helpers
         /// <summary>
         /// Get a random seed value
         /// </summary>
+        /// 
         /// <returns>24 bytes of p-rand</returns>
         public static byte[] GetSeed24()
         {
@@ -165,6 +191,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helpers
         /// <summary>
         /// Get a random seed value
         /// </summary>
+        /// 
         /// <returns>16 bytes of p-rand</returns>
         public static byte[] GetSeed16()
         {

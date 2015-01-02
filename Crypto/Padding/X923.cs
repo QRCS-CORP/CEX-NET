@@ -1,5 +1,7 @@
-﻿using System;
+﻿#region Directives
+using System;
 using System.Security.Cryptography;
+#endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Padding
 {
@@ -10,12 +12,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Padding
     {
         #region Properties
         /// <summary>
-        /// Block size of Cipher
+        /// Get: Block size of Cipher
         /// </summary>
         public int BlockSize { get; set; }
 
         /// <summary>
-        /// Padding name
+        /// Get: Padding name
         /// </summary>
         public string Name
         {
@@ -34,6 +36,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Padding
         /// <summary>
         /// Add padding to input array
         /// </summary>
+        /// 
         /// <param name="Input">Array to modify</param>
         /// <param name="Offset">Offset into array</param>
         public void AddPadding(byte[] Input, int Offset)
@@ -52,7 +55,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Padding
         /// <summary>
         /// Get the length of padding in an array
         /// </summary>
+        /// 
         /// <param name="Input">Padded array of bytes</param>
+        /// 
         /// <returns>Length of padding</returns>
         public int GetPaddingLength(byte[] Input)
         {
@@ -62,8 +67,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Padding
         /// <summary>
         /// Get the length of padding in an array
         /// </summary>
+        /// 
         /// <param name="Input">Padded array of bytes</param>
         /// <param name="Offset">Offset into array</param>
+        /// 
         /// <returns>Length of padding</returns>
         public int GetPaddingLength(byte[] Input, int Offset)
         {

@@ -1,8 +1,63 @@
-﻿using System;
+﻿#region Directives
+using System;
 using VTDev.Libraries.CEXEngine.Crypto.Ciphers;
+#endregion
+
+#region License Information
+/// <remarks>
+/// <para>Permission is hereby granted, free of charge, to any person obtaining
+/// a copy of this software and associated documentation files (the
+/// "Software"), to deal in the Software without restriction, including
+/// without limitation the rights to use, copy, modify, merge, publish,
+/// distribute, sublicense, and/or sell copies of the Software, and to
+/// permit persons to whom the Software is furnished to do so, subject to
+/// the following conditions:</para>
+/// 
+/// <para>The copyright notice and this permission notice shall be
+/// included in all copies or substantial portions of the Software.</para>
+/// 
+/// <para>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+/// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+/// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+/// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+/// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+/// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+/// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</para>
+#endregion
+
+#region Class Notes
+/// <para><description>Implementation Details:</description>
+/// An implementation of a Counter based Deterministic Random Byte Generator (CTRDRBG). 
+/// Written by John Underhill, November 21, 2014
+/// contact: steppenwolfe_2000@yahoo.com</para>
+/// </remarks>
+#endregion
+
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Generators
 {
+    /// <summary>
+    /// CTRDRBG: An implementation of a Counter based Deterministic Random Byte Generator (CTRDRBG). 
+    /// 
+    /// <list type="bullet">
+    /// <item><description>Can be initialized with any block cipher.</description></item>
+    /// <item><description>Combination [Salt, Ikm, Nonce] must be: cipher key size +  cipher block size in length.</description></item>
+    /// <item><description>Nonce and Ikm are optional, (but recommended).</description></item>
+    /// </list>
+    /// 
+    /// <example>
+    /// <description>Example using an <c>IGenerator</c> interface:</description>
+    /// <code>
+    /// using (IGenerator rand = new CTRDRBG(new RDX()))
+    /// {
+    ///     // initialize
+    ///     rand.Init(Salt, [Ikm], [Nonce]);
+    ///     // generate bytes
+    ///     rand.Generate(Size, Output);
+    /// }
+    /// </code>
+    /// </example>
+    /// </summary> 
     public class CTRDRBG : IGenerator, IDisposable
     {
         #region Constants
@@ -56,7 +111,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generators
             }
         }
 
-
         /// <summary>
         /// Get: Legal key size for selected cipher
         /// </summary>
@@ -97,11 +151,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generators
 
         #region Public Methods
         /// <summary>
-        /// Initialize the algorithm
+        /// Initialize the generator
         /// </summary>
+        /// 
         /// <param name="Salt">Salt value</param>
+        /// 
+        /// <exception cref="System.ArgumentNullException">Thrown if a null salt is used.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">Salt does not contain enough material for Key and Vector creation.</exception>
         public void Init(byte[] Salt)
         {
+            if (Salt == null)
+                throw new ArgumentNullException("Salt can not be null!");
             if (Salt.Length < _userKeySize)
                 throw (new ArgumentOutOfRangeException("Minimum key size has not been added. Size must be at least " + _userKeySize + " bytes!"));
 
@@ -115,10 +175,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generators
         }
 
         /// <summary>
-        /// Initialize the algorithm
+        /// Initialize the generator
         /// </summary>
+        /// 
         /// <param name="Salt">Salt value</param>
-        /// <param name="Info">Nonce value</param>
+        /// <param name="Ikm">Key material</param>
+        /// 
+        /// <exception cref="System.ArgumentNullException">Thrown if a null salt or ikm is used.</exception>
         public void Init(byte[] Salt, byte[] Ikm)
         {
             byte[] seed = new byte[Salt.Length + Ikm.Length];
@@ -130,11 +193,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generators
         }
 
         /// <summary>
-        /// Initialize the algorithm
+        /// Initialize the generator
         /// </summary>
+        /// 
         /// <param name="Salt">Salt value</param>
         /// <param name="Ikm">Key material</param>
         /// <param name="Info">Nonce value</param>
+        /// 
+        /// <exception cref="System.ArgumentNullException">Thrown if a null salt, ikm, or nonce is used.</exception>
         public void Init(byte[] Salt, byte[] Ikm, byte[] Info)
         {
             byte[] seed = new byte[Salt.Length + Ikm.Length + Info.Length];
@@ -149,8 +215,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generators
         /// <summary>
         /// Generate a block of bytes
         /// </summary>
+        /// 
         /// <param name="Output">Output array</param>
         /// <param name="Size">Number of bytes to generate</param>
+        /// 
         /// <returns>Number of bytes generated</returns>
         public int Generate(int Size, byte[] Output)
         {
@@ -162,9 +230,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generators
         /// <summary>
         /// Generate a block of bytes
         /// </summary>
+        /// 
         /// <param name="Output">Output array</param>
         /// <param name="OutOffset">Position within Output array</param>
         /// <param name="Size">Number of bytes to generate</param>
+        /// 
         /// <returns>Number of bytes generated</returns>
         public int Generate(int Size, byte[] Output, int OutOffset)
         {
@@ -303,7 +373,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generators
 
         #region IDispose
         /// <summary>
-        /// Dispose of this class
+        /// Dispose of this class, and dependant resources
         /// </summary>
         public void Dispose()
         {

@@ -1,15 +1,67 @@
-﻿using System;
+﻿#region Directives
+using System;
+#endregion
 
-/// Based on Keccak, designed by Guido Bertoni, Joan Daemen, Michaël Peeters, and Gilles Van Assche. 
-/// http://keccak.noekeon.org/Keccak-submission-3.pdf
+#region License Information
+/// <remarks>
+/// <para>Permission is hereby granted, free of charge, to any person obtaining
+/// a copy of this software and associated documentation files (the
+/// "Software"), to deal in the Software without restriction, including
+/// without limitation the rights to use, copy, modify, merge, publish,
+/// distribute, sublicense, and/or sell copies of the Software, and to
+/// permit persons to whom the Software is furnished to do so, subject to
+/// the following conditions:</para>
 /// 
-/// Adapted from the BouncyCastle java 1.51 implementation: http://bouncycastle.org/
-/// SHA3Digest class: http://grepcode.com/file/repo1.maven.org/maven2/org.bouncycastle/bcprov-ext-jdk15on/1.51/org/bouncycastle/crypto/digests/SHA3Digest.java
+/// <para>The copyright notice and this permission notice shall be
+/// included in all copies or substantial portions of the Software.</para>
+/// 
+/// <para>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+/// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+/// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+/// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+/// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+/// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+/// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</para>
+#endregion
+
+#region Class Notes
+/// <para><description>Principal Algorithms:</description>
+/// An implementation of the SHA-3 digest based on Keccak, designed by Guido Bertoni, Joan Daemen, Michaël Peeters, and Gilles Van Assche. 
+/// SHA-3 <see cref="http://keccak.noekeon.org/Keccak-submission-3.pdf">Specification</see>.</para>
+/// 
+/// <para><description>Code Base Guides:</description>
+/// Portions of this code based on the Bouncy Castle 
+/// <see cref="http://grepcode.com/file/repo1.maven.org/maven2/org.bouncycastle/bcprov-ext-jdk15on/1.51/org/bouncycastle/crypto/digests/SHA3Digest.java">SHA3Digest</see> class.</para>
+/// 
+/// <para><description>Implementation Details:</description>
+/// An implementation of the SHA-3 digest. 
 /// Refactoring, a couple of small optimizations, Dispose, and a ComputeHash method added.
-/// Many thanks to the authors of BouncyCastle for their great contributions..
+/// Many thanks to the authors of BouncyCastle for their great contributions.
+/// Written by John Underhill, September 19, 2014
+/// contact: steppenwolfe_2000@yahoo.com</para>
+/// </remarks>
+#endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Digests
 {
+    /// <summary>
+    /// SHA3Digest: An implementation of the SHA-2 digest.
+    /// 
+    /// <list type="bullet">
+    /// <item><description>Hash sizes are 224, 256, 384 and 512 bit.</description></item>
+    /// <item><description>Block sizes are 1152, 1088, 832, 576 bit.</description></item>
+    /// </list>
+    /// <example>
+    /// <description>Example using an <c>IDigest</c> interface:</description>
+    /// <code>
+    /// using (IDigest hash = new SHA3Digest())
+    /// {
+    ///     // compute a hash
+    ///     byte[] Output = ComputeHash(Input);
+    /// }
+    /// </code>
+    /// </example>
+    /// </summary> 
     public class SHA3Digest : IDigest, IDisposable
     {
         #region Fields
@@ -32,7 +84,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
 
         #region Properties
         /// <summary>
-        /// The Digests internal blocksize in bytes
+        /// Get: The Digests internal blocksize in bytes
         /// </summary>
         public int BlockSize
         {
@@ -40,7 +92,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
         }
 
         /// <summary>
-        /// Size of returned digest in bytes
+        /// Get: Size of returned digest in bytes
         /// </summary>
         public int DigestSize
         {
@@ -48,7 +100,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
         }
 
         /// <summary>
-        /// Digest name
+        /// Get: Digest name
         /// </summary>
         public string Name
         {
@@ -57,11 +109,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
         #endregion
 
         #region Constructor
+        /// <summary>
+        /// Initialize the digest
+        /// </summary>
         public SHA3Digest()
         {
             Init(0);
         }
 
+        /// <summary>
+        /// Initialize the digest
+        /// </summary>
+        /// <param name="Length">Digest size in bits</param>
         public SHA3Digest(int Length)
         {
             Init(Length);
@@ -72,7 +131,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
         /// <summary>
         /// Update the SHA3 buffer
         /// </summary>
-        /// <param name="Input">Input data [bytes]</param>
+        /// 
+        /// <param name="Input">Input data</param>
         /// <param name="InOffset">Offset within Input array</param>
         /// <param name="Length">Amount of data to process in bytes</param>
         public void BlockUpdate(byte[] Input, int InOffset, int Length)
@@ -83,8 +143,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
         /// <summary>
         /// Get the Hash value
         /// </summary>
-        /// <param name="Input">Input data [bytes]</param>
-        /// <returns>Hash value [64 bytes]</returns>
+        /// 
+        /// <param name="Input">Input data</param>
+        /// 
+        /// <returns>Hash value</returns>
         public byte[] ComputeHash(byte[] Input)
         {
             byte[] hash = new byte[this.DigestSize];
@@ -98,8 +160,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
         /// <summary>
         /// Do final processing
         /// </summary>
+        /// 
         /// <param name="Output">Inputs the final block, and returns the Hash value</param>
         /// <param name="OutOffset">The starting positional offset within the Output array</param>
+        /// 
         /// <returns>Size of Hash value</returns>
         public int DoFinal(byte[] Output, int OutOffset)
         {
@@ -120,6 +184,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
         /// <summary>
         /// Update the digest with a single byte
         /// </summary>
+        /// 
         /// <param name="Input">Input byte</param>
         public void Update(byte Input)
         {
@@ -524,7 +589,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digests
 
         #region IDispose
         /// <summary>
-        /// Dispose of this class, releasing the resources
+        /// Dispose of this class
         /// </summary>
         public void Dispose()
         {

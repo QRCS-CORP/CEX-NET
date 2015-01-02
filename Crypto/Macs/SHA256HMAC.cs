@@ -1,7 +1,63 @@
-﻿using System;
+﻿#region Directives
+using System;
+#endregion
+
+#region License Information
+/// <remarks>
+/// <para>Permission is hereby granted, free of charge, to any person obtaining
+/// a copy of this software and associated documentation files (the
+/// "Software"), to deal in the Software without restriction, including
+/// without limitation the rights to use, copy, modify, merge, publish,
+/// distribute, sublicense, and/or sell copies of the Software, and to
+/// permit persons to whom the Software is furnished to do so, subject to
+/// the following conditions:</para>
+/// 
+/// <para>The copyright notice and this permission notice shall be
+/// included in all copies or substantial portions of the Software.</para>
+/// 
+/// <para>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+/// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+/// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+/// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+/// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+/// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+/// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</para>
+#endregion
+
+#region Class Notes
+/// <para><description>Guiding Publications:</description>
+/// HMAC: <see cref="http://tools.ietf.org/html/rfc2104">RFC 2104</see>.
+/// Fips 180 SHA <see cref="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf">Specification</see>.</para>
+/// 
+/// <para><description>Code Base Guides:</description>
+/// Portions of this code based on the Bouncy Castle Java 
+/// <see cref="http://bouncycastle.org/latest_releases.html">Release 1.51</see>.</para>
+/// 
+/// <para><description>Implementation Details:</description>
+/// An implementation of a keyed hash function; SHA-2 256 Hash based Message Authentication Code.
+/// Written by John Underhill, September 24, 2014
+/// contact: steppenwolfe_2000@yahoo.com</para>
+/// </remarks>
+#endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Macs
 {
+    /// <summary>
+    /// SHA256 Hash based Message Authentication Code
+    /// 
+    /// <example>
+    /// <description>Use with an <c>IMac</c> interface:</description>
+    /// <code>
+    /// using (IMac mac = new SHA256HMAC())
+    /// {
+    ///     // initialize
+    ///     mac.Init(Key);
+    ///     // get mac
+    ///     Output = mac.ComputeMac(Input);
+    /// }
+    /// </code>
+    /// </example>
+    /// </summary>
     public class SHA256HMAC : IMac, IDisposable
     {
         #region Constants
@@ -23,6 +79,32 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Macs
         private Int32 _wordOffset = 0;
         #endregion
 
+        #region Properties
+        /// <summary>
+        /// Get: The Ciphers internal blocksize in bytes
+        /// </summary>
+        public int BlockSize
+        {
+            get { return BLOCK_SIZE; }
+        }
+
+        /// <summary>
+        /// Get: Size of returned digest in bytes
+        /// </summary>
+        public int DigestSize
+        {
+            get { return DIGEST_SIZE; }
+        }
+
+        /// <summary>
+        /// Get: Algorithm name
+        /// </summary>
+        public string Name
+        {
+            get { return "SHA256HMAC"; }
+        }
+        #endregion
+
         #region Constructor
         /// <summary>
         /// Initialize the class
@@ -33,8 +115,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Macs
 
         /// <summary>
         /// Initialize the class and working variables.
-        /// Can be used in place of Init() call.
+        /// <para>Can be used in place of <see cref="Init(byte[])"/> call.</para>
         /// </summary>
+        /// 
         /// <param name="Key">HMAC Key</param>
         public SHA256HMAC(byte[] Key)
         {
@@ -46,7 +129,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Macs
         /// <summary>
         /// Update the hash buffer
         /// </summary>
-        /// <param name="Input">Input data [bytes]</param>
+        /// 
+        /// <param name="Input">Input data</param>
         /// <param name="InputOffset">Offset within Input</param>
         /// <param name="Length">Amount of data to process in bytes</param>
         public void BlockUpdate(byte[] Input, int InputOffset, int Length)
@@ -82,8 +166,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Macs
         /// <summary>
         /// Get the Hash value
         /// </summary>
-        /// <param name="Input"></param>
-        /// <returns>Hash value [32 bytes]</returns>
+        /// 
+        /// <param name="Input">Input data</param>
+        /// 
+        /// <returns>Mac value</returns>
         public byte[] ComputeMac(byte[] Input)
         {
             byte[] hash = new byte[32];
@@ -97,8 +183,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Macs
         /// <summary>
         /// Process the last block of data
         /// </summary>
+        /// 
         /// <param name="Output">The hash value return</param>
         /// <param name="Offset">The offset in the data</param>
+        /// 
         /// <returns>bytes processed</returns>
         public int DoFinal(byte[] Output, int Offset)
         {
@@ -118,6 +206,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Macs
         /// <summary>
         /// Initialize the HMAC
         /// </summary>
+        /// 
         /// <param name="Key">HMAC key</param>
         public void Init(byte[] Key)
         {
@@ -164,6 +253,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Macs
         /// <summary>
         /// Update the digest with a single byte
         /// </summary>
+        /// 
         /// <param name="Input">Input byte</param>
         public void Update(byte Input)
         {
@@ -179,39 +269,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Macs
         }
         #endregion
 
-        #region Properties
-        /// <summary>
-        /// The Ciphers internal blocksize in bytes
-        /// </summary>
-        public int BlockSize
-        {
-            get { return BLOCK_SIZE; }
-        }
-
-        /// <summary>
-        /// Size of returned digest in bytes
-        /// </summary>
-        public int DigestSize
-        {
-            get { return DIGEST_SIZE; }
-        }
-
-        /// <summary>
-        /// Algorithm name
-        /// </summary>
-        public string Name
-        {
-            get { return "SHA256HMAC"; }
-        }
-        #endregion
-
         #region Private Methods
-        /// <summary>
+        /// <remarks>
         /// Do final processing
-        /// </summary>
-        /// <param name="Output">Inputs the final block, and returns the Hash value</param>
-        /// <param name="OutputOffset">The starting positional offset within the Output array</param>
-        /// <returns>Size of Hash value, Always 32 bytes</returns>
+        /// </remarks>
         private Int32 Finalize(byte[] Output, Int32 OutputOffset)
         {
             Finish();
@@ -394,7 +455,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Macs
 
         #region IDispose
         /// <summary>
-        /// Dispose of this class, releasing the resources
+        /// Dispose of this class, and dependant resources
         /// </summary>
         public void Dispose()
         {

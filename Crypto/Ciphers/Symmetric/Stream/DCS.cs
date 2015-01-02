@@ -1,39 +1,74 @@
-﻿using System;
+﻿#region Directives
+using System;
+#endregion
 
-#region About
-/// Permission is hereby granted, free of charge, to any person obtaining
+#region License Information
+/// <remarks>
+/// <para>Permission is hereby granted, free of charge, to any person obtaining
 /// a copy of this software and associated documentation files (the
 /// "Software"), to deal in the Software without restriction, including
 /// without limitation the rights to use, copy, modify, merge, publish,
 /// distribute, sublicense, and/or sell copies of the Software, and to
 /// permit persons to whom the Software is furnished to do so, subject to
-/// the following conditions:
+/// the following conditions:</para>
 /// 
-/// The copyright notice and this permission notice shall be
-/// included in all copies or substantial portions of the Software.
+/// <para>The copyright notice and this permission notice shall be
+/// included in all copies or substantial portions of the Software.</para>
 /// 
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+/// <para>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 /// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 /// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 /// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 /// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 /// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-/// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-///
-/// A stream cipher implementation using a dual AES CTR Xor:
+/// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</para>
+#endregion
+
+#region Class Notes
+/// <para><description>Principal Algorithms:</description>
+/// Portions of this cipher based on the Rijndael block cipher designed by Joan Daemen and Vincent Rijmen:
+/// Rijndael <see cref="http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf">Specification</see>.
+/// 
+/// <para><description>Guiding Publications:</description>
+/// AES specification <see cref="http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf">Fips 197</see>.</para>
+/// 
+/// <para><description>Code Base Guides:</description>
+/// Portions of this code based on the Mono 
+/// <see cref="https://github.com/mono/mono/blob/effa4c07ba850bedbe1ff54b2a5df281c058ebcb/mcs/class/corlib/System.Security.Cryptography/RijndaelManagedTransform.cs">RijndaelManagedTransform</see> class.
+/// Portions of this code also based on the Bouncy Castle Java 
+/// <see cref="http://bouncycastle.org/latest_releases.html">Release 1.51</see>.</para>
+/// 
+/// <para><description>Implementation Details:</description>
+/// A stream cipher implementation using a dual AES CTR Xor.
 /// Dual CTR Stream (DCS)
 /// Valid Key size is 768 bit (96 bytes).
 /// Written by John Underhill, September 21, 2014
-/// contact: steppenwolfe_2000@yahoo.com
+/// contact: steppenwolfe_2000@yahoo.com</para>
+/// </remarks>
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 {
     /// <summary>
     /// DCS: A parallelized stream cipher implementation.
-    /// Uses a dual AES CTR XOR; (R_k1(C1) ^ R_k2(C2)) ^ P.
-    /// Valid Key size is 768 bit (96 bytes).
-    /// Minimum input size required for parallel processing is 1024 bytes.
+    /// 
+    /// <list type="bullet">
+    /// <item><description>Valid Key size is 768 bit (96 bytes).</description></item>
+    /// <item><description>Minimum input size required for parallel processing is 1024 bytes.</description></item>
+    /// </list>
+    /// 
+    /// <example>
+    /// <description>Example using an <c>IStreamCipher</c> interface:</description>
+    /// <code>
+    /// using (IStreamCipher cipher = new DCS())
+    /// {
+    ///     // initialize for encryption
+    ///     cipher.cipher(new KeyParams(Key));
+    ///     // encrypt a block
+    ///     cipher.Transform(Input, Output);
+    /// }
+    /// </code>
+    /// </example>
     /// </summary>
     public sealed class DCS : IStreamCipher, IDisposable
     {
@@ -58,7 +93,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         private UInt32[] _exKey1;
         private UInt32[] _exKey2;
         private bool _isDisposed = false;
-        private bool _isEncryption = false;
         private bool _isInitialized = false;
         private bool _isParallel = false;
         private byte[] _keyBuffer = new byte[96];
@@ -66,16 +100,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         #region Properties
         /// <summary>
-        /// Get: Used as encryptor, false for decryption. 
-        /// </summary>
-        public bool IsEncryption
-        {
-            get { return _isEncryption; }
-            private set { _isEncryption = value; }
-        }
-
-        /// <summary>
-        /// Get: Key has been expanded
+        /// Get: Cipher is ready to transform data
         /// </summary>
         public bool IsInitialized
         {
@@ -101,7 +126,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         /// <summary>
         /// Get: Seed Size in bits; 768 or 96 bytes
         /// </summary>
-        public static Int32[] KeySizes
+        public static Int32[] LegalKeySizes
         {
             get { return new Int32[] { KEY_BITS }; }
         }
@@ -122,9 +147,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
             get { return "DCS"; }
         }
 
-        /// <summary>
+        /// <remarks>
         /// Processor count
-        /// </summary>
+        /// </remarks>
         private int ProcessorCount { get; set; }
         #endregion
 
@@ -145,19 +170,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         #region Public Methods
         /// <summary>
-        /// Initialize the algorithm, must be called before processing
+        /// Initialize the Cipher.
         /// </summary>
-        /// <param name="KeyParam">Contains 96 byte (768 bit) random key value</param>
+        /// 
+        /// <param name="KeyParam">Cipher key container. The <see cref="LegalKeySizes"/> property contains valid sizes.</param>
+        /// 
+        /// <exception cref="System.ArgumentNullException">Thrown if a null key is used.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid key size is used.</exception>
+        /// <exception cref="System.ArgumentException">Thrown if key contains too many repeating sequences.</exception>
         public void Init(KeyParams KeyParam)
         {
             if (KeyParam.Key == null)
-                throw new ArgumentOutOfRangeException("Invalid seed! Seed can not be null.");
+                throw new ArgumentNullException("Invalid seed! Seed can not be null.");
             if (KeyParam.Key.Length != 96)
                 throw new ArgumentOutOfRangeException("Invalid seed size! Seed must be 96 bytes.");
             if (ZerosFrequency(KeyParam.Key) > 24)
                 throw new ArgumentException("Bad seed! Seed material contains too many zeroes.");
             if (!EvaluateSeed(KeyParam.Key))
-                throw new ArgumentException("Bad seed! Seed material contains repeating squence.");
+                throw new ArgumentException("Bad seed! Seed material contains repeating sequence.");
 
             // copy seed
             Buffer.BlockCopy(KeyParam.Key, 0, _keyBuffer, 0, _keyBuffer.Length);
@@ -187,10 +217,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         }
 
         /// <summary>
-        /// Encrypt/Decrypt an array of bytes
+        /// Encrypt/Decrypt an array of bytes.
+        /// <para><see cref="Init(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Input bytes, plain text for encryption, cipher text for decryption</param>
         /// <param name="Output">Output bytes, array of at least equal size of input that receives processed bytes</param>
+        /// 
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an input and output arrays do not align or are too small.</exception>
         public void Transform(byte[] Input, byte[] Output)
         {
             if (Output.Length < 1)
@@ -256,13 +290,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         }
 
         /// <summary>
-        /// Transform a block of bytes within an array.
-        /// Init must be called before this method can be used.
+        /// Encrypt/Decrypt an array of bytes.
+        /// <para><see cref="Init(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="InOffset">Offset within the Input array</param>
         /// <param name="Output">Encrypted bytes</param>
         /// <param name="OutOffset">Offset within the Output array</param>
+        /// 
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if input array is smaller then the ouput array.</exception>
         public void Transform(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
             int size = Output.Length - OutOffset;
@@ -281,14 +318,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         }
 
         /// <summary>
-        /// Transform a block of bytes within an array.
-        /// Init must be called before this method can be used.
+        /// Encrypt/Decrypt an array of bytes.
+        /// <para><see cref="Init(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="InOffset">Offset within the Input array</param>
         /// <param name="Length">Number of bytes to process</param>
         /// <param name="Output">Encrypted bytes</param>
         /// <param name="OutOffset">Offset within the Output array</param>
+        /// 
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if input array is smaller then the ouput array.</exception>
         public void Transform(byte[] Input, int InOffset, int Length, byte[] Output, int OutOffset)
         {
             if (Input.Length - InOffset < Length)
@@ -306,13 +346,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         #endregion
 
         #region Random Generator
-        /// <summary>
+        /// <remarks>
         /// Generate an array of p-random bytes
-        /// </summary>
-        /// <param name="Size">Size of expected output</param>
-        /// <param name="Ctr1">Counter 1</param>
-        /// <param name="Ctr2">Counter 2</param>
-        /// <returns>Random array of bytes</returns>
+        /// </remarks>
         private byte[] Generate(Int32 Size, byte[] Ctr1, byte[] Ctr2)
         {
             // align to upper divisible of block size
@@ -354,22 +390,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
             return outputData;
         }
 
-        /// <summary>
+        /// <remarks>
         /// Incremental counter with carry
-        /// </summary>
-        /// <param name="Counter">Counter</param>
+        /// </remarks>
         private void Increment(byte[] Counter)
         {
             int i = Counter.Length;
             while (--i >= 0 && ++Counter[i] == 0) { }
         }
 
-        /// <summary>
+        /// <remarks>
         /// Increase a byte array by a numerical value
-        /// </summary>
-        /// <param name="Counter">Original byte array</param>
-        /// <param name="Size">Number to increase by</param>
-        /// <returns>Array with increased value [byte[]]</returns>
+        /// </remarks>
         private byte[] Increase(byte[] Counter, int Size)
         {
             int carry = 0;
@@ -394,10 +426,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         #endregion
 
         #region Rijndael
-        /// <summary>
+        /// <remarks>
         /// Expand the key and set state variables
-        /// </summary>
-        /// <param name="Key">128-512 bit (16-64 byte) encryption key</param>
+        /// </remarks>
         private UInt32[] ExpandKey(byte[] Key)
         {
             // rounds calculation
@@ -896,7 +927,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         #region IDispose
         /// <summary>
-        /// Dispose of the class resources
+        /// Dispose of this class
         /// </summary>
         public void Dispose()
         {

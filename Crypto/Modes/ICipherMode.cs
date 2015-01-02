@@ -1,5 +1,7 @@
-﻿using System;
+﻿#region Directives
+using System;
 using VTDev.Libraries.CEXEngine.Crypto.Ciphers;
+#endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Modes
 {
@@ -9,19 +11,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
     public interface ICipherMode : IDisposable
     {
         /// <summary>
-        /// Unit block size of internal cipher.
+        /// Unit block size of internal cipher
         /// </summary>
         int BlockSize { get; }
 
         /// <summary>
-        /// Used as encryptor, false for decryption. 
+        /// Used as encryptor, false for decryption.
         /// </summary>
         bool IsEncryption { get; }
 
         /// <summary>
-        /// Uses parallel processing. 
+        /// Uses parallel processing.
         /// </summary>
-        bool IsParallel { get; set;  }
+        bool IsParallel { get; set; }
 
         /// <summary>
         /// Cipher name
@@ -31,7 +33,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
         /// <summary>
         /// Underlying Cipher
         /// </summary>
-        IBlockCipher Cipher { get; set; }
+        IBlockCipher Cipher { get; }
 
         /// <summary>
         /// Intitialization Vector
@@ -41,6 +43,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
         /// <summary>
         /// Initialize the Cipher
         /// </summary>
+        /// 
         /// <param name="Encryptor">Cipher is used for encryption, false to decrypt</param>
         /// <param name="Transform">Underlying encryption engine</param>
         /// <param name="KeyParam">Cipher key and Vector</param>
@@ -49,6 +52,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
         /// <summary>
         /// Transform a block of bytes.
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="Output">Encrypted bytes</param>
         void Transform(byte[] Input, byte[] Output);
@@ -56,6 +60,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
         /// <summary>
         /// Transform a block of bytes within an array.
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="InOffset">Offset with the Input array</param>
         /// <param name="Output">Encrypted bytes</param>
@@ -63,7 +68,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
         void Transform(byte[] Input, int InOffset, byte[] Output, int OutOffset);
 
         /// <summary>
-        /// Dispose of this class
+        /// Dispose of this class, and dependant resources
         /// </summary>
         void Dispose();
     }

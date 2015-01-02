@@ -1,39 +1,50 @@
-﻿using System;
+﻿#region Directives
+using System;
 using VTDev.Libraries.CEXEngine.Crypto.Generators;
 using VTDev.Libraries.CEXEngine.Crypto.Macs;
+#endregion
 
-#region About
-/// Permission is hereby granted, free of charge, to any person obtaining
+#region License Information
+/// <remarks>
+/// <para>Permission is hereby granted, free of charge, to any person obtaining
 /// a copy of this software and associated documentation files (the
 /// "Software"), to deal in the Software without restriction, including
 /// without limitation the rights to use, copy, modify, merge, publish,
 /// distribute, sublicense, and/or sell copies of the Software, and to
 /// permit persons to whom the Software is furnished to do so, subject to
-/// the following conditions:
+/// the following conditions:</para>
 /// 
-/// The copyright notice and this permission notice shall be
-/// included in all copies or substantial portions of the Software.
+/// <para>The copyright notice and this permission notice shall be
+/// included in all copies or substantial portions of the Software.</para>
 /// 
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+/// <para>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 /// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 /// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 /// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 /// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 /// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-/// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-///
-/// Based in part on the Twofish block cipher designed by Bruce Schneier, John Kelsey, 
+/// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</para>
+#endregion
+
+#region Class Notes
+/// <para><description>Principal Algorithms:</description>
+/// Portions of this cipher based on the Rijndael block cipher designed by Joan Daemen and Vincent Rijmen:
+/// Rijndael <see cref="http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf">Specification</see>.
+/// 
+/// <para>Portions of this cipher based on the Twofish block cipher designed by Bruce Schneier, John Kelsey, 
 /// Doug Whiting, David Wagner, Chris Hall, and Niels Ferguson.
-/// Twofish white paper: https://www.schneier.com/paper-twofish-paper.pdf
+/// Twofish: <see cref="https://www.schneier.com/paper-twofish-paper.pdf">Specification</see>.</para>
 /// 
-/// Based in part on the Rijndael cipher written by Joan Daemen and Vincent Rijmen.
-/// Rijndael Specification: http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf
+/// <para><description>Guiding Publications:</description>
+/// AES specification <see cref="http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf">Fips 197</see>.</para>
 /// 
-/// Portions of this code based on the Mono RijndaelManagedTransform class:
-/// https://github.com/mono/mono/blob/effa4c07ba850bedbe1ff54b2a5df281c058ebcb/mcs/class/corlib/System.Security.Cryptography/RijndaelManagedTransform.cs
-/// Portions of this code also based on Bouncy Castle Java release 1.51:
-/// http://bouncycastle.org/latest_releases.html
+/// <para><description>Code Base Guides:</description>
+/// Portions of this code based on the Mono 
+/// <see cref="https://github.com/mono/mono/blob/effa4c07ba850bedbe1ff54b2a5df281c058ebcb/mcs/class/corlib/System.Security.Cryptography/RijndaelManagedTransform.cs">RijndaelManagedTransform</see> class.
+/// Portions of this code also based on the Bouncy Castle Java 
+/// <see cref="http://bouncycastle.org/latest_releases.html">Release 1.51</see>.</para>
 /// 
+/// <para><description>Implementation Details:</description>
 /// A stream cipher implementation based on the Twofish and Rijndael block ciphers,
 /// using HKDF with a SHA512 HMAC for expanded key generation.
 /// Merges both diffusion engines during rounds processing.
@@ -44,17 +55,35 @@ using VTDev.Libraries.CEXEngine.Crypto.Macs;
 /// The number of Diffusion Rounds are configuarable.
 /// Valid Rounds assignments are 16, 18, 20, 22, 24, 26, 28, 30 and 32, default is 16.
 /// Written by John Underhill, December 11, 2014
-/// contact: steppenwolfe_2000@yahoo.com
+/// contact: steppenwolfe_2000@yahoo.com</para>
+/// </remarks>
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 {
-    /// Fusion: Twofish Rijndael Merged
-    /// Minimum key size is 192 bytes.
-    /// Valid Key sizes are 64 + multiples of 128 bytes (IKm + Salt).
-    /// Valid block sizes is 16 byte wide.
-    /// The number of Diffusion Rounds are configuarable.
-    /// Valid Rounds assignments are 16, 18, 20, 22, 24, 26, 28, 30 and 32, default is 16.
+    /// <summary>
+    /// Fusion: An implementation of the Twofish and Rijndael Merged ciphers.
+    /// 
+    /// <list type="bullet">
+    /// <item><description>Minimum key size is 192 bytes.</description></item>
+    /// <item><description>Valid Key sizes are 64 + multiples of 128 bytes (IKm + Salt).</description></item>
+    /// <item><description>Valid block size is 16 bytes wide.</description></item>
+    /// <item><description>Valid Rounds assignments are 16, 18, 20, 22, 24, 26, 28, 30 and 32, default is 16.</description></item>
+    /// </list>
+    /// 
+    /// <example>
+    /// <description>Example using an <c>IStreamCipher</c> interface:</description>
+    /// <code>
+    /// using (IStreamCipher cipher = new Fusion())
+    /// {
+    ///     // initialize for encryption
+    ///     cipher.cipher(new KeyParams(Key, IV));
+    ///     // encrypt a block
+    ///     cipher.Transform(Input, Output);
+    /// }
+    /// </code>
+    /// </example>
+    /// </summary>
     public class Fusion : IStreamCipher, IDisposable
     {
         #region Constants
@@ -91,7 +120,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         #region Properties
         /// <summary>
-        /// Get: Key has been expanded
+        /// Get: Cipher is ready to transform data
         /// </summary>
         public bool IsInitialized
         {
@@ -117,17 +146,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         /// <summary>
         /// Get: Available Encryption Key Sizes in bits (192, 320, 448, 576 bytes)
         /// </summary>
-        public static Int32[] KeySizes
+        public static Int32[] LegalKeySizes
         {
             get { return new Int32[] { 1536, 2560, 3584, 4608 }; }
-        }
-
-        /// <summary>
-        /// Get: Minimum input size to trigger parallel processing
-        /// </summary>
-        public int MinParallelSize
-        {
-            get { return MIN_PARALLEL; }
         }
 
         /// <summary>
@@ -139,6 +160,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         }
 
         /// <summary>
+        /// Get: Minimum input size to trigger parallel processing
+        /// </summary>
+        public int MinParallelSize
+        {
+            get { return MIN_PARALLEL; }
+        }
+
+        /// <summary>
         /// Get: Cipher name
         /// </summary>
         public string Name
@@ -146,13 +175,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
             get { return "Fusion"; }
         }
 
-        /// <summary>
+        /// <remarks>
         /// Processor count
-        /// </summary>
+        /// </remarks>
         private int ProcessorCount { get; set; }
         #endregion
 
         #region Constructor
+        /// <summary>
+        /// Initialize the class
+        /// </summary>
+        /// 
+        /// <param name="Rounds">Number of diffusion rounds. The <see cref="LegalRounds"/> property contains available sizes.</param>
+        /// 
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid rounds count is chosen.</exception>
         public Fusion(int Rounds = DEFAULT_ROUNDS)
         {
             if (Rounds != 16 && Rounds != 18 && Rounds != 20 && Rounds != 22 && Rounds != 24 && Rounds != 26 && Rounds != 28 && Rounds != 30 && Rounds != 32)
@@ -172,18 +208,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         /// <summary>
         /// Initialize the Cipher.
         /// </summary>
-        /// <param name="Encryption">Using Encryption or Decryption mode</param>
-        /// <param name="KeyParam">Contains cipher key, valid sizes are: 128, 192, 256 and 512 bytes</param>
+        /// 
+        /// <param name="KeyParam">Cipher key container. The <see cref="LegalKeySizes"/> property contains valid sizes.</param>
+        /// 
+        /// <exception cref="System.ArgumentNullException">Thrown if a null key or iv is used.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid key or iv size is used.</exception>
         public void Init(KeyParams KeyParam)
         {
             if (KeyParam.Key == null)
-                throw new ArgumentOutOfRangeException("Invalid key! Key can not be null.");
+                throw new ArgumentNullException("Invalid key! Key can not be null.");
             if (KeyParam.Key.Length < MIN_KEYSIZE)
                 throw new ArgumentOutOfRangeException("Invalid key size! Key must be at least " + MIN_KEYSIZE + " bytes (" + MIN_KEYSIZE * 8 + " bit).");
             if ((KeyParam.Key.Length - IKM_SIZE) % SALT_SIZE != 0)
                 throw new ArgumentOutOfRangeException("Invalid key size! Key must be (length - IKm length: " + IKM_SIZE + " bytes) + divisible of SHA512 block size (128 bytes).");
             if (KeyParam.IV == null)
-                throw new ArgumentOutOfRangeException("Invalid IV! IV can not be null.");
+                throw new ArgumentNullException("Invalid IV! IV can not be null.");
             if (KeyParam.IV.Length != BLOCK_SIZE)
                 throw new ArgumentOutOfRangeException("Invalid IV size! IV must be at exactly " + BLOCK_SIZE + " bytes (" + BLOCK_SIZE * 8 + " bit).");
 
@@ -193,10 +232,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
 
         /// <summary>
-        /// Encrypt/Decrypt an array of bytes
+        /// Encrypt/Decrypt an array of bytes.
+        /// <para><see cref="Init(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Input bytes, plain text for encryption, cipher text for decryption</param>
         /// <param name="Output">Output bytes, array of at least equal size of input that receives processed bytes</param>
+        /// 
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an input and output arrays do not align or are too small.</exception>
         public void Transform(byte[] Input, byte[] Output)
         {
             if (Output.Length < 1)
@@ -254,13 +297,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         }
 
         /// <summary>
-        /// Transform a block of bytes within an array.
-        /// Init must be called before this method can be used.
+        /// Encrypt/Decrypt an array of bytes.
+        /// <para><see cref="Init(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="InOffset">Offset within the Input array</param>
         /// <param name="Output">Encrypted bytes</param>
         /// <param name="OutOffset">Offset within the Output array</param>
+        /// 
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if input array is smaller then the ouput array.</exception>
         public void Transform(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
             int size = Output.Length - OutOffset;
@@ -279,14 +325,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         }
 
         /// <summary>
-        /// Transform a block of bytes within an array.
-        /// Init must be called before this method can be used.
+        /// Encrypt/Decrypt an array of bytes.
+        /// <para><see cref="Init(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="InOffset">Offset within the Input array</param>
         /// <param name="Length">Number of bytes to process</param>
         /// <param name="Output">Encrypted bytes</param>
         /// <param name="OutOffset">Offset within the Output array</param>
+        /// 
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if input array is smaller then the ouput array.</exception>
         public void Transform(byte[] Input, int InOffset, int Length, byte[] Output, int OutOffset)
         {
             if (Input.Length - InOffset < Length)
@@ -304,13 +353,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         #endregion
 
         #region Random Generator
-        /// <summary>
+        /// <remarks>
         /// Generate an array of p-rand bytes
-        /// </summary>
-        /// <param name="Size">Size of expected output</param>
-        /// <param name="Counter">Counter 1</param>
-        /// <param name="Ctr2">Counter 2</param>
-        /// <returns>Random array of bytes</returns>
+        /// </remarks>
         private byte[] Generate(Int32 Size, byte[] Counter)
         {
             // align to upper divisible of block size
@@ -344,22 +389,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
             return outputData;
         }
 
-        /// <summary>
+        /// <remarks>
         /// Incremental counter with carry
-        /// </summary>
-        /// <param name="Counter">Counter</param>
+        /// </remarks>
         private void Increment(byte[] Counter)
         {
             int i = Counter.Length;
             while (--i >= 0 && ++Counter[i] == 0) { }
         }
 
-        /// <summary>
+        /// <remarks>
         /// Increase a byte array by a numerical value
-        /// </summary>
-        /// <param name="Counter">Original byte array</param>
-        /// <param name="Size">Number to increase by</param>
-        /// <returns>Array with increased value [byte[]]</returns>
+        /// </remarks>
         private byte[] Increase(byte[] Counter, int Size)
         {
             int carry = 0;

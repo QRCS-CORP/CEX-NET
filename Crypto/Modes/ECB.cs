@@ -1,11 +1,63 @@
-﻿using System;
+﻿#region Directives
+using System;
 using VTDev.Libraries.CEXEngine.Crypto.Ciphers;
+#endregion
+
+#region License Information
+/// <remarks>
+/// <para>Permission is hereby granted, free of charge, to any person obtaining
+/// a copy of this software and associated documentation files (the
+/// "Software"), to deal in the Software without restriction, including
+/// without limitation the rights to use, copy, modify, merge, publish,
+/// distribute, sublicense, and/or sell copies of the Software, and to
+/// permit persons to whom the Software is furnished to do so, subject to
+/// the following conditions:</para>
+/// 
+/// <para>The copyright notice and this permission notice shall be
+/// included in all copies or substantial portions of the Software.</para>
+/// 
+/// <para>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+/// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+/// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+/// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+/// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+/// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+/// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</para>
+#endregion
+
+#region Class Notes
+/// <para><description>Guiding Publications:</description>
+/// NIST: <see cref="http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf">SP800-38A</see>.
+/// 
+/// <para><description>Code Base Guides:</description>
+/// Portions of this code based on the Bouncy Castle Java 
+/// <see cref="http://bouncycastle.org/latest_releases.html">Release 1.51</see>.</para>
+/// 
+/// <para><description>Implementation Details:</description>
+/// An implementation of an Electronic CodeBook Mode (ECB).
+/// Written by John Underhill, September 24, 2014
+/// contact: steppenwolfe_2000@yahoo.com</para>
+/// </remarks>
+#endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Modes
 {
     /// <summary>
     /// ECB mode (not recommended)
-    /// </summary>
+    /// 
+    /// <example>
+    /// <description>Example using an <c>ICipherMode</c> interface:</description>
+    /// <code>
+    /// using (ICipherMode mode = new ECB(new RDX()))
+    /// {
+    ///     // initialize for encryption
+    ///     mode.Init(true, new KeyParams(Key));
+    ///     // encrypt a block
+    ///     mode.Transform(Input, Output);
+    /// }
+    /// </code>
+    /// </example>
+    /// </summary> 
     public class ECB : ICipherMode, IDisposable
     {
         #region Fields
@@ -18,7 +70,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
 
         #region Properties
         /// <summary>
-        /// Unit block size of internal cipher.
+        /// Get: Unit block size of internal cipher.
         /// </summary>
         public int BlockSize
         {
@@ -26,16 +78,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
         }
 
         /// <summary>
-        /// Underlying Cipher
+        /// Get: Underlying Cipher
         /// </summary>
         public IBlockCipher Cipher
         {
             get { return _blockCipher; }
-            set { _blockCipher = value; }
+            private set { _blockCipher = value; }
         }
 
         /// <summary>
-        /// Used as encryptor, false for decryption. 
+        /// Get: Used as encryptor, false for decryption. 
         /// </summary>
         public bool IsEncryption
         {
@@ -44,12 +96,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
         }
 
         /// <summary>
-        /// Uses parallel processing. 
+        /// Get: Uses parallel processing. 
         /// </summary>
         public bool IsParallel { get; set; }
 
         /// <summary>
-        /// Cipher name
+        /// Get: Cipher name
         /// </summary>
         public string Name
         {
@@ -57,7 +109,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
         }
 
         /// <summary>
-        /// Intitialization Vector
+        /// Get/Set: Intitialization Vector
         /// </summary>
         public byte[] Vector
         {
@@ -70,6 +122,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
         /// <summary>
         /// Initialize the Cipher
         /// </summary>
+        /// 
         /// <param name="Cipher">Underlying encryption algorithm</param>
         public ECB(IBlockCipher Cipher)
         {
@@ -82,8 +135,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
         /// <summary>
         /// Initialize the Cipher
         /// </summary>
+        /// 
         /// <param name="Encryption">Cipher is used for encryption, false to decrypt</param>
         /// <param name="KeyParam">KeyParam containing key and vector</param>
+        /// 
+        /// <exception cref="System.ArgumentNullException">Thrown if key is null.</exception>
         public void Init(bool Encryption, KeyParams KeyParam)
         {
             if (KeyParam.Key == null)
@@ -96,7 +152,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
 
         /// <summary>
         /// Transform a block of bytes.
-        /// Init must be called before this method can be used.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
         /// <param name="Input">Bytes to Encrypt/Decrypt</param>
         /// <param name="Output">Encrypted or Decrypted bytes</param>
@@ -110,8 +166,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
 
         /// <summary>
         /// Transform a block of bytes within an array.
-        /// Init must be called before this method can be used.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="InOffset">Offset with the Input array</param>
         /// <param name="Output">Encrypted bytes</param>
@@ -126,7 +183,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
 
         /// <summary>
         /// Decrypt a single block of bytes.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Encrypted bytes</param>
         /// <param name="Output">Decrypted bytes</param>
         public void DecryptBlock(byte[] Input, byte[] Output)
@@ -136,7 +195,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
 
         /// <summary>
         /// Decrypt a block of bytes within an array.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Encrypted bytes</param>
         /// <param name="InOffset">Offset with the Input array</param>
         /// <param name="Output">Decrypted bytes</param>
@@ -148,7 +209,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
 
         /// <summary>
         /// Encrypt a block of bytes.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="Output">Encrypted bytes</param>
         public void EncryptBlock(byte[] Input, byte[] Output)
@@ -158,7 +221,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
 
         /// <summary>
         /// Encrypt a block of bytes within an array.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="InOffset">Offset with the Input array</param>
         /// <param name="Output">Encrypted bytes</param>
@@ -171,7 +236,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Modes
 
         #region IDispose
         /// <summary>
-        /// Dispose of this class and the underlying cipher
+        /// Dispose of this class, and dependant resources
         /// </summary>
         public void Dispose()
         {

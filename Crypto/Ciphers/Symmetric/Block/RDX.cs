@@ -1,47 +1,75 @@
-﻿using System;
+﻿#region Directives
+using System;
+#endregion
 
-#region About
-/// Permission is hereby granted, free of charge, to any person obtaining
+#region License Information
+/// <remarks>
+/// <para>Permission is hereby granted, free of charge, to any person obtaining
 /// a copy of this software and associated documentation files (the
 /// "Software"), to deal in the Software without restriction, including
 /// without limitation the rights to use, copy, modify, merge, publish,
 /// distribute, sublicense, and/or sell copies of the Software, and to
 /// permit persons to whom the Software is furnished to do so, subject to
-/// the following conditions:
+/// the following conditions:</para>
 /// 
-/// The copyright notice and this permission notice shall be
-/// included in all copies or substantial portions of the Software.
+/// <para>The copyright notice and this permission notice shall be
+/// included in all copies or substantial portions of the Software.</para>
 /// 
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+/// <para>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 /// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 /// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 /// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 /// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 /// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-/// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+/// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</para>
+#endregion
+
+#region Class Notes
+/// <para><description>Principal Algorithms:</description>
+/// Cipher implementation based on the Rijndael block cipher designed by Joan Daemen and Vincent Rijmen:
+/// Rijndael <see cref="http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf">Specification</see>.</para>
 /// 
-/// Based on the Rijndael cipher written by Joan Daemen and Vincent Rijmen.
-/// Rijndael Specification: http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf
-/// AES specification Fips 197: http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
+/// <para><description>Guiding Publications:</description>
+/// AES specification document: <see cref="http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf">Fips 197</see>.</para>
 /// 
-/// Portions of this code based on the Mono RijndaelManagedTransform class:
-/// https://github.com/mono/mono/blob/effa4c07ba850bedbe1ff54b2a5df281c058ebcb/mcs/class/corlib/System.Security.Cryptography/RijndaelManagedTransform.cs
+/// <para><description>Code Base Guides:</description>
+/// Portions of this code based on the Mono 
+/// <see cref="https://github.com/mono/mono/blob/effa4c07ba850bedbe1ff54b2a5df281c058ebcb/mcs/class/corlib/System.Security.Cryptography/RijndaelManagedTransform.cs">RijndaelManagedTransform</see>
+/// class.</para>
 /// 
+/// <para><description>Implementation Details:</description>
 /// An extended implementation of the Rijndael encryption algorithm:
 /// Rijndael Extended (RDX)
 /// Valid Key sizes are 128, 192, 256, and 512 bit.
 /// Valid block sizes are 16 and 32 byte wide.
 /// Written by John Underhill, September 10, 2014
-/// contact: steppenwolfe_2000@yahoo.com
+/// contact: steppenwolfe_2000@yahoo.com</para>
+/// </remarks>
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 {
     /// <summary>
     /// RDX: An extended implementation of the Rijndael encryption algorithm.
-    /// Valid Key sizes are 128, 192, 256, and 512 bit.
-    /// Valid block sizes are 16 and 32 byte wide.
-    /// </summary>
+    /// 
+    /// <list type="bullet">
+    /// <item><description>Valid Key sizes are 128, 192, 256, and 512 bit.</description></item>
+    /// <item><description>Valid block sizes are 16 and 32 byte wide.</description></item>
+    /// </list>
+    /// 
+    /// <example>
+    /// <description>Example using an <c>ICipherMode</c> interface:</description>
+    /// <code>
+    /// using (ICipherMode mode = new CTR(new RDX()))
+    /// {
+    ///     // initialize for encryption
+    ///     mode.Init(true, new KeyParams(Key));
+    ///     // encrypt a block
+    ///     mode.Transform(Input, Output);
+    /// }
+    /// </code>
+    /// </example>
+    /// </summary> 
     public sealed class RDX : IBlockCipher, IDisposable
     {
         #region Constants
@@ -63,12 +91,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         #region Properties
         /// <summary>
-        /// Get/Set: Unit block size of internal cipher
+        /// Get: Unit block size of internal cipher
+        /// <para>Block size must be 16 or 32 bytes wide</para>
         /// </summary>
         public int BlockSize
         {
             get { return _blockSize; }
-            set { _blockSize = value; }
+            private set { _blockSize = value; }
         }
 
         /// <summary>
@@ -82,7 +111,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         }
 
         /// <summary>
-        /// Get: Key has been expanded
+        /// Get: Cipher is ready to transform data
         /// </summary>
         public bool IsInitialized
         {
@@ -91,9 +120,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         }
 
         /// <summary>
+        /// Get: Available block sizes for this cipher
+        /// </summary>
+        public static int[] LegalBlockSizes
+        {
+            get { return new int[] { 16, 32 }; }
+        }
+
+        /// <summary>
         /// Get: Available Encryption Key Sizes in bits
         /// </summary>
-        public static Int32[] KeySizes
+        public static Int32[] LegalKeySizes
         {
             get { return new Int32[] { 128, 192, 256, 512 }; }
         }
@@ -111,7 +148,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         /// <summary>
         /// Initialize the class
         /// </summary>
-        /// <param name="Block">Cipher input block size</param>
+        /// 
+        /// <param name="Block">Cipher input <see cref="BlockSize"/>. The <see cref="LegalBlockSizes"/> property contains available sizes.</param>
+        /// 
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid block size is chosen.</exception>
         public RDX(int Block = BLOCK16)
         {
             if (Block != BLOCK16 && Block != BLOCK32)
@@ -124,9 +164,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         #region Public Methods
         /// <summary>
         /// Decrypt a single block of bytes.
-        /// Init must be called with the Encryption flag set to false before this method can be used.
-        /// Input and Output must be at least BlockSize in length.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called with the Encryption flag set to <c>false</c> before this method can be used.
+        /// Input and Output must be at least <see cref="BlockSize"/> in length.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Encrypted bytes</param>
         /// <param name="Output">Decrypted bytes</param>
         public void DecryptBlock(byte[] Input, byte[] Output)
@@ -139,9 +180,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         /// <summary>
         /// Decrypt a block of bytes within an array.
-        /// Init must be called with the Encryption flag set to false before this method can be used.
-        /// Input and Output + Offsets must be at least BlockSize in length.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called with the Encryption flag set to <c>false</c> before this method can be used.
+        /// Input and Output array lengths - Offset must be at least <see cref="BlockSize"/> in length.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Encrypted bytes</param>
         /// <param name="InOffset">Offset within the Input array</param>
         /// <param name="Output">Decrypted bytes</param>
@@ -156,8 +198,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         /// <summary>
         /// Encrypt a block of bytes.
-        /// Init must be called with the Encryption flag set to true before this method can be used.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called with the Encryption flag set to <c>true</c> before this method can be used.
+        /// Input and Output array lengths must be at least <see cref="BlockSize"/> in length.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="Output">Encrypted bytes</param>
         public void EncryptBlock(byte[] Input, byte[] Output)
@@ -170,8 +214,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         /// <summary>
         /// Encrypt a block of bytes within an array.
-        /// Init must be called with the Encryption flag set to true before this method can be used.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called with the Encryption flag set to <c>true</c> before this method can be used.
+        /// Input and Output array lengths - Offset must be at least <see cref="BlockSize"/> in length.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="InOffset">Offset within the Input array</param>
         /// <param name="Output">Encrypted bytes</param>
@@ -187,16 +233,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
         /// <summary>
         /// Initialize the Cipher.
         /// </summary>
+        /// 
         /// <param name="Encryption">Using Encryption or Decryption mode</param>
-        /// <param name="KeyParam">Contains cipher key, valid sizes are: 128, 192, 256 and 512 bytes</param>
+        /// <param name="KeyParam">Cipher key container. The <see cref="LegalKeySizes"/> property contains valid sizes.</param>
+        /// 
+        /// <exception cref="System.ArgumentNullException">Thrown if a null key is used.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid key size is used.</exception>
         public void Init(bool Encryption, KeyParams KeyParam)
         {
             if (KeyParam.Key == null)
-                throw new ArgumentOutOfRangeException("Invalid key! Key can not be null.");
+                throw new ArgumentNullException("Invalid key! Key can not be null.");
             if (KeyParam.Key.Length != 16 && KeyParam.Key.Length != 24 && KeyParam.Key.Length != 32 && KeyParam.Key.Length != 64)
                 throw new ArgumentOutOfRangeException("Invalid key size! Valid sizes are 16, 24, 32, 64 bytes.");
-            if (BlockSize != 16 && BlockSize != 32)
-                throw new ArgumentOutOfRangeException("Invalid block size! Valid sizes are 16 and 32 bytes.");
 
             this.IsEncryption = Encryption;
             // expand the key
@@ -205,9 +253,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         /// <summary>
         /// Transform a block of bytes.
-        /// Init must be called before this method can be used.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called before this method can be used.
+        /// Input and Output array lengths must be at least <see cref="BlockSize"/> in length.</para>
         /// </summary>
-        /// <param name="Input">Bytes to Encrypt/Decrypt</param>
+        /// 
+        /// <param name="Input">Bytes to Encrypt or Decrypt</param>
         /// <param name="Output">Encrypted or Decrypted bytes</param>
         public void Transform(byte[] Input, byte[] Output)
         {
@@ -219,8 +269,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         /// <summary>
         /// Transform a block of bytes within an array.
-        /// Init must be called before this method can be used.
+        /// <para><see cref="Init(bool, KeyParams)"/> must be called before this method can be used.
+        /// Input and Output array lengths - Offset must be at least <see cref="BlockSize"/> in length.</para>
         /// </summary>
+        /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="InOffset">Offset within the Input array</param>
         /// <param name="Output">Encrypted bytes</param>
@@ -236,11 +288,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Ciphers
 
         #region Rijndael
         #region ExpandKey
-        /// <summary>
+        /// <remarks>
         /// Expand the key and set state variables
-        /// </summary>
-        /// <param name="Key">128, 192, 265, or 512 bit encryption key</param>
-        /// <param name="Encryption">Encrypt or decrypt</param>
+        /// </remarks>
         private UInt32[] ExpandKey(byte[] Key, bool Encryption)
         {
             int pos = 0;
