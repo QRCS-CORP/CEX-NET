@@ -5,40 +5,35 @@ using System;
 namespace VTDev.Libraries.CEXEngine.Crypto.Padding
 {
     /// <summary>
-    /// PKCS7 Padding
+    /// <h3>The PKCS7 Padding Scheme.</h3>
+    /// <para>PKCS7 as outlined in RFC 5652<cite>RFC 5652</cite></para>
     /// </summary>
-    public class PKCS7 : IPadding
+    public sealed class PKCS7 : IPadding
     {
-        #region Properties
-        /// <summary>
-        /// Get: Block size of Cipher
-        /// </summary>
-        public int BlockSize { get; set; }
+        #region Constants
+        private const string ALG_NAME = "PKCS7";
+        #endregion
 
+        #region Properties
         /// <summary>
         /// Get: Padding name
         /// </summary>
         public string Name
         {
-            get { return "PKCS7"; }
+            get { return ALG_NAME; }
         }
         #endregion
 
         #region Methods
-        /// <summary>
-        /// Initialize padding
-        /// </summary>
-        public void Init()
-        {
-        }
-
         /// <summary>
         /// Add padding to input array
         /// </summary>
         /// 
         /// <param name="Input">Array to modify</param>
         /// <param name="Offset">Offset into array</param>
-        public void AddPadding(byte[] Input, int Offset)
+        /// 
+        /// <returns>Length of padding</returns>
+        public int AddPadding(byte[] Input, int Offset)
         {
             byte code = (byte)(Input.Length - Offset);
 
@@ -47,6 +42,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Padding
                 Input[Offset] = code;
                 Offset++;
             }
+
+            return code;
         }
 
         /// <summary>

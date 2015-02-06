@@ -6,40 +6,34 @@ using System.Security.Cryptography;
 namespace VTDev.Libraries.CEXEngine.Crypto.Padding
 {
     /// <summary>
-    /// X923 Padding
+    /// <h3>The X.923 Padding Scheme.</h3>
     /// </summary>
-    public class X923 : IPadding
+    public sealed class X923 : IPadding
     {
-        #region Properties
-        /// <summary>
-        /// Get: Block size of Cipher
-        /// </summary>
-        public int BlockSize { get; set; }
+        #region Constants
+        private const string ALG_NAME = "X923";
+        #endregion
 
+        #region Properties
         /// <summary>
         /// Get: Padding name
         /// </summary>
         public string Name
         {
-            get { return "X923"; }
+            get { return ALG_NAME; }
         }
         #endregion
 
         #region Methods
-        /// <summary>
-        /// Initialize padding
-        /// </summary>
-        public void Init()
-        {
-        }
-
         /// <summary>
         /// Add padding to input array
         /// </summary>
         /// 
         /// <param name="Input">Array to modify</param>
         /// <param name="Offset">Offset into array</param>
-        public void AddPadding(byte[] Input, int Offset)
+        /// 
+        /// <returns>Length of padding</returns>
+        public int AddPadding(byte[] Input, int Offset)
         {
             byte code = (byte)(Input.Length - Offset);
             int len = (Input.Length - Offset) - 1;
@@ -50,6 +44,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Padding
 
             Buffer.BlockCopy(data, 0, Input, Offset, len);
             Input[Input.Length - 1] = code;
+
+            return code;
         }
 
         /// <summary>

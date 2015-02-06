@@ -6,19 +6,9 @@
     public interface IPadding
     {
         /// <summary>
-        /// Get: Block size of Cipher
-        /// </summary>
-        int BlockSize { get; set; }
-
-        /// <summary>
         /// Get: Padding name
         /// </summary>
         string Name { get; }
-
-        /// <summary>
-        /// Initialize padding
-        /// </summary>
-        void Init();
 
         /// <summary>
         /// Add padding to input array
@@ -26,7 +16,9 @@
         /// 
         /// <param name="Input">Array to modify</param>
         /// <param name="Offset">Offset into array</param>
-        void AddPadding(byte[] Input, int Offset);
+        /// 
+        /// <returns>Length of padding</returns>
+        int AddPadding(byte[] Input, int Offset);
 
         /// <summary>
         /// Get the length of padding in an array

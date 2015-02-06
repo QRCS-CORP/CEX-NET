@@ -5,40 +5,34 @@ using System;
 namespace VTDev.Libraries.CEXEngine.Crypto.Padding
 {
     /// <summary>
-    /// Zero Padding (Not Recommended)
+    /// <h3>The Zero Padding Scheme (Not Recommended).</h3>
     /// </summary>
-    public class ZeroPad : IPadding
+    public sealed class ZeroPad : IPadding
     {
-        #region Properties
-        /// <summary>
-        /// Get: Block size of Cipher
-        /// </summary>
-        public int BlockSize { get; set; }
+        #region Constants
+        private const string ALG_NAME = "ZeroPad";
+        #endregion
 
+        #region Properties
         /// <summary>
         /// Get: Padding name
         /// </summary>
         public string Name
         {
-            get { return "Zeros"; }
+            get { return ALG_NAME; }
         }
         #endregion
 
         #region Methods
-        /// <summary>
-        /// Initialize padding
-        /// </summary>
-        public void Init()
-        {
-        }
-
         /// <summary>
         /// Add padding to input array
         /// </summary>
         /// 
         /// <param name="Input">Array to modify</param>
         /// <param name="Offset">Offset into array</param>
-        public void AddPadding(byte[] Input, int Offset)
+        /// 
+        /// <returns>Length of padding</returns>
+        public int AddPadding(byte[] Input, int Offset)
         {
             byte code = (byte)0;
 
@@ -47,6 +41,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Padding
                 Input[Offset] = code;
                 Offset++;
             }
+
+            return (Input.Length - Offset);
         }
 
         /// <summary>
