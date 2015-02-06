@@ -151,7 +151,6 @@ In the three block ciphers presented here (Rijndael, Serpent, and Twofish), The 
 
 Let's look at a round of Serpent:
 
- Collapse | Copy Code
 R0 ^= _exKey[keyCtr++];
 R1 ^= _exKey[keyCtr++];
 R2 ^= _exKey[keyCtr++];
@@ -191,7 +190,6 @@ Super Ciphers have been around for a while, and there are a number of different 
 
 Let's look at two rounds of RSM:
 
- Collapse | Copy Code
 // serpent sbox and transform
 Sb0(ref R0, ref R1, ref R2, ref R3);
 LinearTransform(ref R0, ref R1, ref R2, ref R3);
