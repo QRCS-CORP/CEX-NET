@@ -1,5 +1,4 @@
-<h3>Introduction</h3>
-
+Introduction
 
 What follows is the product of my study of several encryption algorithms. I decided to write this library, out of a desire to learn more about them, and encryption in general. I have in the past adapted classes from popular libraries like Mono and Bouncy Castle, but this time I wanted to write my own implementations, ones that were optimized for the C# language, and possibly faster, and more flexible than these popular C# versions. As I was writing the base classes, I also began thinking about various attack vectors, and how they might be mitigated, and also how the existing primitives might be improved upon from a security perspective.
 It is important to note, that using the base ciphers with their original key sizes, output from those classes will be exactly the same as any other valid implementation of that cipher; RDX (Rijndael) with a 256 bit key is Rijndael, as TFX (Twofish) with a standard key size is Twofish, and SPX (Serpent) is a valid Serpent implementation. This is proven. The Tests section contains the most complete and authoritative test suites available for each of these ciphers. So if you choose to stick with standard key lengths, you can use configurations that have been thoroughly cryptanalyzed.
@@ -21,20 +20,20 @@ CEX is also available on GitHub as the CEX Project. The library API documentatio
 
 For a full featured implementation of these algorithms, including key management, authentication controls, anti-tampering measures, encrypted assets, a very cool interface, and many more features; check out the version on my website: CEX on vtdev.com.
 
-<h3>Library Components</h3>
+Library Components
 
 The library contains the following components, as it evolves, some will be added, some removed, and when possible, changes will be made to improve upon performance, security and documentation.
 
-<h3>Encryption Engines</h3>
+Encryption Engines
 
-<h4>Base Algorithms</h4>
+Base Algorithms
 
 The three base ciphers; Rijndael, Serpent, and Twofish have all underwent thorough testing to ensure that they align with valid implementations that use a smaller maximum key size. The same algorithms are used to transform data at any key size; only the key schedule itself has been extended, (a key schedule takes a small user key, and expands it into a larger working array, used in the rounds function to create a unique output). These changes to the key schedule, and a flexible rounds assignment, increase the potential security of the cipher, make it more difficult to cryptanalyze, and more resistant to brute force attacks.
 •RDX: (Rijndael) This is an implementation of the Rijndael algorithm used in AES, extended to a 512 bit key.
 •SPX:  (Serpent) An implementation of the Serpent encryption algorithm, extended to accept a 512 bit key.
 •TFX: (Twofish) An implementation of the Twofish encryption algorithm, extended to accept a 512 bit key.
 
-<h4>HX Ciphers: Hash based Key Schedules</h4>
+HX Ciphers: Hash based Key Schedules
 
 The HX Series Ciphers use the identical encryption and decryption algorithms (transforms), of the standard ciphers, the difference is that the key schedule has been replaced by a Hash based Key Derivation Function (HKDF). The HKDF (default) is powered by an SHA512 HMAC, and is one of the most cryptographically strong methods available to generate pseudo-random output. The HKDF based key schedule takes a minimum 192 bytes (1536 bits) of input as a user key when using SHA512, and uses that keying material to generate a cryptographically strong working key array. As of version 1.3, the digest engine that powers HKDF is now definable through the HX and M ciphers constructors KeyEngine parameter; so any of the implemented digests can be used to power the key schedule: Blake, Keccak, SHA-2, or Skein.
 
@@ -43,7 +42,7 @@ There are several advantages to using a hash based KDF; the stronger working key
 •SHX: Minimum (default digest engine) 1536 bit key, and up to 128 rounds of diffusion.
 •THX: Minimum (default digest engine) 1536 bit key, and up to 32 rounds of diffusion.
 
-<h4>Super Ciphers</h4>
+Super Ciphers
 
 These are merged ciphers; where two ciphers are combined during the rounds processing stage. There are a number of existing implementations that use this combined cipher technique, they either encrypt a file twice, each time using a different key and cipher, or use the combined output from counter encryptions to create a pseudo random key stream which is combined with the input to create the cipher-text. Both of these methods share the same weakness, called a ‘meet in the middle’ attack. This is where it may be theoretically possible to unwind both ciphers with little more than the computational effort required to break one alone. I got around this by ‘merging’ the ciphers within the transform function. For example, RSM combines the Rijndael and Serpent ciphers. In the rounds function, the input data undergoes a round of Rijndael, the product of that round is processed as a round of Serpent, then another round of Rijndael etc. So if set to 18 rounds, it processes the state with 18 rounds of Rijndael and 16 rounds of Serpent. This should effectively mitigate the meet in the middle attack, and make most forms of differential or linear analysis far more difficult.
 •RSM: Rijndael and Serpent merged. HKDF key scheduler and up to 42 rounds of diffusion.
