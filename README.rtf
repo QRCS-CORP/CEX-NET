@@ -7,17 +7,14 @@ Speed remains an important design criterion with this project. The CTR mode and 
 I definitely have some strong reservations about publishing this code, not the least of which is that it is likely to spawn a number of so called 'AES 512' copies by people who may not understand enough about the algorithms to evaluate, produce, or maintain a secure encryption software. It's kind of a quandary though, if I leave it on Github, no one will ever see it, if I publish it, chances are it could be used irresponsibly.. I would urge anyone considering using one of the extended algorithms to study the work, thoroughly evaluate the implementations, and make an informed choice.
 
 As for my part, I wrote these implementations based on well-known versions, and made as few changes to the ciphers as possible to extend the key size. I have confidence in the library itself, because I took care to test it every step of the way, and feel I am developing a good understanding of the cryptographic primitives used in its construction. This should however, be considered as what it was intended to be; experiments..
-
-I hope to expand this library in the future, as I continue my exploration of encryption technologies, and I welcome input from cryptographers and programmers. If you have a comment or concern, I'd be glad to hear from you. My goals include moving what I feel are the best and strongest implementations to a Java library.
-
+I hope to expand this library in the future, as I continue my exploration of encryption technologies, and I welcome input from cryptographers and programmers. 
+If you have a comment or concern, I'd be glad to hear from you. My goals include moving what I feel are the best and strongest implementations to a Java library.
 Version 1.3 is what I consider the first 'real' release of the library. By this I mean that many of the project objectives have been completed; the library is very easy to use, a documentation framework has been built, parallelization has been implemented where possible, and many of the primitives I wanted in the library have been added. There is a version 1.4 coming; where I will introduce some post-quantum asymmetric ciphers.. but from this point on the release should be stable, and I don't forsee a lot of breaking changes with future releases.
 
 Documentation has been added as an optional download with the project distribution, though the website link on the sample forms Help menu, or directly at: CEX Help.
-
 Before downloading the source files, it is your responsibility to check if these extended key lengths (512 bit and higher) are legal in your country. If you use this code, please do so responsibly and in accordance to law in your region.
 
 CEX is also available on GitHub as the CEX Project. The library API documentation can be accessed from the CEX Homepage, along with the latest releases of the library and example code.
-
 For a full featured implementation of these algorithms, including key management, authentication controls, anti-tampering measures, encrypted assets, a very cool interface, and many more features; check out the version on my website: CEX on vtdev.com.
 
 Library Components
