@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C2258BA9-5D43-45FC-BF32-250BE5104BBD}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>VTDev.Projects.CEX.Test</RootNamespace>
+    <AssemblyName>Test</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Debug\Test.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Release\Test.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Helper\Logger.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Tests\CipherTest\AesAvsTest.cs" />
+    <Compile Include="Tests\CipherTest\AesFipsTest.cs" />
+    <Compile Include="Tests\CipherTest\ChaChaTest.cs" />
+    <Compile Include="Tests\CipherTest\CipherModeTest.cs" />
+    <Compile Include="Tests\CipherTest\IOTest.cs" />
+    <Compile Include="Tests\CipherTest\ParallelModeTest.cs" />
+    <Compile Include="Tests\CipherTest\RijndaelTest.cs" />
+    <Compile Include="Tests\CipherTest\SalsaTest.cs" />
+    <Compile Include="Tests\CipherTest\SerpentTest.cs" />
+    <Compile Include="Tests\CipherTest\TwofishTest.cs" />
+    <Compile Include="Tests\DigestTest\BlakeTest.cs" />
+    <Compile Include="Tests\DigestTest\DigestStreamTest.cs" />
+    <Compile Include="Tests\DigestTest\KeccakTest.cs" />
+    <Compile Include="Tests\DigestTest\Sha2Test.cs" />
+    <Compile Include="Tests\DigestTest\SkeinTest.cs" />
+    <Compile Include="Tests\GeneratorTest\DgcDrbgTest.cs" />
+    <Compile Include="Tests\GeneratorTest\Pbkdf2Test.cs" />
+    <Compile Include="Tests\GeneratorTest\Pkcs5Test.cs" />
+    <Compile Include="Tests\ITest.cs" />
+    <Compile Include="Tests\MacTest\CMacTest.cs" />
+    <Compile Include="Tests\MacTest\HMacTest.cs" />
+    <Compile Include="Tests\MacTest\MacStreamTest.cs" />
+    <Compile Include="Tests\MacTest\VmpcMacTest.cs" />
+    <Compile Include="Tests\GeneratorTest\HkdfTest.cs" />
+    <Compile Include="Tests\PrngTest\SecureRandomTest.cs" />
+    <Compile Include="Tests\TestEventArgs.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Tests\Vectors\AESAVS\keyvect128.txt" />
+    <Content Include="Tests\Vectors\AESAVS\keyvect192.txt" />
+    <Content Include="Tests\Vectors\AESAVS\keyvect256.txt" />
+    <Content Include="Tests\Vectors\AESAVS\plainvect128.txt" />
+    <Content Include="Tests\Vectors\AESAVS\plainvect192.txt" />
+    <Content Include="Tests\Vectors\AESAVS\plainvect256.txt" />
+    <Content Include="Tests\Vectors\Counterpane\twofishcipher-128.txt" />
+    <Content Include="Tests\Vectors\Counterpane\twofishcipher-192.txt" />
+    <Content Include="Tests\Vectors\Counterpane\twofishcipher-256.txt" />
+    <Content Include="Tests\Vectors\Counterpane\twofishkey-128.txt" />
+    <Content Include="Tests\Vectors\Counterpane\twofishkey-192.txt" />
+    <Content Include="Tests\Vectors\Counterpane\twofishkey-256.txt" />
+    <Content Include="Tests\Vectors\Nessie\serpentcipher128.txt" />
+    <Content Include="Tests\Vectors\Nessie\serpentmonte1000-128.txt" />
+    <Content Include="Tests\Vectors\Nessie\serpentplain128.txt" />
+    <None Include="Tests\Vectors\Nessie\serpentplain256.txt" />
+    <None Include="Tests\Vectors\Nessie\serpentplain192.txt" />
+    <None Include="Tests\Vectors\Nessie\serpentmonte1000-256.txt" />
+    <None Include="Tests\Vectors\Nessie\serpentmonte1000-192.txt" />
+    <None Include="Tests\Vectors\Nessie\serpentmonte100-256.txt" />
+    <None Include="Tests\Vectors\Nessie\serpentmonte100-192.txt" />
+    <None Include="Tests\Vectors\Nessie\serpentmonte100-128.txt" />
+    <None Include="Tests\Vectors\Nessie\serpentkey256.txt" />
+    <None Include="Tests\Vectors\Nessie\serpentkey192.txt" />
+    <None Include="Tests\Vectors\Nessie\serpentkey128.txt" />
+    <None Include="Tests\Vectors\Nessie\serpentcipher256.txt" />
+    <None Include="Tests\Vectors\Nessie\serpentcipher192.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CEXEngine\CEXEngine.csproj">
+      <Project>{F63F1625-804A-431D-99A7-8D636B0766DE}</Project>
+      <Name>CEXEngine</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

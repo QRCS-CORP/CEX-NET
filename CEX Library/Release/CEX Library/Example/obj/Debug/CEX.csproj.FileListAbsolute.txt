@@ -1,0 +1,17 @@
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX\bin\Debug\CEX.exe
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX\bin\Debug\CEX.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX\obj\Debug\VTDev.Projects.CEX.FormMain.resources
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX\obj\Debug\VTDev.Projects.CEX.Properties.Resources.resources
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX\obj\Debug\CEX.csproj.GenerateResource.Cache
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX\obj\Debug\CEX.exe
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX\obj\Debug\CEX.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Free\bin\Debug\CEXFree.exe
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Free\bin\Debug\CEXFree.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Free\obj\Debug\VTDev.Projects.CEX.FormMain.resources
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Free\obj\Debug\VTDev.Projects.CEX.Properties.Resources.resources
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Free\obj\Debug\CEX.csproj.GenerateResource.Cache
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Free\obj\Debug\CEXFree.exe
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Free\obj\Debug\CEXFree.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Free\bin\Debug\CEXFree.exe.config
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Free\obj\Debug\VTDev.Projects.CEX.FormAbout.resources
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Free\obj\Debug\VTDev.Projects.CEX.FormTest.resources

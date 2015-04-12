@@ -1,0 +1,8 @@
+C:\Users\John\Documents\Visual Studio 2010\Projects\Evolution\bin\Debug\Evolution.exe
+C:\Users\John\Documents\Visual Studio 2010\Projects\Evolution\bin\Debug\Evolution.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\Evolution\obj\x86\Debug\Evolution.csproj.GenerateResource.Cache
+C:\Users\John\Documents\Visual Studio 2010\Projects\Evolution\obj\x86\Debug\Evolution.exe
+C:\Users\John\Documents\Visual Studio 2010\Projects\Evolution\obj\x86\Debug\Evolution.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\Evolution\obj\x86\Debug\Evolution.csprojResolveAssemblyReference.cache
+C:\Users\John\Documents\Visual Studio 2010\Projects\Evolution\obj\x86\Debug\VTDev.Projects.Evolution.Properties.Resources.resources
+C:\Users\John\Documents\Visual Studio 2010\Projects\Evolution\obj\x86\Debug\VTDev.Projects.Evolution.FormMain.resources

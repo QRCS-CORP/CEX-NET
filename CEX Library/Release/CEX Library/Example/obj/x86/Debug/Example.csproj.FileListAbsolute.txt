@@ -1,0 +1,30 @@
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEX Free\obj\x86\Debug\Example.csprojResolveAssemblyReference.cache
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEX Free\obj\x86\Debug\VTDev.Projects.CEX.FormAbout.resources
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEX Free\obj\x86\Debug\VTDev.Projects.CEX.FormMain.resources
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEX Free\obj\x86\Debug\VTDev.Projects.CEX.FormSpeedTest.resources
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEX Free\obj\x86\Debug\Example.csproj.GenerateResource.Cache
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEX Free\obj\x86\Debug\CEXFree.exe
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEX Free\obj\x86\Debug\CEXFree.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEX Free\obj\x86\Debug\VTDev.Projects.CEX.Properties.Resources.resources
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEX Free\bin\Debug\CEXFree.exe.config
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEX Free\bin\Debug\CEXFree.exe
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEX Free\bin\Debug\CEXFree.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEX Free\bin\Debug\CEXEngine.dll
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEX Free\bin\Debug\CEXEngine.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEX Free\bin\Debug\CEXEngine.xml
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Example\bin\Debug\CEXFree.exe.config
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Example\obj\x86\Debug\CEXFree.exe
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Example\obj\x86\Debug\CEXFree.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Example\bin\Debug\CEXFree.exe
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Example\bin\Debug\CEXFree.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Example\bin\Debug\CEXEngine.dll
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Example\bin\Debug\CEXEngine.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Example\bin\Debug\CEXEngine.xml
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Example\obj\x86\Debug\Example.csprojResolveAssemblyReference.cache
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Example\obj\x86\Debug\VTDev.Projects.CEX.FormAbout.resources
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Example\obj\x86\Debug\VTDev.Projects.CEX.FormMain.resources
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Example\obj\x86\Debug\VTDev.Projects.CEX.FormSpeedTest.resources
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Example\obj\x86\Debug\VTDev.Projects.CEX.Properties.Resources.resources
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Example\obj\x86\Debug\Example.csproj.GenerateResource.Cache
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library Saved\CEXv13-noexe\CEX Library\Example\bin\Debug\CEXFree.exe.config
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library Saved\CEXv13-noexe\CEX Library\Example\obj\x86\Debug\CEXFree.pdb

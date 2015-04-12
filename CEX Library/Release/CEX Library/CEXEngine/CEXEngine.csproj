@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{F63F1625-804A-431D-99A7-8D636B0766DE}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>VTDev.Libraries.CEXEngine</RootNamespace>
+    <AssemblyName>CEXEngine</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Debug\CEXEngine.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+    <DocumentationFile>bin\x86\Debug\CEXEngine.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Release\CEXEngine.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Crypto\Cipher\Symmetric\Stream\ChaCha.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Stream\DCS.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Stream\Fusion.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\IBlockCipher.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Stream\IStreamCipher.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\RDX.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\RHX.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\RSM.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\RSX.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Stream\Salsa20.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\SHX.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\SPX.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\TFX.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\THX.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\TSM.cs" />
+    <Compile Include="Crypto\Digest\Blake256.cs" />
+    <Compile Include="Crypto\Digest\Blake512.cs" />
+    <Compile Include="Crypto\Digest\IDigest.cs" />
+    <Compile Include="Crypto\Digest\SHA256.cs" />
+    <Compile Include="Crypto\Digest\Keccak.cs" />
+    <Compile Include="Crypto\Digest\SHA512.cs" />
+    <Compile Include="Crypto\Digest\Skein1024.cs" />
+    <Compile Include="Crypto\Digest\Skein256.cs" />
+    <Compile Include="Crypto\Digest\Skein512.cs" />
+    <Compile Include="Crypto\Helper\KeyFactory.cs" />
+    <Compile Include="Crypto\Helper\KeyHeader.cs" />
+    <Compile Include="Crypto\Helper\MessageHeader.cs" />
+    <Compile Include="Crypto\Mac\CMAC.cs" />
+    <Compile Include="Crypto\Mac\VMPCMAC.cs" />
+    <Compile Include="Crypto\Padding\ISO7816.cs" />
+    <Compile Include="Crypto\Padding\TBC.cs" />
+    <Compile Include="Crypto\Prng\BBSG.cs" />
+    <Compile Include="Crypto\Generator\DGCDRBG.cs" />
+    <Compile Include="Crypto\Prng\CCG.cs" />
+    <Compile Include="Crypto\Prng\IRandom.cs" />
+    <Compile Include="Crypto\Prng\CSPRng.cs" />
+    <Compile Include="Crypto\Prng\MODEXPG.cs" />
+    <Compile Include="Crypto\Prng\QCG1.cs" />
+    <Compile Include="Crypto\Prng\QCG2.cs" />
+    <Compile Include="Crypto\Prng\SecureRandom.cs" />
+    <Compile Include="Crypto\Generator\CTRDRBG.cs" />
+    <Compile Include="Crypto\Generator\HKDF.cs" />
+    <Compile Include="Crypto\Generator\IGenerator.cs" />
+    <Compile Include="Crypto\Helper\KeyGenerator.cs" />
+    <Compile Include="Crypto\Numeric\BigInteger.cs" />
+    <Compile Include="Crypto\Mode\OFB.cs" />
+    <Compile Include="Crypto\Process\CipherStream.cs" />
+    <Compile Include="Crypto\Process\DigestStream.cs" />
+    <Compile Include="Crypto\Process\MacStream.cs" />
+    <Compile Include="Queue\JitterQueue.cs" />
+    <Compile Include="Utility\Compare.cs" />
+    <Compile Include="Utility\Compression.cs" />
+    <Compile Include="Crypto\Helper\Enums.cs" />
+    <Compile Include="Crypto\Helper\KeyParams.cs" />
+    <Compile Include="Queue\WaitQueue.cs" />
+    <Compile Include="Crypto\Mac\HMAC.cs" />
+    <Compile Include="Crypto\Mac\IMac.cs" />
+    <Compile Include="Crypto\Mac\SHA256HMAC.cs" />
+    <Compile Include="Crypto\Mac\SHA512HMAC.cs" />
+    <Compile Include="Crypto\Mode\CBC.cs" />
+    <Compile Include="Crypto\Mode\CFB.cs" />
+    <Compile Include="Crypto\Mode\CTR.cs" />
+    <Compile Include="Crypto\Mode\ECB.cs" />
+    <Compile Include="Crypto\Mode\ICipherMode.cs" />
+    <Compile Include="Crypto\Padding\IPadding.cs" />
+    <Compile Include="Crypto\Padding\PKCS7.cs" />
+    <Compile Include="Crypto\Padding\X923.cs" />
+    <Compile Include="Crypto\Padding\ZeroPad.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Security\SecureDelete.cs" />
+    <Compile Include="Utility\FileUtilities.cs" />
+    <Compile Include="Utility\Hex.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Crypto\Cipher\Asymmetric\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bibliography.xml">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

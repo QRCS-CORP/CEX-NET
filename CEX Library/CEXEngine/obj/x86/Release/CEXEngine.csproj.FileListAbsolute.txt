@@ -1,0 +1,4 @@
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEXEngine\bin\x86\Release\CEXEngine.dll
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEXEngine\bin\x86\Release\CEXEngine.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEXEngine\obj\x86\Release\CEXEngine.dll
+C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEXEngine\obj\x86\Release\CEXEngine.pdb
