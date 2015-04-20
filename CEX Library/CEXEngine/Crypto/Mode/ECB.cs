@@ -126,6 +126,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mode
         }
 
         /// <summary>
+        /// Get: The current state of the initialization Vector
+        /// </summary>
+        public byte[] IV
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
         /// Get: Cipher name
         /// </summary>
         public string Name

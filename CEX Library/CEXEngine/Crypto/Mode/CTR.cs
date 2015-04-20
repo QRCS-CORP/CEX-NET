@@ -158,6 +158,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mode
         }
 
         /// <summary>
+        /// Get: The current state of the initialization Vector
+        /// </summary>
+        public byte[] IV
+        {
+            get { return (byte[])_ctrVector.Clone(); }
+        }
+
+        /// <summary>
         /// Get/Set: Parallel block size. Must be a multiple of <see cref="ParallelMinimumSize"/>.
         /// </summary>
         /// 

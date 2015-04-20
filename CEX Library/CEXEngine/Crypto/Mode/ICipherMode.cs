@@ -31,6 +31,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mode
         bool IsInitialized { get; }
 
         /// <summary>
+        /// Get: The current state of the initialization Vector
+        /// </summary>
+        byte[] IV { get; }
+
+        /// <summary>
         /// Cipher name
         /// </summary>
         string Name { get; }

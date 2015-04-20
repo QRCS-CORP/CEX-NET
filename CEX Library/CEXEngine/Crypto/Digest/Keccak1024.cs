@@ -41,7 +41,8 @@ using System;
 namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 {
     /// <summary>
-    /// <h3>Keccak512: An implementation of the SHA-3 Keccak digest.</h3>
+    /// <h3>Keccak1024: An implementation of the SHA-3 Keccak digest.</h3>
+    /// <h4>Note: Experimental! may need future adjustments</h4>
     /// <para>SHA-3 competition winner<cite>SHA-3 Standardization</cite>: The Keccak<cite>Keccak</cite> digest</para>
     /// </summary>
     /// 
@@ -160,14 +161,26 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="DigestSize">Digest return size in bits</param>
         public Keccak1024(int DigestSize = 1024)
         {
-            // test for legal sizes; default at 512
+            // test for legal sizes
             if (DigestSize == 768)
                 _digestSize = 768 / 8;
             else
                 _digestSize = 1024 / 8;
-            // +security/size = smaller blocks, more processing
-            // 32=136, 64=72, 96=54, 128=40
-            _blockSize = _digestSize == 128 ? 40 : 54;
+
+            // Note Apr/2015: +security/size = smaller blocks, more processing
+            // I'll have to re-examine the docs, other changes may be required..
+            // http://eprint.iacr.org/2010/285.pdf
+            // http://csrc.nist.gov/publications/drafts/fips-202/fips_202_draft.pdf
+            // http://keccak.noekeon.org/specs_summary.html
+            // given that internal size 'c' is not representative of likely input dimension,
+            // and that this will be specifically purposed to an IGF, simply increasing
+            // the rate 'r' of permutations via the decreased block size should apply an increased security,
+            // while keeping an acceptable input size, (and one that correlates as a multiple of SHA-2 which 
+            // is also desired given the target structure). Since the ntru/mceliece implementations are 
+            // intended as n2n authenticators, (rather than a server technology), speed is also less a concern,
+            // as this will be used in 1-time communications connections between nodes j.u.
+            _blockSize = _digestSize == 128 ? 32 : 48;
+
             Initialize();
         }
 

@@ -55,11 +55,6 @@ namespace VTDev.Projects.CEX
         public FormMain()
         {
             InitializeComponent();
-            int[] a1 = new int[100];
-            for (int i = 0; i < 100; i++)
-                a1[i] = i;
-
-            a1.Shuffle();
         }
         #endregion
 

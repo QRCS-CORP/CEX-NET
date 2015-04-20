@@ -150,6 +150,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mode
         }
 
         /// <summary>
+        /// Get: The current state of the initialization Vector
+        /// </summary>
+        public byte[] IV
+        {
+            get { return (byte[])_cbcIv.Clone(); }
+        }
+
+        /// <summary>
         /// Get: Cipher name
         /// </summary>
         public string Name
