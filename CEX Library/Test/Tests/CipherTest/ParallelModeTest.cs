@@ -1,10 +1,10 @@
 ﻿#region Directives
 using System;
 using System.Security.Cryptography;
-using VTDev.Libraries.CEXEngine.Crypto;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block;
-using VTDev.Libraries.CEXEngine.Crypto.Mode;
-using VTDev.Libraries.CEXEngine.Utility;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Tools;
 #endregion
 
 namespace VTDev.Projects.CEX.Test.Tests.CipherTest

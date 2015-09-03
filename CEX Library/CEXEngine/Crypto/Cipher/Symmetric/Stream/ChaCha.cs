@@ -1,5 +1,7 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
@@ -34,7 +36,7 @@ using System;
 // ChaCha20+
 // An implementation based on the ChaCha stream cipher,
 // using an extended key size, and higher variable rounds assignment.
-// Valid Key sizes are 128, 256 and 384 (16, 32 and 48 bytes).
+// Valid Key sizes are 128 and 256 (16 and 32 bytes).
 // Valid rounds are 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28 and 30.
 // Written by John Underhill, October 21, 2014
 // contact: develop@vtdev.com
@@ -43,8 +45,8 @@ using System;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
 {
     /// <summary>
-    /// <h3>ChaCha+: A ChaCha stream cipher implementation.</h3>
-    /// <para>A ChaCha cipher extended to use up to a 384 bit key, and up to 30 rounds of diffusion.</para>
+    /// <h3>ChaCha+: A parallelized ChaCha stream cipher implementation.</h3>
+    /// <para>A ChaCha cipher extended to use up to 30 rounds.</para>
     /// </summary>
     /// 
     /// <example>
@@ -63,12 +65,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
     /// <revisionHistory>
     /// <revision date="2014/11/14" version="1.2.0.0">Initial release</revision>
     /// <revision date="2015/01/23" version="1.3.0.0">Secondary release; updates to layout and documentation</revision>
+    /// <revision date="2015/06/14" version="1.4.0.0">Added parallel processing</revision>
+    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
     /// </revisionHistory>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
     /// <list type="bullet">
-    /// <item><description>Valid Key sizes are 128, 256 and 384 (16, 32 and 48 bytes).</description></item>
+    /// <item><description>Valid Key sizes are 128 and 256 (16 and 32 bytes).</description></item>
     /// <item><description>Block size is 64 bytes wide.</description></item>
     /// <item><description>Valid rounds are 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28 and 30.</description></item>
     /// </list>
@@ -85,30 +89,71 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
     /// <item><description>Inspired in part by the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see>.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class ChaCha : IStreamCipher, IDisposable
+    public sealed class ChaCha : IStreamCipher
     {
         #region Constants
         private const string ALG_NAME = "ChaCha";
-        private const int DEFAULT_ROUNDS = 20;
+        private const int ROUNDS20 = 20;
         private const int MAX_ROUNDS = 30;
         private const int MIN_ROUNDS = 8;
         private const int STATE_SIZE = 16;
         private const int VECTOR_SIZE = 8;
+        private const int BLOCK_SIZE = 64;
+        private const int PARALLEL_CHUNK = 1024;
+        private const int MAXALLOC_MB100 = 100000000;
+        private const int PARALLEL_DEFBLOCK = 64000;
+        private static readonly byte[] SIGMA = System.Text.Encoding.ASCII.GetBytes("expand 32-byte k");
+        private static readonly byte[] TAU = System.Text.Encoding.ASCII.GetBytes("expand 16-byte k");
         #endregion
 
         #region Fields
-        private Int32 _dfnRounds = DEFAULT_ROUNDS;
-        private byte[] _ftSigma = System.Text.Encoding.ASCII.GetBytes("expand 32-byte k");
-        private byte[] _ftTau = System.Text.Encoding.ASCII.GetBytes("expand 16-byte k");
+        private int[] _ctrVector = new int[2];
+        private byte[] _dstCode = null;
         private bool _isDisposed = false;
         private bool _isInitialized = false;
+        private bool _isParallel = false;
         private byte[] _keyStream = new byte[STATE_SIZE * 4];
-        private Int32 _ksIndex = 0;
+        private int _parallelBlockSize = PARALLEL_DEFBLOCK;
+        private Int32 _rndCount = ROUNDS20;
         private Int32[] _wrkBuffer = new Int32[STATE_SIZE];
-        private Int32[] _wrkState = new Int32[STATE_SIZE];
+        private Int32[] _wrkState = new Int32[14];
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Get the current counter value
+        /// </summary>
+        public long Counter
+        {
+            get { return ((long)_ctrVector[1] << 32) | (_ctrVector[0] & 0xffffffffL); }
+        }
+
+        /// <summary>
+        /// Get/Set: Sets the Nonce value in the initialization parameters (Tau-Sigma). 
+        /// <para>Must be set before <see cref="Initialize(KeyParams)"/> is called.
+        /// Changing this code will create a unique distribution of the cipher.
+        /// Code must be 16 bytes in length and sufficiently asymmetric (no more than 2 repeats, of 2 bytes, at a distance of 2 intervals).</para>
+        /// </summary>
+        /// 
+        /// <exception cref="CryptoSymmetricException">Thrown if an invalid distribution code is used</exception>
+        public byte[] DistributionCode
+        {
+            get { return _dstCode; }
+            set
+            {
+                if (value == null)
+                    throw new CryptoSymmetricException("ChaCha:DistributionCode", "Distribution Code can not be null!", new ArgumentNullException());
+                if (value.Length != 16)
+                    throw new CryptoSymmetricException("ChaCha:DistributionCode", "Distribution Code must be 16 bytes in length!", new ArgumentNullException());
+                if (!ValidCode(value))
+                    throw new CryptoSymmetricException("ChaCha:DistributionCode", "Use a random value; distribution code is not asymmetric!", new ArgumentNullException());
+                if (_isInitialized)
+                    throw new CryptoSymmetricException("ChaCha:DistributionCode", "Distribution Code must be set before cipher is initialized!", new ArgumentNullException());
+
+                _dstCode = value;
+            }
+        }
+
         /// <summary>
         /// Get: Cipher is ready to transform data
         /// </summary>
@@ -119,19 +164,34 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         }
 
         /// <summary>
-        /// Get: Available Encryption Key Sizes in bytes
+        /// Get/Set: Automatic processor parallelization
         /// </summary>
-        public static Int32[] LegalKeySizes
+        public bool IsParallel
         {
-            get { return new Int32[] { 16, 32, 48, 56 }; }
+            get { return _isParallel; }
+            set
+            {
+                if (ProcessorCount < 2)
+                    _isParallel = false;
+                else
+                    _isParallel = value;
+            }
         }
 
         /// <summary>
-        /// Get: Available number of rounds
+        /// Get: Available Encryption Key Sizes in bytes
         /// </summary>
-        public static Int32[] LegalRounds
+        public static int[] LegalKeySizes
         {
-            get { return new Int32[] { 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30 }; }
+            get { return new int[] { 16, 32 }; }
+        }
+
+        /// <summary>
+        /// Get: Available diffusion round assignments
+        /// </summary>
+        public static int[] LegalRounds
+        {
+            get { return new int[] { 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30 }; }
         }
 
         /// <summary>
@@ -143,18 +203,58 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         }
 
         /// <summary>
+        /// Get/Set: Parallel block size. Must be a multiple of <see cref="ParallelMinimumSize"/>.
+        /// </summary>
+        /// 
+        /// <exception cref="CryptoSymmetricException">Thrown if a parallel block size is not evenly divisible by ParallelMinimumSize, or  block size is less than ParallelMinimumSize or more than ParallelMaximumSize values</exception>
+        public int ParallelBlockSize
+        {
+            get { return _parallelBlockSize; }
+            set
+            {
+                if (value % ParallelMinimumSize != 0)
+                    throw new CryptoSymmetricException("ChaCha:ParallelBlockSize", String.Format("Parallel block size must be evenly divisible by ParallelMinimumSize: {0}", ParallelMinimumSize), new ArgumentException());
+                if (value > ParallelMaximumSize || value < ParallelMinimumSize)
+                    throw new CryptoSymmetricException("ChaCha:ParallelBlockSize", String.Format("Parallel block must be Maximum of ParallelMaximumSize: {0} and evenly divisible by ParallelMinimumSize: {1}", ParallelMaximumSize, ParallelMinimumSize), new ArgumentOutOfRangeException());
+
+                _parallelBlockSize = value;
+            }
+        }
+
+        /// <summary>
+        /// Get: Maximum input size with parallel processing
+        /// </summary>
+        public int ParallelMaximumSize
+        {
+            get { return MAXALLOC_MB100; }
+        }
+
+        /// <summary>
+        /// Get: The smallest parallel block size. Parallel blocks must be a multiple of this size.
+        /// </summary>
+        public int ParallelMinimumSize
+        {
+            get { return ProcessorCount * (STATE_SIZE * 4); }
+        }
+
+        /// <remarks>
+        /// Get: Processor count
+        /// </remarks>
+        private int ProcessorCount { get; set; }
+
+        /// <summary>
         /// Get: Number of rounds
         /// </summary>
         public int Rounds
         {
-            get { return _dfnRounds; }
-            private set { _dfnRounds = value; }
+            get { return _rndCount; }
+            private set { _rndCount = value; }
         }
 
         /// <summary>
         /// Get: Initialization vector size
         /// </summary>
-        public static int VectorSize
+        public int VectorSize
         {
             get { return VECTOR_SIZE; }
         }
@@ -164,26 +264,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// <summary>
         /// Initialize the class
         /// </summary>
-        public ChaCha()
-        {
-            _dfnRounds = DEFAULT_ROUNDS;
-        }
-
-        /// <summary>
-        /// Initialize the class
-        /// </summary>
         /// 
-        /// <param name="Rounds">Number of diffusion rounds. The <see cref="LegalRounds"/> property contains available sizes</param>
+        /// <param name="Rounds">Number of diffusion rounds. The <see cref="LegalRounds"/> property contains available sizes. Default is 20 rounds.</param>
         /// 
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid rounds count is chosen</exception>
-        public ChaCha(Int32 Rounds = DEFAULT_ROUNDS)
+        /// <exception cref="CryptoSymmetricException">Thrown if an invalid rounds count is chosen</exception>
+        public ChaCha(int Rounds = ROUNDS20)
         {
             if (Rounds <= 0 || (Rounds & 1) != 0)
-                throw new ArgumentOutOfRangeException("Rounds must be a positive even number!");
+                throw new CryptoSymmetricException("ChaCha:Ctor", "Rounds must be a positive even number!", new ArgumentOutOfRangeException());
             if (Rounds < MIN_ROUNDS || Rounds > MAX_ROUNDS)
-                throw new ArgumentOutOfRangeException("Rounds must be between " + MIN_ROUNDS + " and " + MAX_ROUNDS + "!");
-            
-            _dfnRounds = Rounds;
+                throw new CryptoSymmetricException("ChaCha:Ctor", String.Format("Rounds must be between {0} and {1)!", MIN_ROUNDS, MAX_ROUNDS), new ArgumentOutOfRangeException());
+
+            _rndCount = Rounds;
+
+            ProcessorCount = Environment.ProcessorCount;
+            if (ProcessorCount % 2 != 0)
+                ProcessorCount--;
+
+            IsParallel = ProcessorCount > 1;
         }
 
         /// <summary>
@@ -197,138 +295,48 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
 
         #region Public Methods
         /// <summary>
-        /// Increment the internal counter by 1
-        /// </summary>
-        public void AdvanceCounter()
-        {
-            if (++_wrkState[12] == 0)
-                ++_wrkState[13];
-        }
-
-        /// <summary>
-        /// Get the current counter value
-        /// </summary>
-        /// 
-        /// <returns>Counter</returns>
-        public long GetCounter()
-        {
-            return ((long)_wrkState[13] << 32) | (_wrkState[12] & 0xffffffffL);
-        }
-
-        /// <summary>
         /// Initialize the Cipher
         /// </summary>
         /// 
         /// <param name="KeyParam">Cipher key container. 
-        /// <para>Uses the Key and IV fields of the KeyParam parameter. 
-        /// The <see cref="LegalKeySizes"/> property contains valid sizes</para></param>
+        /// <para>Uses the Key and IV fields of KeyParam. 
+        /// The <see cref="LegalKeySizes"/> property contains valid Key sizes. 
+        /// IV must be 8 bytes in size.</para>
+        /// </param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null key or iv is used</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid key or iv size is used</exception>
+        /// <exception cref="System.ArgumentNullException">Thrown if a null key or iv  is used</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid key or iv size  is used</exception>
         public void Initialize(KeyParams KeyParam)
         {
             if (KeyParam.IV == null)
-                throw new ArgumentException("Init parameters must include an IV!");
+                throw new CryptoSymmetricException("ChaCha:Initialize", "Init parameters must include an IV!", new ArgumentException());
             if (KeyParam.IV.Length != 8)
-                throw new ArgumentOutOfRangeException("Requires exactly 8 bytes of IV!");
-
-            ResetCounter();
-
+                throw new CryptoSymmetricException("ChaCha:Initialize", "Requires exactly 8 bytes of IV!", new ArgumentOutOfRangeException());
             if (KeyParam.Key == null)
-            {
-                if (!_isInitialized)
-                    throw new ArgumentException("Key can not be null for first initialisation!");
+                throw new CryptoSymmetricException("ChaCha:Initialize", "Key can not be null!", new ArgumentException());
+            if (KeyParam.Key.Length != 16 && KeyParam.Key.Length != 32)
+                throw new CryptoSymmetricException("ChaCha:Initialize", "Key must be 16 or 32 bytes!", new ArgumentOutOfRangeException());
 
-                SetKey(null, KeyParam.IV);
-            }
-            else
+            if (DistributionCode == null)
             {
-                if (KeyParam.Key.Length != 16 && KeyParam.Key.Length != 32 && KeyParam.Key.Length != 48 && KeyParam.Key.Length != 56)
-                    throw new ArgumentOutOfRangeException("Key must be 16, 32, 48, or 56 bytes!");
-
-                SetKey(KeyParam.Key, KeyParam.IV);
+                if (KeyParam.Key.Length == 16)
+                    _dstCode = (byte[])TAU.Clone();
+                else
+                    _dstCode = (byte[])SIGMA.Clone();
             }
 
             Reset();
+            SetKey(KeyParam.Key, KeyParam.IV);
 
             _isInitialized = true;
         }
 
         /// <summary>
-        /// Reset the Counter
+        /// Reset the primary internal counter
         /// </summary>
-        public void ResetCounter()
+        public void Reset()
         {
-            _wrkState[12] = _wrkState[13] = 0;
-        }
-
-        /// <summary>
-        /// Set the counter back by 1
-        /// </summary>
-        public void RetreatCounter()
-        {
-            if (--_wrkState[12] == -1)
-                --_wrkState[13];
-        }
-
-        /// <summary>
-        /// Return an transformed byte
-        /// </summary>
-        /// 
-        /// <param name="Input">Input byte</param>
-        /// 
-        /// <returns>Transformed byte</returns>
-        public byte ReturnByte(byte Input)
-        {
-            // 2^70 is 1180 exabytes, this check is not realistic
-            //if (LimitExceeded())
-            //    throw new ArgumentException("2^70 byte limit per IV; Change IV!");
-
-            byte output = (byte)(_keyStream[_ksIndex] ^ Input);
-            _ksIndex = (_ksIndex + 1) & 63;
-
-            if (_ksIndex == 0)
-            {
-                AdvanceCounter();
-                GenerateKeyStream(_keyStream);
-            }
-
-            return output;
-        }
-
-        /// <summary>
-        /// Skip a portion of the stream
-        /// </summary>
-        /// 
-        /// <param name="Length">Number of bytes to skip</param>
-        /// 
-        /// <returns>Bytes skipped</returns>
-        public long Skip(long Length)
-        {
-            if (Length >= 0)
-            {
-                for (long i = 0; i < Length; i++)
-                {
-                    _ksIndex = (_ksIndex + 1) & 63;
-
-                    if (_ksIndex == 0)
-                        AdvanceCounter();
-                }
-            }
-            else
-            {
-                for (long i = 0; i > Length; i--)
-                {
-                    if (_ksIndex == 0)
-                        RetreatCounter();
-
-                    _ksIndex = (_ksIndex - 1) & 63;
-                }
-            }
-
-            GenerateKeyStream(_keyStream);
-
-            return Length;
+            _ctrVector[0] = _ctrVector[1] = 0;
         }
 
         /// <summary>
@@ -340,21 +348,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// <param name="Output">Output bytes, array of at least equal size of input that receives processed bytes</param>
         public void Transform(byte[] Input, byte[] Output)
         {
-            int ctr = 0;
-
-            while (ctr < Output.Length)
-            {
-                Output[ctr] = (byte)(_keyStream[_ksIndex] ^ Input[ctr]);
-                _ksIndex = (_ksIndex + 1) & 63;
-
-                if (_ksIndex == 0)
-                {
-                    AdvanceCounter();
-                    GenerateKeyStream(_keyStream);
-                }
-
-                ctr++;
-            }
+            ProcessBlock(Input, Output);
         }
 
         /// <summary>
@@ -366,24 +360,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// <param name="InOffset">Offset in the Input array</param>
         /// <param name="Output">Encrypted bytes</param>
         /// <param name="OutOffset">Offset in the Output array</param>
-        public void Transform(byte[] Input, Int32 InOffset, byte[] Output, Int32 OutOffset)
+        public void Transform(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
-            int len = Output.Length - OutOffset;
-            int ctr = 0;
-
-            while (ctr < len)
-            {
-                Output[ctr + OutOffset] = (byte)(_keyStream[_ksIndex] ^ Input[ctr + InOffset]);
-                _ksIndex = (_ksIndex + 1) & 63;
-
-                if (_ksIndex == 0)
-                {
-                    AdvanceCounter();
-                    GenerateKeyStream(_keyStream);
-                }
-
-                ctr++;
-            }
+            ProcessBlock(Input, 0, Output, 0);
         }
 
         /// <summary>
@@ -396,284 +375,411 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// <param name="Length">Number of bytes to process</param>
         /// <param name="Output">Encrypted bytes</param>
         /// <param name="OutOffset">Offset in the Output array</param>
-        public void Transform(byte[] Input, Int32 InOffset, Int32 Length, byte[] Output, Int32 OutOffset)
+        public void Transform(byte[] Input, int InOffset, int Length, byte[] Output, int OutOffset)
         {
-            int ctr = 0;
-
-            while (ctr < Length)
-            {
-                Output[ctr + OutOffset] = (byte)(_keyStream[_ksIndex] ^ Input[ctr + InOffset]);
-                _ksIndex = (_ksIndex + 1) & 63;
-
-                if (_ksIndex == 0)
-                {
-                    AdvanceCounter();
-                    GenerateKeyStream(_keyStream);
-                }
-
-                ctr++;
-            }
-        }
-
-        /// <summary>
-        /// Reset the algorithm
-        /// </summary>
-        public void Reset()
-        {
-            _ksIndex = 0;
-            GenerateKeyStream(_keyStream);
+            ProcessBlock(Input, 0, Length, Output, 0);
         }
         #endregion
 
         #region Key Schedule
+
         private void SetKey(byte[] Key, byte[] Iv)
         {
-            _wrkState[14] = LEToDword(Iv, 0);
-            _wrkState[15] = LEToDword(Iv, 4);
-
             if (Key != null)
             {
-                _wrkState[4] = LEToDword(Key, 0);
-                _wrkState[5] = LEToDword(Key, 4);
-                _wrkState[6] = LEToDword(Key, 8);
-                _wrkState[7] = LEToDword(Key, 12);
+                if (Key.Length == 32)
+                {
+                    _wrkState[0] = Convert8To32(_dstCode, 0);
+                    _wrkState[1] = Convert8To32(_dstCode, 4);
+                    _wrkState[2] = Convert8To32(_dstCode, 8);
+                    _wrkState[3] = Convert8To32(_dstCode, 12);
+                    _wrkState[4] = Convert8To32(Key, 0);
+                    _wrkState[5] = Convert8To32(Key, 4);
+                    _wrkState[6] = Convert8To32(Key, 8);
+                    _wrkState[7] = Convert8To32(Key, 12);
+                    _wrkState[8] = Convert8To32(Key, 16);
+                    _wrkState[9] = Convert8To32(Key, 20);
+                    _wrkState[10] = Convert8To32(Key, 24);
+                    _wrkState[11] = Convert8To32(Key, 28);
+                    _wrkState[12] = Convert8To32(Iv, 0);
+                    _wrkState[13] = Convert8To32(Iv, 4);
 
-                if (Key.Length == 56)
-                {
-                    _wrkState[8] = LEToDword(Key, 16);
-                    _wrkState[9] = LEToDword(Key, 20);
-                    _wrkState[10] = LEToDword(Key, 24);
-                    _wrkState[11] = LEToDword(Key, 28);
-                    // nonce
-                    _wrkState[0] = LEToDword(Key, 32);
-                    _wrkState[1] = LEToDword(Key, 36);
-                    _wrkState[2] = LEToDword(Key, 40);
-                    _wrkState[3] = LEToDword(Key, 44);
-                    // counter
-                    _wrkState[12] = LEToDword(Key, 48);
-                    _wrkState[13] = LEToDword(Key, 52);
-                }
-                else if (Key.Length == 48)
-                {
-                    _wrkState[8] = LEToDword(Key, 16);
-                    _wrkState[9] = LEToDword(Key, 20);
-                    _wrkState[10] = LEToDword(Key, 24);
-                    _wrkState[11] = LEToDword(Key, 28);
-                    // nonce
-                    _wrkState[0] = LEToDword(Key, 32);
-                    _wrkState[1] = LEToDword(Key, 36);
-                    _wrkState[2] = LEToDword(Key, 40);
-                    _wrkState[3] = LEToDword(Key, 44);
-                }
-                else if (Key.Length == 32)
-                {
-                    _wrkState[8] = LEToDword(Key, 16);
-                    _wrkState[9] = LEToDword(Key, 20);
-                    _wrkState[10] = LEToDword(Key, 24);
-                    _wrkState[11] = LEToDword(Key, 28);
-                    // nonce
-                    _wrkState[0] = LEToDword(_ftSigma, 0);
-                    _wrkState[1] = LEToDword(_ftSigma, 4);
-                    _wrkState[2] = LEToDword(_ftSigma, 8);
-                    _wrkState[3] = LEToDword(_ftSigma, 12);
                 }
                 else
                 {
-                    _wrkState[8] = LEToDword(Key, 0);
-                    _wrkState[9] = LEToDword(Key, 4);
-                    _wrkState[10] = LEToDword(Key, 8);
-                    _wrkState[11] = LEToDword(Key, 12);
-                    // nonce
-                    _wrkState[0] = LEToDword(_ftTau, 0);
-                    _wrkState[1] = LEToDword(_ftTau, 4);
-                    _wrkState[2] = LEToDword(_ftTau, 8);
-                    _wrkState[3] = LEToDword(_ftTau, 12);
+                    _wrkState[0] = Convert8To32(_dstCode, 0);
+                    _wrkState[1] = Convert8To32(_dstCode, 4);
+                    _wrkState[2] = Convert8To32(_dstCode, 8);
+                    _wrkState[3] = Convert8To32(_dstCode, 12);
+                    _wrkState[4] = Convert8To32(Key, 0);
+                    _wrkState[5] = Convert8To32(Key, 4);
+                    _wrkState[6] = Convert8To32(Key, 8);
+                    _wrkState[7] = Convert8To32(Key, 12);
+                    _wrkState[8] = Convert8To32(Key, 0);
+                    _wrkState[9] = Convert8To32(Key, 4);
+                    _wrkState[10] = Convert8To32(Key, 8);
+                    _wrkState[11] = Convert8To32(Key, 12);
+                    _wrkState[12] = Convert8To32(Iv, 0);
+                    _wrkState[13] = Convert8To32(Iv, 4);
                 }
-
-                // if nonce portion of key is too symmetrical, pre-process
-                if (Key.Length > 32 && !ValidNonce(Key, 32, 16))
-                    CreateNonce();
             }
         }
         #endregion
 
         #region Transform
-        private void ChaChaCore(Int32 Rounds, Int32[] Input, Int32[] Output)
+        private void ChaChaCore(Int32[] Output, int[] Counter)
         {
             int ctr = 0;
 
-            Int32 X0 = Input[ctr++];
-            Int32 X1 = Input[ctr++];
-            Int32 X2 = Input[ctr++];
-            Int32 X3 = Input[ctr++];
-            Int32 X4 = Input[ctr++];
-            Int32 X5 = Input[ctr++];
-            Int32 X6 = Input[ctr++];
-            Int32 X7 = Input[ctr++];
-            Int32 X8 = Input[ctr++];
-            Int32 X9 = Input[ctr++];
-            Int32 X10 = Input[ctr++];
-            Int32 X11 = Input[ctr++];
-            Int32 X12 = Input[ctr++];
-            Int32 X13 = Input[ctr++];
-            Int32 X14 = Input[ctr++];
-            Int32 X15 = Input[ctr];
+            Int32 X0 = _wrkState[ctr++];
+            Int32 X1 = _wrkState[ctr++];
+            Int32 X2 = _wrkState[ctr++];
+            Int32 X3 = _wrkState[ctr++];
+            Int32 X4 = _wrkState[ctr++];
+            Int32 X5 = _wrkState[ctr++];
+            Int32 X6 = _wrkState[ctr++];
+            Int32 X7 = _wrkState[ctr++];
+            Int32 X8 = _wrkState[ctr++];
+            Int32 X9 = _wrkState[ctr++];
+            Int32 X10 = _wrkState[ctr++];
+            Int32 X11 = _wrkState[ctr++];
+            Int32 X12 = Counter[0];
+            Int32 X13 = Counter[1];
+            Int32 X14 = _wrkState[ctr++];
+            Int32 X15 = _wrkState[ctr];
 
             ctr = Rounds;
 
             while (ctr > 0)
             {
-                X0 += X4; X12 = RotL(X12 ^ X0, 16);
-                X8 += X12; X4 = RotL(X4 ^ X8, 12);
-                X0 += X4; X12 = RotL(X12 ^ X0, 8);
-                X8 += X12; X4 = RotL(X4 ^ X8, 7);
-                X1 += X5; X13 = RotL(X13 ^ X1, 16);
-                X9 += X13; X5 = RotL(X5 ^ X9, 12);
-                X1 += X5; X13 = RotL(X13 ^ X1, 8);
-                X9 += X13; X5 = RotL(X5 ^ X9, 7);
-                X2 += X6; X14 = RotL(X14 ^ X2, 16);
-                X10 += X14; X6 = RotL(X6 ^ X10, 12);
-                X2 += X6; X14 = RotL(X14 ^ X2, 8);
-                X10 += X14; X6 = RotL(X6 ^ X10, 7);
-                X3 += X7; X15 = RotL(X15 ^ X3, 16);
-                X11 += X15; X7 = RotL(X7 ^ X11, 12);
-                X3 += X7; X15 = RotL(X15 ^ X3, 8);
-                X11 += X15; X7 = RotL(X7 ^ X11, 7);
-                X0 += X5; X15 = RotL(X15 ^ X0, 16);
-                X10 += X15; X5 = RotL(X5 ^ X10, 12);
-                X0 += X5; X15 = RotL(X15 ^ X0, 8);
-                X10 += X15; X5 = RotL(X5 ^ X10, 7);
-                X1 += X6; X12 = RotL(X12 ^ X1, 16);
-                X11 += X12; X6 = RotL(X6 ^ X11, 12);
-                X1 += X6; X12 = RotL(X12 ^ X1, 8);
-                X11 += X12; X6 = RotL(X6 ^ X11, 7);
-                X2 += X7; X13 = RotL(X13 ^ X2, 16);
-                X8 += X13; X7 = RotL(X7 ^ X8, 12);
-                X2 += X7; X13 = RotL(X13 ^ X2, 8);
-                X8 += X13; X7 = RotL(X7 ^ X8, 7);
-                X3 += X4; X14 = RotL(X14 ^ X3, 16);
-                X9 += X14; X4 = RotL(X4 ^ X9, 12);
-                X3 += X4; X14 = RotL(X14 ^ X3, 8);
-                X9 += X14; X4 = RotL(X4 ^ X9, 7);
-
+                X0 += X4; X12 = Rtl(X12 ^ X0, 16);
+                X8 += X12; X4 = Rtl(X4 ^ X8, 12);
+                X0 += X4; X12 = Rtl(X12 ^ X0, 8);
+                X8 += X12; X4 = Rtl(X4 ^ X8, 7);
+                X1 += X5; X13 = Rtl(X13 ^ X1, 16);
+                X9 += X13; X5 = Rtl(X5 ^ X9, 12);
+                X1 += X5; X13 = Rtl(X13 ^ X1, 8);
+                X9 += X13; X5 = Rtl(X5 ^ X9, 7);
+                X2 += X6; X14 = Rtl(X14 ^ X2, 16);
+                X10 += X14; X6 = Rtl(X6 ^ X10, 12);
+                X2 += X6; X14 = Rtl(X14 ^ X2, 8);
+                X10 += X14; X6 = Rtl(X6 ^ X10, 7);
+                X3 += X7; X15 = Rtl(X15 ^ X3, 16);
+                X11 += X15; X7 = Rtl(X7 ^ X11, 12);
+                X3 += X7; X15 = Rtl(X15 ^ X3, 8);
+                X11 += X15; X7 = Rtl(X7 ^ X11, 7);
+                X0 += X5; X15 = Rtl(X15 ^ X0, 16);
+                X10 += X15; X5 = Rtl(X5 ^ X10, 12);
+                X0 += X5; X15 = Rtl(X15 ^ X0, 8);
+                X10 += X15; X5 = Rtl(X5 ^ X10, 7);
+                X1 += X6; X12 = Rtl(X12 ^ X1, 16);
+                X11 += X12; X6 = Rtl(X6 ^ X11, 12);
+                X1 += X6; X12 = Rtl(X12 ^ X1, 8);
+                X11 += X12; X6 = Rtl(X6 ^ X11, 7);
+                X2 += X7; X13 = Rtl(X13 ^ X2, 16);
+                X8 += X13; X7 = Rtl(X7 ^ X8, 12);
+                X2 += X7; X13 = Rtl(X13 ^ X2, 8);
+                X8 += X13; X7 = Rtl(X7 ^ X8, 7);
+                X3 += X4; X14 = Rtl(X14 ^ X3, 16);
+                X9 += X14; X4 = Rtl(X4 ^ X9, 12);
+                X3 += X4; X14 = Rtl(X14 ^ X3, 8);
+                X9 += X14; X4 = Rtl(X4 ^ X9, 7);
                 ctr -= 2;
             }
 
             ctr = 0;
 
-            Output[ctr] = X0 + Input[ctr++];
-            Output[ctr] = X1 + Input[ctr++];
-            Output[ctr] = X2 + Input[ctr++];
-            Output[ctr] = X3 + Input[ctr++];
-            Output[ctr] = X4 + Input[ctr++];
-            Output[ctr] = X5 + Input[ctr++];
-            Output[ctr] = X6 + Input[ctr++];
-            Output[ctr] = X7 + Input[ctr++];
-            Output[ctr] = X8 + Input[ctr++];
-            Output[ctr] = X9 + Input[ctr++];
-            Output[ctr] = X10 + Input[ctr++];
-            Output[ctr] = X11 + Input[ctr++];
-            Output[ctr] = X12 + Input[ctr++];
-            Output[ctr] = X13 + Input[ctr++];
-            Output[ctr] = X14 + Input[ctr++];
-            Output[ctr] = X15 + Input[ctr];
+            Output[ctr] = X0 + _wrkState[ctr++];
+            Output[ctr] = X1 + _wrkState[ctr++];
+            Output[ctr] = X2 + _wrkState[ctr++];
+            Output[ctr] = X3 + _wrkState[ctr++];
+            Output[ctr] = X4 + _wrkState[ctr++];
+            Output[ctr] = X5 + _wrkState[ctr++];
+            Output[ctr] = X6 + _wrkState[ctr++];
+            Output[ctr] = X7 + _wrkState[ctr++];
+            Output[ctr] = X8 + _wrkState[ctr++];
+            Output[ctr] = X9 + _wrkState[ctr++];
+            Output[ctr] = X10 + _wrkState[ctr++];
+            Output[ctr] = X11 + _wrkState[ctr++];
+            Output[ctr] = X12 + Counter[0];
+            Output[ctr + 1] = X13 + Counter[1];
+            Output[ctr + 2] = X14 + _wrkState[ctr++];
+            Output[ctr + 2] = X15 + _wrkState[ctr];
+        }
+
+        private byte[] Generate(int Size, int[] Counter)
+        {
+            // align to upper divisible of block size
+            int algSize = (Size % BLOCK_SIZE == 0 ? Size : Size + BLOCK_SIZE - (Size % BLOCK_SIZE));
+            int lstBlock = algSize - BLOCK_SIZE;
+            int[] outputBlock = new int[STATE_SIZE];
+            byte[] outputData = new byte[Size];
+
+            for (int i = 0; i < algSize; i += BLOCK_SIZE)
+            {
+                ChaChaCore(outputBlock, Counter);
+
+                // copy to output
+                if (i != lstBlock)
+                {
+                    // copy transform to output
+                    Buffer.BlockCopy(outputBlock, 0, outputData, i, BLOCK_SIZE);
+                }
+                else
+                {
+                    // copy last block
+                    int fnlSize = (Size % BLOCK_SIZE) == 0 ? BLOCK_SIZE : (Size % BLOCK_SIZE);
+                    Buffer.BlockCopy(outputBlock, 0, outputData, i, fnlSize);
+                }
+
+                // increment counter
+                Increment(Counter);
+            }
+
+            return outputData;
+        }
+
+        private void ProcessBlock(byte[] Input, byte[] Output)
+        {
+            if (!IsParallel || Output.Length < ParallelBlockSize)
+            {
+                // generate random
+                byte[] rand = Generate(Output.Length, _ctrVector);
+
+                // output is input xor with random
+                for (int i = 0; i < Output.Length; i++)
+                    Output[i] = (byte)(Input[i] ^ rand[i]);
+            }
+            else
+            {
+                // parallel CTR processing //
+                int prcCount = ProcessorCount;
+                int alnSize = Output.Length / BLOCK_SIZE;
+                int cnkSize = (alnSize / prcCount) * BLOCK_SIZE;
+                int rndSize = cnkSize * prcCount;
+                int subSize = (cnkSize / BLOCK_SIZE);
+
+                // create jagged array of 'sub counters'
+                int[][] vectors = new int[prcCount][];
+
+                // create random, and xor to output in parallel
+                System.Threading.Tasks.Parallel.For(0, prcCount, i =>
+                {
+                    // offset counter by chunk size / block size
+                    vectors[i] = Increase(_ctrVector, subSize * i);
+                    // create random with offset counter
+                    byte[] rand = Generate(cnkSize, vectors[i]);
+
+                    // xor with input at offset
+                    for (int j = 0; j < cnkSize; j++)
+                        Output[j + (i * cnkSize)] = (byte)(Input[j + (i * cnkSize)] ^ rand[j]);
+                });
+
+                // last block processing
+                if (rndSize < Output.Length)
+                {
+                    int fnlSize = Output.Length % rndSize;
+                    byte[] rand = Generate(fnlSize, vectors[prcCount - 1]);
+
+                    for (int i = 0; i < fnlSize; i++)
+                        Output[i + rndSize] = (byte)(Input[i + rndSize] ^ rand[i]);
+                }
+
+                // copy the last counter position to class variable
+                Buffer.BlockCopy(vectors[prcCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
+            }
+        }
+
+        private void ProcessBlock(byte[] Input, int InOffset, byte[] Output, int OutOffset)
+        {
+            int blkSize = (Output.Length - OutOffset);
+
+            if (!IsParallel)
+            {
+                blkSize = blkSize < BLOCK_SIZE ? blkSize : BLOCK_SIZE;
+                // generate random
+                byte[] rand = Generate(blkSize, _ctrVector);
+
+                // output is input xor with random
+                for (int i = 0; i < blkSize; i++)
+                    Output[i + OutOffset] = (byte)(Input[i + InOffset] ^ rand[i]);
+            }
+            else if (blkSize < ParallelBlockSize)
+            {
+                // generate random
+                byte[] rand = Generate(blkSize, _ctrVector);
+
+                // output is input xor with random
+                for (int i = 0; i < blkSize; i++)
+                    Output[i + OutOffset] = (byte)(Input[i + InOffset] ^ rand[i]);
+            }
+            else
+            {
+                // parallel CTR processing //
+                int prcCount = ProcessorCount;
+                int alnSize = ParallelBlockSize / BLOCK_SIZE;
+                int cnkSize = (alnSize / prcCount) * BLOCK_SIZE;
+                int rndSize = cnkSize * prcCount;
+                int subSize = (cnkSize / BLOCK_SIZE);
+
+                // create jagged array of 'sub counters'
+                int[][] vectors = new int[prcCount][];
+
+                // create random, and xor to output in parallel
+                System.Threading.Tasks.Parallel.For(0, prcCount, i =>
+                {
+                    // offset counter by chunk size / block size
+                    vectors[i] = Increase(_ctrVector, subSize * i);
+                    // create random with offset counter
+                    byte[] rand = Generate(cnkSize, vectors[i]);
+
+                    // xor with input at offset
+                    for (int j = 0; j < cnkSize; j++)
+                        Output[j + OutOffset + (i * cnkSize)] = (byte)(Input[j + InOffset + (i * cnkSize)] ^ rand[j]);
+                });
+
+                // last block processing
+                if (rndSize < Output.Length)
+                {
+                    int fnlSize = _parallelBlockSize % rndSize;
+                    byte[] rand = Generate(fnlSize, vectors[prcCount - 1]);
+
+                    for (int i = 0; i < fnlSize; i++)
+                        Output[i + OutOffset + rndSize] = (byte)(Input[i + InOffset + rndSize] ^ rand[i]);
+                }
+
+                // copy the last counter position to class variable
+                Buffer.BlockCopy(vectors[prcCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
+            }
+        }
+
+        private void ProcessBlock(byte[] Input, int InOffset, int Length, byte[] Output, int OutOffset)
+        {
+            int blkSize = Length;
+
+            if (!IsParallel)
+            {
+                blkSize = blkSize < BLOCK_SIZE ? blkSize : BLOCK_SIZE;
+                // generate random
+                byte[] rand = Generate(blkSize, _ctrVector);
+
+                // output is input xor with random
+                for (int i = 0; i < blkSize; i++)
+                    Output[i + OutOffset] = (byte)(Input[i + InOffset] ^ rand[i]);
+            }
+            else if (blkSize < ParallelBlockSize)
+            {
+                // generate random
+                byte[] rand = Generate(blkSize, _ctrVector);
+
+                // output is input xor with random
+                for (int i = 0; i < blkSize; i++)
+                    Output[i + OutOffset] = (byte)(Input[i + InOffset] ^ rand[i]);
+            }
+            else
+            {
+                // parallel CTR processing //
+                int prcCount = ProcessorCount;
+                int alnSize = ParallelBlockSize / BLOCK_SIZE;
+                int cnkSize = (alnSize / prcCount) * BLOCK_SIZE;
+                int rndSize = cnkSize * prcCount;
+                int subSize = (cnkSize / BLOCK_SIZE);
+
+                // create jagged array of 'sub counters'
+                int[][] vectors = new int[prcCount][];
+
+                // create random, and xor to output in parallel
+                System.Threading.Tasks.Parallel.For(0, prcCount, i =>
+                {
+                    // offset counter by chunk size / block size
+                    vectors[i] = Increase(_ctrVector, subSize * i);
+                    // create random with offset counter
+                    byte[] rand = Generate(cnkSize, vectors[i]);
+
+                    // xor with input at offset
+                    for (int j = 0; j < cnkSize; j++)
+                        Output[j + OutOffset + (i * cnkSize)] = (byte)(Input[j + InOffset + (i * cnkSize)] ^ rand[j]);
+                });
+
+                // last block processing
+                if (rndSize < Length)
+                {
+                    int fnlSize = _parallelBlockSize % rndSize;
+                    byte[] rand = Generate(fnlSize, vectors[prcCount - 1]);
+
+                    for (int i = 0; i < fnlSize; i++)
+                        Output[i + OutOffset + rndSize] = (byte)(Input[i + InOffset + rndSize] ^ rand[i]);
+                }
+
+                // copy the last counter position to class variable
+                Buffer.BlockCopy(vectors[prcCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
+            }
         }
         #endregion
 
         #region Helpers
-        private int ByteFrequencyMax(byte[] Seed)
+        private byte[] Convert32ToBytes(int Input, byte[] Output, int OutOffset)
         {
-            int ctr = 0;
-            int len = Seed.Length;
-            int max = 0;
+            Output[OutOffset] = (byte)Input;
+            Output[OutOffset + 1] = (byte)(Input >> 8);
+            Output[OutOffset + 2] = (byte)(Input >> 16);
+            Output[OutOffset + 3] = (byte)(Input >> 24);
+            return Output;
+        }
 
-            // test for highest number of a repeating value
-            for (int i = 0; i < len; i++)
+        private void Convert32ToBytes(int[] Input, byte[] Output, int OutOffset)
+        {
+            for (int i = 0; i < Input.Length; ++i)
             {
-                for (int j = 0; j < 256; j++)
-                {
-                    if (Seed[i] == (byte)j)
-                    {
-                        ctr++;
-
-                        if (ctr > max)
-                            max = ctr;
-                    }
-                }
-            }
-
-            return max;
-        }
-
-        private void CreateNonce()
-        {
-            // Process engine state to generate key
-            int stateLen = _wrkState.Length;
-            Int32[] chachaOut = new Int32[stateLen];
-            Int32[] stateTemp = new Int32[stateLen];
-            Buffer.BlockCopy(_wrkState, 0, stateTemp, 0, stateLen * 4);
-
-            // create a new nonce with core
-            ChaChaCore(20, stateTemp, chachaOut);
-            // copy new nonce to state
-            Buffer.BlockCopy(chachaOut, 0, _wrkState, 0, 16);
-
-            // check for unique counter
-            if (_wrkState[12] == _wrkState[14])
-                _wrkState[12] = chachaOut[12];
-            if (_wrkState[13] == _wrkState[15])
-                _wrkState[13] = chachaOut[13];
-        }
-
-        private void GenerateKeyStream(byte[] Output)
-        {
-            ChaChaCore(_dfnRounds, _wrkState, _wrkBuffer);
-            DwordsToLEs(_wrkBuffer, Output, 0);
-        }
-
-        private static byte[] DwordToLE(Int32 Dword, byte[] Le, Int32 OutOffset)
-        {
-            Le[OutOffset] = (byte)Dword;
-            Le[OutOffset + 1] = (byte)(Dword >> 8);
-            Le[OutOffset + 2] = (byte)(Dword >> 16);
-            Le[OutOffset + 3] = (byte)(Dword >> 24);
-            return Le;
-        }
-
-        private static void DwordsToLEs(Int32[] Dwords, byte[] Le, Int32 OutOffset)
-        {
-            for (int i = 0; i < Dwords.Length; ++i)
-            {
-                DwordToLE(Dwords[i], Le, OutOffset);
+                Convert32ToBytes(Input[i], Output, OutOffset);
                 OutOffset += 4;
             }
         }
 
-        private static Int32 LEToDword(byte[] Le, Int32 InOffset)
+        private int Convert8To32(byte[] Input, int InOffset)
         {
-            return ((Le[InOffset] & 255)) |
-                   ((Le[InOffset + 1] & 255) << 8) |
-                   ((Le[InOffset + 2] & 255) << 16) |
-                   (Le[InOffset + 3] << 24);
+            return ((Input[InOffset] & 255)) |
+                   ((Input[InOffset + 1] & 255) << 8) |
+                   ((Input[InOffset + 2] & 255) << 16) |
+                   (Input[InOffset + 3] << 24);
         }
 
-        private static Int32 RotL(Int32 X, Int32 Y)
+        private void Increment(int[] Counter)
         {
-            return (X << Y) | ((Int32)((uint)X >> -Y));
+            if (++Counter[0] == 0)
+                ++Counter[1];
         }
 
-        private bool ValidNonce(byte[] Key, int Offset, int Length)
+        private int[] Increase(int[] Counter, int Size)
+        {
+            int[] copy = new int[Counter.Length];
+            Array.Copy(Counter, 0, copy, 0, Counter.Length);
+
+            for (int i = 0; i < Size; i++)
+                Increment(copy);
+
+            return copy;
+        }
+
+        private int Rtl(int X, int Y)
+        {
+            // rotate left
+            return (X << Y) | ((int)((uint)X >> -Y));
+        }
+
+        private bool ValidCode(byte[] Code)
         {
             int ctr = 0;
             int rep = 0;
 
-            // test for minimum asymmetry; max 2 repeats, 2 times, distance of more than 4
-            for (int i = Offset; i < Offset + Length; i++)
+            // test for minimum asymmetry per sigma and tau constants; 
+            // max 2 repeats, 2 times, distance of more than 4
+            for (int i = 0; i < Code.Length; i++)
             {
                 ctr = 0;
-                for (int j = i + 1; j < Offset + Length; j++)
+                for (int j = i + 1; j < Code.Length; j++)
                 {
-                    if (Key[i] == Key[j])
+                    if (Code[i] == Code[j])
                     {
                         ctr++;
 
@@ -725,15 +831,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
                         Array.Clear(_wrkState, 0, _wrkState.Length);
                         _wrkState = null;
                     }
-                    if (_ftTau != null)
+                    if (_dstCode != null)
                     {
-                        Array.Clear(_ftTau, 0, _ftTau.Length);
-                        _ftTau = null;
-                    }
-                    if (_ftSigma != null)
-                    {
-                        Array.Clear(_ftSigma, 0, _ftSigma.Length);
-                        _ftSigma = null;
+                        Array.Clear(_dstCode, 0, _dstCode.Length);
+                        _dstCode = null;
                     }
                 }
                 finally

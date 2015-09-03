@@ -1,5 +1,6 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
@@ -59,10 +60,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     /// <revisionHistory>
     /// <revision date="2014/11/11" version="1.2.0.0">Initial release</revision>
     /// <revision date="2015/01/23" version="1.3.0.0">Changes to formatting and documentation</revision>
+    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
     /// </revisionHistory>
     /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digests">VTDev.Libraries.CEXEngine.Crypto.Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
@@ -83,7 +85,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     /// <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class SHA512 : IDigest, IDisposable
+    public sealed class SHA512 : IDigest
     {
         #region Constants
         private const string ALG_NAME = "SHA512";
@@ -154,8 +156,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="Input">Input data</param>
         /// <param name="InOffset">Offset within Input array</param>
         /// <param name="Length">Amount of data to process in bytes</param>
+        /// 
+        /// <exception cref="CryptoHashException">Thrown if an invalid Input size is chosen</exception>
         public void BlockUpdate(byte[] Input, int InOffset, int Length)
         {
+            if ((InOffset + Length) > Input.Length)
+                throw new CryptoHashException("SHA512:BlockUpdate", "The Input buffer is too short!", new ArgumentOutOfRangeException());
+
             // fill the current word
             while ((_bufferOffset != 0) && (Length > 0))
             {
@@ -210,8 +217,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="OutOffset">The starting offset within the Output array</param>
         /// 
         /// <returns>Size of Hash value, Always 64 bytes</returns>
+        /// 
+        /// <exception cref="CryptoHashException">Thrown if Output array is too small</exception>
         public int DoFinal(byte[] Output, int OutOffset)
         {
+            if (Output.Length - OutOffset < DigestSize)
+                throw new CryptoHashException("SHA512:DoFinal", "The Output buffer is too short!", new ArgumentOutOfRangeException());
+
             Finish();
 
             UInt64ToBE(_H0, Output, OutOffset);

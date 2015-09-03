@@ -1,0 +1,3 @@
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMClient\bin\Debug\SocketAsyncClient.exe.config
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMClient\obj\Debug\SocketAsyncClient.exe
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMClient\obj\Debug\SocketAsyncClient.pdb

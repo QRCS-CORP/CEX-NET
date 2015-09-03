@@ -1,6 +1,8 @@
 ﻿#region Directives
 using System;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
@@ -36,14 +38,14 @@ using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block;
 namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 {
     /// <summary>
-    /// <h3>CTRDRBG: An implementation of a Encryption Counter based Deterministic Random Byte Generator.</h3>
+    /// <h3>CTRDrbg: An implementation of a Encryption Counter based Deterministic Random Byte Generator.</h3>
     /// <para>A Block Cipher Counter DRBG as outlined in NIST document: SP800-90A<cite>SP800-90B</cite></para>
     /// </summary> 
     /// 
     /// <example>
     /// <description>Example using an <c>IGenerator</c> interface:</description>
     /// <code>
-    /// using (IGenerator rnd = new CTRDRBG(new RDX()))
+    /// using (IGenerator rnd = new CTRDrbg(new RDX()))
     /// {
     ///     // initialize
     ///     rnd.Initialize(Salt, [Ikm], [Nonce]);
@@ -55,19 +57,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// 
     /// <revisionHistory>
     /// <revision date="2015/01/23" version="1.3.0.0">Initial release</revision>
+    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
     /// </revisionHistory>
     /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block Namespace</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Mode.ICipherMode Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Engines">VTDev.Libraries.CEXEngine.Crypto.Engines Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode Interface</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">VTDev.Libraries.CEXEngine.Crypto.Engines Enumeration</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
     /// <list type="bullet">
-    /// <item><description>Can be initialized with any block <see cref="VTDev.Libraries.CEXEngine.Crypto.Engines">cipher</see>.</description></item>
+    /// <item><description>Can be initialized with any block <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">cipher</see>.</description></item>
     /// <item><description>Parallelized by default on a multi processer system when an input byte array of <see cref="ParallelMinimumSize"/> bytes or larger is used.</description></item>
     /// <item><description>Parallelization can be disabled using the <see cref="IsParallel"/> property.</description></item>
-    /// <item><description>The <see cref="CTRDRBG(IBlockCipher, bool)">Constructors</see> DisposeEngine parameter determines if Cipher engine is destroyed when <see cref="Dispose()"/> is called on this class; default is <c>true</c>.</description></item>
+    /// <item><description>The <see cref="CTRDrbg(IBlockCipher, bool, int)">Constructors</see> DisposeEngine parameter determines if Cipher engine is destroyed when <see cref="Dispose()"/> is called on this class; default is <c>true</c>.</description></item>
     /// <item><description>Combination of [Salt, Ikm, Nonce] must be: cipher key size +  cipher block size in length.</description></item>
     /// <item><description>Nonce and Ikm are optional, (but recommended).</description></item>
     /// </list>
@@ -80,10 +83,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// <item><description>Security Bounds for the NIST Codebook-based: <see href="http://eprint.iacr.org/2006/379.pdf">Deterministic Random Bit Generator</see>.</description></item>
     /// </list>
     /// </remarks>
-    public sealed class CTRDRBG : IGenerator, IDisposable
+    public sealed class CTRDrbg : IGenerator
     {
         #region Constants
-        private const string ALG_NAME = "CTRDRBG";
+        private const string ALG_NAME = "CTRDrbg";
         private const int BLOCK_SIZE = 16;
         private const int COUNTER_SIZE = 16;
         private const Int32 MAX_PARALLEL = 1024000;
@@ -99,36 +102,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         private bool _isInitialized = false;
         private bool _isParallel = false;
         private int _keySize = 32 + COUNTER_SIZE;
-        #endregion
-
-        #region Constructor
-        /// <summary>
-        /// Creates a CTR Bytes Generator using a block cipher
-        /// </summary>
-        /// 
-        /// <param name="Cipher">The block cipher</param>
-        /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
-        public CTRDRBG(IBlockCipher Cipher, bool DisposeEngine = true)
-        {
-            _disposeEngine = DisposeEngine;
-            _Cipher = Cipher;
-            _keySize = GetKeySize() + COUNTER_SIZE;
-            _blockSize = _Cipher.BlockSize;
-
-            ProcessorCount = Environment.ProcessorCount;
-            if (ProcessorCount % 2 != 0)
-                ProcessorCount--;
-
-            IsParallel = ProcessorCount > 1;
-        }
-
-        /// <summary>
-        /// Finalize objects
-        /// </summary>
-        ~CTRDRBG()
-        {
-            Dispose(false);
-        }
         #endregion
 
         #region Properties
@@ -157,8 +130,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         }
 
         /// <summary>
-        /// <para>Minimum initialization key size in bytes; 
-        /// combined sizes of Salt, Ikm, and Nonce must be at least this size.</para>
+        /// <para>The key size (in bytes) of the symmetric cipher</para>
         /// </summary>
         public int KeySize
         {
@@ -196,6 +168,51 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         }
         #endregion
 
+        #region Constructor
+        /// <summary>
+        /// Creates a CTR Bytes Generator using a block cipher
+        /// </summary>
+        /// 
+        /// <param name="Cipher">The block cipher</param>
+        /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
+        /// <param name="KeySize">The key size (in bytes) of the symmetric cipher; a <c>0</c> value will auto size the key</param>
+        /// 
+        /// <exception cref="CryptoSymmetricException">Thrown if a null block cipher is used</exception>
+        public CTRDrbg(IBlockCipher Cipher, bool DisposeEngine = true, int KeySize = 0)
+        {
+            if (Cipher == null)
+                throw new CryptoGeneratorException("CTRDrbg:Ctor", "Cipher can not be null!", new ArgumentNullException());
+
+            _disposeEngine = DisposeEngine;
+            _Cipher = Cipher;
+
+            if (KeySize > 0)
+                _keySize = KeySize;
+            else
+                _keySize = GetKeySize();
+
+            _blockSize = _Cipher.BlockSize;
+
+            ProcessorCount = Environment.ProcessorCount;
+            if (ProcessorCount % 2 != 0)
+                ProcessorCount--;
+
+            IsParallel = ProcessorCount > 1;
+        }
+
+        private CTRDrbg()
+        {
+        }
+
+        /// <summary>
+        /// Finalize objects
+        /// </summary>
+        ~CTRDrbg()
+        {
+            Dispose(false);
+        }
+        #endregion
+
         #region Public Methods
         /// <summary>
         /// Initialize the generator
@@ -203,14 +220,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// 
         /// <param name="Salt">Salt value</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null salt is used</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">Salt does not contain enough material for Key and Vector creation</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if an invalid or null salt is used</exception>
         public void Initialize(byte[] Salt)
         {
             if (Salt == null)
-                throw new ArgumentNullException("Salt can not be null!");
-            if (Salt.Length < _keySize)
-                throw (new ArgumentOutOfRangeException("Minimum key size has not been added. Size must be at least " + _keySize + " bytes!"));
+                throw new CryptoGeneratorException("CTRDrbg:Initialize", "Salt can not be null!", new ArgumentNullException());
+            if (Salt.Length < _keySize + COUNTER_SIZE)
+                throw new CryptoGeneratorException("CTRDrbg:Initialize", string.Format("Minimum key size has not been added. Size must be at least {0} bytes!", _keySize + COUNTER_SIZE), new ArgumentOutOfRangeException());
 
             _ctrVector = new byte[_blockSize];
             Buffer.BlockCopy(Salt, 0, _ctrVector, 0, _blockSize);
@@ -229,9 +245,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <param name="Salt">Salt value</param>
         /// <param name="Ikm">Key material</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null salt or ikm is used</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if a null salt or ikm is used</exception>
         public void Initialize(byte[] Salt, byte[] Ikm)
         {
+            if (Salt == null)
+                throw new CryptoGeneratorException("CTRDrbg:Initialize", "Salt can not be null!", new ArgumentNullException());
+            if (Ikm == null)
+                throw new CryptoGeneratorException("CTRDrbg:Initialize", "IKM can not be null!", new ArgumentNullException());
+
             byte[] seed = new byte[Salt.Length + Ikm.Length];
 
             Buffer.BlockCopy(Salt, 0, seed, 0, Salt.Length);
@@ -248,7 +269,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <param name="Ikm">Key material</param>
         /// <param name="Info">Nonce value</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null salt, ikm, or nonce is used</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if a null salt or ikm is used</exception>
         public void Initialize(byte[] Salt, byte[] Ikm, byte[] Info)
         {
             byte[] seed = new byte[Salt.Length + Ikm.Length + Info.Length];
@@ -283,8 +304,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <param name="Size">Number of bytes to generate</param>
         /// 
         /// <returns>Number of bytes generated</returns>
+        /// 
+        /// <exception cref="CryptoGeneratorException">Thrown if the output buffer is too small</exception>
         public int Generate(byte[] Output, int OutOffset, int Size)
         {
+            if ((Output.Length - Size) < OutOffset)
+                throw new CryptoGeneratorException("CTRDrbg:Generate", "Output buffer too small!", new Exception());
+
             ParallelTransform(Output, OutOffset);
 
             return Size;
@@ -298,11 +324,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// 
         /// <param name="Seed">Pseudo random seed material</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null Seed is used</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if a null Seed is used</exception>
         public void Update(byte[] Seed)
         {
             if (Seed == null)
-                throw new ArgumentNullException("Seed can not be null!");
+                throw new CryptoGeneratorException("CTRDrbg:Update", "Seed can not be null!", new ArgumentNullException());
 
             if (Seed.Length >= KeySize)
                 Initialize(Seed);

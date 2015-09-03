@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Windows.Forms;
-using VTDev.Libraries.CEXEngine.Crypto;
-using VTDev.Libraries.CEXEngine.Crypto.Digest;
-using VTDev.Libraries.CEXEngine.Crypto.Helper;
 using System.Text;
+using System.Windows.Forms;
+using VTDev.Libraries.CEXEngine.Crypto.Digest;
 
 namespace VTDev.Projects.CEX
 {

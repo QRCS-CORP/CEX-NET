@@ -9,3 +9,14 @@ C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Speed\obj\x86\De
 C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Speed\obj\x86\Debug\Speed.exe
 C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Speed\obj\x86\Debug\Speed.pdb
 C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Speed\obj\x86\Debug\Speed.csprojResolveAssemblyReference.cache
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Speed\bin\Debug\Speed.exe
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Speed\bin\Debug\Speed.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Speed\bin\Debug\CEXEngine.dll
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Speed\bin\Debug\CEXEngine.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Speed\bin\Debug\CEXEngine.xml
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Speed\obj\x86\Debug\Speed.FormSpeedTest.resources
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Speed\obj\x86\Debug\Speed.Properties.Resources.resources
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Speed\obj\x86\Debug\Speed.csproj.GenerateResource.Cache
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Speed\obj\x86\Debug\Speed.exe
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Speed\obj\x86\Debug\Speed.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Speed\obj\x86\Debug\Speed.csprojResolveAssemblyReference.cache

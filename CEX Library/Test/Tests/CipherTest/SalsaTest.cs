@@ -1,8 +1,9 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Crypto;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream;
-using VTDev.Libraries.CEXEngine.Utility;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Prng;
+using VTDev.Libraries.CEXEngine.Tools;
 #endregion
 
 namespace VTDev.Projects.CEX.Test.Tests.CipherTest
@@ -81,6 +82,8 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 VectorTest(20, _key[2], _iv[1], _plainText, _cipherText[4]);
                 VectorTest(20, _key[3], _iv[2], _plainText, _cipherText[5]);
                 OnProgress(new TestEventArgs("Passed 256 bit key vector tests.."));
+                ParallelTest();
+                OnProgress(new TestEventArgs("Passed parallel/linear equality tests.."));
 
                 return SUCCESS;
             }
@@ -93,6 +96,33 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         #endregion
 
         #region Private
+        private void ParallelTest()
+        {
+            CSPRng rng = new CSPRng();
+            byte[] key = rng.GetBytes(32);
+            byte[] iv = rng.GetBytes(8);
+            byte[] data = rng.GetBytes(2048);
+            byte[] enc = new byte[2048];
+            byte[] dec = new byte[2048];
+            rng.Dispose();
+
+            using (Salsa20 salsa = new Salsa20(10))
+            {
+                // encrypt linear
+                salsa.Initialize(new KeyParams(key, iv));
+                salsa.IsParallel = false;
+                salsa.Transform(data, enc);
+                // decrypt parallel
+                salsa.Initialize(new KeyParams(key, iv));
+                salsa.IsParallel = true;
+                salsa.ParallelBlockSize = 2048;
+                salsa.Transform(enc, dec);
+            }
+
+            if (!Compare.AreEqual(data, dec))
+                throw new Exception("Salsa20: Decrypted arrays are not equal!");
+        }
+
         private void VectorTest(int Rounds, byte[] Key, byte[] Vector, byte[] Input, byte[] Output)
         {
             byte[] outBytes = new byte[Input.Length];

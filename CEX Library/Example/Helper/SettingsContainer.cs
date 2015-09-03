@@ -2,8 +2,9 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using VTDev.Libraries.CEXEngine.Crypto.Structures;
 using System.Text;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Processing.Structure;
 #endregion
 
 namespace VTDev.Projects.CEX.Helper
@@ -74,12 +75,12 @@ namespace VTDev.Projects.CEX.Helper
         }
 
         /// <summary>
-        /// Convert a string to a KeyPackage structure
+        /// Convert a string to a PackageKey structure
         /// </summary>
         /// 
-        /// <param name="Settings">The string containing the KeyPackage</param>
+        /// <param name="Settings">The string containing the PackageKey</param>
         /// 
-        /// <returns>A KeyPackage structuree</returns>
+        /// <returns>A PackageKey structuree</returns>
         public static SettingsContainer FromString(string Settings)
         {
             return DeSerialize(new MemoryStream(Encoding.ASCII.GetBytes(Settings)));
@@ -109,8 +110,8 @@ namespace VTDev.Projects.CEX.Helper
             BinaryReader reader = new BinaryReader(SettingsStream);
             SettingsContainer settings = new SettingsContainer();
 
-            settings.Authority = KeyAuthority.DeSerialize(SettingsStream);
-            settings.Description = CipherDescription.DeSerialize(SettingsStream);
+            settings.Authority = new KeyAuthority(SettingsStream);
+            settings.Description = new CipherDescription(SettingsStream);
             settings.SignChecked = reader.ReadBoolean();
             settings.DomainRestrictChecked = reader.ReadBoolean();
             settings.VolatileChecked = reader.ReadBoolean();
@@ -135,8 +136,8 @@ namespace VTDev.Projects.CEX.Helper
             MemoryStream stream = new MemoryStream();
             BinaryWriter writer = new BinaryWriter(stream);
 
-            writer.Write(((MemoryStream)KeyAuthority.Serialize(Settings.Authority)).ToArray());
-            writer.Write(((MemoryStream)CipherDescription.Serialize(Settings.Description)).ToArray());
+            writer.Write(Settings.Authority.ToBytes());
+            writer.Write(Settings.Description.ToBytes());
             writer.Write(Settings.SignChecked);
             writer.Write(Settings.DomainRestrictChecked);
             writer.Write(Settings.VolatileChecked);

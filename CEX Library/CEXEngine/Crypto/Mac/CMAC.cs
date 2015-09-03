@@ -1,8 +1,10 @@
 ﻿#region Directives
 using System;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block;
-using VTDev.Libraries.CEXEngine.Crypto.Mode;
-using VTDev.Libraries.CEXEngine.Crypto.Padding;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
@@ -57,11 +59,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
     /// 
     /// <revisionHistory>
     /// <revision date="2015/01/23" version="1.3.0.0">Initial release</revision>
+    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
     /// </revisionHistory>
     /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block Namespace</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Mode.ICipherMode Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Engines">VTDev.Libraries.CEXEngine.Crypto.Engines Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode Interface</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">VTDev.Libraries.CEXEngine.Crypto.Engines Enumeration</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
@@ -85,7 +88,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
     /// <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class CMAC : IMac, IDisposable
+    public sealed class CMAC : IMac
     {
         #region Constants
         private const string ALG_NAME = "CMAC";
@@ -95,7 +98,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 
         #region Fields
         private int _blockSize = 0;
-        private ICipherMode _cipherType;
+        private ICipherMode _cipherMode;
         private int _digestSize;
         private bool _disposeEngine = true;
         private bool _isDisposed = false;
@@ -149,27 +152,30 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// </summary>
         /// <param name="Cipher">Instance of the block cipher</param>
         /// <param name="MacBits">Expected MAC return size in Bits; must be less or equal to Cipher Block size in bits</param>
-        /// 
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid MAC size is chosen</exception>
-        /// <exception cref="System.ArgumentException">Thrown if an invalid block size is chosen</exception>
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
+        /// 
+        /// <exception cref="CryptoMacException">Thrown if an invalid Mac or block size is used</exception>
         public CMAC(IBlockCipher Cipher, int MacBits, bool DisposeEngine = true)
         {
             if ((MacBits % 8) != 0)
-                throw new ArgumentOutOfRangeException("MAC size must be multiple of 8!");
+                throw new CryptoMacException("CMAC:Ctor", "MAC size must be multiple of 8!", new ArgumentOutOfRangeException());
             if (MacBits > (Cipher.BlockSize * 8))
-                throw new ArgumentOutOfRangeException("MAC size must be less or equal to " + (Cipher.BlockSize * 8));
+                throw new CryptoMacException("CMAC:Ctor", String.Format("MAC size must be less or equal to {0}!", Cipher.BlockSize * 8), new ArgumentOutOfRangeException());
             if (Cipher.BlockSize != 8 && Cipher.BlockSize != 16)
-                throw new ArgumentException("Block size must be either 64 or 128 bits!");
+                throw new CryptoMacException("CMAC:Ctor", "Block size must be either 64 or 128 bits!", new ArgumentException());
 
             _disposeEngine = DisposeEngine;
-            _cipherType = new CBC(Cipher);
-            _blockSize = _cipherType.BlockSize;
+            _cipherMode = new CBC(Cipher);
+            _blockSize = _cipherMode.BlockSize;
             _digestSize = MacBits / 8;
             _msgCode = new byte[_blockSize];
             _wrkBuffer = new byte[_blockSize];
             _tmpZeroes = new byte[_blockSize];
             _wrkOffset = 0;
+        }
+
+        private CMAC()
+        {
         }
 
         /// <summary>
@@ -190,11 +196,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <param name="InOffset">Offset within Input array</param>
         /// <param name="Length">Amount of data to process in bytes</param>
         /// 
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid Input size is chosen</exception>
+        /// <exception cref="CryptoMacException">Thrown if an invalid Input size is chosen</exception>
         public void BlockUpdate(byte[] Input, int InOffset, int Length)
         {
             if ((InOffset + Length) > Input.Length)
-                throw new ArgumentOutOfRangeException("The Input buffer is too short!");
+                throw new CryptoMacException("CMAC:BlockUpdate", "The Input buffer is too short!", new ArgumentOutOfRangeException());
 
             int gapLen = _blockSize - _wrkOffset;
 
@@ -202,7 +208,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
             {
                 Buffer.BlockCopy(Input, InOffset, _wrkBuffer, _wrkOffset, gapLen);
 
-                _cipherType.Transform(_wrkBuffer, 0, _msgCode, 0);
+                _cipherMode.Transform(_wrkBuffer, 0, _msgCode, 0);
 
                 _wrkOffset = 0;
                 Length -= gapLen;
@@ -210,7 +216,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 
                 while (Length > _blockSize)
                 {
-                    _cipherType.Transform(Input, InOffset, _msgCode, 0);
+                    _cipherMode.Transform(Input, InOffset, _msgCode, 0);
 
                     Length -= _blockSize;
                     InOffset += _blockSize;
@@ -244,11 +250,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// </summary>
         /// 
         /// <param name="Output">The hash value return</param>
-        /// <param name="Offset">The offset in the data</param>
+        /// <param name="OutOffset">The offset in the data</param>
         /// 
-        /// <returns>bytes processed</returns>
-        public int DoFinal(byte[] Output, int Offset)
+        /// <returns>The number of bytes processed</returns>
+        /// 
+        /// <exception cref="CryptoMacException">Thrown if Output array is too small</exception>
+        public int DoFinal(byte[] Output, int OutOffset)
         {
+            if (Output.Length - OutOffset < _digestSize)
+                throw new CryptoMacException("CMAC:DoFinal", "The Output buffer is too short!", new ArgumentOutOfRangeException());
+
             byte[] lu;
 
             if (_wrkOffset == _blockSize)
@@ -264,9 +275,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
             for (int i = 0; i < _msgCode.Length; i++)
                 _wrkBuffer[i] ^= lu[i];
 
-            _cipherType.Transform(_wrkBuffer, 0, _msgCode, 0);
+            _cipherMode.Transform(_wrkBuffer, 0, _msgCode, 0);
 
-            Buffer.BlockCopy(_msgCode, 0, Output, Offset, _digestSize);
+            Buffer.BlockCopy(_msgCode, 0, Output, OutOffset, _digestSize);
 
             Reset();
 
@@ -274,30 +285,38 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         }
 
         /// <summary>
-        /// Initialize the MAC
+        /// Initialize the Cipher MAC.
+        /// <para>Uses the Key field, and optionally the IV field of the KeyParams class.</para>
         /// </summary>
         /// 
-        /// <param name="KeyParam">A <see cref="KeyParams"/> containing Key and IV. 
-        /// <para>Uses the Key and IV fields of the KeyParams parameter.
+        /// <param name="KeyParam">A <see cref="KeyParams"/> containing the cipher Key and optional IV. 
+        /// <para>Uses the Key field of the KeyParams parameter, and optionally the IV.
         /// Key size must be one of the <c>LegalKeySizes</c> of the underlying cipher.
         /// IV size must be the ciphers blocksize.
         /// </para>
         /// </param>
+        /// 
+        /// <exception cref="CryptoMacException">Thrown if an invalid Input size is chosen</exception>
         public void Initialize(KeyParams KeyParam)
         {
             if (KeyParam.Key == null)
-                throw new ArgumentNullException("Key can not be null!");
+                throw new CryptoMacException("CMAC:Initialize", "Key can not be null!", new ArgumentNullException());
 
-            byte[] tmpIv = new byte[_blockSize];
+            byte[] tmpIv;
+            if (KeyParam.IV == null || KeyParam.IV.Length != _blockSize)
+                tmpIv = new byte[_blockSize];
+            else
+                tmpIv = KeyParam.IV;
+
             // convert for cipher
             KeyParams key = new KeyParams(KeyParam.Key, tmpIv);
-            _cipherType.Initialize(true, key);
+            _cipherMode.Initialize(true, key);
 
             _L = new byte[_tmpZeroes.Length];
-            _cipherType.Transform(_tmpZeroes, 0, _L, 0);
+            _cipherMode.Transform(_tmpZeroes, 0, _L, 0);
             _LU = DoubleLu(_L);
             _LU2 = DoubleLu(_LU);
-            _cipherType.Initialize(true, key);
+            _cipherMode.Initialize(true, key);
 
             _isInitialized = true;
         }
@@ -320,7 +339,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         {
             if (_wrkOffset == _wrkBuffer.Length)
             {
-                _cipherType.Transform(_wrkBuffer, 0, _msgCode, 0);
+                _cipherMode.Transform(_wrkBuffer, 0, _msgCode, 0);
                 _wrkOffset = 0;
             }
 
@@ -362,10 +381,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
             {
                 try
                 {
-                    if (_cipherType != null && _disposeEngine)
+                    if (_cipherMode != null && _disposeEngine)
                     {
-                        _cipherType.Dispose();
-                        _cipherType = null;
+                        _cipherMode.Dispose();
+                        _cipherMode = null;
                     }
                     if (_msgCode != null)
                     {

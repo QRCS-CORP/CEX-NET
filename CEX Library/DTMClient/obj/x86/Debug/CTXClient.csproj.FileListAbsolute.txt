@@ -1,0 +1,5 @@
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\CTXClient\bin\x86\Debug\SocketAsyncClient.exe.config
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\CTXClient\bin\x86\Debug\SocketAsyncClient.exe
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\CTXClient\bin\x86\Debug\SocketAsyncClient.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\CTXClient\obj\x86\Debug\SocketAsyncClient.exe
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\CTXClient\obj\x86\Debug\SocketAsyncClient.pdb

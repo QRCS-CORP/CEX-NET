@@ -1,5 +1,7 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
@@ -31,7 +33,7 @@ using System;
 // Doug Whiting, David Wagner, Chris Hall, and Niels Ferguson.
 // Twofish: <see href="https://www.schneier.com/paper-twofish-paper.pdf">Specification</see>.
 // 
-// Implementation Details:</description>
+// Implementation Details:
 // An implementation of the Twofish block cipher,
 // extended to 512 bit keys and up to 32 rounds.
 // TwoFish Extended (TFX)
@@ -62,9 +64,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// <revisionHistory>
     /// <revision date="2014/11/14" version="1.2.0.0">Initial release</revision>
     /// <revision date="2015/01/23" version="1.3.0.0">Secondary release; updates to layout and documentation</revision>
+    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
     /// </revisionHistory>
     /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Mode.ICipherMode Interface</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode Interface</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
@@ -90,12 +93,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// <item><description>Inspired in part by the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see>.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class TFX : IBlockCipher, IDisposable
+    public sealed class TFX : IBlockCipher
     {
         #region Constants
         private const string ALG_NAME = "TFX";
         private const Int32 BLOCK_SIZE = 16;
-        private const Int32 DEFAULT_ROUNDS = 16;
+        private const Int32 ROUNDS16 = 16;
         private const Int32 DEFAULT_SUBKEYS = 40;
         private const Int32 GF256_FDBK = 0x169; // primitive polynomial for GF(256)
         private const Int32 GF256_FDBK_2 = GF256_FDBK / 2;
@@ -109,7 +112,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         #endregion
 
         #region Fields
-        private Int32 _dfnRounds = DEFAULT_ROUNDS;
+        private Int32 _dfnRounds = ROUNDS16;
         private Int32[] _expKey;
         private bool _isDisposed = false;
         private bool _isEncryption = false;
@@ -184,13 +187,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// Initialize the class
         /// </summary>
         /// 
-        /// <param name="Rounds">Number of diffusion rounds. The <see cref="LegalRounds"/> property contains available sizes</param>
+        /// <param name="Rounds">Number of diffusion rounds. The <see cref="LegalRounds"/> property contains available sizes. Default is 16 rounds.</param>
         /// 
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid rounds count is chosen</exception>
-        public TFX(int Rounds = DEFAULT_ROUNDS)
+        /// <exception cref="CryptoSymmetricException">Thrown if an invalid rounds count is chosen</exception>
+        public TFX(int Rounds = ROUNDS16)
         {
             if (Rounds != 16 && Rounds != 18 && Rounds != 20 && Rounds != 22 && Rounds != 24 && Rounds != 26 && Rounds != 28 && Rounds != 30 && Rounds != 32)
-                throw new ArgumentOutOfRangeException("Invalid rounds size! Sizes supported are 16, 18, 20, 22, 24, 26, 28, 30 and 32.");
+                throw new CryptoSymmetricException("TFX:CTor", "Invalid rounds size! Sizes supported are 16, 18, 20, 22, 24, 26, 28, 30 and 32.", new ArgumentOutOfRangeException());
 
             _dfnRounds = Rounds;
         }
@@ -268,14 +271,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// <param name="Encryption">Using Encryption or Decryption mode</param>
         /// <param name="KeyParam">Cipher key container. <para>The <see cref="LegalKeySizes"/> property contains valid sizes.</para></param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null key is used</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid key size is used</exception>
+        /// <exception cref="CryptoSymmetricException">Thrown if a null or invalid key is used</exception>
         public void Initialize(bool Encryption, KeyParams KeyParam)
         {
             if (KeyParam.Key == null)
-                throw new ArgumentNullException("Invalid key! Key can not be null.");
+                throw new CryptoSymmetricException("TFX:Initialize", "Invalid key! Key can not be null.", new ArgumentNullException());
             if (KeyParam.Key.Length != 16 && KeyParam.Key.Length != 24 && KeyParam.Key.Length != 32 && KeyParam.Key.Length != 64)
-                throw new ArgumentOutOfRangeException("Invalid key size! Valid sizes are 16, 24, 32, 64 bytes.");
+                throw new CryptoSymmetricException("TFX:Initialize", "Invalid key size! Valid sizes are 16, 24, 32 and 64 bytes.", new ArgumentOutOfRangeException());
 
             _isEncryption = Encryption;
             _expKey = ExpandKey(KeyParam.Key);
@@ -479,7 +481,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         #endregion
 
         #region Helpers
-        private static Int32 BytesToInt32(byte[] Input, Int32 InOffset)
+        private Int32 BytesToInt32(byte[] Input, Int32 InOffset)
         {
             return (((byte)(Input[InOffset])) |
                 ((byte)(Input[InOffset + 1]) << 8) |
@@ -487,7 +489,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 ((byte)(Input[InOffset + 3]) << 24));
         }
 
-        private static void Int32ToBytes(Int32 Dword, byte[] Output, Int32 OutOffset)
+        private void Int32ToBytes(Int32 Dword, byte[] Output, Int32 OutOffset)
         {
             Output[OutOffset] = (byte)Dword;
             Output[OutOffset + 1] = (byte)(Dword >> 8);

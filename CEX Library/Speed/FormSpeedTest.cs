@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using VTDev.Libraries.CEXEngine.Crypto;
 using Speed.SpeedTest;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 
 #region Speed Benchmarks
 /// Speed tests on an AMD ASD-3600 Quad-Core, 4GB RAM, compiled Release/Any CPU.
@@ -84,26 +84,26 @@ namespace Speed
 
         #region Fields
         private CipherModes _cipherType;
-        private Engines _engineType;
+        private SymmetricEngines _engineType;
         private KeySizes _keySize;
         private bool _isEncryption;
         private bool _isParallel;
         private RoundCounts _roundCount;
         private static int _sampleSize = 1;
         private EngineSpeedTest.TestTypes _testType;
-        private static readonly Dictionary<string, Engines> _engineDescriptions = new Dictionary<string, Engines>() 
+        private static readonly Dictionary<string, SymmetricEngines> _engineDescriptions = new Dictionary<string, SymmetricEngines>() 
         {  
-            {"ChaCha+: The ChaCha stream cipher", Engines.ChaCha},
-            {"Fusion: The Twofish and Rijndael Merged ciphers", Engines.Fusion},
-            {"RDX: An extended implementation of Rijndael", Engines.RDX},
-            {"RHX: Rijndael with an HKDF Key Schedule", Engines.RHX},
-            {"RSM: Rijndael and Serpent Merged block ciphers", Engines.RSM},
-            {"Salsa20+: The Salsa20 stream cipher", Engines.Salsa},
-            {"SHX: Serpent extended with an HKDF Key Schedule", Engines.SHX},
-            {"SPX: An extended implementation of Serpent", Engines.SPX},
-            {"TFX: An extended implementation of Twofish", Engines.TFX},
-            {"THX: Twofish extended with an HKDF Key Schedule", Engines.THX},
-            {"TSM: Twofish and Serpent Merged ciphers", Engines.TSM}
+            {"ChaCha+: The ChaCha stream cipher", SymmetricEngines.ChaCha},
+            {"Fusion: The Twofish and Rijndael Merged ciphers", SymmetricEngines.Fusion},
+            {"RDX: An extended implementation of Rijndael", SymmetricEngines.RDX},
+            {"RHX: Rijndael with an HKDF Key Schedule", SymmetricEngines.RHX},
+            {"RSM: Rijndael and Serpent Merged block ciphers", SymmetricEngines.RSM},
+            {"Salsa20+: The Salsa20 stream cipher", SymmetricEngines.Salsa},
+            {"SHX: Serpent extended with an HKDF Key Schedule", SymmetricEngines.SHX},
+            {"SPX: An extended implementation of Serpent", SymmetricEngines.SPX},
+            {"TFX: An extended implementation of Twofish", SymmetricEngines.TFX},
+            {"THX: Twofish extended with an HKDF Key Schedule", SymmetricEngines.THX},
+            {"TSM: Twofish and Serpent Merged ciphers", SymmetricEngines.TSM}
         };
         #endregion
 
@@ -124,7 +124,7 @@ namespace Speed
 
         private void OnEngineChanged(object sender, EventArgs e)
         {
-            Engines engine = _engineDescriptions[((ComboBox)sender).Text];
+            SymmetricEngines engine = _engineDescriptions[((ComboBox)sender).Text];
             SetComboParams(engine);
             this._engineType = engine;
         }
@@ -289,10 +289,10 @@ namespace Speed
 
             ComboHelper.LoadEnumValues(cbCipherMode, typeof(CipherModes));
             cbCipherMode.SelectedIndex = 2;
-            SetComboParams(Engines.RHX);
+            SetComboParams(SymmetricEngines.RHX);
         }
 
-        private void SetComboParams(Engines Engine)
+        private void SetComboParams(SymmetricEngines Engine)
         {
             cbCipherMode.Enabled = true;
             cbKeySize.Enabled = true;
@@ -302,8 +302,8 @@ namespace Speed
 
             switch (Engine)
             {
-                case Engines.ChaCha:
-                case Engines.Salsa:
+                case SymmetricEngines.ChaCha:
+                case SymmetricEngines.Salsa:
                     cbCipherMode.Enabled = false;
                     cbKeySize.Items.Add(KeySizes.K128);
                     cbKeySize.Items.Add(KeySizes.K256);
@@ -313,22 +313,21 @@ namespace Speed
                     ComboHelper.AddEnumRange(cbRounds, typeof(RoundCounts), 8, 30);
                     ComboHelper.SetSelectedIndex(cbRounds, 6);
                     break;
-                case Engines.RDX:
+                case SymmetricEngines.RDX:
                     cbRounds.Enabled = false;
                     cbKeySize.Items.Add(KeySizes.K128);
                     cbKeySize.Items.Add(KeySizes.K256);
                     cbKeySize.Items.Add(KeySizes.K512);
                     ComboHelper.SetSelectedIndex(cbKeySize, 1);
                     break;
-                case Engines.RHX:
-                    this._engineType = Engines.RHX;
-                    ComboHelper.SetSelectedIndex(cbEngines, 4);
+                case SymmetricEngines.RHX:
+                    ComboHelper.SetSelectedIndex(cbEngines, 3);
                     ComboHelper.AddEnumRange(cbKeySize, typeof(KeySizes), 192, 576);
                     ComboHelper.SetSelectedIndex(cbKeySize, 0);
                     ComboHelper.AddEnumRange(cbRounds, typeof(RoundCounts), 10, 38);
                     ComboHelper.SetSelectedIndex(cbRounds, 2);
                     break;
-                case Engines.RSM:
+                case SymmetricEngines.RSM:
                     ComboHelper.AddEnumRange(cbKeySize, typeof(KeySizes), 192, 576);
                     ComboHelper.SetSelectedIndex(cbKeySize, 0);
                     cbRounds.Items.Add(RoundCounts.R10);
@@ -338,7 +337,7 @@ namespace Speed
                     cbRounds.Items.Add(RoundCounts.R42);
                     ComboHelper.SetSelectedIndex(cbRounds, 1);
                     break;
-                case Engines.SHX:
+                case SymmetricEngines.SHX:
                     ComboHelper.AddEnumRange(cbKeySize, typeof(KeySizes), 192, 576);
                     ComboHelper.SetSelectedIndex(cbKeySize, 0);
                     cbRounds.Items.Add(RoundCounts.R32);
@@ -348,7 +347,7 @@ namespace Speed
                     cbRounds.Items.Add(RoundCounts.R64);
                     ComboHelper.SetSelectedIndex(cbRounds, 0);
                     break;
-                case Engines.SPX:
+                case SymmetricEngines.SPX:
                     ComboHelper.AddEnumRange(cbKeySize, typeof(KeySizes), 16, 64);
                     ComboHelper.SetSelectedIndex(cbKeySize, 2);
                     cbRounds.Items.Add(RoundCounts.R32);
@@ -358,7 +357,7 @@ namespace Speed
                     cbRounds.Items.Add(RoundCounts.R64);
                     ComboHelper.SetSelectedIndex(cbRounds, 0);
                     break;
-                case Engines.TFX:
+                case SymmetricEngines.TFX:
                     cbKeySize.Items.Add(KeySizes.K128);
                     cbKeySize.Items.Add(KeySizes.K256);
                     cbKeySize.Items.Add(KeySizes.K512);

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
-using VTDev.Libraries.CEXEngine.Crypto.Structures;
-using VTDev.Libraries.CEXEngine.Crypto;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
+using VTDev.Libraries.CEXEngine.Crypto.Processing.Structure;
 
 namespace VTDev.Projects.CEX
 {
@@ -22,7 +22,7 @@ namespace VTDev.Projects.CEX
             lstInfo.Items.Add("");
             lstInfo.Items.Add("Key Settings");
             lstInfo.Items.Add("Sub Keys:" + Info.SubKeyCount);
-            lstInfo.Items.Add("Cipher: " + MemberToString((Engines)Info.Description.CipherType));
+            lstInfo.Items.Add("Cipher: " + MemberToString((SymmetricEngines)Info.Description.CipherType));
             lstInfo.Items.Add("HMAC:" + (Info.Description.MacSize > 0 ? MemberToString((Digests)Info.Description.MacEngine) : "None"));
             if (!string.IsNullOrEmpty(Info.Tag))
                 lstInfo.Items.Add("Description: " + Info.Tag);

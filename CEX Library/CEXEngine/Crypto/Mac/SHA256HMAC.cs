@@ -1,6 +1,8 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
@@ -56,11 +58,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
     /// <revisionHistory>
     /// <revision date="2014/11/11" version="1.2.0.0">Initial release</revision>
     /// <revision date="2015/01/23" version="1.3.0.0">Changes to formatting and documentation</revision>
+    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
     /// </revisionHistory>
     /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest">VTDev.Libraries.CEXEngine.Crypto.Digest Namespace</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digests">VTDev.Libraries.CEXEngine.Crypto.Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
@@ -85,7 +88,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
     /// <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class SHA256HMAC : IMac, IDisposable
+    public sealed class SHA256HMAC : IMac
     {
         #region Constants
         private const string ALG_NAME = "SHA256HMAC";
@@ -155,8 +158,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// 
         /// <param name="Key">HMAC Key; passed to HMAC Initialize() through constructor</param>
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
+        /// 
+        /// <exception cref="CryptoMacException">Thrown if a null Key is used</exception>
         public SHA256HMAC(byte[] Key, bool DisposeEngine = true)
         {
+            if (Key == null)
+                throw new CryptoMacException("SHA256HMAC:Ctor", "Key can not be null!", new ArgumentNullException());
+
             _shaDigest = new SHA256();
             _shaHmac = new HMAC(_shaDigest, Key, DisposeEngine);
             _isInitialized = true;
@@ -180,11 +188,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <param name="InOffset">Offset within Input</param>
         /// <param name="Length">Amount of data to process in bytes</param>
         /// 
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid Input size is chosen</exception>
+        /// <exception cref="CryptoMacException">Thrown if an invalid Input size is chosen</exception>
         public void BlockUpdate(byte[] Input, int InOffset, int Length)
         {
             if ((InOffset + Length) > Input.Length)
-                throw new ArgumentOutOfRangeException("The Input buffer is too short!");
+                throw new CryptoMacException("SHA256HMAC:BlockUpdate", "The Input buffer is too short!", new ArgumentOutOfRangeException());
 
             _shaHmac.BlockUpdate(Input, InOffset, Length);
         }
@@ -206,16 +214,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// </summary>
         /// 
         /// <param name="Output">The hash value return</param>
-        /// <param name="Offset">The offset in the data</param>
+        /// <param name="OutOffset">The offset in the data</param>
         /// 
-        /// <returns>bytes processed</returns>
-        public int DoFinal(byte[] Output, int Offset)
+        /// <returns>The number of bytes processed</returns>
+        /// 
+        /// <exception cref="CryptoMacException">Thrown if Output array is too small</exception>
+        public int DoFinal(byte[] Output, int OutOffset)
         {
-            return _shaHmac.DoFinal(Output, Offset);
+            if (Output.Length - OutOffset < DIGEST_SIZE)
+                throw new CryptoMacException("SHA256HMAC:DoFinal", "The Output buffer is too short!", new ArgumentOutOfRangeException());
+
+            return _shaHmac.DoFinal(Output, OutOffset);
         }
 
         /// <summary>
-        /// Initialize the HMAC
+        /// Initialize the HMAC.
+        /// <para>Uses the Key field of the KeyParams class.</para>
         /// </summary>
         /// 
         /// <param name="KeyParam">KeyParams containing HMAC Key. 

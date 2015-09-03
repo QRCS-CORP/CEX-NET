@@ -144,7 +144,7 @@ namespace VTDev.Libraries.CEXEngine.Security
             if (FileSize < BUFFER_SIZE)
                 bufferSize = (int)FileSize;
 
-            using (FileStream outputWriter = new FileStream(FilePath, FileMode.Open, FileAccess.Write, FileShare.None, Buffer.Length, FileOptions.WriteThrough))
+            using (FileStream outputWriter = new FileStream(FilePath, FileMode.Open, FileAccess.Write, FileShare.Read, Buffer.Length, FileOptions.WriteThrough))
             {
                 while (bytesWritten < FileSize)
                 {

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using VTDev.Libraries.CEXEngine.Crypto;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream;
-using VTDev.Libraries.CEXEngine.Crypto.Helper;
-using VTDev.Libraries.CEXEngine.Crypto.Mode;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 
 namespace Speed.SpeedTest
 {
@@ -35,7 +35,7 @@ namespace Speed.SpeedTest
         private ICipherMode _cipherEngine;
         private CipherModes _cipherType;
         private int _dataSize;
-        private Engines _engineType;
+        private SymmetricEngines _engineType;
         private bool _isEncryption;
         private bool _isParallel;
         byte[] _inputBuffer;
@@ -48,7 +48,7 @@ namespace Speed.SpeedTest
         #endregion
 
         #region Constructor
-        public EngineSpeedTest(Engines Engine, CipherModes Mode, int DataSize, int KeySize, int Rounds, bool Encryption, bool Parallel, TestTypes TestType = TestTypes.FileIO)
+        public EngineSpeedTest(SymmetricEngines Engine, CipherModes Mode, int DataSize, int KeySize, int Rounds, bool Encryption, bool Parallel, TestTypes TestType = TestTypes.FileIO)
         {
             _cipherType = Mode;
             _dataSize = DataSize;
@@ -65,7 +65,7 @@ namespace Speed.SpeedTest
                 _streamCipher = GetStreamEngine();
                 _streamCipher.Initialize(_keyParam);
 
-                if (_isParallel && _engineType == Engines.Fusion)
+                if (_isParallel && _engineType == SymmetricEngines.Fusion || _engineType == SymmetricEngines.Salsa)
                 {
                     if (_dataSize > MB100)
                         _blockSize = MB100;
@@ -312,21 +312,21 @@ namespace Speed.SpeedTest
 
         private IBlockCipher GetBlockEngine()
         {
-            if (_engineType == Engines.RDX)
+            if (_engineType == SymmetricEngines.RDX)
                 return new RDX();
-            else if (_engineType == Engines.RHX)
+            else if (_engineType == SymmetricEngines.RHX)
                 return new RHX(_roundCount);
-            else if (_engineType == Engines.RSM)
+            else if (_engineType == SymmetricEngines.RSM)
                 return new RSM(_roundCount);
-            else if (_engineType == Engines.SHX)
+            else if (_engineType == SymmetricEngines.SHX)
                 return new SHX(_roundCount);
-            else if (_engineType == Engines.SPX)
+            else if (_engineType == SymmetricEngines.SPX)
                 return new SPX(_roundCount);
-            else if (_engineType == Engines.TFX)
+            else if (_engineType == SymmetricEngines.TFX)
                 return new TFX(_roundCount);
-            else if (_engineType == Engines.THX)
+            else if (_engineType == SymmetricEngines.THX)
                 return new THX(_roundCount);
-            else if (_engineType == Engines.TSM)
+            else if (_engineType == SymmetricEngines.TSM)
                 return new TSM(_roundCount);
             else
                 return null;
@@ -346,11 +346,11 @@ namespace Speed.SpeedTest
 
         private IStreamCipher GetStreamEngine()
         {
-            if (_engineType == Engines.ChaCha)
+            if (_engineType == SymmetricEngines.ChaCha)
                 return new ChaCha();
-            else if (_engineType == Engines.Fusion)
+            else if (_engineType == SymmetricEngines.Fusion)
                 return new Fusion();
-            else if (_engineType == Engines.Salsa)
+            else if (_engineType == SymmetricEngines.Salsa)
                 return new Salsa20();
             else
                 return null;
@@ -358,26 +358,26 @@ namespace Speed.SpeedTest
 
         private KeyParams GetKeyParams()
         {
-            if (_engineType == Engines.ChaCha)
+            if (_engineType == SymmetricEngines.ChaCha)
                 return new KeyGenerator().GetKeyParams(_keySize, 8);
-            else if (_engineType == Engines.Salsa)
+            else if (_engineType == SymmetricEngines.Salsa)
                 return new KeyGenerator().GetKeyParams(_keySize, 8);
-            else if (_engineType == Engines.Fusion)
+            else if (_engineType == SymmetricEngines.Fusion)
                 return new KeyGenerator().GetKeyParams(_keySize, 16);
 
             if (_keySize != 0)
                 return new KeyGenerator().GetKeyParams(_keySize, 16);
-            else if (_engineType == Engines.RDX)
+            else if (_engineType == SymmetricEngines.RDX)
                 return new KeyGenerator().GetKeyParams(_keySize, 16);
-            else if (_engineType == Engines.RHX)
+            else if (_engineType == SymmetricEngines.RHX)
                 return new KeyGenerator().GetKeyParams(_keySize, 16);
-            else if (_engineType == Engines.RSM)
+            else if (_engineType == SymmetricEngines.RSM)
                 return new KeyGenerator().GetKeyParams(_keySize, 16);
-            else if (_engineType == Engines.SHX)
+            else if (_engineType == SymmetricEngines.SHX)
                 return new KeyGenerator().GetKeyParams(_keySize, 16);
-            else if (_engineType == Engines.SPX)
+            else if (_engineType == SymmetricEngines.SPX)
                 return new KeyGenerator().GetKeyParams(_keySize, 16);
-            else if (_engineType == Engines.TFX)
+            else if (_engineType == SymmetricEngines.TFX)
                 return new KeyGenerator().GetKeyParams(_keySize, 16);
             else
                 return null;
@@ -385,9 +385,9 @@ namespace Speed.SpeedTest
 
         private bool IsStreamCipher()
         {
-            return _engineType == Engines.ChaCha ||
-                _engineType == Engines.Salsa ||
-                _engineType == Engines.Fusion;
+            return _engineType == SymmetricEngines.ChaCha ||
+                _engineType == SymmetricEngines.Salsa ||
+                _engineType == SymmetricEngines.Fusion;
         }
         #endregion
     }

@@ -2,6 +2,7 @@
 using System;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Generator;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
@@ -51,11 +52,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
     /// 
     /// <revisionHistory>
     /// <revision date="2015/28/15" version="1.3.2.0">Initial release</revision>
+    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
     /// </revisionHistory>
     /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Mac.HMAC">VTDev.Libraries.CEXEngine.Crypto.Mac HMAC</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digests">VTDev.Libraries.CEXEngine.Crypto Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration Digests Enumeration</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Guiding Publications:</h4></description>
@@ -63,7 +65,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
     /// <item><description>RFC 2898: <see href="http://tools.ietf.org/html/rfc2898">Specification</see>.</description></item>
     /// </list>
     /// </remarks>
-    public sealed class PBPRng : IRandom, IDisposable
+    public sealed class PBPRng : IRandom
     {
         #region Constants
         private const string ALG_NAME = "PassphrasePrng";
@@ -99,13 +101,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="Digest">Digest engine</param>
         /// <param name="Passphrase">The passphrase</param>
         /// <param name="Salt">The salt value</param>
-        /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
-        public PBPRng(IDigest Digest, byte[] Passphrase, byte[] Salt, bool DisposeEngine = true)
+        /// <param name="Iterations">The number of transformation iterations performed by the digest with PKCS5 (default is 10,000)</param>
+        /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called (default is true)</param>
+        /// 
+        /// <exception cref="CryptoRandomException">Thrown if a null Digest, Passphrase or Salt are used</exception>
+        public PBPRng(IDigest Digest, byte[] Passphrase, byte[] Salt, int Iterations = PKCS_ITERATIONS, bool DisposeEngine = true)
         {
+            if (Digest == null)
+                throw new CryptoRandomException("PBPRng:Ctor", "Digest can not be null!", new ArgumentNullException());
+            if (Passphrase == null)
+                throw new CryptoRandomException("PBPRng:Ctor", "Passphrase can not be null!", new ArgumentNullException());
+            if (Salt == null)
+                throw new CryptoRandomException("PBPRng:Ctor", "Salt can not be null!", new ArgumentNullException());
+
             try
             {
                 _disposeEngine = DisposeEngine;
-                PKCS5 pkcs = new PKCS5(Digest, PKCS_ITERATIONS, false);
+                PKCS5 pkcs = new PKCS5(Digest, Iterations, false);
                 _digest = Digest;
                 pkcs.Initialize(Salt, Passphrase);
                 _rndData = new byte[_digest.BlockSize];
@@ -276,6 +288,42 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
             Buffer.BlockCopy(GetBytes(8), 0, data, 0, LONG_SIZE);
 
             return data[0];
+        }
+
+        /// <summary>
+        /// Get a ranged pseudo random 64bit integer
+        /// </summary>
+        /// 
+        /// <param name="Maximum">Maximum value</param>
+        /// 
+        /// <returns>Random Int64</returns>
+        public Int64 NextLong(long Maximum)
+        {
+            byte[] rand;
+            Int64[] num = new Int64[1];
+
+            do
+            {
+                rand = GetByteRange(Maximum);
+                Buffer.BlockCopy(rand, 0, num, 0, rand.Length);
+            } while (num[0] > Maximum);
+
+            return num[0];
+        }
+
+        /// <summary>
+        /// Get a ranged pseudo random 64bit integer
+        /// </summary>
+        /// 
+        /// <param name="Minimum">Minimum value</param>
+        /// <param name="Maximum">Maximum value</param>
+        /// 
+        /// <returns>Random Int64</returns>
+        public Int64 NextLong(long Minimum, long Maximum)
+        {
+            Int64 num = 0;
+            while ((num = NextLong(Maximum)) < Minimum) { }
+            return num;
         }
 
         /// <summary>

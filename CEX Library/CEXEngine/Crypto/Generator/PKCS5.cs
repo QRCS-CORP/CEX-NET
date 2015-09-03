@@ -1,7 +1,9 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Mac;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Generator
@@ -26,16 +28,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// 
     /// <revisionHistory>
     /// <revision date="2015/28/15" version="1.3.1.1">Initial release</revision>
+    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
     /// </revisionHistory>
     /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Mac.HMAC">VTDev.Libraries.CEXEngine.Crypto.Mac HMAC</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digests">VTDev.Libraries.CEXEngine.Crypto Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration Digests Enumeration</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
     /// <list type="bullet">
-    /// <item><description>Can be initialized with a <see cref="Digests">Digest</see> or a <see cref="Macs">Mac</see>.</description></item>
+    /// <item><description>Can be initialized with a <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> or a <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Macs">Mac</see>.</description></item>
     /// <item><description>The <see cref="PKCS5(IDigest, int, bool)">Constructors</see> DisposeEngine parameter determines if Digest engine is destroyed when <see cref="Dispose()"/> is called on this class; default is <c>true</c>.</description></item>
     /// <item><description>Salt size should be multiple of Digest block size.</description></item>
     /// <item><description>Ikm size should be Digest hash return size.</description></item>
@@ -52,7 +55,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
     /// </list> 
     /// </remarks>
-    public class PKCS5 : IGenerator, IDisposable
+    public class PKCS5 : IGenerator
     {
         #region Constants
         private const string ALG_NAME = "PKCS5";
@@ -101,16 +104,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
         #region Constructors
         /// <summary>
-        /// Creates a PKCS5 Bytes Generator based on the given HMAC function
+        /// Creates a PKCS5 Bytes Generator using the default SHA512 HMAC engine
         /// </summary>
         /// 
         /// <param name="Iterations">The number of cycles used to produce output</param>
         /// 
-        /// <exception cref="System.ArgumentException">Thrown if an invalid Iterations count is used</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if an invalid Iterations count is used</exception>
         public PKCS5(int Iterations)
         {
             if (Iterations < 1)
-                throw new ArgumentException("Iterations count can not be less than 1!");
+                throw new CryptoGeneratorException("PKCS5:Ctor", "Iterations count can not be less than 1!", new ArgumentException());
 
             _Iterations = Iterations;
             _disposeEngine = true;
@@ -127,14 +130,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <param name="Iterations">The number of cycles used to produce output</param>
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null Digest is used</exception>
-        /// <exception cref="System.ArgumentException">Thrown if an invalid Iterations count is used</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if a null Digest or Iterations count is used</exception>
         public PKCS5(IDigest Digest, int Iterations, bool DisposeEngine = true)
         {
             if (Digest == null)
-                throw new ArgumentNullException("Digest can not be null!");
+                throw new CryptoGeneratorException("PKCS5:Ctor", "Digest can not be null!", new ArgumentNullException());
             if (Iterations < 1)
-                throw new ArgumentException("Iterations count can not be less than 1!");
+                throw new CryptoGeneratorException("PKCS5:Ctor", "Iterations count can not be less than 1!", new ArgumentException());
 
             _Iterations = Iterations;
             _disposeEngine = DisposeEngine;
@@ -151,20 +153,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <param name="Iterations">The number of cycles used to produce output</param>
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null Hmac is used</exception>
-        /// <exception cref="System.ArgumentException">Thrown if an invalid Iterations count is used</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if a null Hmac or invalid Iterations count is used</exception>
         public PKCS5(IMac Hmac, int Iterations, bool DisposeEngine = true)
         {
             if (Hmac == null)
-                throw new ArgumentNullException("Hmac can not be null!");
+                throw new CryptoGeneratorException("PKCS5:Ctor", "Hmac can not be null!", new ArgumentNullException());
             if (Iterations < 1)
-                throw new ArgumentException("Iterations count can not be less than 1!");
+                throw new CryptoGeneratorException("PKCS5:Ctor", "Iterations count can not be less than 1!", new ArgumentException());
 
             _Iterations = Iterations;
             _disposeEngine = DisposeEngine;
             _digestMac = Hmac;
             _hashLength = Hmac.DigestSize;
             _keySize = Hmac.BlockSize;
+        }
+
+        private PKCS5()
+        {
         }
 
         /// <summary>
@@ -183,11 +188,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// 
         /// <param name="Salt">Salt value</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null Salt is used</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if a null Salt is used</exception>
         public void Initialize(byte[] Salt)
         {
             if (Salt == null)
-                throw new ArgumentNullException("Salt can not be null!");
+                throw new CryptoGeneratorException("PKCS5:Initialize", "Salt can not be null!", new ArgumentNullException());
 
             byte[] keyBytes = new byte[_digestMac.DigestSize];
             Buffer.BlockCopy(Salt, 0, _Salt, 0, Salt.Length - _digestMac.DigestSize);
@@ -205,13 +210,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <param name="Salt">Salt value</param>
         /// <param name="Ikm">Key material</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null Salt or Ikm is used</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if a null Salt or Ikm is used</exception>
         public void Initialize(byte[] Salt, byte[] Ikm)
         {
             if (Salt == null)
-                throw new ArgumentNullException("Salt can not be null!");
+                throw new CryptoGeneratorException("PKCS5:Initialize", "Salt can not be null!", new ArgumentNullException());
             if (Ikm == null)
-                throw new ArgumentNullException("Ikm can not be null!");
+                throw new CryptoGeneratorException("PKCS5:Initialize", "IKM can not be null!", new ArgumentNullException());
 
             _Salt = (byte[])Salt.Clone();
             _macKey = new KeyParams(Ikm);
@@ -227,13 +232,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <param name="Ikm">Key material</param>
         /// <param name="Nonce">Nonce value</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null Salt or Ikm is used</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if a null Salt or Ikm is used</exception>
         public void Initialize(byte[] Salt, byte[] Ikm, byte[] Nonce)
         {
             if (Salt == null)
-                throw new ArgumentNullException("Salt can not be null!");
+                throw new CryptoGeneratorException("PKCS5:Initialize", "Salt can not be null!", new ArgumentNullException());
             if (Ikm == null)
-                throw new ArgumentNullException("Ikm can not be null!");
+                throw new CryptoGeneratorException("PKCS5:Initialize", "IKM can not be null!", new ArgumentNullException());
 
             _macKey = new KeyParams(Ikm);
             _Salt = new byte[Salt.Length + Nonce.Length];
@@ -265,8 +270,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <param name="Size">Number of bytes to generate</param>
         /// 
         /// <returns>Number of bytes generated</returns>
+        /// 
+        /// <exception cref="CryptoGeneratorException">Thrown if the output buffer is too small</exception>
         public int Generate(byte[] Output, int OutOffset, int Size)
         {
+            if ((Output.Length - Size) < OutOffset)
+                throw new CryptoGeneratorException("PKCS5:Generate", "Output buffer too small!", new Exception());
+
             return GenerateKey(Output, OutOffset, Size);
         }
 
@@ -276,9 +286,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// 
         /// <param name="Seed">Pseudo random seed material</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null Seed is used</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if a null Seed is used</exception>
         public void Update(byte[] Seed)
         {
+            if (Seed == null)
+                throw new CryptoGeneratorException("PKCS5:Update", "Seed can not be null!", new ArgumentNullException());
+
             Initialize(Seed);
         }
         #endregion
@@ -311,12 +324,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
             return Size;
         }
 
-        private void IntToOctet(byte[] Output, int Offset)
+        private void IntToOctet(byte[] Output, int Counter)
         {
-            Output[0] = (byte)((uint)Offset >> 24);
-            Output[1] = (byte)((uint)Offset >> 16);
-            Output[2] = (byte)((uint)Offset >> 8);
-            Output[3] = (byte)Offset;
+            Output[0] = (byte)((uint)Counter >> 24);
+            Output[1] = (byte)((uint)Counter >> 16);
+            Output[2] = (byte)((uint)Counter >> 8);
+            Output[3] = (byte)Counter;
         }
 
         private void Process(byte[] Input, byte[] Output, int OutOffset)

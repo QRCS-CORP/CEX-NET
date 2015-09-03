@@ -2,9 +2,9 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
-using VTDev.Libraries.CEXEngine.Crypto;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block;
-using VTDev.Libraries.CEXEngine.Utility;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Tools;
 #endregion
 
 namespace VTDev.Projects.CEX.Test.Tests.CipherTest

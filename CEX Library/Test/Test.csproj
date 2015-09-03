@@ -68,6 +68,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -75,6 +77,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsoleUtils.cs" />
     <Compile Include="Helper\Logger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -83,6 +86,27 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Tests\AsymmetricTest\GMSS\GMSSKeyTest.cs" />
+    <Compile Include="Tests\AsymmetricTest\GMSS\GMSSParamTest.cs" />
+    <Compile Include="Tests\AsymmetricTest\GMSS\GMSSSignTest.cs" />
+    <Compile Include="Tests\AsymmetricTest\McEliece\McElieceEncryptionTest.cs" />
+    <Compile Include="Tests\AsymmetricTest\McEliece\McElieceKeyTest.cs" />
+    <Compile Include="Tests\AsymmetricTest\McEliece\McElieceParamTest.cs" />
+    <Compile Include="Tests\AsymmetricTest\McEliece\McElieceSignTest.cs" />
+    <Compile Include="Tests\AsymmetricTest\NTRU\Encrypt\NtruEncryptTest.cs" />
+    <Compile Include="Tests\AsymmetricTest\NTRU\Encrypt\NtruKeyPairTest.cs" />
+    <Compile Include="Tests\AsymmetricTest\NTRU\Encrypt\NtruKeyTest.cs" />
+    <Compile Include="Tests\AsymmetricTest\NTRU\Encrypt\NtruParametersTest.cs" />
+    <Compile Include="Tests\AsymmetricTest\NTRU\Encrypt\PBPRngTest.cs" />
+    <Compile Include="Tests\AsymmetricTest\NTRU\Utils\ByteUtils.cs" />
+    <Compile Include="Tests\AsymmetricTest\RLWE\RLWEEncryptionTest.cs" />
+    <Compile Include="Tests\AsymmetricTest\RLWE\RLWEKeyTest.cs" />
+    <Compile Include="Tests\AsymmetricTest\RLWE\RLWEParamTest.cs" />
+    <Compile Include="Tests\AsymmetricTest\RLWE\RLWESignTest.cs" />
+    <Compile Include="Tests\AsymmetricTest\RNBW\RNBWKeyTest.cs" />
+    <Compile Include="Tests\AsymmetricTest\RNBW\RNBWParamTest.cs" />
+    <Compile Include="Tests\AsymmetricTest\RNBW\RNBWSignTest.cs" />
+    <Compile Include="Tests\BigInt\BigIntegerTest.cs" />
     <Compile Include="Tests\CipherTest\AesAvsTest.cs" />
     <Compile Include="Tests\CipherTest\AesFipsTest.cs" />
     <Compile Include="Tests\CipherTest\ChaChaTest.cs" />
@@ -94,7 +118,7 @@
     <Compile Include="Tests\CipherTest\SerpentTest.cs" />
     <Compile Include="Tests\CipherTest\TwofishTest.cs" />
     <Compile Include="Tests\DigestTest\BlakeTest.cs" />
-    <Compile Include="Tests\DigestTest\DigestStreamTest.cs" />
+    <Compile Include="Tests\DigestTest\StreamDigestTest.cs" />
     <Compile Include="Tests\DigestTest\KeccakTest.cs" />
     <Compile Include="Tests\DigestTest\Sha2Test.cs" />
     <Compile Include="Tests\DigestTest\SkeinTest.cs" />
@@ -104,11 +128,12 @@
     <Compile Include="Tests\ITest.cs" />
     <Compile Include="Tests\MacTest\CMacTest.cs" />
     <Compile Include="Tests\MacTest\HMacTest.cs" />
-    <Compile Include="Tests\MacTest\MacStreamTest.cs" />
+    <Compile Include="Tests\MacTest\StreamMacTest.cs" />
     <Compile Include="Tests\MacTest\VmpcMacTest.cs" />
     <Compile Include="Tests\GeneratorTest\HkdfTest.cs" />
     <Compile Include="Tests\PrngTest\SecureRandomTest.cs" />
     <Compile Include="Tests\TestEventArgs.cs" />
+    <Compile Include="Tests\Tools\CompressionTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Tests\Vectors\AESAVS\keyvect128.txt" />
@@ -151,6 +176,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

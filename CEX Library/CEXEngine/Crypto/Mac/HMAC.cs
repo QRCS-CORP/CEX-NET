@@ -1,6 +1,8 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
@@ -56,11 +58,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
     /// <revisionHistory>
     /// <revision date="2014/11/11" version="1.2.0.0">Initial release</revision>
     /// <revision date="2015/01/23" version="1.3.0.0">Changes to formatting and documentation</revision>
+    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
     /// </revisionHistory>
     /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest">VTDev.Libraries.CEXEngine.Crypto.Digest Namespace</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digests">VTDev.Libraries.CEXEngine.Crypto.Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
@@ -86,7 +89,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
     /// <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class HMAC : IMac, IDisposable
+    public sealed class HMAC : IMac
     {
         #region Constants
         private const string ALG_NAME = "HMAC";
@@ -147,8 +150,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// 
         /// <param name="Digest">Message Digest instance</param>
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
+        /// 
+        /// <exception cref="CryptoMacException">Thrown if a null digest is used</exception>
         public HMAC(IDigest Digest, bool DisposeEngine = true)
         {
+            if (Digest == null)
+                throw new CryptoMacException("HMAC:Ctor", "Digest can not be null!", new ArgumentNullException());
+
             _disposeEngine = DisposeEngine;
             _msgDigest = Digest;
             _digestSize = Digest.DigestSize;
@@ -165,8 +173,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <param name="Digest">Message Digest instance</param>
         /// <param name="Key">HMAC Key; passed to HMAC Initialize() through constructor</param>
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
+        /// 
+        /// <exception cref="CryptoMacException">Thrown if a null digest is used</exception>
         public HMAC(IDigest Digest, byte[] Key, bool DisposeEngine = true)
         {
+            if (Digest == null)
+                throw new CryptoMacException("HMAC:Ctor", "Digest can not be null!", new ArgumentNullException());
+
             _disposeEngine = DisposeEngine;
             _msgDigest = Digest;
             _digestSize = Digest.DigestSize;
@@ -177,6 +190,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
             KeyParams keyParam = new KeyParams(Key);
             Initialize(keyParam);
             keyParam.Dispose();
+        }
+
+        private HMAC()
+        {
         }
 
         /// <summary>
@@ -197,11 +214,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <param name="InOffset">Starting position with the Input array</param>
         /// <param name="Length">Length of data to process</param>
         /// 
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid Input size is chosen</exception>
+        /// <exception cref="CryptoMacException">Thrown if an invalid Input size is chosen</exception>
         public void BlockUpdate(byte[] Input, int InOffset, int Length)
         {
             if (InOffset + Length > Input.Length)
-                throw new ArgumentOutOfRangeException("The Input buffer is too short!");
+                throw new CryptoMacException("HMAC:BlockUpdate", "The Input buffer is too short!", new ArgumentOutOfRangeException());
 
             _msgDigest.BlockUpdate(Input, InOffset, Length);
         }
@@ -230,9 +247,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <param name="Output">Output array that receives the hash code</param>
         /// <param name="OutOffset">Offset within Output array</param>
         /// 
-        /// <returns>Hash size</returns>
+        /// <returns>The number of bytes processed</returns>
+        /// 
+        /// <exception cref="CryptoMacException">Thrown if Output array is too small</exception>
         public int DoFinal(byte[] Output, int OutOffset)
         {
+            if (Output.Length - OutOffset < _msgDigest.DigestSize)
+                throw new CryptoMacException("HMAC:DoFinal", "The Output buffer is too short!", new ArgumentOutOfRangeException());
+
             byte[] temp = new byte[_digestSize];
             _msgDigest.DoFinal(temp, 0);
 
@@ -250,22 +272,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         }
 
         /// <summary>
-        /// Initialize the HMAC
+        /// Initialize the HMAC.
+        /// <para>Uses the Key field of the KeyParams class.</para>
         /// </summary>
         /// 
-        /// <param name="KeyParam">HMAC Key. 
+        /// <param name="KeyParam">The HMAC Key. 
         /// <para>Uses the Key field of the <see cref="KeyParams"/> class.
-        /// Key should be equal in size to the <see cref="DigestSize"/></para>
+        /// Key should be equal in size to the <see cref="DigestSize"/> value.</para>
         /// </param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if the IKM of the KeyParams parameter is null</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if the IKM is less than digest size</exception>
+        /// <exception cref="CryptoMacException">Thrown if the Key is null or less than digest size</exception>
         public void Initialize(KeyParams KeyParam)
         {
             if (KeyParam.Key == null)
-                throw new ArgumentNullException("Key can not be null!");
-           // if (KeyParam.Key.Length < _digestSize)
-           //     throw new ArgumentOutOfRangeException(String.Format("Ikm must be at least {0} in length!", _digestSize));
+                throw new CryptoMacException("HMAC:Initialize", "Key can not be null!", new ArgumentNullException());
 
             _msgDigest.Reset();
             int keyLength = KeyParam.Key.Length;

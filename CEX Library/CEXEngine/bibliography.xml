@@ -1,5 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <bibliography>
+  <reference name="A state-of-the-art Diffie-Hellman function">
+    <title>A state-of-the-art Diffie-Hellman function</title>
+    <author>Daniel J Bernstein</author>
+    <link>http://cr.yp.to/ecdh.html</link>
+  </reference>
   <reference name="Blake">
     <title>SHA-3 proposal BLAKE</title>
     <author>Jean-Philippe Aumasson, Luca Henzen, Willi Meier, and Raphael C.-W. Phan</author>
@@ -14,6 +19,16 @@
     <title>ChaCha, a variant of Salsa20</title>
     <author>Daniel J. Bernstein</author>
     <link>http://cr.yp.to/chacha/chacha-20080128.pdf</link>
+  </reference>
+  <reference name="EESS">
+    <title>EESS #1: Implementation Aspects of NTRUEncrypt and NTRUSign</title>
+    <author>Consortium for Efficient Embedded Security</author>
+    <link>http://grouper.ieee.org/groups/1363/lattPK/submissions/EESS1v2.pdf</link>
+  </reference>
+  <reference name="Eine verstandliche Beschreibung des Schonhage-Strassen-Algorithmus">
+    <title>Eine verstandliche Beschreibung des Schonhage-Strassen-Algorithmus</title>
+    <author>Malte Leip</author>
+    <link>http://malte-leip.net/beschreibung_ssa.pdf</link>
   </reference>
   <reference name="Fips 140-2">
     <title>Security Requirements for Cryptographic Modules</title>
@@ -40,6 +55,11 @@
     <author>Alfred J. Menezes, Paul C. van Oorschot and Scott A. Vanstone</author>
     <link>http://cacr.uwaterloo.ca/hac/</link>
   </reference>
+  <reference name="Implementation Aspects of NTRUEncrypt and NTRUSign">
+    <title>Implementation Aspects of NTRUEncrypt and NTRUSign</title>
+    <author>William Whyte</author>
+    <link>http://grouper.ieee.org/groups/1363/lattPK/submissions/EESS1v2.pdf</link>
+  </reference>
   <reference name="ISO 18033">
     <title>Information technology - Security techniques - Encryption algorithms - Part 2</title>
     <author>Victor Shoup</author>
@@ -50,10 +70,110 @@
     <author>Guido Bertoni, Joan Daemen, Michaël Peeters, and Gilles Van Assche</author>
     <link>http://keccak.noekeon.org/Keccak-submission-3.pdf</link>
   </reference>
+  <reference name="McEliece Resists Quantum Fourier Sampling Attacks">
+    <title>The McEliece Cryptosystem Resists Quantum Fourier Sampling Attacks</title>
+    <author>Hang Dinh, Cristopher Moore, and Alexander Russell</author>
+    <link>http://arxiv.org/pdf/1008.2390v1.pdf</link>
+  </reference>
+  <reference name="McEliece Attacking and defending McEliece">
+    <title>Attacking and defending the McEliece cryptosystem</title>
+    <author>Daniel J. Bernstein, Tanja Lange, and Christiane Peters</author>
+    <link>http://eprint.iacr.org/2008/318.pdf</link>
+  </reference>
+  <reference name="McEliece vs Grover">
+    <title>Grover vs. McEliece</title>
+    <author>Daniel J. Bernstein</author>
+    <link>http://cr.yp.to/codes/grovercode-20091123.pdf</link>
+  </reference>
+  <reference name="McEliece CCA2">
+    <title>A CCA2 Secure Variant of the McEliece Cryptosystem</title>
+    <author>Edoardo Persichetti</author>
+    <link>http://eprint.iacr.org/2012/268.pdf</link>
+  </reference>
+  <reference name="McEliece CCA2 Secure">
+    <title>On a CCA2-secure variant of McEliece in the standard model</title>
+    <author>Nico Dottling, Rafael Dowsley, Jorn Muller-Quade and Anderson C.A. Nascimento</author>
+    <link>http://cseweb.ucsd.edu/~rdowsley/pdf/DDMN12.pdf</link>
+  </reference>
+  <reference name="McEliece CCA2 Knapsack">
+    <title>New Approach for CCA2-Secure Post-Quantum Cryptosystem Using Knapsack Problem</title>
+    <author>Roohallah Rastaghi</author>
+    <link>http://arxiv.org/vc/arxiv/papers/1211/1211.6984v4.pdf</link>
+  </reference>
+  <reference name="McEliece OAEP Reconsidered">
+    <title>OAEP Reconsidered</title>
+    <author>Victor Shoup</author>
+    <link>http://eprint.iacr.org/2000/060.pdf</link>
+  </reference>
+  <reference name="McEliece McBits">
+    <title>McBits: fast constant-time code-based cryptography</title>
+    <author>Daniel J. Bernstein, Tung Chou, and Peter Schwabe</author>
+    <link>http://binary.cr.yp.to/mcbits-20130616.pdf</link>
+  </reference>
+  <reference name="McEliece Parameters">
+    <title>Selecting Parameters for Secure McEliece-based Cryptosystems</title>
+    <author>Robert Niebuhr, Mohammed Meziani, Stanislav Bulygin, and Johannes Buchmann</author>
+    <link>https://eprint.iacr.org/2010/271.pdf</link>
+  </reference>
+  <reference name="McEliece Handbook of Applied Cryptography">
+    <title>Handbook of Applied Cryptography, Chapter 8</title>
+    <author>Alfred J. Menezes, Paul C. van Oorschot, and Scott A. Vanstone</author>
+    <link>http://cacr.uwaterloo.ca/hac/about/chap8.pdf</link>
+  </reference>
+  <reference name="McEliece Weak keys">
+    <title>Weak keys in the McEliece public-key cryptosystem</title>
+    <author>Pierre Loidreau and Nicolas Sendrier</author>
+    <link>http://perso.univ-rennes1.fr/pierre.loidreau/articles/ieee-it/Cles_Faibles.pdf</link>
+  </reference>
   <reference name="NIST IR7896">
     <title>Third-Round Report of the SHA-3 Cryptographic Hash Algorithm Competition</title>
     <author>National Institute of Standards and Technology (NIST)</author>
     <link>http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf</link>
+  </reference>
+  <reference name="NTRU Adaptive">
+    <title>Adaptive Key Recovery Attacks on NTRU-based Somewhat Homomorphic Encryption Schemes"</title>
+    <author>Ricardo Dahab1, Steven Galbraith, and Eduardo Morais</author>
+    <link>https://eprint.iacr.org/2015/127.pdf</link>
+  </reference>
+  <reference name="NTRU Crypto">
+    <title>NTRU: A Ring Based Public Key Crypto System</title>
+    <author>Jeffrey Hoffstein, Jill Pipher, and Joseph H. Silverman</author>
+    <link>https://www.securityinnovation.com/uploads/Crypto/ANTS97.pdf</link>
+  </reference>
+  <reference name="NTRU Optimizations">
+    <title>Optimizations for NTRU</title>
+    <author>Jeffrey Hoffstein, and Joseph H. Silverman</author>
+    <link>https://www.securityinnovation.com/uploads/Crypto/TECH_ARTICLE_OPT.pdf</link>
+  </reference>
+  <reference name="NTRU Practical">
+    <title>Practical lattice-based cryptography: NTRUEncrypt and NTRUSign</title>
+    <author>Jeff Hoffstein, Nick Howgrave-Graham, Jill Pipher, and William Whyte</author>
+    <link>https://www.securityinnovation.com/uploads/Crypto/lll25.pdf</link>
+  </reference>
+  <reference name="NTRU Params">
+    <title>Choosing NTRUEncrypt Parameters in Light of Combined Lattice Reduction and MITM Approaches </title>
+    <author>P. Hirschhorn, J. Hoffstein, N. Howgrave-Graham, W. Whyte</author>
+    <link>https://www.securityinnovation.com/uploads/Crypto/params.pdf</link>
+  </reference>
+  <reference name="NTRU Simplified">
+    <title>The NTRU Cryptosystem: Implementation and Comparative Analysis</title>
+    <author>Rodney D'Souza</author>
+    <link>http://teal.gmu.edu/courses/ECE543/project/reports_2001/dsouza.pdf</link>
+  </reference>
+  <reference name="NTRU Technical">
+    <title>NTRU Cryptosystems Technical Report</title>
+    <author>Jeffrey Hoffstein andJoseph H. Silverman</author>
+    <link>https://www.securityinnovation.com/uploads/Crypto/NTRUTech016.pdf</link>
+  </reference>
+  <reference name="Quantum Resistant Public Key Cryptography: A Survey">
+    <title>Quantum Resistant Public Key Cryptography: A Survey</title>
+    <author>Ray A. Perlner and David A. Cooper</author>
+    <link>http://www.nist.gov/customcf/get_pdf.cfm?pub_id=901595</link>
+  </reference>
+  <reference name="Rainbow Parameters">
+    <title>Selecting Parameters for the Rainbow Signature Scheme</title>
+    <author>Albrecht Petzoldt, Stanislav Bulygin, and Johannes Buchmann</author>
+    <link>http://eprint.iacr.org/2010/437.pdf</link>
   </reference>
   <reference name="RFC 2104">
     <title>HMAC: Keyed-Hashing for Message Authentication</title>
@@ -120,6 +240,11 @@
     <author>Daniel J. Bernstein</author>
     <link>http://cr.yp.to/snuffle/security.pdf</link>
   </reference>
+  <reference name="Schnelle Multiplikation großer Zahlen">
+    <title>Schnelle Multiplikation großer Zahlen</title>
+    <author>Arnold Schönhage and Volker Strassen</author>
+    <link>http://www.scribd.com/doc/68857222/Schnelle-Multiplikation-gro%C3%9Fer-Zahlen</link>
+  </reference>
   <reference name="Security Bounds">
     <title>Security Bounds for the NIST Codebook-based Deterministic Random Bit Generator</title>
     <author>Matthew J. Campagna</author>
@@ -163,7 +288,7 @@
   <reference name="SP800-90A">
     <title>Recommendation for the Entropy Sources Used for Random Bit Generation</title>
     <author>National Institute of Standards and Technology (NIST)</author>
-    <link>http://csrc.nist.gov/publications/nistpubs/800-90A/SP800-90A.pdf</link>
+    <link>http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90Ar1.pdf</link>
   </reference>
   <reference name="SP800-90B">
     <title>Recommendation for the Entropy Sources Used for Random Bit Generation</title>
@@ -184,7 +309,7 @@
     <title>VMPC One-Way Function and Stream Cipher</title>
     <author>Bartosz Zoltak</author>
     <link>http://www.okna.wroc.pl/vmpc.pdf</link>
-  </reference>//http://www.jstatsoft.org/v08/i14/paper
+  </reference>
   <reference name="VMPC-MAC">
     <title>VMPC-MAC: A Stream Cipher Based Authenticated Encryption Scheme</title>
     <author>Bartosz Zoltak</author>

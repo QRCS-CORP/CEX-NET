@@ -1,9 +1,11 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Crypto.Generator;
-using VTDev.Libraries.CEXEngine.Crypto.Mac;
-using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using System.ComponentModel;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Digest;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
+using VTDev.Libraries.CEXEngine.Crypto.Generator;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
@@ -71,6 +73,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
     /// <revision date="2014/09/18" version="1.2.0.0">Initial release using a fixed Digest key schedule generator</revision>
     /// <revision date="2015/01/23" version="1.3.0.0">Secondary release using an assignable Digest in the HKDF engine</revision>
     /// <revision date="2015/03/15" version="1.3.2.0">Added the IkmSize optional parameter to the constructor, and the DistributionCode property</revision>
+    /// <revision date="2015/05/14" version="1.3.5.0">Added the IV property</revision>
+    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
     /// </revisionHistory>
     /// 
     /// <remarks>
@@ -122,12 +126,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
     /// and the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see>.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class Fusion : IStreamCipher, IDisposable
+    public sealed class Fusion : IStreamCipher
     {
         #region Constants
         private const string ALG_NAME = "Fusion";
         private const Int32 BLOCK_SIZE = 16;
-        private const Int32 DEFAULT_ROUNDS = 16;
+        private const Int32 ROUNDS16 = 16;
         private const Int32 DEFAULT_SUBKEYS = 40;
         // primitive polynomial for GF(256)
         private const Int32 GF256_FDBK = 0x169; 
@@ -153,7 +157,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
 
         #region Fields
         private byte[] _ctrVector;
-        private Int32 _dfnRounds = DEFAULT_ROUNDS;
+        private Int32 _dfnRounds = ROUNDS16;
         private Int32[] _expKey;
         // configurable nonce can create a unique distribution, can be byte(0)
         private byte[] _hkdfInfo = System.Text.Encoding.ASCII.GetBytes("Fusion version 1 information string");
@@ -168,20 +172,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         #endregion
 
         #region Properties
-
         /// <summary>
         /// Get/Set: Sets the Info value in the HKDF initialization parameters. 
         /// <para>Must be set before <see cref="Initialize(KeyParams)"/> is called.
         /// Changing this code will create a unique distribution of the cipher.
         /// Code can be either a zero byte array, or a multiple of the HKDF digest engines return size.</para>
         /// </summary>
+        /// 
+        /// <exception cref="CryptoSymmetricException">Thrown if an invalid distribution code is used</exception>
         public byte[] DistributionCode
         {
             get { return _hkdfInfo; }
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("Distribution Code can not be null!");
+                    throw new CryptoSymmetricException("Fusion:DistributionCode", "Distribution Code can not be null!", new ArgumentNullException());
 
                 _hkdfInfo = value;
             }
@@ -235,6 +240,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         }
 
         /// <summary>
+        /// Get: The current state of the initialization Vector
+        /// </summary>
+        public byte[] IV
+        {
+            get { return (byte[])_ctrVector.Clone(); }
+        }
+
+        /// <summary>
         /// Get: Available Encryption Key Sizes in bytes
         /// </summary>
         public Int32[] LegalKeySizes
@@ -263,17 +276,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// Get/Set: Parallel block size. Must be a multiple of <see cref="ParallelMinimumSize"/>.
         /// </summary>
         /// 
-        /// <exception cref="System.ArgumentException">Thrown if a parallel block size is not evenly divisible by ParallelMinimumSize</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if parallel block size is less than ParallelMinimumSize or more than ParallelMaximumSize values</exception>
+        /// <exception cref="CryptoSymmetricException">Thrown if a parallel block size is not evenly divisible by ParallelMinimumSize, or  block size is less than ParallelMinimumSize or more than ParallelMaximumSize values</exception>
         public int ParallelBlockSize
         {
             get { return _parallelBlockSize; }
             set
             {
                 if (value % ParallelMinimumSize != 0)
-                    throw new ArgumentException(String.Format("Parallel block size must be evenly divisible by ParallelMinimumSize: {0}", ParallelMinimumSize));
+                    throw new CryptoSymmetricException("Fusion:ParallelBlockSize", String.Format("Parallel block size must be evenly divisible by ParallelMinimumSize: {0}", ParallelMinimumSize), new ArgumentException());
                 if (value > ParallelMaximumSize || value < ParallelMinimumSize)
-                    throw new ArgumentOutOfRangeException(String.Format("Parallel block must be Maximum of ParallelMaximumSize: {0} and evenly divisible by ParallelMinimumSize: {1}", ParallelMaximumSize, ParallelMinimumSize));
+                    throw new CryptoSymmetricException("Fusion:ParallelBlockSize", String.Format("Parallel block must be Maximum of ParallelMaximumSize: {0} and evenly divisible by ParallelMinimumSize: {1}", ParallelMaximumSize, ParallelMinimumSize), new ArgumentOutOfRangeException());
 
                 _parallelBlockSize = value;
             }
@@ -295,7 +307,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
             get { return ProcessorCount * BLOCK_SIZE; }
         }
 
-
         /// <remarks>
         /// Processor count
         /// </remarks>
@@ -307,14 +318,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// Initialize the class
         /// </summary>
         /// 
-        /// <param name="Rounds">Number of diffusion rounds. The <see cref="LegalRounds"/> property contains available sizes</param>
+        /// <param name="Rounds">Number of diffusion rounds. The <see cref="LegalRounds"/> property contains available sizes. Default is 16 rounds.</param>
         /// <param name="KeyEngine">The Key Schedule KDF digest engine; can be any one of the <see cref="Digests">Digest</see> implementations. The default engine is <see cref="SHA512"/>.</param>
         /// 
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid rounds count is chosen</exception>
-        public Fusion(int Rounds = DEFAULT_ROUNDS, Digests KeyEngine = Digests.SHA512)
+        /// <exception cref="CryptoSymmetricException">Thrown if an invalid rounds count is chosen</exception>
+        public Fusion(int Rounds = ROUNDS16, Digests KeyEngine = Digests.SHA512)
         {
             if (Rounds != 16 && Rounds != 18 && Rounds != 20 && Rounds != 22 && Rounds != 24 && Rounds != 26 && Rounds != 28 && Rounds != 30 && Rounds != 32)
-                throw new ArgumentOutOfRangeException("Invalid rounds size! Sizes supported are 16, 18, 20, 22, 24, 26, 28, 30 and 32.");
+                throw new CryptoSymmetricException("Fusion:Ctor", "Invalid rounds size! Sizes supported are 16, 18, 20, 22, 24, 26, 28, 30 and 32.", new ArgumentOutOfRangeException());
 
             // get the kdf digest engine
             _keyEngine = GetKeyEngine(KeyEngine);
@@ -349,20 +360,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// 
         /// <param name="KeyParam">Cipher key container. The <see cref="LegalKeySizes"/> property contains valid sizes</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null key or iv is used</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid key or iv size is used</exception>
+        /// <exception cref="CryptoSymmetricException">Thrown if an invalid key or iv is used</exception>
         public void Initialize(KeyParams KeyParam)
         {
             if (KeyParam.Key == null)
-                throw new ArgumentNullException("Invalid key! Key can not be null.");
+                throw new CryptoSymmetricException("Fusion:Initialize", "Invalid key! Key can not be null.", new ArgumentNullException());
             if (KeyParam.Key.Length < LegalKeySizes[0])
-                throw new ArgumentOutOfRangeException(String.Format("Invalid key size! Key must be at least {0}  bytes ({1} bit).", LegalKeySizes[0], LegalKeySizes[0] * 8));
+                throw new CryptoSymmetricException("Fusion:Initialize", String.Format("Invalid key size! Key must be at least {0}  bytes ({1} bit).", LegalKeySizes[0], LegalKeySizes[0] * 8), new ArgumentOutOfRangeException());
             if ((KeyParam.Key.Length - _keyEngine.DigestSize) % _keyEngine.BlockSize != 0)
-                throw new ArgumentOutOfRangeException(String.Format("Invalid key size! Key must be (length - IKm length: {0} bytes) + multiple of {1} block size.", _keyEngine.DigestSize, _keyEngine.BlockSize));
+                throw new CryptoSymmetricException("Fusion:Initialize", String.Format("Invalid key size! Key must be (length - IKm length: {0} bytes) + multiple of {1} block size.", _keyEngine.DigestSize, _keyEngine.BlockSize), new ArgumentOutOfRangeException());
             if (KeyParam.IV == null)
-                throw new ArgumentNullException("Invalid IV! IV can not be null.");
+                throw new CryptoSymmetricException("Fusion:Initialize", "Invalid IV! IV can not be null.", new ArgumentNullException());
             if (KeyParam.IV.Length != BLOCK_SIZE)
-                throw new ArgumentOutOfRangeException(String.Format("Invalid IV size! IV must be at exactly {0} bytes ({1} bit).", BLOCK_SIZE, BLOCK_SIZE * 8));
+                throw new CryptoSymmetricException("Fusion:Initialize", String.Format("Invalid IV size! IV must be at exactly {0} bytes ({1} bit).", BLOCK_SIZE, BLOCK_SIZE * 8), new ArgumentOutOfRangeException());
 
             // get the iv
             _ctrVector = (byte[])KeyParam.IV.Clone();
@@ -525,7 +535,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
                 for (int i = 0; i < blkSize; i++)
                     Output[i + OutOffset] = (byte)(Input[i + InOffset] ^ rand[i]);
             }
-            else if (blkSize < _parallelBlockSize)
+            else if (blkSize < ParallelBlockSize)
             {
                 // generate random
                 byte[] rand = Generate(blkSize, _ctrVector);
@@ -538,7 +548,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
             {
                 // parallel CTR processing //
                 int prcCount = ProcessorCount;
-                int alnSize = _parallelBlockSize / BLOCK_SIZE;
+                int alnSize = ParallelBlockSize / BLOCK_SIZE;
                 int cnkSize = (alnSize / prcCount) * BLOCK_SIZE;
                 int rndSize = cnkSize * prcCount;
                 int subSize = (cnkSize / BLOCK_SIZE);
@@ -560,9 +570,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
                 });
 
                 // last block processing
-                if (rndSize < _parallelBlockSize)
+                if (rndSize < Length)
                 {
-                    int fnlSize = _parallelBlockSize % rndSize;
+                    int fnlSize = Length % rndSize;
                     byte[] rand = Generate(fnlSize, vectors[prcCount - 1]);
 
                     for (int i = 0; i < fnlSize; i++)
@@ -823,7 +833,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         #endregion
 
         #region Helpers
-        private static Int32 BytesToInt32(byte[] Input, Int32 InOffset)
+        private Int32 BytesToInt32(byte[] Input, Int32 InOffset)
         {
             return (((byte)(Input[InOffset])) |
                 ((byte)(Input[InOffset + 1]) << 8) |
@@ -831,7 +841,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
                 ((byte)(Input[InOffset + 3]) << 24));
         }
 
-        private static void Int32ToBytes(Int32 Dword, byte[] Output, Int32 OutOffset)
+        private void Int32ToBytes(Int32 Dword, byte[] Output, Int32 OutOffset)
         {
             Output[OutOffset] = (byte)Dword;
             Output[OutOffset + 1] = (byte)(Dword >> 8);

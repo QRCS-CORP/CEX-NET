@@ -1,6 +1,7 @@
 ﻿#region Directives
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using System;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
@@ -59,19 +60,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// 
     /// <revisionHistory>
     /// <revision date="2015/01/23" version="1.3.0.0">Initial release</revision>
+    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
     /// </revisionHistory>
     /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest">VTDev.Libraries.CEXEngine.Crypto.Digest Namespace</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digests">VTDev.Libraries.CEXEngine.Crypto.Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
     /// <list type="bullet">
-    /// <item><description>Can be initialized with any <see cref="Digests">digest</see>.</description></item>
+    /// <item><description>Can be initialized with any <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">digest</see>.</description></item>
     /// <item><description>Combination of [Salt, Ikm, Nonce] must be at least: digest block size + counter (8 bytes) size in length.</description></item>
-    /// <item><description>The <see cref="DGCDRBG(IDigest, bool)">Constructors</see> DisposeEngine parameter determines if Digest engine is destroyed when <see cref="Dispose()"/> is called on this class; default is <c>true</c>.</description></item>
+    /// <item><description>The <see cref="DGCDrbg(IDigest, bool)">Constructors</see> DisposeEngine parameter determines if Digest engine is destroyed when <see cref="Dispose()"/> is called on this class; default is <c>true</c>.</description></item>
     /// <item><description>Nonce and Ikm are optional, (but recommended).</description></item>
+    /// <item><description>Output buffer is 4 * the digest return size.</description></item>
     /// </list>
     /// 
     /// <description><h4>Guiding Publications:</h4></description>
@@ -88,10 +91,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class DGCDRBG : IGenerator, IDisposable
+    public sealed class DGCDrbg : IGenerator
     {
         #region Constants
-        private const string ALG_NAME = "DGCDRBG";
+        private const string ALG_NAME = "DGCDrbg";
         private const int COUNTER_SIZE = 8;
         private const long CYCLE_COUNT = 10;
         #endregion
@@ -106,6 +109,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         private IDigest _msgDigest;
         private long _stateCtr = 1;
         private long _seedCtr = 1;
+        private object _objLock = new object();
         #endregion
 
         #region Properties
@@ -144,8 +148,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// 
         /// <param name="Digest">Hash function</param>
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
-        public DGCDRBG(IDigest Digest, bool DisposeEngine = true)
+        /// 
+        /// <exception cref="CryptoSymmetricException">Thrown if a null digest is used</exception>
+        public DGCDrbg(IDigest Digest, bool DisposeEngine = true)
         {
+            if (Digest == null)
+                throw new CryptoGeneratorException("DGCDrbg:Ctor", "Digest can not be null!", new ArgumentNullException());
+
             _disposeEngine = DisposeEngine;
             _msgDigest = Digest;
             _dgtSeed = new byte[Digest.DigestSize];
@@ -153,10 +162,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
             _keySize = _msgDigest.BlockSize + COUNTER_SIZE;
         }
 
+        private DGCDrbg()
+        {
+        }
+
         /// <summary>
         /// Finalize objects
         /// </summary>
-        ~DGCDRBG()
+        ~DGCDrbg()
         {
             Dispose(false);
         }
@@ -169,24 +182,25 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// 
         /// <param name="Salt">Salt value</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null salt is used</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">Salt does not contain enough material for Key and Vector creation</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if an invalid or null salt is used</exception>
         public void Initialize(byte[] Salt)
         {
             if (Salt == null)
-                throw new ArgumentNullException("Salt can not be null!");
-            //if (Salt.Length < _keySize)
-            //    throw (new ArgumentOutOfRangeException("Minimum key size has not been added. Size must be at least " + _keySize + " bytes!"));
+                throw new CryptoGeneratorException("DGCDrbg:Initialize", "Salt can not be null!", new ArgumentNullException());
+            if (Salt.Length < COUNTER_SIZE)
+                throw new CryptoGeneratorException("DGCDrbg:Initialize", "Salt must be at least 8 bytes!", new ArgumentOutOfRangeException());
 
             Int64[] counter = new Int64[1];
-            int keyLen = Salt.Length - COUNTER_SIZE;
+            int keyLen = (Salt.Length - COUNTER_SIZE) < 0 ? 0 : Salt.Length - COUNTER_SIZE;
             byte[] key = new byte[keyLen];
+            int ctrLen = Math.Min(COUNTER_SIZE, Salt.Length);
 
-            Buffer.BlockCopy(Salt, 0, counter, 0, COUNTER_SIZE);
-            Buffer.BlockCopy(Salt, COUNTER_SIZE, key, 0, keyLen);
+            Buffer.BlockCopy(Salt, 0, counter, 0, ctrLen);
+            Buffer.BlockCopy(Salt, ctrLen, key, 0, keyLen);
 
             UpdateSeed(key);
             UpdateCounter(counter[0]);
+
             _isInitialized = true;
         }
 
@@ -197,7 +211,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <param name="Salt">Salt value</param>
         /// <param name="Ikm">Key material</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null salt or ikm is used</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if an invalid or null salt is used</exception>
         public void Initialize(byte[] Salt, byte[] Ikm)
         {
             byte[] seed = new byte[Salt.Length + Ikm.Length];
@@ -216,7 +230,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <param name="Ikm">Key material</param>
         /// <param name="Info">Info value</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null salt or ikm is used</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if an invalid or null salt is used</exception>
         public void Initialize(byte[] Salt, byte[] Ikm, byte[] Info)
         {
             byte[] seed = new byte[Salt.Length + Ikm.Length + Info.Length];
@@ -249,8 +263,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <param name="Size">Number of bytes to generate</param>
         /// 
         /// <returns>Number of bytes generated</returns>
+        /// 
+        /// <exception cref="CryptoGeneratorException">Thrown if the output buffer is too small</exception>
         public int Generate(byte[] Output, int OutOffset, int Size)
         {
+            if ((Output.Length - Size) < OutOffset)
+                throw new CryptoGeneratorException("DGCDrbg:Generate", "Output buffer too small!", new Exception());
+
             int offset = 0;
             int len = OutOffset + Size;
 
@@ -279,14 +298,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// 
         /// <param name="Seed">Pseudo random seed material</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null Seed is used</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">Seed does not contain enough material for Key and Vector creation</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if a null or invalid Seed is used</exception>
         public void Update(byte[] Seed)
         {
             if (Seed == null)
-                throw new ArgumentNullException("Seed can not be null!");
+                throw new CryptoGeneratorException("DGCDrbg:Update", "Seed can not be null!", new ArgumentNullException());
             if (Seed.Length < COUNTER_SIZE)
-                throw (new ArgumentOutOfRangeException("Minimum key size has not been added. Size must be at least " + COUNTER_SIZE + " bytes!"));
+                throw new CryptoGeneratorException("DGCDrbg:Update", String.Format("Minimum key size has not been added. Size must be at least {0} bytes!", COUNTER_SIZE), new ArgumentOutOfRangeException());
 
             // update seed and counter
             if (Seed.Length >= _msgDigest.BlockSize + COUNTER_SIZE)
@@ -312,76 +330,55 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         #endregion
 
         #region Private Methods
-        /// <remarks>
-        /// Docs say class 'should be parallelizable'. 
-        /// Only problem is, digest consumes most of the processing time,
-        /// and setup for a parallel loop will likely cost more than time
-        /// saved in small sized runs..
-        /// </remarks>
-        private void BlockUpdate(byte[] Data)
-        {
-            lock (this)
-            {
-                _msgDigest.BlockUpdate(Data, 0, Data.Length);
-            }
-        }
-
         private void CycleSeed()
         {
-            BlockUpdate(_dgtSeed);
-            DigestAddCounter(_seedCtr++);
-            DoFinal(_dgtSeed);
+            _msgDigest.BlockUpdate(_dgtSeed, 0, _dgtSeed.Length);
+            IncrementCounter(_seedCtr++);
+            _msgDigest.DoFinal(_dgtSeed, 0);
         }
 
-        private void DigestAddCounter(long Counter)
+        private void IncrementCounter(long Counter)
         {
-            for (int i = 0; i != 8; i++)
+            for (int i = 0; i < 8; i++)
             {
-                Update((byte)Counter);
+                _msgDigest.Update((byte)Counter);
                 Counter >>= 8;
-            }
-        }
-
-        private void DoFinal(byte[] Data)
-        {
-            lock (this)
-            {
-                _msgDigest.DoFinal(Data, 0);
             }
         }
 
         private void GenerateState()
         {
-            DigestAddCounter(_stateCtr++);
-
-            BlockUpdate(_dgtState);
-            BlockUpdate(_dgtSeed);
-            DoFinal(_dgtState);
-
-            if ((_stateCtr % CYCLE_COUNT) == 0)
-                CycleSeed();
-        }
-
-        private void Update(byte Data)
-        {
-            lock (this)
+            lock (_objLock)
             {
-                _msgDigest.Update(Data);
+                IncrementCounter(_stateCtr++);
+
+                _msgDigest.BlockUpdate(_dgtState, 0, _dgtState.Length);
+                _msgDigest.BlockUpdate(_dgtSeed, 0, _dgtSeed.Length);
+                _msgDigest.DoFinal(_dgtState, 0);
+
+                if ((_stateCtr % CYCLE_COUNT) == 0)
+                    CycleSeed();
             }
         }
 
         private void UpdateCounter(long Counter)
         {
-            DigestAddCounter(Counter);
-            BlockUpdate(_dgtSeed);
-            DoFinal(_dgtSeed);
+            lock (_objLock)
+            {
+                IncrementCounter(Counter);
+                _msgDigest.BlockUpdate(_dgtSeed, 0, _dgtSeed.Length);
+                _msgDigest.DoFinal(_dgtSeed, 0);
+            }
         }
 
         private void UpdateSeed(byte[] Seed)
         {
-            BlockUpdate(Seed);
-            BlockUpdate(_dgtSeed);
-            DoFinal(_dgtSeed);
+            lock (_objLock)
+            {
+                _msgDigest.BlockUpdate(Seed, 0, Seed.Length);
+                _msgDigest.BlockUpdate(_dgtSeed, 0, _dgtSeed.Length);
+                _msgDigest.DoFinal(_dgtSeed, 0);
+            }
         }
         #endregion
 

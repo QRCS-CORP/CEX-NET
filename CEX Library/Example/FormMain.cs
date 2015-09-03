@@ -1,17 +1,17 @@
 ﻿#region Directives
-// Jafnan er hálfsögð saga ef einn segir..
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using VTDev.Libraries.CEXEngine.Crypto;
-using VTDev.Libraries.CEXEngine.Crypto.Helper;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Mac;
-using VTDev.Libraries.CEXEngine.Crypto.Process;
-using VTDev.Libraries.CEXEngine.Crypto.Structures;
-using VTDev.Libraries.CEXEngine.Utility;
+using VTDev.Libraries.CEXEngine.Crypto.Processing;
+using VTDev.Libraries.CEXEngine.Crypto.Processing.Factory;
+using VTDev.Libraries.CEXEngine.Crypto.Processing.Structure;
+using VTDev.Libraries.CEXEngine.Tools;
 using VTDev.Projects.CEX.Helper;
 #endregion
 
@@ -55,6 +55,19 @@ namespace VTDev.Projects.CEX
         public FormMain()
         {
             InitializeComponent();
+
+            // examples testing key factories and processors
+            // adjust paths to your installation
+
+            //FactoryTests.KeyFactoryTest();
+            //FactoryTests.PackageFactoryTest();
+            //FactoryTests.VolumeFactoryTest();
+            //ProcessingTests.CompressionCipherTest(@"C:\Tests\Test", @"C:\Tests\Extract", @"C:\Tests\voltest.cep");
+            //ProcessingTests.PacketCipherTest();
+            //ProcessingTests.StreamCipherTest();
+            //ProcessingTests.StreamDigestTest();
+            //ProcessingTests.StreamMacTest();
+            //ProcessingTests.VolumeCipherTest(@"C:\Tests\Test");
         }
         #endregion
 
@@ -127,9 +140,9 @@ namespace VTDev.Projects.CEX
 
         #region Crypto
         /// <remarks>
-        /// This method demonstrates using a KeyHeaderStruct with an HMAC key, 
-        /// and a MessageHeaderStruct with a keyed hash value to test 
-        /// the validity of an encrypted file before it is conditionally decrypted. 
+        /// This method demonstrates using a PackageFactory to extract a key.
+        /// StreamMac to verify with a keyed HMAC, that tests the encrypted file before it is conditionally decrypted. 
+        /// If accepted the stream is then decrypted using the StreamCipher class.
         /// </remarks>
         private void Decrypt()
         {
@@ -144,7 +157,7 @@ namespace VTDev.Projects.CEX
                     byte[] keyId = MessageHeader.GetKeyId(inStream);
 
                     // get the keyheader and key material from the key file
-                    using (KeyFactory keyFactory = new KeyFactory(_keyFilePath, _container.Authority))
+                    using (PackageFactory keyFactory = new PackageFactory(_keyFilePath, _container.Authority))
                     {
                         if (keyFactory.AccessScope == KeyScope.NoAccess)
                         {
@@ -165,7 +178,7 @@ namespace VTDev.Projects.CEX
                     {
                         // get the hmac for the encrypted file; this could be made selectable
                         // via the KeyHeaderStruct MacDigest and MacSize members.
-                        using (MacStream mstrm = new MacStream(new SHA512HMAC(keyParam.IKM)))
+                        using (StreamMac mstrm = new StreamMac(new SHA512HMAC(keyParam.IKM)))
                         {
                             // get the message header mac
                             byte[] chksum = MessageHeader.GetMessageMac(inStream, cipherDesc.MacSize);
@@ -186,17 +199,17 @@ namespace VTDev.Projects.CEX
                         }
                     }
 
-                    // with this constructor, the CipherStream class creates the cryptographic 
-                    // engine using the description contained in the keyheaderstruct.
+                    // with this constructor, the StreamCipher class creates the cryptographic 
+                    // engine using the description contained in the CipherDescription structure.
                     // The (cipher and) engine are automatically destroyed in the cipherstream dispose
-                    using (CipherStream cstrm = new CipherStream(false, cipherDesc, keyParam))
+                    using (StreamCipher cstrm = new StreamCipher(false, cipherDesc, keyParam))
                     {
                         using (FileStream outStream = new FileStream(_outputPath, FileMode.Create, FileAccess.Write))
                         {
                             // start at an input offset equal to the message header size
                             inStream.Seek(hdrOffset, SeekOrigin.Begin);
                             // use a percentage counter
-                            cstrm.ProgressPercent += new CipherStream.ProgressDelegate(OnProgressPercent);
+                            cstrm.ProgressPercent += new StreamCipher.ProgressDelegate(OnProgressPercent);
                             // initialize internals
                             cstrm.Initialize(inStream, outStream);
                             // write the decrypted output to file
@@ -222,10 +235,9 @@ namespace VTDev.Projects.CEX
         }
 
         /// <remarks>
-        /// This method demonstrates using a KeyHeaderStruct and CipherStream class to
-        /// both encrypt a file, and optionally sign the message file with an SHA512 HMAC.
-        /// The KeyHeaderStruct usage is optional; if using fixed cipher parameters, a much simpler
-        /// construction can be made. See the CipherStream documentation for an example.
+        /// This method demonstrates using a PackageFactory and StreamCipher class to
+        /// both encrypt a file, and optionally sign the message with an SHA512 HMAC.
+        /// See the StreamCipher and StreamMac documentation for more examples.
         /// </remarks>
         private void Encrypt()
         {
@@ -238,7 +250,7 @@ namespace VTDev.Projects.CEX
                 byte[] extKey = null;
 
                 // get the keyheader and key material from the key file
-                using (KeyFactory keyFactory = new KeyFactory(_keyFilePath, _container.Authority))
+                using (PackageFactory keyFactory = new PackageFactory(_keyFilePath, _container.Authority))
                 {
                     // get the key info
                     PackageInfo pki = keyFactory.KeyInfo();
@@ -253,10 +265,10 @@ namespace VTDev.Projects.CEX
                 // offset start position is base header + Mac size
                 int hdrOffset = MessageHeader.GetHeaderSize + keyHeader.MacSize;
 
-                // with this constructor, the CipherStream class creates the cryptographic
-                // engine using the description in the keyheaderstruct.
+                // with this constructor, the StreamCipher class creates the cryptographic
+                // engine using the description in the CipherDescription.
                 // The (cipher and) engine are destroyed in the cipherstream dispose
-                using (CipherStream cstrm = new CipherStream(true, keyHeader, keyParam))
+                using (StreamCipher cstrm = new StreamCipher(true, keyHeader, keyParam))
                 {
                     using (FileStream inStream = new FileStream(_inputPath, FileMode.Open, FileAccess.Read))
                     {
@@ -265,7 +277,7 @@ namespace VTDev.Projects.CEX
                             // start at an output offset equal to the message header + MAC length
                             outStream.Seek(hdrOffset, SeekOrigin.Begin);
                             // use a percentage counter
-                            cstrm.ProgressPercent += new CipherStream.ProgressDelegate(OnProgressPercent);
+                            cstrm.ProgressPercent += new StreamCipher.ProgressDelegate(OnProgressPercent);
                             // initialize internals
                             cstrm.Initialize(inStream, outStream);
                             // write the encrypted output to file
@@ -280,12 +292,12 @@ namespace VTDev.Projects.CEX
                             if (keyHeader.MacSize > 0)
                             {
                                 // Get the mac for the encrypted file; Mac engine is SHA512 by default, 
-                                // configurable via the KeyHeaderStruct MacSize and MacEngine members.
+                                // configurable via the CipherDescription MacSize and MacEngine members.
                                 // This is where you would select and initialize the correct Digest via the
-                                // KeyHeaderStruct MacDigest and MacSize members, and initialize 
-                                // the corresponding digest. For expedience, this example is fixed on the default SHA512.
-                                // An optional progress event is available in the MacStream class.
-                                using (MacStream mstrm = new MacStream(new SHA512HMAC(keyParam.IKM)))
+                                // CipherDescription members, and initialize the corresponding digest. 
+                                // For expedience, this example is fixed on the default SHA512.
+                                // An optional progress event is available in the StreamMac class.
+                                using (StreamMac mstrm = new StreamMac(new SHA512HMAC(keyParam.IKM)))
                                 {
                                     // seek to end of header
                                     outStream.Seek(hdrOffset, SeekOrigin.Begin);
@@ -318,7 +330,7 @@ namespace VTDev.Projects.CEX
         }
 
         /// <summary>
-        /// Demonstrates saving a key file using the KeyFactory class
+        /// Demonstrates saving a key file using the PackageFactory class
         /// </summary>
         private void SaveKey()
         {
@@ -347,17 +359,17 @@ namespace VTDev.Projects.CEX
                 if (!string.IsNullOrEmpty(txtSubKeyCount.Text) && txtSubKeyCount.Text != "0")
                     int.TryParse(txtSubKeyCount.Text, out keyCount);
 
-                // create a KeyPackage; a key package can contain 1 or many thousands of 'subkeys'. Each subkey set
+                // create a PackageKey; a key package can contain 1 or many thousands of 'subkeys'. Each subkey set
                 // contains one group of unique random keying material; key, iv, and optional hmac key. 
                 // Each key set is used only once for encryption, guaranteeing that a unique set of values is used for every encryption cycle.
-                KeyPackage package = new KeyPackage(
+                PackageKey package = new PackageKey(
                     _container.Authority,           // the KeyAuthority structure
                     _container.Description,         // the CipherDescription structure
                     keyCount,                       // the number of subkeys to add to this key package
                     IdGenerator());                 // the file extension encryption key
 
                 // create and write the key
-                using (KeyFactory factory = new KeyFactory(_keyFilePath, _container.Authority))
+                using (PackageFactory factory = new PackageFactory(_keyFilePath, _container.Authority))
                     factory.Create(package);
 
                 // store path
@@ -389,7 +401,7 @@ namespace VTDev.Projects.CEX
                 {
                     byte[] messageId = MessageHeader.GetKeyId(msgFile);
 
-                    using (KeyFactory factory = new KeyFactory(KeyPath, _container.Authority))
+                    using (PackageFactory factory = new PackageFactory(KeyPath, _container.Authority))
                         isEqual = factory.ContainsSubKey(messageId) > -1;
                 }
             }
@@ -447,7 +459,7 @@ namespace VTDev.Projects.CEX
 
         private void LoadComboParams()
         {
-            ComboHelper.LoadEnumValues(cbEngines, typeof(Engines));
+            ComboHelper.LoadEnumValues(cbEngines, typeof(SymmetricEngines));
             ComboHelper.LoadEnumValues(cbCipherMode, typeof(CipherModes));
             ComboHelper.LoadEnumValues(cbPaddingMode, typeof(PaddingModes));
             ComboHelper.LoadEnumValues(cbHkdf, typeof(Digests));
@@ -479,16 +491,16 @@ namespace VTDev.Projects.CEX
             pbStatus.Value = 0;
         }
 
-        private void SetKeySizes(Engines CipherEngine, Digests KdfEngine)
+        private void SetKeySizes(SymmetricEngines CipherEngine, Digests KdfEngine)
         {
             cbKeySize.Items.Clear();
 
-            if (CipherEngine == Engines.Fusion ||
-                CipherEngine == Engines.RHX ||
-                CipherEngine == Engines.RSM ||
-                CipherEngine == Engines.SHX ||
-                CipherEngine == Engines.TSM ||
-                CipherEngine == Engines.THX)
+            if (CipherEngine == SymmetricEngines.Fusion ||
+                CipherEngine == SymmetricEngines.RHX ||
+                CipherEngine == SymmetricEngines.RSM ||
+                CipherEngine == SymmetricEngines.SHX ||
+                CipherEngine == SymmetricEngines.TSM ||
+                CipherEngine == SymmetricEngines.THX)
             {
                 cbHkdf.Enabled = true;
 
@@ -534,17 +546,17 @@ namespace VTDev.Projects.CEX
                         break;
                 }
             }
-            else if (CipherEngine == Engines.RDX ||
-                CipherEngine == Engines.SPX ||
-                CipherEngine == Engines.TFX)
+            else if (CipherEngine == SymmetricEngines.RDX ||
+                CipherEngine == SymmetricEngines.SPX ||
+                CipherEngine == SymmetricEngines.TFX)
             {
                 cbHkdf.Enabled = false;
                 cbKeySize.Items.Add(KeySizes.K128);
                 cbKeySize.Items.Add(KeySizes.K256);
                 cbKeySize.Items.Add(KeySizes.K512);
             }
-            else if (CipherEngine == Engines.ChaCha ||
-                CipherEngine == Engines.Salsa)
+            else if (CipherEngine == SymmetricEngines.ChaCha ||
+                CipherEngine == SymmetricEngines.Salsa)
             {
                 cbHkdf.Enabled = false;
                 cbKeySize.Items.Add(KeySizes.K128);
@@ -556,7 +568,7 @@ namespace VTDev.Projects.CEX
             ComboHelper.SetSelectedIndex(cbKeySize, 1);
         }
 
-        private void SetComboParams(Engines Engine)
+        private void SetComboParams(SymmetricEngines Engine)
         {
             cbCipherMode.Enabled = true;
             cbPaddingMode.Enabled = true;
@@ -569,8 +581,8 @@ namespace VTDev.Projects.CEX
 
             switch (Engine)
             {
-                case Engines.ChaCha:
-                case Engines.Salsa:
+                case SymmetricEngines.ChaCha:
+                case SymmetricEngines.Salsa:
                     cbCipherMode.Enabled = false;
                     cbPaddingMode.Enabled = false;
                     ComboHelper.AddEnumRange(cbRounds, typeof(RoundCounts), 8, 30);
@@ -579,24 +591,24 @@ namespace VTDev.Projects.CEX
                     cbVectorSize.Items.Add(IVSizes.V64);
                     cbVectorSize.SelectedIndex = 0;
                     break;
-                case Engines.Fusion:
+                case SymmetricEngines.Fusion:
                     cbCipherMode.Enabled = false;
                     cbPaddingMode.Enabled = false;
                     ComboHelper.AddEnumRange(cbRounds, typeof(RoundCounts), 16, 32);
                     ComboHelper.SetSelectedIndex(cbRounds, 0);
                     break;
-                case Engines.RDX:
+                case SymmetricEngines.RDX:
                     cbRounds.Enabled = false;
                     cbVectorSize.Items.Add(IVSizes.V256);
                     cbVectorSize.SelectedIndex = 0;
                     break;
-                case Engines.RHX:
+                case SymmetricEngines.RHX:
                     ComboHelper.AddEnumRange(cbRounds, typeof(RoundCounts), 10, 38);
                     ComboHelper.SetSelectedIndex(cbRounds, 2);
                     cbVectorSize.Items.Add(IVSizes.V256);
                     cbVectorSize.SelectedIndex = 0;
                     break;
-                case Engines.RSM:
+                case SymmetricEngines.RSM:
                     cbRounds.Items.Add(RoundCounts.R10);
                     cbRounds.Items.Add(RoundCounts.R18);
                     cbRounds.Items.Add(RoundCounts.R26);
@@ -606,7 +618,7 @@ namespace VTDev.Projects.CEX
                     cbVectorSize.Items.Add(IVSizes.V256);
                     cbVectorSize.SelectedIndex = 0;
                     break;
-                case Engines.SHX:
+                case SymmetricEngines.SHX:
                     cbRounds.Items.Add(RoundCounts.R32);
                     cbRounds.Items.Add(RoundCounts.R40);
                     cbRounds.Items.Add(RoundCounts.R48);
@@ -614,7 +626,7 @@ namespace VTDev.Projects.CEX
                     cbRounds.Items.Add(RoundCounts.R64);
                     ComboHelper.SetSelectedIndex(cbRounds, 0);
                     break;
-                case Engines.SPX:
+                case SymmetricEngines.SPX:
                     cbRounds.Items.Add(RoundCounts.R32);
                     cbRounds.Items.Add(RoundCounts.R40);
                     cbRounds.Items.Add(RoundCounts.R48);
@@ -622,11 +634,11 @@ namespace VTDev.Projects.CEX
                     cbRounds.Items.Add(RoundCounts.R64);
                     ComboHelper.SetSelectedIndex(cbRounds, 0);
                     break;
-                case Engines.TFX:
+                case SymmetricEngines.TFX:
                     ComboHelper.AddEnumRange(cbRounds, typeof(RoundCounts), 16, 32);
                     ComboHelper.SetSelectedIndex(cbRounds, 0);
                     break;
-                case Engines.TSM:
+                case SymmetricEngines.TSM:
                     cbRounds.Items.Add(RoundCounts.R16);
                     cbRounds.Items.Add(RoundCounts.R24);
                     cbRounds.Items.Add(RoundCounts.R32);
@@ -651,8 +663,8 @@ namespace VTDev.Projects.CEX
 
         private void OnEngineChanged(object sender, EventArgs e)
         {
-            Engines engine = Engines.RHX;
-            Enum.TryParse<Engines>(((ComboBox)sender).Text, out engine);
+            SymmetricEngines engine = SymmetricEngines.RHX;
+            Enum.TryParse<SymmetricEngines>(((ComboBox)sender).Text, out engine);
             _container.Description.EngineType = (int)engine;
 
             Digests digest = Digests.SHA512;
@@ -667,7 +679,7 @@ namespace VTDev.Projects.CEX
         {
             Digests digest = Digests.SHA512;
             Enum.TryParse<Digests>(((ComboBox)sender).Text, out digest);
-            SetKeySizes((Engines)cbEngines.SelectedItem, digest);
+            SetKeySizes((SymmetricEngines)cbEngines.SelectedItem, digest);
             _container.Description.KdfEngine = (int)digest;
         }
 
@@ -698,7 +710,7 @@ namespace VTDev.Projects.CEX
 
         private void OnInfoButtonClick(object sender, EventArgs e)
         {
-            using (KeyFactory keyFactory = new KeyFactory(_keyFilePath, _container.Authority))
+            using (PackageFactory keyFactory = new PackageFactory(_keyFilePath, _container.Authority))
             {
                 using (FormInfo frmInfo = new FormInfo())
                 {
@@ -795,7 +807,7 @@ namespace VTDev.Projects.CEX
             Enum.TryParse<IVSizes>(((ComboBox)sender).Text, out ivsize);
             _container.Description.IvSize = (int)ivsize;
 
-            if (_container.Description.EngineType == (int)Engines.ChaCha || _container.Description.EngineType == (int)Engines.Salsa)
+            if (_container.Description.EngineType == (int)SymmetricEngines.ChaCha || _container.Description.EngineType == (int)SymmetricEngines.Salsa)
                 _container.Description.BlockSize = (int)BlockSizes.B1024;
             else
                 _container.Description.BlockSize = (int)ivsize;
@@ -928,7 +940,7 @@ namespace VTDev.Projects.CEX
             // get the key policy flag
             long policies = 0;
             using (FileStream keyStream = new FileStream(keyFile, FileMode.Open, FileAccess.Read))
-                policies = KeyPackage.GetKeyPolicy(keyStream);
+                policies = PackageKey.GetKeyPolicy(keyStream);
 
             // test if key requires authentication
             if ((policies & (long)KeyPolicies.PackageAuth) == (long)KeyPolicies.PackageAuth)
@@ -936,7 +948,7 @@ namespace VTDev.Projects.CEX
                 // ask for passphrase
                 if (ShowAuthDialog())
                 {
-                    using (KeyFactory keyFactory = new KeyFactory(keyFile, _container.Authority))
+                    using (PackageFactory keyFactory = new PackageFactory(keyFile, _container.Authority))
                     {
                         if (keyFactory.AccessScope == KeyScope.NoAccess)
                         {
@@ -1027,7 +1039,7 @@ namespace VTDev.Projects.CEX
             _isParallel = Environment.ProcessorCount > 1;
             Reset();
             LoadComboParams();
-            SetComboParams(Engines.RHX);
+            SetComboParams(SymmetricEngines.RHX);
             LoadSettings();
         }
         #endregion
@@ -1043,7 +1055,7 @@ namespace VTDev.Projects.CEX
             _container = new SettingsContainer()
             {
                 Authority = new KeyAuthority(Utilities.GetDomainId(), origin, new byte[0], new byte[0], KeyPolicies.None),
-                Description = new CipherDescription(Engines.RHX, (int)KeySizes.K2560, IVSizes.V128, CipherModes.CTR, PaddingModes.X923, BlockSizes.B128, RoundCounts.R22),
+                Description = new CipherDescription(SymmetricEngines.RHX, (int)KeySizes.K2560, IVSizes.V128, CipherModes.CTR, PaddingModes.X923, BlockSizes.B128, RoundCounts.R22),
                 DomainRestrictChecked = false,
                 NoNarrativeChecked = false,
                 PackageAuthChecked = false,
@@ -1076,8 +1088,8 @@ namespace VTDev.Projects.CEX
                     _container.Authority.KeyPolicy = 0;
                     // apply the container values to controls
                     cbEngines.SelectedIndex = _container.Description.EngineType;
-                    SetComboParams((Engines)_container.Description.EngineType);
-                    SetKeySizes((Engines)_container.Description.EngineType, (Digests)_container.Description.KdfEngine);
+                    SetComboParams((SymmetricEngines)_container.Description.EngineType);
+                    SetKeySizes((SymmetricEngines)_container.Description.EngineType, (Digests)_container.Description.KdfEngine);
                     cbCipherMode.SelectedIndex = _container.Description.CipherType;
                     cbHkdf.SelectedIndex = _container.Description.KdfEngine;
                     cbHmac.SelectedIndex = _container.Description.MacEngine;

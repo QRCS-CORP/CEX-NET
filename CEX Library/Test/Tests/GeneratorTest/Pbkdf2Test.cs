@@ -2,7 +2,7 @@
 using System;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Generator;
-using VTDev.Libraries.CEXEngine.Utility;
+using VTDev.Libraries.CEXEngine.Tools;
 #endregion
 
 namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
@@ -73,7 +73,7 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
         {
             byte[] outBytes = new byte[Size];
 
-            using (PBKDF2 gen = new PBKDF2(new SHA256()))
+            using (KDF2Drbg gen = new KDF2Drbg(new SHA256()))
             {
                 gen.Initialize(Salt);
                 gen.Generate(outBytes, 0, Size);

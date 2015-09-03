@@ -1,7 +1,9 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Mac;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
@@ -65,17 +67,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// <revisionHistory>
     /// <revision date="2014/11/11" version="1.2.0.0">Initial release</revision>
     /// <revision date="2015/01/23" version="1.3.0.0">Changes to formatting and documentation</revision>
+    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
     /// </revisionHistory>
     /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Mac.HMAC">VTDev.Libraries.CEXEngine.Crypto.Mac.HMAC HMAC</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest">VTDev.Libraries.CEXEngine.Crypto.Digest Namespace</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digests">VTDev.Libraries.CEXEngine.Crypto.Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
     /// <list type="bullet">
-    /// <item><description>Can be initialized with a <see cref="Digests">Digest</see> or a <see cref="Macs">Mac</see>.</description></item>
+    /// <item><description>Can be initialized with a <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> or a <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Macs">Mac</see>.</description></item>
     /// <item><description>The <see cref="HKDF(IDigest, bool)">Constructors</see> DisposeEngine parameter determines if Digest engine is destroyed when <see cref="Dispose()"/> is called on this class; default is <c>true</c>.</description></item>
     /// <item><description>Salt size should be multiple of Digest block size.</description></item>
     /// <item><description>Ikm size should be Digest hash return size.</description></item>
@@ -93,7 +96,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class HKDF : IGenerator, IDisposable
+    public sealed class HKDF : IGenerator
     {
         #region Constants
         private const string ALG_NAME = "HKDF";
@@ -148,11 +151,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <param name="Digest">The digest used</param>
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null Digest is used</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if a null Digest is used</exception>
         public HKDF(IDigest Digest, bool DisposeEngine = true)
         {
             if (Digest == null)
-                throw new ArgumentNullException("Digest can not be null!");
+                throw new CryptoGeneratorException("HKDF:Ctor", "Digest can not be null!", new ArgumentNullException());
 
             _disposeEngine = DisposeEngine;
             _digestMac = new HMAC(Digest);
@@ -166,16 +169,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// 
         /// <param name="Hmac">The HMAC digest used</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null Hmac is used</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if a null Hmac is used</exception>
         public HKDF(IMac Hmac)
         {
             if (Hmac == null)
-                throw new ArgumentNullException("Hmac can not be null!");
+                throw new CryptoGeneratorException("HKDF:Ctor", "Hmac can not be null!", new ArgumentNullException());
 
             _digestMac = Hmac;
             _hashLength = Hmac.DigestSize;
 
             _keySize = Hmac.BlockSize;
+        }
+
+        private HKDF()
+        {
         }
 
         /// <summary>
@@ -194,11 +201,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// 
         /// <param name="Salt">Salt value</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null Salt is used</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if a null Salt is used</exception>
         public void Initialize(byte[] Salt)
         {
             if (Salt == null)
-                throw new ArgumentNullException("Salt can not be null!");
+                throw new CryptoGeneratorException("HKDF:Initialize", "Salt can not be null!", new ArgumentNullException());
 
             _digestMac.Initialize(new KeyParams(Salt));
             _generatedBytes = 0;
@@ -213,13 +220,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <param name="Salt">Salt value</param>
         /// <param name="Ikm">Key material</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null Salt or Ikm is used</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if a null Salt or Ikm is used</exception>
         public void Initialize(byte[] Salt, byte[] Ikm)
         {
             if (Salt == null)
-                throw new ArgumentNullException("Salt can not be null!");
+                throw new CryptoGeneratorException("HKDF:Initialize", "Salt can not be null!", new ArgumentNullException());
             if (Ikm == null)
-                throw new ArgumentNullException("Ikm can not be null!");
+                throw new CryptoGeneratorException("HKDF:Initialize", "IKM can not be null!", new ArgumentNullException());
 
             _digestMac.Initialize(new KeyParams(Extract(Salt, Ikm)));
             _generatedBytes = 0;
@@ -235,13 +242,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <param name="Ikm">Key material</param>
         /// <param name="Info">Nonce value</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null Salt or Ikm is used</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if a null Salt or Ikm is used</exception>
         public void Initialize(byte[] Salt, byte[] Ikm, byte[] Info)
         {
             if (Salt == null)
-                throw new ArgumentNullException("Salt can not be null!");
+                throw new CryptoGeneratorException("HKDF:Initialize", "Salt can not be null!", new ArgumentNullException());
             if (Ikm == null)
-                throw new ArgumentNullException("Ikm can not be null!");
+                throw new CryptoGeneratorException("HKDF:Initialize", "IKM can not be null!", new ArgumentNullException());
 
             _digestMac.Initialize(new KeyParams(Extract(Salt, Ikm)));
 
@@ -274,10 +281,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <param name="Size">Number of bytes to generate</param>
         /// 
         /// <returns>Number of bytes generated</returns>
+        /// 
+        /// <exception cref="CryptoGeneratorException">Thrown if the output buffer is too small, or the size requested exceeds maximum: 255 * HashLen bytes</exception>
         public int Generate(byte[] Output, int OutOffset, int Size)
         {
+            if ((Output.Length - Size) < OutOffset)
+                throw new CryptoGeneratorException("PKCS5:Generate", "Output buffer too small!", new Exception());
             if (_generatedBytes + Size > 255 * _hashLength)
-                throw new ArgumentOutOfRangeException("HKDF may only be used for 255 * HashLen bytes of output");
+                throw new CryptoGeneratorException("HKDF:Generate", "HKDF may only be used for 255 * HashLen bytes of output", new ArgumentOutOfRangeException());
 
             if (_generatedBytes % _hashLength == 0)
                 ExpandNext();
@@ -312,11 +323,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// 
         /// <param name="Seed">Pseudo random seed material</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null Seed is used</exception>
+        /// <exception cref="CryptoGeneratorException">Thrown if a null Seed is used</exception>
         public void Update(byte[] Seed)
         {
             if (Seed == null)
-                throw new ArgumentNullException("Seed can not be null!");
+                throw new CryptoGeneratorException("HKDF:Update", "Seed can not be null!", new ArgumentNullException());
 
             Initialize(Seed);
         }
@@ -345,7 +356,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
             int n = _generatedBytes / _hashLength + 1;
 
             if (n >= 256)
-                throw new ArgumentOutOfRangeException("HKDF cannot generate more than 255 blocks of HashLen size");
+                throw new CryptoGeneratorException("HKDF:ExpandNext", "HKDF cannot generate more than 255 blocks of HashLen size", new ArgumentOutOfRangeException());
 
             // special case for T(0): T(0) is empty, so no update
             if (_generatedBytes != 0)

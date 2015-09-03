@@ -1,5 +1,6 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
@@ -30,7 +31,7 @@ using System;
 // The Skein Hash Function Family: <see href="http://www.skein-hash.info/sites/default/files/skein1.1.pdf">Skein V1.1</see>.
 // Implementation Details:
 // An implementation of the Skein digest. 
-// Written by John Underhill, January 13, 2014
+// Written by John Underhill, January 13, 2015
 // contact: develop@vtdev.com
 #endregion
 
@@ -55,10 +56,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     /// 
     /// <revisionHistory>
     /// <revision date="2015/01/23" version="1.3.0.0">Initial release</revision>
+    /// <revision date="2015/03/10" version="1.3.0.0">Added Initialize call to Ctor</revision>
+    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
     /// </revisionHistory>
     /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digests">VTDev.Libraries.CEXEngine.Crypto.Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
@@ -81,7 +84,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     /// <item><description>Adapted from the excellent project by Alberto Fajardo: <see href="http://code.google.com/p/skeinfish/">Skeinfish Release 0.50</see>.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class Skein1024 : IDigest, IDisposable
+    public sealed class Skein1024 : IDigest
     {
         #region Constants
         private const string ALG_NAME = "Skein1024";
@@ -166,8 +169,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// </summary>
         /// 
         /// <param name="InitializationType">Digest initialization type <see cref="SkeinInitializationType"/></param>
-        /// 
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid output size is chosen</exception>
         public Skein1024(SkeinInitializationType InitializationType = SkeinInitializationType.Normal)
         {
             this.InitializationType = InitializationType;
@@ -176,12 +177,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             _cipherStateBytes = STATE_SIZE / 8;
             _cipherStateWords = STATE_SIZE / 64;
             _outputBytes = (STATE_SIZE + 7) / 8;
-
-            // Figure out which cipher we need based on
-            // the state size
             _blockCipher = new Threefish1024();
-            if (_blockCipher == null)
-                throw new Exception("Unsupported state size.");
 
             // Allocate buffers
             _inputBuffer = new byte[_cipherStateBytes];
@@ -216,8 +212,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="Input">Input data</param>
         /// <param name="InOffset">Offset within Input</param>
         /// <param name="Length">Amount of data to process in bytes</param>
+        /// 
+        /// <exception cref="CryptoHashException">Thrown if an invalid Input size is chosen</exception>
         public void BlockUpdate(byte[] Input, int InOffset, int Length)
         {
+            if ((InOffset + Length) > Input.Length)
+                throw new CryptoHashException("Skein1024:BlockUpdate", "The Input buffer is too short!", new ArgumentOutOfRangeException());
+
             int bytesDone = 0;
             int offset = InOffset;
 
@@ -247,8 +248,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         }
 
         /// <summary>
-        /// <para>Get the Hash value. Note: <see cref="Reset()"/> 
-        /// is called post hash calculation.</para> 
+        /// Get the Hash value.
+        /// <para>Note: <see cref="Reset()"/> is called post hash calculation.</para> 
         /// </summary>
         /// 
         /// <param name="Input">Input data</param>
@@ -276,8 +277,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="OutOffset">The starting offset within the Output array</param>
         /// 
         /// <returns>Size of Hash value</returns>
+        /// 
+        /// <exception cref="CryptoHashException">Thrown if Output array is too small</exception>
         public int DoFinal(byte[] Output, int OutOffset)
         {
+            if (Output.Length - OutOffset < DigestSize)
+                throw new CryptoHashException("Skein1024:DoFinal", "The Output buffer is too short!", new ArgumentOutOfRangeException());
+
             int i;
 
             // Pad left over space in input buffer with zeros
@@ -455,10 +461,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// </summary>
         /// 
         /// <param name="Schema">Schema Configuration string</param>
+        /// 
+        /// <exception cref="CryptoSymmetricException">Thrown if an invalid schema is used</exception>
         public void SetSchema(params byte[] Schema)
         {
-            if (Schema.Length != 4) 
-                throw new Exception("Schema must be 4 bytes.");
+            if (Schema.Length != 4)
+                throw new CryptoHashException("Skein1024:SetSchema", "Schema must be 4 bytes.", new Exception());
 
             UInt64 n = ConfigString[0];
 
@@ -478,10 +486,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// </summary>
         /// 
         /// <param name="Version">Version string</param>
+        /// 
+        /// <exception cref="CryptoSymmetricException">Thrown if an invalid version is used</exception>
         public void SetVersion(int Version)
         {
             if (Version < 0 || Version > 3)
-                throw new Exception("Version must be between 0 and 3, inclusive.");
+                throw new CryptoHashException("Skein1024:SetVersion", "Version must be between 0 and 3, inclusive.", new Exception());
 
             ConfigString[0] &= ~((UInt64)0x03 << 32);
             ConfigString[0] |= (UInt64)Version << 32;
@@ -514,10 +524,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// </summary>
         /// 
         /// <param name="Height">Tree height</param>
+        /// 
+        /// <exception cref="CryptoSymmetricException">Thrown if an invalid tree height is used</exception>
         public void SetMaxTreeHeight(byte Height)
         {
             if (Height == 1)
-                throw new Exception("Tree height must be zero or greater than 1.");
+                throw new CryptoHashException("Skein1024:SetMaxTreeHeight", "Tree height must be zero or greater than 1.", new Exception());
 
             ConfigString[2] &= ~((UInt64)0xff << 16);
             ConfigString[2] |= (UInt64)Height << 16;

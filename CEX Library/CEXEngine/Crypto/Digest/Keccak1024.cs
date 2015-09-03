@@ -1,5 +1,6 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
@@ -61,10 +62,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     /// <revision date="2014/11/11" version="1.2.0.0">Initial release</revision>
     /// <revision date="2015/01/23" version="1.3.0.0">Changes to formatting and documentation</revision>
     /// <revision date="2015/01/23" version="1.3.5.0">Rewritten for improvements to security and speed</revision>
+    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
     /// </revisionHistory>
     /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digests">VTDev.Libraries.CEXEngine.Crypto.Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
@@ -88,7 +90,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     /// and the <see href="https://github.com/gvanas/KeccakCodePackage">Keccak Code Package</see>.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class Keccak1024 : IDigest, IDisposable
+    public sealed class Keccak1024 : IDigest
     {
         #region Constants
         private const string ALG_NAME = "Keccak1024";
@@ -168,7 +170,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
                 _digestSize = 1024 / 8;
 
             // Note Apr/2015: +security/size = smaller blocks, more processing
-            // I'll have to re-examine the docs, other changes may be required..
+            // I'll have to re-examine the docs, other changes may be required (i.e. extending permutation).
             // http://eprint.iacr.org/2010/285.pdf
             // http://csrc.nist.gov/publications/drafts/fips-202/fips_202_draft.pdf
             // http://keccak.noekeon.org/specs_summary.html
@@ -201,8 +203,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="Input">Input data</param>
         /// <param name="InOffset">Offset within Input array</param>
         /// <param name="Length">Amount of data to process in bytes</param>
+        /// 
+        /// <exception cref="CryptoHashException">Thrown if an invalid Input size is chosen</exception>
         public void BlockUpdate(byte[] Input, int InOffset, int Length)
         {
+            if ((InOffset + Length) > Input.Length)
+                throw new CryptoHashException("Keccak1024:BlockUpdate", "The Input buffer is too short!", new ArgumentOutOfRangeException());
+
             if (_bufferIndex != 0)
             {
                 if (Length + _bufferIndex >= _blockSize)
@@ -255,8 +262,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="OutOffset">The starting offset within the Output array</param>
         /// 
         /// <returns>Size of Hash value</returns>
+        /// 
+        /// <exception cref="CryptoHashException">Thrown if Output array is too small</exception>
         public int DoFinal(byte[] Output, int OutOffset)
         {
+            if (Output.Length - OutOffset < DigestSize)
+                throw new CryptoHashException("Keccak1024:DoFinal", "The Output buffer is too short!", new ArgumentOutOfRangeException());
+
             Array.Clear(_buffer, _bufferIndex, _buffer.Length - _bufferIndex); 
             _buffer[_bufferIndex] = 1;
             _buffer[BlockSize - 1] |= 128;

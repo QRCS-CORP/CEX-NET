@@ -1,5 +1,7 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
@@ -66,9 +68,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// <revisionHistory>
     /// <revision date="2014/11/14" version="1.2.0.0">Initial release</revision>
     /// <revision date="2015/01/23" version="1.3.0.0">Secondary release; updates to layout and documentation</revision>
+    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
     /// </revisionHistory>
     /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Mode.ICipherMode Interface</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode Interface</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
@@ -97,11 +100,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// <item><description>Inspired in part by the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see>.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class SPX : IBlockCipher, IDisposable
+    public sealed class SPX : IBlockCipher
     {
         #region Constants
         private const string ALG_NAME = "SPX";
-        private const Int32 DEFAULT_ROUNDS = 32;
+        private const Int32 ROUNDS32 = 32;
         private const Int32 BLOCK_SIZE = 16;
         private const Int32 MAX_ROUNDS = 64;
         private const Int32 MIN_ROUNDS = 32;
@@ -183,13 +186,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// Initialize the class
         /// </summary>
         /// 
-        /// <param name="Rounds">Number of diffusion rounds. The <see cref="LegalRounds"/> property contains available sizes</param>
+        /// <param name="Rounds">Number of diffusion rounds. The <see cref="LegalRounds"/> property contains available sizes.  Default is 32 rounds.</param>
         /// 
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid rounds count is chosen</exception>
-        public SPX(int Rounds = DEFAULT_ROUNDS)
+        /// <exception cref="CryptoSymmetricException">Thrown if an invalid rounds count is chosen</exception>
+        public SPX(int Rounds = ROUNDS32)
         {
             if (Rounds != 32 && Rounds != 40 && Rounds != 48 && Rounds != 56 && Rounds != 64 && Rounds != 80 && Rounds != 96 && Rounds != 128)
-                throw new ArgumentOutOfRangeException("Invalid rounds size! Sizes supported are 32, 40, 48, 56, 64, 80, 96 and 128.");
+                throw new CryptoSymmetricException("SPX:CTor", "Invalid rounds size! Sizes supported are 32, 40, 48, 56, 64, 80, 96 and 128.", new ArgumentOutOfRangeException());
 
             _dfnRounds = Rounds;
         }
@@ -267,14 +270,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// <param name="Encryption">Using Encryption or Decryption mode</param>
         /// <param name="KeyParam">Cipher key container. <para>The <see cref="LegalKeySizes"/> property contains valid sizes.</para></param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null key is used</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid key size is used</exception>
+        /// <exception cref="CryptoSymmetricException">Thrown if a null or invalid key is used</exception>
         public void Initialize(bool Encryption, KeyParams KeyParam)
         {
             if (KeyParam.Key == null)
-                throw new ArgumentNullException("Invalid key! Key can not be null.");
+                throw new CryptoSymmetricException("SPX:Initialize", "Invalid key! Key can not be null.", new ArgumentNullException());
             if (KeyParam.Key.Length != 16 && KeyParam.Key.Length != 24 && KeyParam.Key.Length != 32 && KeyParam.Key.Length != 64)
-                throw new ArgumentOutOfRangeException("Invalid key size! Valid sizes are 16, 24, 32 and 32 bytes.");
+                throw new CryptoSymmetricException("SPX:Initialize", "Invalid key size! Valid sizes are 16, 24, 32 and 64 bytes.", new ArgumentOutOfRangeException());
 
             _isEncryption = Encryption;
             _expKey = ExpandKey(KeyParam.Key);
@@ -326,7 +328,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 
             // less than 512 is default rounds
             if (Key.Length < 64)
-                _dfnRounds = DEFAULT_ROUNDS;
+                _dfnRounds = ROUNDS32;
 
             int keySize = 4 * (_dfnRounds + 1);
 
@@ -556,7 +558,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         #endregion
 
         #region Helpers
-        private static Int32 BytesToInt32(byte[] Input, Int32 InOffset)
+        private Int32 BytesToInt32(byte[] Input, Int32 InOffset)
         {
             return ((Input[InOffset] << 24) |
                 (Input[InOffset + 1] << 16) |
@@ -564,7 +566,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 (Input[InOffset + 3]));
         }
 
-        private static void Int32ToBytes(Int32 Dword, byte[] Output, Int32 OutOffset)
+        private void Int32ToBytes(Int32 Dword, byte[] Output, Int32 OutOffset)
         {
             Output[OutOffset + 3] = (byte)(Dword);
             Output[OutOffset + 2] = (byte)(Dword >> 8);
@@ -572,12 +574,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             Output[OutOffset] = (byte)(Dword >> 24);
         }
 
-        private static Int32 RotateLeft(Int32 X, Int32 Bits)
+        private Int32 RotateLeft(Int32 X, Int32 Bits)
         {
             return ((X << Bits) | (Int32)((UInt32)X >> (32 - Bits)));
         }
 
-        private static Int32 RotateRight(Int32 X, Int32 Bits)
+        private Int32 RotateRight(Int32 X, Int32 Bits)
         {
             return ((Int32)((UInt32)X >> Bits) | (X << (32 - Bits)));
         }

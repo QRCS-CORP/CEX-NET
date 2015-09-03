@@ -1,6 +1,7 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Crypto.Numeric;
+using VTDev.Libraries.CEXEngine.Numeric;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
@@ -50,6 +51,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
     /// 
     /// <revisionHistory>
     /// <revision date="2015/01/23" version="1.3.0.0">Initial release</revision>
+    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
     /// </revisionHistory>
     /// 
     /// <remarks>
@@ -66,7 +68,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
     /// <item><description>This code based on the excellent Java version by Zur Aougav: <see href="http://sourceforge.net/projects/jrandtest/">CubicResiduePrng</see> class.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class CCG : IRandom, IDisposable
+    public sealed class CCG : IRandom
     {
         #region Constants
         private const string ALG_NAME = "CCG";
@@ -125,11 +127,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="P">Random Prime with probability &lt; 2 ** -100</param>
         /// <param name="G">Random Generator State</param>
         /// 
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if P is not a valid prime</exception>
+        /// <exception cref="CryptoRandomException">Thrown if P is not a valid prime</exception>
         public CCG(BigInteger P, BigInteger G)
         {
             if (!P.IsProbablePrime(90))
-                throw new ArgumentOutOfRangeException("P is not a valid prime number!.");
+                throw new CryptoRandomException("CCG:Ctor", "P is not a valid prime number!", new ArgumentOutOfRangeException());
 
             _secRand = new SecureRandom();
 
@@ -264,6 +266,42 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
                 _G = BigInteger.ValueOf(2);
 
             return _G.ToInt64();
+        }
+
+        /// <summary>
+        /// Get a ranged pseudo random 64bit integer
+        /// </summary>
+        /// 
+        /// <param name="Maximum">Maximum value</param>
+        /// 
+        /// <returns>Random Int64</returns>
+        public Int64 NextLong(long Maximum)
+        {
+            byte[] rand;
+            Int64[] num = new Int64[1];
+
+            do
+            {
+                rand = GetByteRange(Maximum);
+                Buffer.BlockCopy(rand, 0, num, 0, rand.Length);
+            } while (num[0] > Maximum);
+
+            return num[0];
+        }
+
+        /// <summary>
+        /// Get a ranged pseudo random 64bit integer
+        /// </summary>
+        /// 
+        /// <param name="Minimum">Minimum value</param>
+        /// <param name="Maximum">Maximum value</param>
+        /// 
+        /// <returns>Random Int64</returns>
+        public Int64 NextLong(long Minimum, long Maximum)
+        {
+            Int64 num = 0;
+            while ((num = NextLong(Maximum)) < Minimum) { }
+            return num;
         }
 
         /// <summary>

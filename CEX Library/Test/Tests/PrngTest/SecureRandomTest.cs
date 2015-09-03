@@ -1,12 +1,13 @@
 ﻿#region Directives
 using System;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
+using VTDev.Libraries.CEXEngine.Crypto.Digest;
 #endregion
 
 namespace VTDev.Projects.CEX.Test.Tests.PrngTest
 {
     /// <summary>
-    /// Tests the SecureRandom access methods and return ranges
+    /// Tests the SecureRandom and Prng access methods and return ranges
     /// </summary>
     public class SecureRandomTest : ITest
     {
@@ -41,9 +42,35 @@ namespace VTDev.Projects.CEX.Test.Tests.PrngTest
         {
             try
             {
-                RandomTest(); 
-                OnProgress(new TestEventArgs("Passed SecureRandom threshhold tests.."));
+                SecRandTest();
 
+                RandRangeTest(new BBSG(), 10);
+                OnProgress(new TestEventArgs("Passed BBSG threshhold tests.."));
+                RandRangeTest(new CCG(), 10);
+                OnProgress(new TestEventArgs("Passed CCG threshhold tests.."));
+                RandRangeTest(new CSPRng());
+                OnProgress(new TestEventArgs("Passed CSPRng threshhold tests.."));
+                RandRangeTest(new CTRPrng());
+                OnProgress(new TestEventArgs("Passed CTRPrng threshhold tests.."));
+                RandRangeTest(new DGCPrng());
+                OnProgress(new TestEventArgs("Passed DGCPrng threshhold tests.."));
+                RandRangeTest(new MODEXPG(), 10);
+                OnProgress(new TestEventArgs("Passed MODEXPG threshhold tests.."));
+                RandRangeTest(new QCG1(), 10);
+                OnProgress(new TestEventArgs("Passed QCG1 threshhold tests.."));
+                RandRangeTest(new QCG2(), 10);
+                OnProgress(new TestEventArgs("Passed QCG2 threshhold tests.."));
+                RandRangeTest(new SP20Prng(), 10);
+                OnProgress(new TestEventArgs("Passed SP20Prng threshhold tests.."));
+
+
+                byte[] pass, salt;
+                CSPRng rand = new CSPRng();
+                pass = rand.GetBytes(23);
+                salt = rand.GetBytes(256);
+                rand.Dispose();
+                RandRangeTest(new PBPRng(new SHA512(), pass, salt));
+                OnProgress(new TestEventArgs("Passed PBPRng threshhold tests.."));
                 return SUCCESS;
             }
             catch (Exception Ex)
@@ -55,7 +82,34 @@ namespace VTDev.Projects.CEX.Test.Tests.PrngTest
         #endregion
 
         #region Tests
-        private void RandomTest()
+        private void RandRangeTest(IRandom Rand, int Iterations = 1000)
+        {
+            byte[] data;
+            int x;
+            long y;
+            int min, max;
+            min = Rand.Next(33);
+            max = Rand.Next(34, 111);
+
+            for (int i = 0; i < Iterations; i++)
+                data = Rand.GetBytes(i * 10);
+
+            for (int i = 1; i < Iterations; i++)
+            {
+                x = Rand.Next(i * min, i * max);
+                if (x > i * max)
+                    throw new Exception(Rand.Name + ":Next returned a value above of the expected range.");
+                if (x < i * min)
+                    throw new Exception(Rand.Name + ":Next returned a value below of the expected range.");
+                y = Rand.NextLong(i * min, i * max);
+                if (y > i * max)
+                    throw new Exception(Rand.Name + ":NextLong returned a value above of the expected range.");
+                if (y < i * min)
+                    throw new Exception(Rand.Name + ":NextLong returned a value below of the expected range.");
+            }
+        }
+
+        private void SecRandTest()
         {
             using (SecureRandom rnd = new SecureRandom())
             {

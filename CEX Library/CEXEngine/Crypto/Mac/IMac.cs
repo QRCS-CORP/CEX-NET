@@ -1,5 +1,6 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Mac

@@ -1,8 +1,7 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher;
-using VTDev.Libraries.CEXEngine.Crypto.Mode;
-using VTDev.Libraries.CEXEngine.Crypto.Padding;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
@@ -57,6 +56,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
     /// 
     /// <revisionHistory>
     /// <revision date="2015/01/23" version="1.3.0.0">Initial release</revision>
+    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
     /// </revisionHistory>
     /// 
     /// <remarks>
@@ -78,7 +78,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
     /// <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class VMPCMAC : IMac, IDisposable
+    public sealed class VMPCMAC : IMac
     {
         #region Constants
         private const string ALG_NAME = "VMPCMAC";
@@ -161,11 +161,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <param name="InOffset">Offset within Input array</param>
         /// <param name="Length">Amount of data to process in bytes</param>
         /// 
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid Input size is chosen</exception>
+        /// <exception cref="CryptoMacException">Thrown if an invalid Input size is chosen</exception>
         public void BlockUpdate(byte[] Input, int InOffset, int Length)
         {
             if ((InOffset + Length) > Input.Length)
-                throw new ArgumentOutOfRangeException("The Input buffer is too short!");
+                throw new CryptoMacException("VMPCMAC:Ctor", "The Input buffer is too short!", new ArgumentOutOfRangeException());
 
 			for (int i = 0; i < Length; i++)
 				Update(Input[i]);
@@ -193,11 +193,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// </summary>
         /// 
         /// <param name="Output">The hash value return</param>
-        /// <param name="Offset">The offset in the data</param>
+        /// <param name="OutOffset">The offset in the data</param>
         /// 
-        /// <returns>bytes processed</returns>
-        public int DoFinal(byte[] Output, int Offset)
+        /// <returns>The number of bytes processed</returns>
+        /// 
+        /// <exception cref="CryptoMacException">Thrown if Output array is too small</exception>
+        public int DoFinal(byte[] Output, int OutOffset)
         {
+            if (Output.Length - OutOffset < DIGEST_SIZE)
+                throw new CryptoMacException("VMPCMAC:DoFinal", "The Output buffer is too short!", new ArgumentOutOfRangeException());
+
             // Execute the Post-Processing Phase
 			for (int r = 1; r < 25; r++)
 			{
@@ -241,7 +246,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 				_P[_S & 0xff] = temp;
 			}
 
-			Buffer.BlockCopy(M, 0, Output, Offset, M.Length);
+			Buffer.BlockCopy(M, 0, Output, OutOffset, M.Length);
 
             Reset();
 
@@ -249,7 +254,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         }
 
         /// <summary>
-        /// Initialize the MAC
+        /// Initialize the VMPC MAC.
+        /// <para>Uses the Key and IV fields of the KeyParams class.</para>
         /// </summary>
         /// 
         /// <param name="KeyParam">VMPCMAC Key and IV.
@@ -258,19 +264,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// Key and IV should be equal in size.</para>
         /// </param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null Salt, Key, or Nonce is used</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if the IV is too small</exception>
+        /// <exception cref="CryptoMacException">Thrown if a null or invalid Key, or IV is used</exception>
         public void Initialize(KeyParams KeyParam)
         {
-            if (KeyParam.IV == null)
-				throw new ArgumentException("VMPCMAC Initialize KeyParams must include an IV!");
             if (KeyParam.Key == null)
-				throw new ArgumentException("VMPCMAC Initialize KeyParams must include a Key!");
+                throw new CryptoMacException("VMPCMAC:Initialize", "VMPCMAC Initialize KeyParams must include a Key!", new ArgumentNullException());
+            if (KeyParam.IV == null)
+                throw new CryptoMacException("VMPCMAC:Initialize", "VMPCMAC Initialize KeyParams must include an IV!", new ArgumentNullException());
 
 			_workingIV = KeyParam.IV;
 
 			if (_workingIV == null || _workingIV.Length < 1 || _workingIV.Length > 768)
-                throw new ArgumentOutOfRangeException("VMPCMAC requires 1 to 768 bytes of IV!");
+                throw new CryptoMacException("VMPCMAC:Initialize", "VMPCMAC requires 1 to 768 bytes of IV!", new ArgumentOutOfRangeException());
 
 			_workingKey = KeyParam.Key;
 

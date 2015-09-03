@@ -64,6 +64,25 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         Int64 NextLong();
 
         /// <summary>
+        /// Get a ranged pseudo random 64bit integer
+        /// </summary>
+        /// 
+        /// <param name="Maximum">Maximum value</param>
+        /// 
+        /// <returns>Random Int64</returns>
+        Int64 NextLong(long Maximum);
+
+        /// <summary>
+        /// Get a ranged pseudo random 64bit integer
+        /// </summary>
+        /// 
+        /// <param name="Minimum">Minimum value</param>
+        /// <param name="Maximum">Maximum value</param>
+        /// 
+        /// <returns>Random Int64</returns>
+        Int64 NextLong(long Minimum, long Maximum);
+
+        /// <summary>
         /// Reset the internal state
         /// </summary>
         void Reset();

@@ -1,5 +1,7 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
@@ -60,9 +62,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// <revisionHistory>
     /// <revision date="2014/09/10" version="1.2.0.0">Initial release</revision>
     /// <revision date="2015/01/23" version="1.3.0.0">Secondary release; updates to layout and documentation</revision>
+    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
     /// </revisionHistory>
     /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Mode.ICipherMode Interface</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode Interface</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
@@ -89,7 +92,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// <item><description>Inspired in part by the Mono: <see href="https://github.com/mono/mono/blob/effa4c07ba850bedbe1ff54b2a5df281c058ebcb/mcs/class/corlib/System.Security.Cryptography/RijndaelManagedTransform.cs">RijndaelManagedTransform</see> class.</description></item>
     /// </list>
     /// </remarks>
-    public sealed class RDX : IBlockCipher, IDisposable
+    public sealed class RDX : IBlockCipher
     {
         #region Constants
         private const string ALG_NAME = "RDX";
@@ -170,13 +173,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// Initialize this class
         /// </summary>
         /// 
-        /// <param name="BlockSize">Cipher input <see cref="BlockSize"/>. The <see cref="LegalBlockSizes"/> property contains available sizes</param>
+        /// <param name="BlockSize">Cipher input <see cref="BlockSize"/>. The <see cref="LegalBlockSizes"/> property contains available sizes. Default is 16 bytes.</param>
         /// 
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid block size is chosen</exception>
+        /// <exception cref="CryptoSymmetricException">Thrown if an invalid block size is chosen</exception>
         public RDX(int BlockSize = BLOCK16)
         {
             if (BlockSize != BLOCK16 && BlockSize != BLOCK32)
-                throw new ArgumentOutOfRangeException("Invalid block size! Supported block sizes are 16 and 32 bytes.");
+                throw new CryptoSymmetricException("RDX:CTor", "Invalid block size! Supported block sizes are 16 and 32 bytes.", new ArgumentOutOfRangeException());
 
             _blockSize = BlockSize;
         }
@@ -266,14 +269,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// <param name="Encryption">Using Encryption or Decryption mode</param>
         /// <param name="KeyParam">Cipher key container. <para>The <see cref="LegalKeySizes"/> property contains valid sizes.</para></param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null key is used</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid key size is used</exception>
+        /// <exception cref="CryptoSymmetricException">Thrown if a null or invalid key is used</exception>
         public void Initialize(bool Encryption, KeyParams KeyParam)
         {
             if (KeyParam.Key == null)
-                throw new ArgumentNullException("Invalid key! Key can not be null.");
+                throw new CryptoSymmetricException("RDX:Initialize", "Invalid key! Key can not be null.", new ArgumentNullException());
             if (KeyParam.Key.Length != 16 && KeyParam.Key.Length != 24 && KeyParam.Key.Length != 32 && KeyParam.Key.Length != 64)
-                throw new ArgumentOutOfRangeException("Invalid key size! Valid sizes are 16, 24, 32, 64 bytes.");
+                throw new CryptoSymmetricException("RDX:Initialize", "Invalid key size! Valid sizes are 16, 24, 32, 64 bytes.", new ArgumentOutOfRangeException());
 
             _isEncryption = Encryption;
             // expand the key
