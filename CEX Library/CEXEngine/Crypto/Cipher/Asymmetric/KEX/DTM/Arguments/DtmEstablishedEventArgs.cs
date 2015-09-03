@@ -14,6 +14,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments
     public sealed class DtmEstablishedEventArgs : EventArgs
     {
         #region Fields
+        /// <summary>
+        /// The client socket instance
+        /// </summary>
         public Socket Client;
         /// <summary>
         /// The initialized Forward session encryption cipher; used to encrypt a stream sent to the remote host
@@ -34,6 +37,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments
         /// The DTM Established event arguments constructor
         /// </summary>
         /// 
+        /// <param name="Client">The client socket instance</param>
         /// <param name="ForwardSession">The initialized Forward session encryption cipher; used to encrypt data sent to the remote host</param>
         /// <param name="ReturnSession">The initialized Return session encryption cipher; used to decrypt data sent from the remote host</param>
         /// <param name="Flag">An option flag that can contain additional information about the exchange</param>

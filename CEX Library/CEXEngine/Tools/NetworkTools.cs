@@ -6,6 +6,9 @@ using System.Net.NetworkInformation;
 
 namespace VTDev.Libraries.CEXEngine.Tools
 {
+    /// <summary>
+    /// A networking tools class
+    /// </summary>
     public static class NetworkTools
     {
         /// <summary>

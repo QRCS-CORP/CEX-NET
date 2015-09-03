@@ -8,4 +8,5 @@ C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\CEXEngine\bin\x86\Debug\CEXEngine.pdb
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\CEXEngine\obj\x86\Debug\CEXEngine.dll
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\CEXEngine\obj\x86\Debug\CEXEngine.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\CEXEngine\bin\x86\Debug\CEXEngine.XML
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\CEXEngine\obj\x86\Debug\CEXEngine.csprojResolveAssemblyReference.cache

@@ -717,6 +717,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
         /// 
         /// <param name="HostName">The Host Name assigned to this server</param>
         /// <param name="Port">The Port number assigned to this server</param>
+        /// <param name="MaxConnections">The maximum number of connections</param>
+        /// <param name="Timeout">The wait timeout period</param>
         /// 
         /// <exception cref="CryptoSocketException">Thrown if the Tcp listen operation has failed</exception>
         public void Listen(string HostName, int Port, int MaxConnections = 10, int Timeout = Timeout.Infinite)
@@ -750,6 +752,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
         /// 
         /// <param name="Address">The IP address assigned to this server</param>
         /// <param name="Port">The Port number assigned to this server</param>
+        /// <param name="MaxConnections">The maximum number of connections</param>
         /// 
         /// <exception cref="CryptoSocketException">Thrown if the Tcp listen operation has failed</exception>
         public void Listen(IPAddress Address, int Port, int MaxConnections = 10)
@@ -805,6 +808,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
         /// 
         /// <param name="HostName">The Host Name assigned to this server</param>
         /// <param name="Port">The Port number assigned to this server</param>
+        /// <param name="MaxConnections">The maximum number of connections</param>
+        /// <param name="Timeout">The wait timeout period</param>
         /// 
         /// <exception cref="CryptoSocketException">Thrown if the Tcp listen operation has failed</exception>
         public void ListenAsync(string HostName, int Port, int MaxConnections = 10, int Timeout = Timeout.Infinite)
@@ -838,6 +843,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
         /// <param name="Address">The IP address assigned to this server</param>
         /// <param name="Port">The Port number assigned to this server</param>
         /// <param name="MaxConnections">The maximum number of simultaneous connections allowed (default is 10)</param>
+        /// <param name="Timeout">The wait timeout period</param>
         /// 
         /// <exception cref="CryptoSocketException">Thrown if the Tcp listen operation has failed</exception>
         public void ListenAsync(IPAddress Address, int Port, int MaxConnections = 10, int Timeout = Timeout.Infinite)

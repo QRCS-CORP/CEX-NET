@@ -129,15 +129,26 @@ namespace VTDev.Libraries.CEXEngine.Utility
         }
         #endregion
 
+        /// <summary>
+        /// Async reset class
+        /// </summary>
         public class AsyncManualResetEvent
         {
             private volatile TaskCompletionSource<bool> _taskComplete = new TaskCompletionSource<bool>();
 
+            /// <summary>
+            /// Complete wait
+            /// </summary>
+            /// 
+            /// <returns>The Task</returns>
             public Task WaitAsync() 
             { 
                 return _taskComplete.Task; 
             }
 
+            /// <summary>
+            /// Set the Task
+            /// </summary>
             public void Set()
             {
                 var tcs = _taskComplete;
@@ -145,6 +156,9 @@ namespace VTDev.Libraries.CEXEngine.Utility
                 tcs.Task.Wait();
             }
 
+            /// <summary>
+            /// Reset the task
+            /// </summary>
             public void Reset()
             {
                 while (true)

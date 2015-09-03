@@ -74,7 +74,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
     /// <item><description>Current Process: Handle, StartTime ticks, PeakWorkingSet64, NonpagedSystemMemorySize64, PagedSystemMemorySize64, HandleCount, and Id.</description></item>
     /// <item><description>Combined running processes and threads: WorkingSet64, VirtualMemorySize64, StartAddress, Id, and CurrentPriority.</description></item>
     /// <item><description>Environment: Ticks since startup, the Time in Ticks.</description></item>
-    /// <item><description>.</description></item>
     /// </list>
     /// </remarks>
     public sealed class XSPRsg : ISeed

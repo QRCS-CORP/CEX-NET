@@ -67,62 +67,62 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         {
             /// <summary>
             /// Class 1, X1.1 Configuration: Optimized for maximum security; (this is the recommended X1 parameter set).
-            /// <para>Authentication Stage: Ring-LWE <see cref="RLWEN512Q12289"/> and 40 rounds of Serpent.
-            /// Primary Stage: NTRU <see cref="CX1931SK512"/> and 22 rounds of RHX with the Keccak512 Kdf.
+            /// <para>Authentication Stage: Ring-LWE <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 40 rounds of Serpent.
+            /// Primary Stage: NTRU <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1931SK512"/> and 22 rounds of RHX with the Keccak512 Kdf.
             /// Random bytes appended and prepended to exchange entities and message packets.
             /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
             /// </summary>
             X11RNS1R2 = 1,
             /// <summary>
             /// Class 1, X1.2 Configuration: Optimized for maximum security.
-            /// <para>Authentication Stage: Ring-LWE <see cref="RLWEN512Q12289"/> and 20 rounds of TwoFish.
-            /// Primary Stage: NTRU <see cref="CX1931SK512"/> and 40 rounds of SHX with the Keccak512 Kdf.
+            /// <para>Authentication Stage: Ring-LWE <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 20 rounds of TwoFish.
+            /// Primary Stage: NTRU <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1931SK512"/> and 40 rounds of SHX with the Keccak512 Kdf.
             /// Random bytes appended and prepended to exchange entities and message packets.
             /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
             /// </summary>
             X12RNT1S2,
             /// <summary>
             /// Class 2, X2.1 Configuration: Optimized for maximum security.
-            /// <para>Authentication Stage: McEliece <see cref="MPKCFM12T67S256"/> and 22 rounds of RHX.
-            /// Primary Stage: NTRU <see cref="CX1861SK512"/> and 22 rounds of THX with the Skein512 Kdf.
+            /// <para>Authentication Stage: McEliece <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCFM12T67S256"/> and 22 rounds of RHX.
+            /// Primary Stage: NTRU <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1861SK512"/> and 22 rounds of THX with the Skein512 Kdf.
             /// Random bytes appended and prepended to exchange entities and message packets.
             /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
             /// </summary>
             X21MNR2T2,
             /// <summary>
             /// Class 2, X2.2 Configuration: Optimized for security and speed; (this is the recommended x2 parameter set).
-            /// <para>Authentication Stage: McEliece <see cref="MPKCFM12T67S256"/> and 40 rounds of SHX.
-            /// Primary Stage: NTRU <see cref="CX1861SK512"/> and 22 rounds of RHX with the Skein512 Kdf.
+            /// <para>Authentication Stage: McEliece <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCFM12T67S256"/> and 40 rounds of SHX.
+            /// Primary Stage: NTRU <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1861SK512"/> and 22 rounds of RHX with the Skein512 Kdf.
             /// Random bytes appended and prepended to exchange entities.
             /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
             /// </summary>
             X22MNS2R2,
             /// <summary>
             /// Class 3, X3.1 Configuration: Optimized for security and speed.
-            /// <para>Authentication Stage: McEliece <see cref="MPKCFM12T41S256"/> and 20 rounds of Twofish.
-            /// Primary Stage: NTRU <see cref="CX1861SK512"/> and 22 rounds of RHX with the Skein512 Kdf.
+            /// <para>Authentication Stage: McEliece <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCFM12T41S256"/> and 20 rounds of Twofish.
+            /// Primary Stage: NTRU <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1861SK512"/> and 22 rounds of RHX with the Skein512 Kdf.
             /// Random bytes appended and prepended to exchange entities.
             /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
             /// </summary>
             X31RNT1R2,
             /// <summary>
             /// Class 3, X3.2 Configuration: Optimized for security and speed.
-            /// <para>Authentication Stage: Ring-LWE <see cref="RLWEN512Q12289"/> and 40 rounds of Serpent.
-            /// Primary Stage: NTRU <see cref="CX1861SK512"/> and 20 rounds of THX with the Skein512 Kdf.
+            /// <para>Authentication Stage: Ring-LWE <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 40 rounds of Serpent.
+            /// Primary Stage: NTRU <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1861SK512"/> and 20 rounds of THX with the Skein512 Kdf.
             /// Random bytes appended and prepended to exchange entities.
             /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
             /// </summary>
             X32RNS1T2,
             /// <summary>
             /// Class 4, X4.1 Configuration: Optimized for speed.
-            /// <para>Authentication Stage: Ring-LWE <see cref="RLWEN512Q12289"/> and 16 rounds of Twofish.
-            /// Primary Stage: NTRU <see cref="APR2011743FAST"/> and 14 rounds of Rijndael.</para>
+            /// <para>Authentication Stage: Ring-LWE <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 16 rounds of Twofish.
+            /// Primary Stage: NTRU <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.APR2011743FAST"/> and 14 rounds of Rijndael.</para>
             /// </summary>
             X41RNT1R1,
             /// <summary>
             /// Class 4, X4.2 Configuration: Optimized for speed.
-            /// <para>Authentication Stage: Ring-LWE <see cref="RLWEN512Q12289"/> and 32 rounds of Serpent.
-            /// Primary Stage: NTRU <see cref="APR2011743FAST"/> and 22 rounds of Rijndael.</para>
+            /// <para>Authentication Stage: Ring-LWE <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 32 rounds of Serpent.
+            /// Primary Stage: NTRU <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.APR2011743FAST"/> and 22 rounds of Rijndael.</para>
             /// </summary>
             X42RNS1R1
         }
@@ -337,8 +337,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
 
         /// <summary>
         /// Class 1, X1.1 Configuration: Optimized for maximum security; (this is the recommended X1 parameter set).
-        /// <para>Authentication Stage: Ring-LWE <see cref="RLWEN512Q12289"/> and 40 rounds of Serpent.
-        /// Primary Stage: NTRU <see cref="CX1931SK512"/> and 22 rounds of RHX with the Keccak512 Kdf.
+        /// <para>Authentication Stage: Ring-LWE <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 40 rounds of Serpent.
+        /// Primary Stage: NTRU <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1931SK512"/> and 22 rounds of RHX with the Keccak512 Kdf.
         /// Random bytes appended and prepended to exchange entities and message packets.
         /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
         /// </summary>
@@ -380,8 +380,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
 
         /// <summary>
         /// Class 1, X1.2 Configuration: Optimized for maximum security.
-        /// <para>Authentication Stage: Ring-LWE <see cref="RLWEN512Q12289"/> and 20 rounds of TwoFish.
-        /// Primary Stage: NTRU <see cref="CX1931SK512"/> and 40 rounds of SHX with the Keccak512 Kdf.
+        /// <para>Authentication Stage: Ring-LWE <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 20 rounds of TwoFish.
+        /// Primary Stage: NTRU <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1931SK512"/> and 40 rounds of SHX with the Keccak512 Kdf.
         /// Random bytes appended and prepended to exchange entities and message packets.
         /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
         /// </summary>
@@ -406,8 +406,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
 
         /// <summary>
         /// Class 2, X2.1 Configuration: Optimized for maximum security.
-        /// <para>Authentication Stage: McEliece <see cref="MPKCFM12T67S256"/> and 22 rounds of RHX.
-        /// Primary Stage: NTRU <see cref="CX1861SK512"/> and 22 rounds of THX with the Skein512 Kdf.
+        /// <para>Authentication Stage: McEliece <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCFM12T67S256"/> and 22 rounds of RHX.
+        /// Primary Stage: NTRU <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1861SK512"/> and 22 rounds of THX with the Skein512 Kdf.
         /// Random bytes appended and prepended to exchange entities and message packets.
         /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
         /// </summary>
@@ -430,8 +430,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
 
         /// <summary>
         /// Class 2, X2.2 Configuration: Optimized for security and speed; (this is the recommended x2 parameter set).
-        /// <para>Authentication Stage: McEliece <see cref="MPKCFM12T67S256"/> and 40 rounds of SHX.
-        /// Primary Stage: NTRU <see cref="CX1861SK512"/> and 22 rounds of RHX with the Skein512 Kdf.
+        /// <para>Authentication Stage: McEliece <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCFM12T67S256"/> and 40 rounds of SHX.
+        /// Primary Stage: NTRU <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1861SK512"/> and 22 rounds of RHX with the Skein512 Kdf.
         /// Random bytes appended and prepended to exchange entities.
         /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
         /// </summary>
@@ -456,8 +456,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
 
         /// <summary>
         /// Class 3, X3.1 Configuration: Optimized for security and speed.
-        /// <para>Authentication Stage: Ring-LWE <see cref="RLWEN512Q12289"/> and 20 rounds of Twofish.
-        /// Primary Stage: NTRU <see cref="CX1861SK512"/> and 22 rounds of RHX with the Skein512 Kdf.
+        /// <para>Authentication Stage: Ring-LWE <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 20 rounds of Twofish.
+        /// Primary Stage: NTRU <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1861SK512"/> and 22 rounds of RHX with the Skein512 Kdf.
         /// Random bytes appended and prepended to exchange entities.
         /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
         /// </summary>
@@ -480,8 +480,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
 
         /// <summary>
         /// Class 3, X3.2 Configuration: Optimized for security and speed.
-        /// <para>Authentication Stage: Ring-LWE <see cref="RLWEN512Q12289"/> and 40 rounds of Serpent.
-        /// Primary Stage: NTRU <see cref="CX1861SK512"/> and 20 rounds of THX with the Skein512 Kdf.
+        /// <para>Authentication Stage: Ring-LWE <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 40 rounds of Serpent.
+        /// Primary Stage: NTRU <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1861SK512"/> and 20 rounds of THX with the Skein512 Kdf.
         /// Random bytes appended and prepended to exchange entities.
         /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
         /// </summary>
@@ -506,8 +506,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
 
         /// <summary>
         /// Class 4, X4.1 Configuration: Optimized for speed.
-        /// <para>Authentication Stage: Ring-LWE <see cref="RLWEN512Q12289"/> and 16 rounds of Twofish.
-        /// Primary Stage: NTRU <see cref="APR2011743FAST"/> and 14 rounds of Rijndael.</para>
+        /// <para>Authentication Stage: Ring-LWE <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 16 rounds of Twofish.
+        /// Primary Stage: NTRU <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.APR2011743FAST"/> and 14 rounds of Rijndael.</para>
         /// </summary>
         public static readonly DtmParameters DTMX41RNT1R1 = new DtmParameters(
             GetID(DtmParamNames.X41RNT1R1),
@@ -519,8 +519,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
 
         /// <summary>
         /// Class 4, X4.2 Configuration: Optimized for speed.
-        /// <para>Authentication Stage: Ring-LWE <see cref="RLWEN512Q12289"/> and 32 rounds of Serpent.
-        /// Primary Stage: NTRU <see cref="APR2011743FAST"/> and 22 rounds of Rijndael.</para>
+        /// <para>Authentication Stage: Ring-LWE <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 32 rounds of Serpent.
+        /// Primary Stage: NTRU <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.APR2011743FAST"/> and 22 rounds of Rijndael.</para>
         /// </summary>
         public static readonly DtmParameters DTMX42RNS1R1 = new DtmParameters(
             GetID(DtmParamNames.X42RNS1R1),

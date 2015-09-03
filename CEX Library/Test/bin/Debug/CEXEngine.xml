@@ -6931,6 +6931,28 @@
             Get: Returns true for multi processor system
             </summary>
         </member>
+        <member name="T:VTDev.Libraries.CEXEngine.Utility.ParallelUtils.AsyncManualResetEvent">
+            <summary>
+            Async reset class
+            </summary>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Utility.ParallelUtils.AsyncManualResetEvent.WaitAsync">
+            <summary>
+            Complete wait
+            </summary>
+            
+            <returns>The Task</returns>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Utility.ParallelUtils.AsyncManualResetEvent.Set">
+            <summary>
+            Set the Task
+            </summary>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Utility.ParallelUtils.AsyncManualResetEvent.Reset">
+            <summary>
+            Reset the task
+            </summary>
+        </member>
         <member name="T:VTDev.Libraries.CEXEngine.Tools.HexConverter">
             <summary>
             A Hexadecimal conversion helper class
@@ -7122,7 +7144,6 @@
             <item><description>Current Process: Handle, StartTime ticks, PeakWorkingSet64, NonpagedSystemMemorySize64, PagedSystemMemorySize64, HandleCount, and Id.</description></item>
             <item><description>Combined running processes and threads: WorkingSet64, VirtualMemorySize64, StartAddress, Id, and CurrentPriority.</description></item>
             <item><description>Environment: Ticks since startup, the Time in Ticks.</description></item>
-            <item><description>.</description></item>
             </list>
             </remarks>
         </member>
@@ -12916,7 +12937,11 @@
             Holds a list of GF2nFields to which elements have been converted and thus a COB-Matrix exists
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Algebra.GF2nField.Matrices" -->
+        <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Algebra.GF2nField.Matrices">
+            <summary>
+            The COB matrices
+            </summary>
+        </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Algebra.GF2nField.Equals(System.Object)">
             <summary>
             Decides whether the given object <c>other</c> is the same as this field
@@ -18923,8 +18948,8 @@
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParamSets.DTMX11RNS1R2">
             <summary>
             Class 1, X1.1 Configuration: Optimized for maximum security; (this is the recommended X1 parameter set).
-            <para>Authentication Stage: Ring-LWE <see cref="!:RLWEN512Q12289"/> and 40 rounds of Serpent.
-            Primary Stage: NTRU <see cref="!:CX1931SK512"/> and 22 rounds of RHX with the Keccak512 Kdf.
+            <para>Authentication Stage: Ring-LWE <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 40 rounds of Serpent.
+            Primary Stage: NTRU <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1931SK512"/> and 22 rounds of RHX with the Keccak512 Kdf.
             Random bytes appended and prepended to exchange entities and message packets.
             Maximum 200 Millisecond transmission delay post primary key creation.</para>
             </summary>
@@ -18932,8 +18957,8 @@
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParamSets.DTMX12RNT1S2">
             <summary>
             Class 1, X1.2 Configuration: Optimized for maximum security.
-            <para>Authentication Stage: Ring-LWE <see cref="!:RLWEN512Q12289"/> and 20 rounds of TwoFish.
-            Primary Stage: NTRU <see cref="!:CX1931SK512"/> and 40 rounds of SHX with the Keccak512 Kdf.
+            <para>Authentication Stage: Ring-LWE <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 20 rounds of TwoFish.
+            Primary Stage: NTRU <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1931SK512"/> and 40 rounds of SHX with the Keccak512 Kdf.
             Random bytes appended and prepended to exchange entities and message packets.
             Maximum 200 Millisecond transmission delay post primary key creation.</para>
             </summary>
@@ -18941,8 +18966,8 @@
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParamSets.DTMX21MNR2T2">
             <summary>
             Class 2, X2.1 Configuration: Optimized for maximum security.
-            <para>Authentication Stage: McEliece <see cref="!:MPKCFM12T67S256"/> and 22 rounds of RHX.
-            Primary Stage: NTRU <see cref="!:CX1861SK512"/> and 22 rounds of THX with the Skein512 Kdf.
+            <para>Authentication Stage: McEliece <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCFM12T67S256"/> and 22 rounds of RHX.
+            Primary Stage: NTRU <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1861SK512"/> and 22 rounds of THX with the Skein512 Kdf.
             Random bytes appended and prepended to exchange entities and message packets.
             Maximum 200 Millisecond transmission delay post primary key creation.</para>
             </summary>
@@ -18950,8 +18975,8 @@
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParamSets.DTMX22MNS2R2">
             <summary>
             Class 2, X2.2 Configuration: Optimized for security and speed; (this is the recommended x2 parameter set).
-            <para>Authentication Stage: McEliece <see cref="!:MPKCFM12T67S256"/> and 40 rounds of SHX.
-            Primary Stage: NTRU <see cref="!:CX1861SK512"/> and 22 rounds of RHX with the Skein512 Kdf.
+            <para>Authentication Stage: McEliece <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCFM12T67S256"/> and 40 rounds of SHX.
+            Primary Stage: NTRU <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1861SK512"/> and 22 rounds of RHX with the Skein512 Kdf.
             Random bytes appended and prepended to exchange entities.
             Maximum 200 Millisecond transmission delay post primary key creation.</para>
             </summary>
@@ -18959,8 +18984,8 @@
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParamSets.DTMX31RNT1R2">
             <summary>
             Class 3, X3.1 Configuration: Optimized for security and speed.
-            <para>Authentication Stage: Ring-LWE <see cref="!:RLWEN512Q12289"/> and 20 rounds of Twofish.
-            Primary Stage: NTRU <see cref="!:CX1861SK512"/> and 22 rounds of RHX with the Skein512 Kdf.
+            <para>Authentication Stage: Ring-LWE <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 20 rounds of Twofish.
+            Primary Stage: NTRU <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1861SK512"/> and 22 rounds of RHX with the Skein512 Kdf.
             Random bytes appended and prepended to exchange entities.
             Maximum 200 Millisecond transmission delay post primary key creation.</para>
             </summary>
@@ -18968,8 +18993,8 @@
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParamSets.DTMX32RNS1T2">
             <summary>
             Class 3, X3.2 Configuration: Optimized for security and speed.
-            <para>Authentication Stage: Ring-LWE <see cref="!:RLWEN512Q12289"/> and 40 rounds of Serpent.
-            Primary Stage: NTRU <see cref="!:CX1861SK512"/> and 20 rounds of THX with the Skein512 Kdf.
+            <para>Authentication Stage: Ring-LWE <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 40 rounds of Serpent.
+            Primary Stage: NTRU <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1861SK512"/> and 20 rounds of THX with the Skein512 Kdf.
             Random bytes appended and prepended to exchange entities.
             Maximum 200 Millisecond transmission delay post primary key creation.</para>
             </summary>
@@ -18977,15 +19002,15 @@
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParamSets.DTMX41RNT1R1">
             <summary>
             Class 4, X4.1 Configuration: Optimized for speed.
-            <para>Authentication Stage: Ring-LWE <see cref="!:RLWEN512Q12289"/> and 16 rounds of Twofish.
-            Primary Stage: NTRU <see cref="!:APR2011743FAST"/> and 14 rounds of Rijndael.</para>
+            <para>Authentication Stage: Ring-LWE <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 16 rounds of Twofish.
+            Primary Stage: NTRU <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.APR2011743FAST"/> and 14 rounds of Rijndael.</para>
             </summary>
         </member>
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParamSets.DTMX42RNS1R1">
             <summary>
             Class 4, X4.2 Configuration: Optimized for speed.
-            <para>Authentication Stage: Ring-LWE <see cref="!:RLWEN512Q12289"/> and 32 rounds of Serpent.
-            Primary Stage: NTRU <see cref="!:APR2011743FAST"/> and 22 rounds of Rijndael.</para>
+            <para>Authentication Stage: Ring-LWE <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 32 rounds of Serpent.
+            Primary Stage: NTRU <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.APR2011743FAST"/> and 22 rounds of Rijndael.</para>
             </summary>
         </member>
         <member name="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParamSets.DtmParamNames">
@@ -18998,8 +19023,8 @@
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParamSets.DtmParamNames.X11RNS1R2">
             <summary>
             Class 1, X1.1 Configuration: Optimized for maximum security; (this is the recommended X1 parameter set).
-            <para>Authentication Stage: Ring-LWE <see cref="!:RLWEN512Q12289"/> and 40 rounds of Serpent.
-            Primary Stage: NTRU <see cref="!:CX1931SK512"/> and 22 rounds of RHX with the Keccak512 Kdf.
+            <para>Authentication Stage: Ring-LWE <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 40 rounds of Serpent.
+            Primary Stage: NTRU <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1931SK512"/> and 22 rounds of RHX with the Keccak512 Kdf.
             Random bytes appended and prepended to exchange entities and message packets.
             Maximum 200 Millisecond transmission delay post primary key creation.</para>
             </summary>
@@ -19007,8 +19032,8 @@
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParamSets.DtmParamNames.X12RNT1S2">
             <summary>
             Class 1, X1.2 Configuration: Optimized for maximum security.
-            <para>Authentication Stage: Ring-LWE <see cref="!:RLWEN512Q12289"/> and 20 rounds of TwoFish.
-            Primary Stage: NTRU <see cref="!:CX1931SK512"/> and 40 rounds of SHX with the Keccak512 Kdf.
+            <para>Authentication Stage: Ring-LWE <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 20 rounds of TwoFish.
+            Primary Stage: NTRU <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1931SK512"/> and 40 rounds of SHX with the Keccak512 Kdf.
             Random bytes appended and prepended to exchange entities and message packets.
             Maximum 200 Millisecond transmission delay post primary key creation.</para>
             </summary>
@@ -19016,8 +19041,8 @@
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParamSets.DtmParamNames.X21MNR2T2">
             <summary>
             Class 2, X2.1 Configuration: Optimized for maximum security.
-            <para>Authentication Stage: McEliece <see cref="!:MPKCFM12T67S256"/> and 22 rounds of RHX.
-            Primary Stage: NTRU <see cref="!:CX1861SK512"/> and 22 rounds of THX with the Skein512 Kdf.
+            <para>Authentication Stage: McEliece <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCFM12T67S256"/> and 22 rounds of RHX.
+            Primary Stage: NTRU <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1861SK512"/> and 22 rounds of THX with the Skein512 Kdf.
             Random bytes appended and prepended to exchange entities and message packets.
             Maximum 200 Millisecond transmission delay post primary key creation.</para>
             </summary>
@@ -19025,8 +19050,8 @@
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParamSets.DtmParamNames.X22MNS2R2">
             <summary>
             Class 2, X2.2 Configuration: Optimized for security and speed; (this is the recommended x2 parameter set).
-            <para>Authentication Stage: McEliece <see cref="!:MPKCFM12T67S256"/> and 40 rounds of SHX.
-            Primary Stage: NTRU <see cref="!:CX1861SK512"/> and 22 rounds of RHX with the Skein512 Kdf.
+            <para>Authentication Stage: McEliece <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCFM12T67S256"/> and 40 rounds of SHX.
+            Primary Stage: NTRU <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1861SK512"/> and 22 rounds of RHX with the Skein512 Kdf.
             Random bytes appended and prepended to exchange entities.
             Maximum 200 Millisecond transmission delay post primary key creation.</para>
             </summary>
@@ -19034,8 +19059,8 @@
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParamSets.DtmParamNames.X31RNT1R2">
             <summary>
             Class 3, X3.1 Configuration: Optimized for security and speed.
-            <para>Authentication Stage: McEliece <see cref="!:MPKCFM12T41S256"/> and 20 rounds of Twofish.
-            Primary Stage: NTRU <see cref="!:CX1861SK512"/> and 22 rounds of RHX with the Skein512 Kdf.
+            <para>Authentication Stage: McEliece <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCFM12T41S256"/> and 20 rounds of Twofish.
+            Primary Stage: NTRU <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1861SK512"/> and 22 rounds of RHX with the Skein512 Kdf.
             Random bytes appended and prepended to exchange entities.
             Maximum 200 Millisecond transmission delay post primary key creation.</para>
             </summary>
@@ -19043,8 +19068,8 @@
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParamSets.DtmParamNames.X32RNS1T2">
             <summary>
             Class 3, X3.2 Configuration: Optimized for security and speed.
-            <para>Authentication Stage: Ring-LWE <see cref="!:RLWEN512Q12289"/> and 40 rounds of Serpent.
-            Primary Stage: NTRU <see cref="!:CX1861SK512"/> and 20 rounds of THX with the Skein512 Kdf.
+            <para>Authentication Stage: Ring-LWE <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 40 rounds of Serpent.
+            Primary Stage: NTRU <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.CX1861SK512"/> and 20 rounds of THX with the Skein512 Kdf.
             Random bytes appended and prepended to exchange entities.
             Maximum 200 Millisecond transmission delay post primary key creation.</para>
             </summary>
@@ -19052,15 +19077,15 @@
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParamSets.DtmParamNames.X41RNT1R1">
             <summary>
             Class 4, X4.1 Configuration: Optimized for speed.
-            <para>Authentication Stage: Ring-LWE <see cref="!:RLWEN512Q12289"/> and 16 rounds of Twofish.
-            Primary Stage: NTRU <see cref="!:APR2011743FAST"/> and 14 rounds of Rijndael.</para>
+            <para>Authentication Stage: Ring-LWE <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 16 rounds of Twofish.
+            Primary Stage: NTRU <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.APR2011743FAST"/> and 14 rounds of Rijndael.</para>
             </summary>
         </member>
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParamSets.DtmParamNames.X42RNS1R1">
             <summary>
             Class 4, X4.2 Configuration: Optimized for speed.
-            <para>Authentication Stage: Ring-LWE <see cref="!:RLWEN512Q12289"/> and 32 rounds of Serpent.
-            Primary Stage: NTRU <see cref="!:APR2011743FAST"/> and 22 rounds of Rijndael.</para>
+            <para>Authentication Stage: Ring-LWE <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEN512Q12289"/> and 32 rounds of Serpent.
+            Primary Stage: NTRU <see cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.APR2011743FAST"/> and 22 rounds of Rijndael.</para>
             </summary>
         </member>
         <member name="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParamSets.SecurityContexts">
@@ -23577,7 +23602,7 @@
             <param name="PacketType">The <see cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages.DtmPacketTypes"/> message type; describes the packet classification</param>
             <param name="PayloadLength">The length of the payload contained in the packet</param>
             <param name="Sequence">The packet sequence number</param>
-            <param name="PacketFlag">The <see cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages.DtmServiceFlags"/> exchange state; indicates the exchange state position</param>
+            <param name="OptionFlag">The <see cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages.DtmServiceFlags"/> exchange state; indicates the exchange state position</param>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structures.DtmPacket.#ctor(System.Byte[])">
             <summary>
@@ -28927,6 +28952,11 @@
             
             <returns>The serialized DtmFileInfo</returns>
         </member>
+        <member name="T:VTDev.Libraries.CEXEngine.Tools.NetworkTools">
+            <summary>
+            A networking tools class
+            </summary>
+        </member>
         <member name="M:VTDev.Libraries.CEXEngine.Tools.NetworkTools.IsPrivateAddress(System.Net.IPAddress)">
             <summary>
             Tests if an address is a private ip
@@ -30151,6 +30181,11 @@
             An event arguments class containing the final symmetric keys from a completed exchange.
             </summary>
         </member>
+        <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments.DtmEstablishedEventArgs.Client">
+            <summary>
+            The client socket instance
+            </summary>
+        </member>
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments.DtmEstablishedEventArgs.ForwardSession">
             <summary>
             The initialized Forward session encryption cipher; used to encrypt a stream sent to the remote host
@@ -30171,6 +30206,7 @@
             The DTM Established event arguments constructor
             </summary>
             
+            <param name="Client">The client socket instance</param>
             <param name="ForwardSession">The initialized Forward session encryption cipher; used to encrypt data sent to the remote host</param>
             <param name="ReturnSession">The initialized Return session encryption cipher; used to decrypt data sent from the remote host</param>
             <param name="Flag">An option flag that can contain additional information about the exchange</param>
@@ -35099,6 +35135,8 @@
             
             <param name="HostName">The Host Name assigned to this server</param>
             <param name="Port">The Port number assigned to this server</param>
+            <param name="MaxConnections">The maximum number of connections</param>
+            <param name="Timeout">The wait timeout period</param>
             
             <exception cref="T:VTDev.Libraries.CEXEngine.CryptoException.CryptoSocketException">Thrown if the Tcp listen operation has failed</exception>
         </member>
@@ -35109,6 +35147,7 @@
             
             <param name="Address">The IP address assigned to this server</param>
             <param name="Port">The Port number assigned to this server</param>
+            <param name="MaxConnections">The maximum number of connections</param>
             
             <exception cref="T:VTDev.Libraries.CEXEngine.CryptoException.CryptoSocketException">Thrown if the Tcp listen operation has failed</exception>
         </member>
@@ -35119,6 +35158,8 @@
             
             <param name="HostName">The Host Name assigned to this server</param>
             <param name="Port">The Port number assigned to this server</param>
+            <param name="MaxConnections">The maximum number of connections</param>
+            <param name="Timeout">The wait timeout period</param>
             
             <exception cref="T:VTDev.Libraries.CEXEngine.CryptoException.CryptoSocketException">Thrown if the Tcp listen operation has failed</exception>
         </member>
@@ -35130,6 +35171,7 @@
             <param name="Address">The IP address assigned to this server</param>
             <param name="Port">The Port number assigned to this server</param>
             <param name="MaxConnections">The maximum number of simultaneous connections allowed (default is 10)</param>
+            <param name="Timeout">The wait timeout period</param>
             
             <exception cref="T:VTDev.Libraries.CEXEngine.CryptoException.CryptoSocketException">Thrown if the Tcp listen operation has failed</exception>
         </member>
@@ -36823,7 +36865,7 @@
              <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments.DtmErrorEventArgs">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments DtmErrorEventArgs class</seealso>
              <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments.DtmEstablishedEventArgs">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments DtmEstablishedEventArgs class</seealso>
              <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments.DtmPacketEventArgs">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments DtmPacketEventArgs class</seealso>
-             <seealso cref="!:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages.DtmErrorStates">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages DtmErrorStates enumeration</seealso>
+             <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages.DtmErrorFlags">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages DtmErrorFlags enumeration</seealso>
              <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages.DtmServiceFlags">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages DtmPacketFlag enumeration</seealso>
              <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages.DtmPacketTypes">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages DtmPacketTypes enumeration</seealso>
              
@@ -36934,7 +36976,7 @@
                      <term>Description</term>
                  </listheader>
                  <item>
-                     <description><see cref="!:DtmErrorStates"/> </description>
+                     <description><see cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages.DtmErrorFlags"/> </description>
                      <description>This enum represents the error flags that can be applied to the DtmPacket Option flag.</description>
                  </item>
                  <item>
@@ -36986,7 +37028,7 @@
                      <term>Description</term>
                  </listheader>
                  <item>
-                     <description><see cref="!:DtmErrorStates"/></description>
+                     <description><see cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages.DtmErrorFlags"/></description>
                      <description>Class contains the error state information.</description>
                  </item>
                  <item>

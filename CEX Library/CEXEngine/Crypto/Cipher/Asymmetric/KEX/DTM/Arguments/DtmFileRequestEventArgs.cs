@@ -29,7 +29,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments
         /// The DTM packet event args constructor; contains the file request state
         /// </summary>
         /// 
-        /// <param name="DesinationFolder">Fires with the name of the file; returns the destination folder</param>
+        /// <param name="FilePath">Fires with the name of the file; returns the destination folder</param>
         /// <param name="OptionFlag">The option flag containing optional state information</param>
         public DtmFileRequestEventArgs(string FilePath = "", long OptionFlag = 0)
         {

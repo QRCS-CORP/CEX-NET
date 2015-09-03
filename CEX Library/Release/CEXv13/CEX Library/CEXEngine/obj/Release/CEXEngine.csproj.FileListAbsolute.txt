@@ -1,5 +1,0 @@
-C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEXEngine\bin\Release\CEXEngine.dll
-C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEXEngine\bin\Release\CEXEngine.pdb
-C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEXEngine\obj\Release\CEXEngine.dll
-C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEXEngine\obj\Release\CEXEngine.pdb
-C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEXEngine\obj\Release\CEXEngine.csprojResolveAssemblyReference.cache

@@ -25,11 +25,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <summary>
         /// Holds a list of GF2nFields to which elements have been converted and thus a COB-Matrix exists
         /// </summary>
-        public List<GF2nField> Fields; //ArrayList
+        public List<GF2nField> Fields;
         /// <summary>
-        /// The COB matrices  //Fields List<GF2nField></GF2nField>, Matrices List<GF2Polynomial[]>
+        /// The COB matrices
         /// </summary>
-        public List<GF2Polynomial[]> Matrices; //ArrayList
+        public List<GF2Polynomial[]> Matrices; 
         #endregion
 
         #region Properties

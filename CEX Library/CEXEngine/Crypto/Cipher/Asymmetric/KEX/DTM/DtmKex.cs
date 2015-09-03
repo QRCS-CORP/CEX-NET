@@ -135,7 +135,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments.DtmErrorEventArgs">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments DtmErrorEventArgs class</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments.DtmEstablishedEventArgs">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments DtmEstablishedEventArgs class</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments.DtmPacketEventArgs">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments DtmPacketEventArgs class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages.DtmErrorStates">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages DtmErrorStates enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages.DtmErrorFlags">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages DtmErrorFlags enumeration</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages.DtmServiceFlags">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages DtmPacketFlag enumeration</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages.DtmPacketTypes">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages DtmPacketTypes enumeration</seealso>
     /// 
@@ -246,7 +246,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     ///         <term>Description</term>
     ///     </listheader>
     ///     <item>
-    ///         <description><see cref="DtmErrorStates"/> </description>
+    ///         <description><see cref="DtmErrorFlags"/> </description>
     ///         <description>This enum represents the error flags that can be applied to the DtmPacket Option flag.</description>
     ///     </item>
     ///     <item>
@@ -298,7 +298,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     ///         <term>Description</term>
     ///     </listheader>
     ///     <item>
-    ///         <description><see cref="DtmErrorStates"/></description>
+    ///         <description><see cref="DtmErrorFlags"/></description>
     ///         <description>Class contains the error state information.</description>
     ///     </item>
     ///     <item>

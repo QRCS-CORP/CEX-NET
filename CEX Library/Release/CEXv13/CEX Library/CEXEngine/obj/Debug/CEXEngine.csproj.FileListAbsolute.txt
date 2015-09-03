@@ -1,4 +1,0 @@
-C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEXEngine\bin\Debug\CEXEngine.dll
-C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEXEngine\bin\Debug\CEXEngine.pdb
-C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEXEngine\obj\Debug\CEXEngine.dll
-C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEXEngine\obj\Debug\CEXEngine.pdb

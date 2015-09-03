@@ -141,7 +141,7 @@ namespace Test
             Console.WriteLine("");
 
             Console.WriteLine("******TESTING KEYPAIR IMPLEMENTATION******");
-            //RunTest(new NtruKeyPairTest());
+            RunTest(new NtruKeyPairTest());
 
             Console.WriteLine("******TESTING ENCRYPTION ENGINE******");
             RunTest(new NtruEncryptTest());
