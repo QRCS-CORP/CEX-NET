@@ -226,7 +226,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             if (!_isInitialized)
                 throw new CryptoAsymmetricException("RLWEEncrypt:Decrypt", "The cipher has not been initialized!", new InvalidOperationException());
             if (_isEncryption)
-                throw new CryptoAsymmetricSignException("RLWEEncrypt:Decrypt", "The cipher is not initialized for decryption!", new ArgumentException());
+                throw new CryptoAsymmetricException("RLWEEncrypt:Decrypt", "The cipher is not initialized for decryption!", new ArgumentException());
 
             int plen = _N >> 3;
 
@@ -258,7 +258,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             if (Input.Length > _maxPlainText - _mFp)
                 throw new CryptoAsymmetricException("RLWEEncrypt:Encrypt", "The input text is too long!", new ArgumentOutOfRangeException());
             if (!_isEncryption)
-                throw new CryptoAsymmetricSignException("RLWEEncrypt:Encrypt", "The cipher is not initialized for encryption!", new ArgumentException());
+                throw new CryptoAsymmetricException("RLWEEncrypt:Encrypt", "The cipher is not initialized for encryption!", new ArgumentException());
 
             int plen = _N >> 3;
 
@@ -331,7 +331,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         public void Initialize(IAsymmetricKey AsmKey)
         {
             if (!(AsmKey is RLWEPublicKey) && !(AsmKey is RLWEPrivateKey))
-                throw new CryptoAsymmetricSignException("RLWEEncrypt:Initialize", "The key is not a valid Ring-KWE key!", new InvalidDataException());
+                throw new CryptoAsymmetricException("RLWEEncrypt:Initialize", "The key is not a valid Ring-KWE key!", new InvalidDataException());
 
             _isEncryption = (AsmKey is RLWEPublicKey);
             _asmKey = AsmKey;

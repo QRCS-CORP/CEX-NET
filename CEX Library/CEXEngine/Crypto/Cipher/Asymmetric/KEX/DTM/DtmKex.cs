@@ -141,7 +141,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     /// 
     /// <remarks>
     /// <description><h4>Overview:</h4></description>
-    /// <para>DTM is designed for maximum flexibility, for this reason authentication between hosts is 'deffered' to another layer of software, whereby the users actions and settings can at 
+    /// <para>DTM is designed for maximum flexibility, for this reason authentication between hosts is 'defered' to another layer of software, whereby the users actions and settings can at 
     /// least in part determine the level of security, authentication, repudiation, and how an exchange is transacted.</para>
     /// 
     /// <para>The protocol is directed at end to end data exchanges, (such as voice or video conferencing between nodes), and a means by which nodes may authenticate and execute a secure
@@ -157,16 +157,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     /// simply by setting the Cancel flag to true in the event arguments, and a packet can be sent back to the requesting host notifying them of the cause of failure. 
     /// This could in turn, trigger another exchange attempt with stronger parameters.</para>
     /// 
-    /// <para>This model proposes using two post-quantum secure ciphers; the first cipher should be considered as the Authenticator, or <c>Auth-Stage</c>. 
+    /// <para>This model proposes using two post-quantum secure ciphers; the first cipher should be considered as the Authenticator, or <c>Auth-Phase</c>. 
     /// The authenticating asymmetric cipher is used to encrypt the first (symmetric) session key. This session key is in turn used to encrypt the asymmetric parameters and the Public key
-    /// of the second <c>Primary-Stage</c> asymmetric cipher. The primary asymmetric cipher encrypts a second symmetric key; which is used as the primary session key in the VPN.</para>
+    /// of the second <c>Primary-Phase</c> asymmetric cipher. The primary asymmetric cipher encrypts a second symmetric key; which is used as the primary session key in the VPN.</para>
     /// <para>Both channels (Send and Receive) are encrypted with seperate keys; data Bob sends to Alice is encrypted with the symmetric key that Bob generated and exchanged, and data Bob receives
     /// from Alice is decrypted with the symmetric key that Alice generated. In this way each actor defines the security context for the channel that they transmit data on.</para>
     /// 
     /// <description><h4>Exchange States:</h4></description>
     /// <list type="table">
     ///     <listheader>
-    ///         <term>Stage</term>
+    ///         <term>Phase</term>
     ///         <term>Description</term>
     ///     </listheader>
     ///     <item>
@@ -175,15 +175,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     ///     </item>
     ///     <item>
     ///         <description>Init</description>
-    ///         <description>The server and client exchange a full DtmIdentity structure; containing the public id field and the PKE Parameters Id, used to create the <c>Auth-Stage</c> Asymmetric keys.</description>
+    ///         <description>The server and client exchange a full DtmIdentity structure; containing the public id field and the PKE Parameters Id, used to create the <c>Auth-Phase</c> Asymmetric keys.</description>
     ///     </item>
     ///     <item>
     ///         <description>PreAuth</description>
-    ///         <description>The server and client exchange their <c>Auth-Stage</c> Asymmetric Public Keys.</description>
+    ///         <description>The server and client exchange their <c>Auth-Phase</c> Asymmetric Public Keys.</description>
     ///     </item>
     ///     <item>
     ///         <description>AuthEx</description>
-    ///         <description>The server and client exchange their <c>Auth-Stage</c> Symmetric KeysParams.</description>
+    ///         <description>The server and client exchange their <c>Auth-Phase</c> Symmetric KeysParams.</description>
     ///     </item>
     ///     <item>
     ///         <description>Auth</description>
@@ -191,15 +191,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     ///     </item>
     ///     <item>
     ///         <description>Sync</description>
-    ///         <description>The server and client exchange their <c>Primary-Stage</c> Asymmetric and Session Parameters.</description>
+    ///         <description>The server and client exchange their <c>Primary-Phase</c> Asymmetric and Session Parameters.</description>
     ///     </item>
     ///     <item>
     ///         <description>PrimeEx</description>
-    ///         <description>The server and client exchange their <c>Primary-Stage</c> Asymmetric Public Key.</description>
+    ///         <description>The server and client exchange their <c>Primary-Phase</c> Asymmetric Public Key.</description>
     ///     </item>
     ///     <item>
     ///         <description>Primary</description>
-    ///         <description>The server and client exchange their <c>Primary-Stage</c> Symmetric KeyParams.</description>
+    ///         <description>The server and client exchange their <c>Primary-Phase</c> Symmetric KeyParams.</description>
     ///     </item>
     ///     <item>
     ///         <description>Establish</description>
@@ -398,6 +398,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// The Data Received event; fires each time data has been received through the post-exchange encrypted channel
         /// </summary>
         public event DataTransferredDelegate DataReceived;
+
+        /// <summary>
+        /// The Disconnected delegate
+        /// </summary>
+        /// <param name="owner">The owner object</param>
+        public delegate void DisconnectedDelegate(object owner);
+        /// <summary>
+        /// The Disconnected event; fires when the connection is disposed
+        /// </summary>
+        public event DisconnectedDelegate Disconnected;
 
         /// <summary>
         /// The File Transferred delegate
@@ -1061,7 +1071,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
 
             try
             {
-
                 if (_clientSocket != null)
                 {
                     _clientSocket.Dispose();
@@ -1093,6 +1102,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             {
                 if (SessionError != null)
                     SessionError(this, new DtmErrorEventArgs(new CryptoProcessingException("DtmKex:Disconnect", "The tear down operation experienced an error!", ex), DtmErrorSeverity.Warning));
+            }
+            finally
+            {
+                if (Disconnected != null)
+                    Disconnected(this);
             }
         }
 
@@ -2118,7 +2132,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         #endregion
 
         #region Exchange Staging
-        // Functions are in order of execution. The Create functions create a reponse packet, the Process functions process the result.
+        // Functions are in order of execution. The Create functions create a response packet, the Process functions process the result.
 
         /// <summary>
         /// Send the servers partial public identity structure <see cref="DtmIdentity"/>.
@@ -2131,9 +2145,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// <returns>A raw packet containing the packet header, and the servers public identity structure</returns>
         private MemoryStream CreateConnect(DtmTrustStates Trust = DtmTrustStates.None)
         {
-            // the option flag on the DtmIdentity can be used to indicate the session keys expiry time.
+            // the option flag is used to describe minimum security level required from this instance
+            int sec = (int)DtmParamSets.GetContext(_dtmParameters.OId);
             // create a partial id and add auth asymmetric and session params.
-            MemoryStream sid = new DtmIdentity(_srvIdentity.Identity, new byte[] { 0, 0, 0, 0 }, new DtmSession(), 0).ToStream();
+            MemoryStream sid = new DtmIdentity(_srvIdentity.Identity, new byte[] { 0, 0, 0, 0 }, new DtmSession(), sec).ToStream();
             // stage completed
             _exchangeState = DtmExchangeFlags.Connect;
 
@@ -2148,6 +2163,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// <param name="PacketStream">A Stream containing the raw packet data</param>
         /// 
         /// <remarks>
+        /// The client auto-negotiates to the security level of the server (the host accepting the connection request).
         /// Fires the <see cref="IdentityReceived"/> event; returning the <see cref="DtmIdentityEventArgs"/> object containing the clients public id structure.
         /// <para>The session can be aborted by setting the DtmIdentityEventArgs Cancel flag to true.</para>
         /// </remarks>
@@ -2159,19 +2175,67 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             _cltIdentity = new DtmIdentity(PacketStream);
 
             // pass it to the client, evaluate the id
-            long resp = 0;
             if (IdentityReceived != null)
             {
                 DtmIdentityEventArgs args = new DtmIdentityEventArgs(DtmExchangeFlags.Init, 0, _cltIdentity);
                 IdentityReceived(this, args);
-                // this flag is the trust level
-                resp = args.Flag;
+
                 if (args.Cancel)
                 {
                     // back out of session
                     TearDown();
                 }
             }
+
+            // synchronize security level with the server
+            if (!_isServer)
+            {
+                // get the servers security context and compare it to ours
+                DtmParamSets.SecurityContexts srvSec = (DtmParamSets.SecurityContexts)_cltIdentity.OptionFlag;
+                DtmParamSets.SecurityContexts cltSec = DtmParamSets.GetContext(_dtmParameters.OId);
+
+                if (cltSec != srvSec)
+                {
+                    // match servers security parameters
+                    if (!NegotiateSecurity(srvSec))
+                    {
+                        // the negotiation failed
+                        Disconnect();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// The remote server requires security parameters negotiation to continue.
+        /// <para>Evaluates the requested security parameter requirement from a server, 
+        /// using the security context stored in the servers identity structure option flag.</para>
+        /// </summary>
+        /// 
+        /// <param name="Context">The servers required security level</param>
+        /// 
+        /// <returns>Returns true if the negotiation succeeds</returns>
+        private bool NegotiateSecurity(DtmParamSets.SecurityContexts Context)
+        {
+            // get the clients id structure
+            DtmParamSets.SecurityContexts sxt = DtmParamSets.GetContext(_dtmParameters.OId);
+
+            // note: only negotiate up as a security measure?
+            if (Context == DtmParamSets.SecurityContexts.X1)
+                _dtmParameters = (DtmParameters)DtmParamSets.DTMX11RNS1R2.DeepCopy();
+            else if (Context == DtmParamSets.SecurityContexts.X2)
+                _dtmParameters = (DtmParameters)DtmParamSets.DTMX22MNS2R2.DeepCopy();
+            else if (Context == DtmParamSets.SecurityContexts.X3)
+                _dtmParameters = (DtmParameters)DtmParamSets.DTMX31RNT1R2.DeepCopy();
+            else if (Context == DtmParamSets.SecurityContexts.X4)
+                _dtmParameters = (DtmParameters)DtmParamSets.DTMX41RNT1R1.DeepCopy();
+            else
+                return false; // error or failure
+
+            // copy new security params
+            _srvIdentity = new DtmIdentity(_dtmHost.PublicId, _dtmParameters.AuthPkeId, _dtmParameters.AuthSession, 0);
+
+            return true;
         }
 
         /// <summary>
@@ -2259,7 +2323,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         {
             // seek past header
             PacketStream.Seek(DtmPacket.GetHeaderSize(), SeekOrigin.Begin);
-            // get client params from option flag
+            // get client params
             _cltAsmParams = GetAsymmetricParams(_cltIdentity.PkeId);
             // store client public key
             _cltPublicKey = GetAsymmetricPublicKey(PacketStream, _cltAsmParams);
@@ -2788,7 +2852,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             }
             catch (Exception ex)
             {
-                throw new CryptoProcessingException("DtmKex:GetAsymmetricPublicKey", "The public key could nt be loaded!", ex);
+                throw new CryptoProcessingException("DtmKex:GetAsymmetricPublicKey", "The public key could not be loaded!", ex);
             }
         }
 

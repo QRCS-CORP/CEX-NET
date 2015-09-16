@@ -59,23 +59,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structures
 
         #region Public Fields
         /// <summary>
-        /// The Cryptographic <see cref="SymmetricEngines">Engine</see> type
+        /// The Cryptographic <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">Engine</see> type
         /// </summary>
         public byte EngineType;
         /// <summary>
-        /// The cipher <see cref="KeySizes">Key Size</see>
+        /// The cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeySizes">Key Size</see>
         /// </summary>
         public short KeySize;
         /// <summary>
-        /// Size of the cipher <see cref="IVSizes">Initialization Vector</see>
+        /// Size of the cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.IVSizes">Initialization Vector</see>
         /// </summary>
         public byte IvSize;
         /// <summary>
-        /// The number of diffusion <see cref="RoundCounts">Rounds</see>
+        /// The number of diffusion <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts">Rounds</see>
         /// </summary>
         public byte RoundCount;
         /// <summary>
-        /// The <see cref="Digests">Digest</see> engine used to power the key schedule Key Derivation Function in HX and M series ciphers
+        /// The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to power the key schedule Key Derivation Function in HX and M series ciphers
         /// </summary>
         public byte KdfEngine;
         #endregion
@@ -85,11 +85,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structures
         /// SessionParams constructor
         /// </summary>
         /// 
-        /// <param name="EngineType">The Cryptographic <see cref="BlockCiphers">Engine</see> type</param>
+        /// <param name="EngineType">The Cryptographic <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockCiphers">Engine</see> type</param>
         /// <param name="KeySize">The cipher Key Size in bytes</param>
-        /// <param name="IvSize">Size of the cipher <see cref="IVSizes">Initialization Vector</see></param>
-        /// <param name="RoundCount">The number of diffusion <see cref="RoundCounts">Rounds</see></param>
-        /// <param name="KdfEngine">The <see cref="Digests">Digest</see> engine used to power the key schedule Key Derivation Function in HX and M series ciphers</param>
+        /// <param name="IvSize">Size of the cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.IVSizes">Initialization Vector</see></param>
+        /// <param name="RoundCount">The number of diffusion <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts">Rounds</see></param>
+        /// <param name="KdfEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to power the key schedule Key Derivation Function in HX and M series ciphers</param>
         /// 
         /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid KeyId, MessageKey, or ExtensionKey is used</exception>
         public DtmSession(BlockCiphers EngineType = BlockCiphers.RDX, int KeySize = 32, IVSizes IvSize = IVSizes.V128, RoundCounts RoundCount = RoundCounts.R14, Digests KdfEngine = Digests.SHA512)

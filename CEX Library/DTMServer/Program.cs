@@ -9,6 +9,8 @@ namespace DTMServerTest
 
         static void Main(string[] args)
         {
+            char[] x = new char[] { (char)0x03 };
+            System.Diagnostics.Debug.Print(new string(x));
             ConsoleUtils.SizeConsole(80, 60);
             ConsoleUtils.CenterConsole();
             Console.Title = "Deferred Trust Model KEX Server";

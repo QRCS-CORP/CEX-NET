@@ -40,7 +40,7 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 {
     /// <summary>
-    /// Generates seed material for a CSPrng using various processed system counters passed through an XorShift+ generator.
+    /// XSPRsg: Generates seed material for a CSPrng using various processed system counters passed through an XorShift+ generator.
     /// <para>An original construct (experimental) meant to provide an alternative to the RNGCryptoServiceProvider as a source of pseudo random seeding material.
     /// This class is suitable for generating seeds for a Prng or Drbg implementation.</para>
     /// </summary>

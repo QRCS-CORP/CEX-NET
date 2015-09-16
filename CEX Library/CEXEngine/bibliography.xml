@@ -7,7 +7,7 @@
   </reference>
   <reference name="Blake">
     <title>SHA-3 proposal BLAKE</title>
-    <author>Jean-Philippe Aumasson, Luca Henzen, Willi Meier, and Raphael C.-W. Phan</author>
+    <author>Jean-Philippe Aumasson, Luca Henzen, Willi Meier, and Raphael C.W. Phan</author>
     <link>https://131002.net/blake/blake.pdf</link>
   </reference>
   <reference name="Blum-Blum-Shub">
@@ -50,6 +50,13 @@
     <author>National Institute of Standards and Technology (NIST)</author>
     <link>http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf</link>
   </reference>
+
+  <reference name="Merkle Signatures">
+    <title>Merkle Signatures with Virtually Unlimited Signature Capacity</title>
+    <author>Johannes Buchmann, Erik Dahmen, Elena Klintsevich, Katsuyuki Okeya, and Camille Vuillaume</author>
+    <link>https://www.cdc.informatik.tu-darmstadt.de/reports/reports/BDKOV07.pdf</link>
+  </reference>
+
   <reference name="Handbook of Applied Cryptography">
     <title>Handbook of Applied Cryptography</title>
     <author>Alfred J. Menezes, Paul C. van Oorschot and Scott A. Vanstone</author>
@@ -70,6 +77,7 @@
     <author>Guido Bertoni, Joan Daemen, Michaël Peeters, and Gilles Van Assche</author>
     <link>http://keccak.noekeon.org/Keccak-submission-3.pdf</link>
   </reference>
+
   <reference name="McEliece Resists Quantum Fourier Sampling Attacks">
     <title>The McEliece Cryptosystem Resists Quantum Fourier Sampling Attacks</title>
     <author>Hang Dinh, Cristopher Moore, and Alexander Russell</author>
@@ -130,6 +138,7 @@
     <author>National Institute of Standards and Technology (NIST)</author>
     <link>http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf</link>
   </reference>
+
   <reference name="NTRU Adaptive">
     <title>Adaptive Key Recovery Attacks on NTRU-based Somewhat Homomorphic Encryption Schemes"</title>
     <author>Ricardo Dahab1, Steven Galbraith, and Eduardo Morais</author>
@@ -151,7 +160,7 @@
     <link>https://www.securityinnovation.com/uploads/Crypto/lll25.pdf</link>
   </reference>
   <reference name="NTRU Params">
-    <title>Choosing NTRUEncrypt Parameters in Light of Combined Lattice Reduction and MITM Approaches </title>
+    <title>Choosing NTRUEncrypt Parameters in Light of Combined Lattice Reduction and MITM Approaches</title>
     <author>P. Hirschhorn, J. Hoffstein, N. Howgrave-Graham, W. Whyte</author>
     <link>https://www.securityinnovation.com/uploads/Crypto/params.pdf</link>
   </reference>
@@ -165,6 +174,7 @@
     <author>Jeffrey Hoffstein andJoseph H. Silverman</author>
     <link>https://www.securityinnovation.com/uploads/Crypto/NTRUTech016.pdf</link>
   </reference>
+
   <reference name="Quantum Resistant Public Key Cryptography: A Survey">
     <title>Quantum Resistant Public Key Cryptography: A Survey</title>
     <author>Ray A. Perlner and David A. Cooper</author>
@@ -215,6 +225,38 @@
     <author>H. Krawczyk, and P. Eronen</author>
     <link>http://tools.ietf.org/html/rfc5869</link>
   </reference>
+
+  <reference name="Ring-LWE Encryption">
+    <title>Efficient Software Implementation of Ring-LWE Encryption</title>
+    <author>Ruan de Clercq, Sujoy Sinha Roy, Frederik Vercauteren, and Ingrid Verbauwhede</author>
+    <link>https://eprint.iacr.org/2014/725.pdf</link>
+  </reference>
+  <reference name="Ring-LWE Cryptoprocessor">
+    <title>Compact Ring-LWE Cryptoprocessor</title>
+    <author>Sujoy Sinha Roy, Frederik Vercauteren, Nele Mentens, Donald Donglong Chen, and Ingrid Verbauwhede</author>
+    <link>http://www.cosic.esat.kuleuven.be/publications/article-2444.pdf</link>
+  </reference>
+  <reference name="RLWE Scheme">
+    <title>A Simple Provably Secure Key Exchange Scheme Based on the Learning with Errors Problem</title>
+    <author>Jintai Ding, Xiang Xie, and Xiaodong Lin</author>
+    <link>http://eprint.iacr.org/2012/688.pdf</link>
+  </reference>
+  <reference name="RLWE DDG Trees">
+    <title>RLWE DDG Trees</title>
+    <author>Not sure..</author>
+    <link>http://www.sml.ee.upatras.gr/UploadedFiles/BOOK-D86/chapter_15_1.pdf</link>
+  </reference>
+  <reference name="Knuth-Yao Quadrangle-Inequality Speedup">
+    <title>The Knuth-Yao Quadrangle-Inequality Speedup is a Consequence of Total-Monotonicity</title>
+    <author>Wolfgang W. Bein, Mordecai J. Golin, Lawrence L. Larmore, and Yan Zhang</author>
+    <link>http://www.egr.unlv.edu/~bein/pubs/knuthyaotalg.pdf</link>
+  </reference>
+  <reference name="RLWE Toolkit">
+    <title>A Toolkit for Ring-LWE Cryptography</title>
+    <author>Vadim Lyubashevsky, Chris Peikerty, and Oded Regev</author>
+    <link>http://www.cc.gatech.edu/~cpeikert/pubs/toolkit.pdf</link>
+  </reference>
+
   <reference name="Rijndael">
     <title>AES Proposal: Rijndael</title>
     <author>Joan Daemen, Vincent Rijmen</author>
@@ -298,7 +340,7 @@
   <reference name="TestU01">
     <title>TestU01: A Software Library in ANSI C for Empirical Testing of Random Number Generators</title>
     <author>Pierre L'Ecuyer and Richard Simard</author>
-      <link>http://www.iro.umontreal.ca/~simardr/testu01/guideshorttestu01.pdf</link>
+    <link>http://www.iro.umontreal.ca/~simardr/testu01/guideshorttestu01.pdf</link>
   </reference>
   <reference name="Twofish">
     <title>Twofish: A 128-Bit Block Cipher</title>

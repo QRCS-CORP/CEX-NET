@@ -553,6 +553,8 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="Source">The source array</param>
         /// <param name="Index">First element to copy</param>
         /// <param name="Length">The number of bytes to copy</param>
+        ///
+        /// <returns>Ranged array</returns>
         public static byte[] GetRange(byte[] Source, int Index, int Length)
         {
             if (Source.Length - Index < Length)
@@ -571,6 +573,8 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="Source">The source array</param>
         /// <param name="Index">First element to copy</param>
         /// <param name="Length">The number of bytes to copy</param>
+        /// 
+        /// <returns>Ranged array</returns>
         public static short[] GetRange(short[] Source, int Index, int Length)
         {
             if (Source.Length - Index < Length)
@@ -589,6 +593,8 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="Source">The source array</param>
         /// <param name="Index">First element to copy</param>
         /// <param name="Length">The number of bytes to copy</param>
+        /// 
+        /// <returns>Ranged array</returns>
         public static int[] GetRange(int[] Source, int Index, int Length)
         {
             if (Source.Length - Index < Length)
@@ -607,6 +613,8 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="Source">The source array</param>
         /// <param name="Index">First element to copy</param>
         /// <param name="Length">The number of bytes to copy</param>
+        /// 
+        /// <returns>Ranged array</returns>
         public static long[] GetRange(long[] Source, long Index, long Length)
         {
             if (Source.Length - Index < Length)

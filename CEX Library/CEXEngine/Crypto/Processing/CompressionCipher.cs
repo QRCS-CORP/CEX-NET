@@ -40,7 +40,7 @@ using VTDev.Libraries.CEXEngine.Tools;
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 {
     /// <summary>
-    /// <h3>Volume cipher helper class.</h3>
+    /// <h3>Compression cipher helper class.</h3>
     /// <para>Extends the StreamCipher class for encrypting a compressed directory of files.
     /// If the cipher is for encryption, files are compressed and encrypted to the output stream.
     /// If the cipher is for decryption, the input stream contains the compressed and encrypted directory, 

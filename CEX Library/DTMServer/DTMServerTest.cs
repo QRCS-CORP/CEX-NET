@@ -29,7 +29,7 @@ namespace DTMServerTest
         public void TestExchange()
         {
             // dtm server exchange parameters X11RNS1R2
-            DtmParameters srvDtmParams = DtmParamSets.FromName(DtmParamSets.DtmParamNames.X42RNS1R1);       // preset contains all the settings required for the exchange
+            DtmParameters srvDtmParams = DtmParamSets.FromName(DtmParamSets.DtmParamNames.X41RNT1R1);       // preset contains all the settings required for the exchange
 
             // dtm server id
             DtmClient srvDmtId = new DtmClient(
@@ -160,7 +160,7 @@ namespace DTMServerTest
                 smsg = Console.ReadLine();
                 if (smsg.ToUpper().Equals("QUIT"))
                 {
-                    // tear down th connection and dispose of the session
+                    // tear down connection and dispose of the session
                     // should always be called when a client disconnects to alert the remote host
                     _dtmServer.Disconnect();
                     break;

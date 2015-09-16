@@ -40,6 +40,10 @@
         /// <summary>
         /// The VPN is established
         /// </summary>
-        Established = 9
+        Established = 9,
+        /// <summary>
+        /// Negotiate the minimum security requirements
+        /// </summary>
+        Negotiate = 10
     }
 }

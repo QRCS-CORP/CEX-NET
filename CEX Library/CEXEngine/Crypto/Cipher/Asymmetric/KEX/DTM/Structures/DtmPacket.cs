@@ -53,7 +53,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structures
         /// </summary>
         public short PacketFlag;
         /// <summary>
-        /// This flag can be used as a time stamp indicating the expiry time of the corresponding session key
+        /// The packet header option flag
         /// </summary>
         public long OptionFlag;
         #endregion
@@ -66,7 +66,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structures
         /// <param name="PacketType">The <see cref="DtmPacketTypes"/> message type; describes the packet classification</param>
         /// <param name="PayloadLength">The length of the payload contained in the packet</param>
         /// <param name="Sequence">The packet sequence number</param>
-        /// <param name="OptionFlag">The <see cref="DtmServiceFlags"/> exchange state; indicates the exchange state position</param>
+        /// <param name="Sequence">The <see cref="DtmServiceFlags"/> exchange state; indicates the exchange state position</param>
+        /// <param name="OptionFlag">The packet header option flag</param>
         public DtmPacket(DtmPacketTypes PacketType, long PayloadLength, long Sequence, short PacketFlag, long OptionFlag = 0)
         {
             this.PacketType = PacketType;

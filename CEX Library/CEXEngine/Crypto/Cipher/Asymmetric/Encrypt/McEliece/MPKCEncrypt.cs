@@ -93,12 +93,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public bool IsEncryption
         {
-            get 
+            get
             {
                 if (!_isInitialized)
                     throw new CryptoAsymmetricException("MPKCEncrypt:IsEncryption", "The cipher must be initialized before state can be determined!", new InvalidOperationException());
 
-                return _isEncryption; 
+                return _isEncryption;
             }
         }
 
@@ -122,7 +122,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
                 if (_maxCipherText == 0 || !_isInitialized)
                     throw new CryptoAsymmetricException("MPKCEncrypt:MaxCipherText", "The cipher must be initialized before size can be calculated!", new InvalidOperationException());
 
-                return _maxCipherText; 
+                return _maxCipherText;
             }
         }
 
@@ -133,12 +133,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <exception cref="CryptoAsymmetricException">Thrown if the cipher is not initialized</exception>
         public int MaxPlainText
         {
-            get 
+            get
             {
                 if (_maxPlainText == 0 || !_isInitialized)
                     throw new CryptoAsymmetricException("MPKCEncrypt:MaxPlainText", "The cipher must be initialized before size can be calculated!", new InvalidOperationException());
 
-                return _maxPlainText; 
+                return _maxPlainText;
             }
         }
 
@@ -190,7 +190,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             if (!_isInitialized)
                 throw new CryptoAsymmetricException("MPKCEncrypt:Decrypt", "The cipher has not been initialized!", new InvalidOperationException());
             if (_isEncryption)
-                throw new CryptoAsymmetricSignException("MPKCEncrypt:Decrypt", "The cipher is not initialized for decryption!", new ArgumentException());
+                throw new CryptoAsymmetricException("MPKCEncrypt:Decrypt", "The cipher is not initialized for decryption!", new ArgumentException());
 
             return _encEngine.Decrypt(Input);
         }
@@ -211,7 +211,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             if (Input.Length > _maxPlainText)
                 throw new CryptoAsymmetricException("MPKCEncrypt:Encrypt", "The input text is too long!", new ArgumentException());
             if (!_isEncryption)
-                throw new CryptoAsymmetricSignException("MPKCEncrypt:Encrypt", "The cipher is not initialized for encryption!", new ArgumentException());
+                throw new CryptoAsymmetricException("MPKCEncrypt:Encrypt", "The cipher is not initialized for encryption!", new ArgumentException());
 
             return _encEngine.Encrypt(Input);
         }
@@ -249,7 +249,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         public void Initialize(IAsymmetricKey AsmKey)
         {
             if (!(AsmKey is MPKCPublicKey) && !(AsmKey is MPKCPrivateKey))
-                throw new CryptoAsymmetricSignException("MPKCEncrypt:Initialize", "The key is not a valid Ring-KWE key!", new InvalidDataException());
+                throw new CryptoAsymmetricException("MPKCEncrypt:Initialize", "The key is not a valid Ring-KWE key!", new InvalidDataException());
 
             _isEncryption = (AsmKey is MPKCPublicKey);
 
@@ -275,7 +275,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
                     throw new CryptoAsymmetricException("MPKCEncrypt:Initialize", "The private key is invalid!", new ArgumentException());
 
                 _maxPlainText = ((MPKCPrivateKey)AsmKey).K >> 3;
-                _maxCipherText = ((MPKCPrivateKey)AsmKey).N>> 3;
+                _maxCipherText = ((MPKCPrivateKey)AsmKey).N >> 3;
             }
 
             _isInitialized = true;

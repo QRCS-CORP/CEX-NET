@@ -26,6 +26,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments
         #endregion
 
         #region Constructor
+        /// <summary>
         /// The DTM packet event args constructor; contains the file request state
         /// </summary>
         /// 

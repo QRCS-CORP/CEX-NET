@@ -92,12 +92,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         public byte[] Decrypt(byte[] Input)
         {
             if (_isEncryption)
-                throw new CryptoAsymmetricSignException("KobaraImaiCipher:Decrypt", "The cipher is not initialized for decryption!", new ArgumentException());
+                throw new CryptoAsymmetricException("KobaraImaiCipher:Decrypt", "The cipher is not initialized for decryption!", new ArgumentException());
 
             int nDiv8 = _N >> 3;
 
             if (Input.Length < nDiv8)
-                throw new CryptoAsymmetricSignException("KobaraImaiCipher:Decrypt", "Bad Padding: Ciphertext too short!", new ArgumentException());
+                throw new CryptoAsymmetricException("KobaraImaiCipher:Decrypt", "Bad Padding: Ciphertext too short!", new ArgumentException());
 
             int c2Len = _dgtEngine.DigestSize;
             int c4Len = _K >> 3;
@@ -165,14 +165,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
                 mConstPrime[i] ^= c1[i];
 
             if (mConstPrime.Length < c1Len)
-                throw new CryptoAsymmetricSignException("KobaraImaiCipher:Decrypt", "Bad Padding: invalid ciphertext!", new ArgumentException());
+                throw new CryptoAsymmetricException("KobaraImaiCipher:Decrypt", "Bad Padding: invalid ciphertext!", new ArgumentException());
 
             byte[][] temp = ByteUtils.Split(mConstPrime, c1Len - MPKCINFO.Length);
             byte[] mr = temp[0];
             byte[] constPrime = temp[1];
 
             if (!ByteUtils.Equals(constPrime, MPKCINFO))
-                throw new CryptoAsymmetricSignException("KobaraImaiCipher:Decrypt", "Bad Padding: invalid ciphertext!", new ArgumentException());
+                throw new CryptoAsymmetricException("KobaraImaiCipher:Decrypt", "Bad Padding: invalid ciphertext!", new ArgumentException());
 
             return mr;
         }
@@ -187,7 +187,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         public byte[] Encrypt(byte[] Input)
         {
             if (!_isEncryption)
-                throw new CryptoAsymmetricSignException("KobaraImaiCipher:Encrypt", "The cipher is not initialized for encryption!", new ArgumentException());
+                throw new CryptoAsymmetricException("KobaraImaiCipher:Encrypt", "The cipher is not initialized for encryption!", new ArgumentException());
 
             int c2Len = _dgtEngine.DigestSize;
             int c4Len = _K >> 3;
@@ -277,7 +277,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
             if (AsmKey is MPKCPrivateKey)
                 return ((MPKCPrivateKey)AsmKey).N;
 
-            throw new CryptoAsymmetricSignException("KobaraImaiCipher:Encrypt", "Unsupported Key type!", new ArgumentException());
+            throw new CryptoAsymmetricException("KobaraImaiCipher:Encrypt", "Unsupported Key type!", new ArgumentException());
         }
 
         /// <summary>
@@ -289,7 +289,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         public void Initialize(IAsymmetricKey AsmKey)
         {
             if (!(AsmKey is MPKCPublicKey) && !(AsmKey is MPKCPrivateKey))
-                throw new CryptoAsymmetricSignException("KobaraImaiCipher:Initialize", "The key is not a valid McEliece key!", new InvalidDataException());
+                throw new CryptoAsymmetricException("KobaraImaiCipher:Initialize", "The key is not a valid McEliece key!", new InvalidDataException());
 
             _isEncryption = (AsmKey is MPKCPublicKey);
 
@@ -345,7 +345,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
                 case Digests.Skein1024:
                     return new Skein1024();
                 default:
-                    throw new CryptoAsymmetricSignException("KobaraImaiCipher:GetDigest", "The digest type is not supported!", new ArgumentException());
+                    throw new CryptoAsymmetricException("KobaraImaiCipher:GetDigest", "The digest type is not supported!", new ArgumentException());
             }
         }
 
@@ -377,7 +377,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
                 case Prngs.QCG2:
                     return new QCG2();
                 default:
-                    throw new CryptoAsymmetricSignException("KobaraImaiCipher:GetPrng", "The Prng type is not supported!", new ArgumentException());
+                    throw new CryptoAsymmetricException("KobaraImaiCipher:GetPrng", "The Prng type is not supported!", new ArgumentException());
             }
         }
         #endregion

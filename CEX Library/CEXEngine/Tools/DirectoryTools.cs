@@ -8,7 +8,7 @@ using System.Security.Principal;
 namespace VTDev.Libraries.CEXEngine.Tools
 {
     /// <summary>
-    /// Folder methods wrapper class
+    /// Directory methods wrapper class
     /// </summary>
     public sealed class DirectoryTools
     {

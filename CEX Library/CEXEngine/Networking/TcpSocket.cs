@@ -683,7 +683,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
                     Connected(this, readEventArgs);
 
                 // signal that the connection has been made
-                _opDone.Set();
+                if (_opDone != null)
+                    _opDone.Set();
             }
             catch (SocketException se)
             {

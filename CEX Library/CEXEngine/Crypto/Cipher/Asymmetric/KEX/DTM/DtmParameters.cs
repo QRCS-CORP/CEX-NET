@@ -37,10 +37,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     /// <summary>
     /// The DtmParameters class.
     /// <para>The DtmParameters class is used to define the working parameters used by the DTM Key Exchange using a DtmKex instance.</para>
-    /// <para>The bytes <c>0</c> through <c>3</c> are the Auth-Stage asymmetric parameters OId.
-    /// The next 4 bytes are the Primary-Stage asymmetric parameters OId.
-    /// Bytes <c>8</c> and <c>9</c> identify the Auth-Stage DtmSession symmetric cipher parameters.
-    /// Bytes <c>10</c> and <c>11</c> identify the Primary-Stage DtmSession symmetric cipher parameters.
+    /// <para>The bytes <c>0</c> through <c>3</c> are the Auth-Phase asymmetric parameters OId.
+    /// The next 4 bytes are the Primary-Phase asymmetric parameters OId.
+    /// Bytes <c>8</c> and <c>9</c> identify the Auth-Phase DtmSession symmetric cipher parameters.
+    /// Bytes <c>10</c> and <c>11</c> identify the Primary-Phase DtmSession symmetric cipher parameters.
     /// The last <c>4</c> bytes are used to uniquely identify the parameter set.</para>
     /// </summary>
     /// 
@@ -65,47 +65,47 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// </summary>
         public byte[] OId;
         /// <summary>
-        /// The <c>Auth-Stage</c> Asymmetric parameters OId; can be the Asymmetric cipher parameters OId, or a serialized Asymmetric Parameters class
+        /// The <c>Auth-Phase</c> Asymmetric parameters OId; can be the Asymmetric cipher parameters OId, or a serialized Asymmetric Parameters class
         /// </summary>
         public byte[] AuthPkeId;
         /// <summary>
-        /// The <c>Primary-Stage</c> Asymmetric parameters OId; can be the Asymmetric cipher parameters OId, or a serialized Asymmetric Parameters class
+        /// The <c>Primary-Phase</c> Asymmetric parameters OId; can be the Asymmetric cipher parameters OId, or a serialized Asymmetric Parameters class
         /// </summary>
         public byte[] PrimaryPkeId;
         /// <summary>
-        /// The <c>Auth-Stage</c> Symmetric sessions cipher parameters; contains a complete description of the Symmetric cipher
+        /// The <c>Auth-Phase</c> Symmetric sessions cipher parameters; contains a complete description of the Symmetric cipher
         /// </summary>
         public DtmSession AuthSession;
         /// <summary>
-        /// The <c>Primary-Stage</c> Symmetric sessions cipher parameters; contains a complete description of the Symmetric cipher
+        /// The <c>Primary-Phase</c> Symmetric sessions cipher parameters; contains a complete description of the Symmetric cipher
         /// </summary>
         public DtmSession PrimarySession;
         /// <summary>
-        /// The Prng used to pad messages
+        /// The Prng type used to pad messages
         /// </summary>
         public Prngs RandomEngine;
         /// <summary>
-        /// (Optional) The maximum number of pseudo-random bytes to append to the <c>Primary-Stage</c> Asymmetric Public key before encryption
+        /// (Optional) The maximum number of pseudo-random bytes to append to the <c>Primary-Phase</c> Asymmetric Public key before encryption
         /// </summary>
         public int MaxAsmKeyAppend;
         /// <summary>
-        /// (Optional) The maximum number of pseudo-random bytes to prepend to the <c>Primary-Stage</c> Asymmetric Public key before encryption
+        /// (Optional) The maximum number of pseudo-random bytes to prepend to the <c>Primary-Phase</c> Asymmetric Public key before encryption
         /// </summary>
         public int MaxAsmKeyPrePend;
         /// <summary>
-        /// (Optional) The maximum number of pseudo-random bytes to append to the <c>Primary-Stage</c> Client Identity before encryption
+        /// (Optional) The maximum number of pseudo-random bytes to append to the <c>Primary-Phase</c> Client Identity before encryption
         /// </summary>
         public int MaxAsmParamsAppend;
         /// <summary>
-        /// (Optional) The maximum number of pseudo-random bytes to prepend to the <c>Primary-Stage</c> Asymmetric Client Identity before encryption
+        /// (Optional) The maximum number of pseudo-random bytes to prepend to the <c>Primary-Phase</c> Asymmetric Client Identity before encryption
         /// </summary>
         public int MaxAsmParamsPrePend;
         /// <summary>
-        /// (Optional) The maximum number of pseudo-random bytes to append to the <c>Primary-Stage</c> Symmetric key before encryption
+        /// (Optional) The maximum number of pseudo-random bytes to append to the <c>Primary-Phase</c> Symmetric key before encryption
         /// </summary>
         public int MaxSymKeyAppend;
         /// <summary>
-        /// (Optional) The maximum number of pseudo-random bytes to prepend to the <c>Primary-Stage</c> Symmetric key before encryption
+        /// (Optional) The maximum number of pseudo-random bytes to prepend to the <c>Primary-Phase</c> Symmetric key before encryption
         /// </summary>
         public int MaxSymKeyPrePend;
         /// <summary>
@@ -117,11 +117,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// </summary>
         public int MaxMessagePrePend;
         /// <summary>
-        /// (Optional) The maximum delay time before sending the <c>Primary-Stage</c> Asymmetric key; the minimum time is 1 half max, a value of <c>0</c> has no delay 
+        /// (Optional) The maximum delay time before sending the <c>Primary-Phase</c> Asymmetric key; the minimum time is 1 half max, a value of <c>0</c> has no delay 
         /// </summary>
         public int MaxAsmKeyDelayMS;
         /// <summary>
-        /// (Optional) The maximum delay time before sending the <c>Primary-Stage</c> Symmetric key; the minimum time is 1 half max, a value of <c>0</c> has no delay
+        /// (Optional) The maximum delay time before sending the <c>Primary-Phase</c> Symmetric key; the minimum time is 1 half max, a value of <c>0</c> has no delay
         /// </summary>
         public int MaxSymKeyDelayMS;
         /// <summary>
@@ -136,21 +136,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// </summary>
         /// 
         /// <param name="OId">The DtmParameters Identifier field; must be 16 bytes in length</param>
-        /// <param name="AuthPkeId">The <c>Auth-Stage</c> Asymmetric parameters OId; can be the Asymmetric cipher parameters OId, or a serialized Asymmetric Parameters class</param>
-        /// <param name="PrimaryPkeId">The <c>Primary-Stage</c> Asymmetric parameters OId; can be the Asymmetric cipher parameters OId, or a serialized Asymmetric Parameters class</param>
-        /// <param name="AuthSession">The <c>Auth-Stage</c> Symmetric sessions cipher parameters; contains a complete description of the Symmetric cipher</param>
-        /// <param name="PrimarySession">The <c>Primary-Stage</c> Symmetric sessions cipher parameters; contains a complete description of the Symmetric cipher</param>
-        /// <param name="RandomEngine">(Optional) The Prng used to pad messages, defaults to <see cref="CTRPrng"/></param>
-        /// <param name="MaxAsmKeyAppend">(Optional) The maximum number of pseudo-random bytes to append to the <c>Primary-Stage</c> Asymmetric Public key before encryption</param>
-        /// <param name="MaxAsmKeyPrePend">(Optional) The maximum number of pseudo-random bytes to prepend to the <c>Primary-Stage</c> Asymmetric Public key before encryption</param>
-        /// <param name="MaxAsmParamsAppend">(Optional) The maximum number of pseudo-random bytes to append to the <c>Primary-Stage</c> Client Identity before encryption</param>
-        /// <param name="MaxAsmParamsPrePend">(Optional) The maximum number of pseudo-random bytes to prepend to the <c>Primary-Stage</c> Asymmetric Client Identity before encryption</param>
-        /// <param name="MaxSymKeyAppend">(Optional) The maximum number of pseudo-random bytes to append to the <c>Primary-Stage</c> Symmetric key before encryption</param>
-        /// <param name="MaxSymKeyPrePend">(Optional) The maximum number of pseudo-random bytes to prepend to the <c>Primary-Stage</c> Symmetric key before encryption</param>
+        /// <param name="AuthPkeId">The <c>Auth-Phase</c> Asymmetric parameters OId; can be the Asymmetric cipher parameters OId, or a serialized Asymmetric Parameters class</param>
+        /// <param name="PrimaryPkeId">The <c>Primary-Phase</c> Asymmetric parameters OId; can be the Asymmetric cipher parameters OId, or a serialized Asymmetric Parameters class</param>
+        /// <param name="AuthSession">The <c>Auth-Phase</c> Symmetric sessions cipher parameters; contains a complete description of the Symmetric cipher</param>
+        /// <param name="PrimarySession">The <c>Primary-Phase</c> Symmetric sessions cipher parameters; contains a complete description of the Symmetric cipher</param>
+        /// <param name="RandomEngine">(Optional) The Prng used to pad messages, defaults to CTRPrng</param>
+        /// <param name="MaxAsmKeyAppend">(Optional) The maximum number of pseudo-random bytes to append to the <c>Primary-Phase</c> Asymmetric Public key before encryption</param>
+        /// <param name="MaxAsmKeyPrePend">(Optional) The maximum number of pseudo-random bytes to prepend to the <c>Primary-Phase</c> Asymmetric Public key before encryption</param>
+        /// <param name="MaxAsmParamsAppend">(Optional) The maximum number of pseudo-random bytes to append to the <c>Primary-Phase</c> Client Identity before encryption</param>
+        /// <param name="MaxAsmParamsPrePend">(Optional) The maximum number of pseudo-random bytes to prepend to the <c>Primary-Phase</c> Asymmetric Client Identity before encryption</param>
+        /// <param name="MaxSymKeyAppend">(Optional) The maximum number of pseudo-random bytes to append to the <c>Primary-Phase</c> Symmetric key before encryption</param>
+        /// <param name="MaxSymKeyPrePend">(Optional) The maximum number of pseudo-random bytes to prepend to the <c>Primary-Phase</c> Symmetric key before encryption</param>
         /// <param name="MaxMessageAppend">(Optional) The maximum number of pseudo-random bytes to append to a <c>Post-Exchange</c> message before encryption</param>
         /// <param name="MaxMessagePrePend">(Optional) The maximum number of pseudo-random bytes to prepend to a <c>Post-Exchange</c> message before encryption</param>
-        /// <param name="MaxAsmKeyDelayMS">(Optional) The maximum delay time before sending the <c>Primary-Stage</c> Asymmetric key; the minimum time is 1 half max, a value of <c>0</c> has no delay</param>
-        /// <param name="MaxSymKeyDelayMS">(Optional) The maximum delay time before sending the <c>Primary-Stage</c> Symmetric key; the minimum time is 1 half max, a value of <c>0</c> has no delay</param>
+        /// <param name="MaxAsmKeyDelayMS">(Optional) The maximum delay time before sending the <c>Primary-Phase</c> Asymmetric key; the minimum time is 1 half max, a value of <c>0</c> has no delay</param>
+        /// <param name="MaxSymKeyDelayMS">(Optional) The maximum delay time before sending the <c>Primary-Phase</c> Symmetric key; the minimum time is 1 half max, a value of <c>0</c> has no delay</param>
         /// <param name="MaxMessageDelayMS">(Optional) The maximum delay time before sending message traffic; the minimum time is <c>0</c>, a value of <c>0</c> has no delay</param>
         public DtmParameters(byte[] OId, byte[] AuthPkeId, byte[] PrimaryPkeId, DtmSession AuthSession, DtmSession PrimarySession, Prngs RandomEngine = Prngs.CTRPrng, int MaxAsmKeyAppend = 0, int MaxAsmKeyPrePend = 0, int MaxAsmParamsAppend = 0, 
             int MaxAsmParamsPrePend = 0, int MaxSymKeyAppend = 0, int MaxSymKeyPrePend = 0, int MaxMessageAppend = 0, int MaxMessagePrePend = 0, int MaxAsmKeyDelayMS = 0, int MaxSymKeyDelayMS = 0, int MaxMessageDelayMS = 0)

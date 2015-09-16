@@ -89,13 +89,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// Get: This class is initialized for Signing with the Public key
         /// </summary>
         /// 
-        /// <exception cref="CryptoAsymmetricSignException">Thrown if cipher has not been initialized</exception>
+        /// <exception cref="CryptoAsymmetricException">Thrown if cipher has not been initialized</exception>
         public bool IsSigner
         {
             get
             {
                 if (!_isInitialized)
-                    throw new CryptoAsymmetricSignException("MPKCSign:IsSigner", "The signer has not been initialized!", new InvalidOperationException());
+                    throw new CryptoAsymmetricException("MPKCSign:IsSigner", "The signer has not been initialized!", new InvalidOperationException());
 
                 return (_asmKey is MPKCPublicKey);
             }
@@ -166,7 +166,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         public void Initialize(IAsymmetricKey AsmKey)
         {
             if (!(AsmKey is MPKCPublicKey) && !(AsmKey is MPKCPrivateKey))
-                throw new CryptoAsymmetricSignException("MPKCSign:Initialize", "The key is not a valid RNBW key!", new InvalidDataException());
+                throw new CryptoAsymmetricException("MPKCSign:Initialize", "The key is not a valid RNBW key!", new InvalidDataException());
 
             Reset();
             _asmKey = AsmKey;

@@ -85,7 +85,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         public byte[] Decrypt(byte[] Input)
         {
             if (_isEncryption)
-                throw new CryptoAsymmetricSignException("FujisakiCipher:Decrypt", "The cipher is not initialized for decryption!", new ArgumentException());
+                throw new CryptoAsymmetricException("FujisakiCipher:Decrypt", "The cipher is not initialized for decryption!", new ArgumentException());
 
             int c1Len = (_N + 7) >> 3;
             int c2Len = Input.Length - c1Len;
@@ -127,7 +127,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
 
             // check that Conv(H(m||r)) = z
             if (!hrmVec.Equals(z))
-                throw new CryptoAsymmetricSignException("FujisakiCipher:Decrypt", "Bad Padding: invalid ciphertext!", new InvalidDataException());
+                throw new CryptoAsymmetricException("FujisakiCipher:Decrypt", "Bad Padding: invalid ciphertext!", new InvalidDataException());
 
             // return plaintext m
             return mBytes;
@@ -143,7 +143,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         public byte[] Encrypt(byte[] Input)
         {
             if (!_isEncryption)
-                throw new CryptoAsymmetricSignException("FujisakiCipher:Encrypt", "The cipher is not initialized for encryption!", new ArgumentException());
+                throw new CryptoAsymmetricException("FujisakiCipher:Encrypt", "The cipher is not initialized for encryption!", new ArgumentException());
 
             // generate random vector r of length k bits
             GF2Vector r = new GF2Vector(_K, _rndEngine);
@@ -193,7 +193,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
             if (AsmKey is MPKCPrivateKey)
                 return ((MPKCPrivateKey)AsmKey).N;
 
-            throw new CryptoAsymmetricSignException("FujisakiCipher:Encrypt", "Unsupported Key type!", new ArgumentException());
+            throw new CryptoAsymmetricException("FujisakiCipher:Encrypt", "Unsupported Key type!", new ArgumentException());
         }
 
         /// <summary>
@@ -205,7 +205,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         public void Initialize(IAsymmetricKey AsmKey)
         {
             if (!(AsmKey is MPKCPublicKey) && !(AsmKey is MPKCPrivateKey))
-                throw new CryptoAsymmetricSignException("FujisakiCipher:Initialize", "The key is not a valid McEliece key!", new InvalidDataException());
+                throw new CryptoAsymmetricException("FujisakiCipher:Initialize", "The key is not a valid McEliece key!", new InvalidDataException());
 
             _isEncryption = (AsmKey is MPKCPublicKey);
 
@@ -261,7 +261,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
                 case Digests.Skein1024:
                     return new Skein1024();
                 default:
-                    throw new CryptoAsymmetricSignException("FujisakiCipher:GetDigest", "The digest type is not supported!", new ArgumentException());
+                    throw new CryptoAsymmetricException("FujisakiCipher:GetDigest", "The digest type is not supported!", new ArgumentException());
             }
         }
 
@@ -293,7 +293,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
                 case Prngs.QCG2:
                     return new QCG2();
                 default:
-                    throw new CryptoAsymmetricSignException("FujisakiCipher:GetPrng", "The Prng type is not supported!", new ArgumentException());
+                    throw new CryptoAsymmetricException("FujisakiCipher:GetPrng", "The Prng type is not supported!", new ArgumentException());
             }
         }
         #endregion

@@ -31,7 +31,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces
         /// 
         /// <param name="AsmKey">The <see cref="IAsymmetricKey"/> containing the Public (verify) or Private (sign) key</param>
         /// 
-        /// <exception>CryptoAsymmetricSignException Thrown if an invalid key is used</exception>
+        /// <exception>CryptoAsymmetricException Thrown if an invalid key is used</exception>
         void Initialize(IAsymmetricKey AsmKey);
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces
         /// 
         /// <returns>The encrypted hash code</returns>
         /// 
-        /// <exception>CryptoAsymmetricSignException Thrown if an invalid key is used, or signer has not been initialized</exception>
+        /// <exception>CryptoAsymmetricException Thrown if an invalid key is used, or signer has not been initialized</exception>
         byte[] Sign(Stream InputStream);
 
         /// <summary>

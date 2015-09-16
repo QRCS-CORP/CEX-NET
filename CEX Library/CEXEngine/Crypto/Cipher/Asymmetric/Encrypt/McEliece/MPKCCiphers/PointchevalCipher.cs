@@ -75,7 +75,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         public byte[] Decrypt(byte[] Input)
         {
             if (_isEncryption)
-                throw new CryptoAsymmetricSignException("PointchevalCipher:Decrypt", "The cipher is not initialized for decryption!", new ArgumentException());
+                throw new CryptoAsymmetricException("PointchevalCipher:Decrypt", "The cipher is not initialized for decryption!", new ArgumentException());
 
             int c1Len = (_N + 7) >> 3;
             int c2Len = Input.Length - c1Len;
@@ -116,7 +116,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
 
             // check that Conv(H(m||r)) = z
             if (!c1Vec.Equals(z))
-                throw new CryptoAsymmetricSignException("PointchevalCipher:Decrypt", "Bad Padding: Invalid ciphertext!", new ArgumentException());
+                throw new CryptoAsymmetricException("PointchevalCipher:Decrypt", "Bad Padding: Invalid ciphertext!", new ArgumentException());
 
             // split (m||r) to obtain m
             int kDiv8 = _K >> 3;
@@ -129,7 +129,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         public byte[] Encrypt(byte[] Input)
         {
             if (!_isEncryption)
-                throw new CryptoAsymmetricSignException("PointchevalCipher:Encrypt", "The cipher is not initialized for encryption!", new ArgumentException());
+                throw new CryptoAsymmetricException("PointchevalCipher:Encrypt", "The cipher is not initialized for encryption!", new ArgumentException());
 
             int kDiv8 = _K >> 3;
             // generate random r of length k div 8 bytes
@@ -186,7 +186,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
             if (Key is MPKCPrivateKey)
                 return ((MPKCPrivateKey)Key).N;
 
-            throw new CryptoAsymmetricSignException("PointchevalCipher:Encrypt", "Unsupported Key type!", new ArgumentException());
+            throw new CryptoAsymmetricException("PointchevalCipher:Encrypt", "Unsupported Key type!", new ArgumentException());
         }
 
         /// <summary>
@@ -198,7 +198,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         public void Initialize(IAsymmetricKey AsmKey)
         {
             if (!(AsmKey is MPKCPublicKey) && !(AsmKey is MPKCPrivateKey))
-                throw new CryptoAsymmetricSignException("PointchevalCipher:Initialize", "The key is not a valid McEliece key!", new InvalidDataException());
+                throw new CryptoAsymmetricException("PointchevalCipher:Initialize", "The key is not a valid McEliece key!", new InvalidDataException());
 
             _isEncryption = (AsmKey is MPKCPublicKey);
 
@@ -254,7 +254,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
                 case Digests.Skein1024:
                     return new Skein1024();
                 default:
-                    throw new CryptoAsymmetricSignException("PointchevalCipher:GetDigest", "The digest type is not supported!", new ArgumentException());
+                    throw new CryptoAsymmetricException("PointchevalCipher:GetDigest", "The digest type is not supported!", new ArgumentException());
             }
         }
 
@@ -286,7 +286,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
                 case Prngs.QCG2:
                     return new QCG2();
                 default:
-                    throw new CryptoAsymmetricSignException("PointchevalCipher:GetPrng", "The Prng type is not supported!", new ArgumentException());
+                    throw new CryptoAsymmetricException("PointchevalCipher:GetPrng", "The Prng type is not supported!", new ArgumentException());
             }
         }
         #endregion

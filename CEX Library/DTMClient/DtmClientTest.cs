@@ -28,7 +28,7 @@ namespace DTMClientTest
         public void TestExchange()
         {
             // dtm server exchange parameters X11RNS1R2
-            DtmParameters cltDtmParams = DtmParamSets.FromName(DtmParamSets.DtmParamNames.X42RNS1R1);           // preset contains all the settings required for the exchange
+            DtmParameters cltDtmParams = DtmParamSets.FromName(DtmParamSets.DtmParamNames.X42RNS1R1);       // preset contains all the settings required for the exchange
 
             // dtm client id
             DtmClient cltDtmId = new DtmClient(
@@ -38,17 +38,17 @@ namespace DTMClientTest
             // create client
             _dtmClient = new DtmKex(cltDtmParams, cltDtmId);
 
-            _dtmClient.IdentityReceived += new DtmKex.IdentityReceivedDelegate(OnIdentityReceived);       // returns the client public and secret id fields, used to authenticate a host
-            _dtmClient.PacketReceived += new DtmKex.PacketReceivedDelegate(OnPacketReceived);             // notify that a packet has been received (optional)
-            _dtmClient.SessionEstablished += new DtmKex.SessionEstablishedDelegate(OnSessionEstablished); // notify when the vpn state is up
-            _dtmClient.PacketSent += new DtmKex.PacketReceivedDelegate(OnPacketSent);                     // notify when a packet has been sent to the remote host (optional)
-            _dtmClient.DataReceived += new DtmKex.DataTransferredDelegate(OnDataReceived);                // returns the decrypted message data
-            _dtmClient.FileReceived += new DtmKex.FileTransferredDelegate(OnFileReceived);                // notify that a file transfer has completed
-            _dtmClient.FileRequest += new DtmKex.FileRequestDelegate(OnFileRequest);                      // notify that the remote host wants to send a file, can cancel or provide a path for the new file
+            _dtmClient.IdentityReceived += new DtmKex.IdentityReceivedDelegate(OnIdentityReceived);         // returns the client public and secret id fields, used to authenticate a host
+            _dtmClient.PacketReceived += new DtmKex.PacketReceivedDelegate(OnPacketReceived);               // notify that a packet has been received (optional)
+            _dtmClient.SessionEstablished += new DtmKex.SessionEstablishedDelegate(OnSessionEstablished);   // notify when the vpn state is up
+            _dtmClient.PacketSent += new DtmKex.PacketReceivedDelegate(OnPacketSent);                       // notify when a packet has been sent to the remote host (optional)
+            _dtmClient.DataReceived += new DtmKex.DataTransferredDelegate(OnDataReceived);                  // returns the decrypted message data
+            _dtmClient.FileReceived += new DtmKex.FileTransferredDelegate(OnFileReceived);                  // notify that a file transfer has completed
+            _dtmClient.FileRequest += new DtmKex.FileRequestDelegate(OnFileRequest);                        // notify that the remote host wants to send a file, can cancel or provide a path for the new file
             _dtmClient.SessionError += new DtmKex.SessionErrorDelegate(OnSessionError);                     // notify of any error conditions; includes the exception, and a severity code contained in the option flag
 
             // client connects and starts the exchange
-            _dtmClient.Connect(IPAddress.Loopback, 1024);
+            _dtmClient.Connect(IPAddress.Loopback, 1024);//IPAddress.Parse("192.168.1.102")
             // wait for the connection
             _initDone.WaitOne();
             // start the message stream
@@ -157,7 +157,7 @@ namespace DTMClientTest
                 smsg = Console.ReadLine();
                 if (smsg.ToUpper().Equals("QUIT"))
                 {
-                    // tear down th connection and dispose of the session
+                    // tear down connection and dispose of the session
                     // should always be called when a client disconnects to alert the remote host
                     _dtmClient.Disconnect();
                     break;

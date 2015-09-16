@@ -202,7 +202,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         public void Initialize(IAsymmetricKey AsmKey)
         {
             if (!(AsmKey is RLWEPublicKey) && !(AsmKey is RLWEPrivateKey))
-                throw new CryptoAsymmetricSignException("RLWESign:Initialize", "The key is not a valid Ring-LWE key!", new InvalidDataException());
+                throw new CryptoAsymmetricException("RLWESign:Initialize", "The key is not a valid Ring-LWE key!", new InvalidDataException());
 
             Reset();
             _asmKey = AsmKey;
