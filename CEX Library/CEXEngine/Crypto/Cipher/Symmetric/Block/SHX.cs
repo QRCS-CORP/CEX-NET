@@ -140,7 +140,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         #endregion
 
         #region Fields
-        private Int32 _dfnRounds = 64;
+        private Int32 _dfnRounds = MIN_ROUNDS;
         // configurable nonce can create a unique distribution, can be byte(0)
         private byte[] _hkdfInfo = System.Text.Encoding.ASCII.GetBytes("SHX version 1 information string");
         private IDigest _keyEngine;

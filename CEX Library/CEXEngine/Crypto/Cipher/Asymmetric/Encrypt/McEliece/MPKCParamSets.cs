@@ -159,14 +159,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// Retrieve a parameter set by its enumeration name
         /// </summary>
         /// 
-        /// <param name="Name">The enumeration name</param>
+        /// <param name="ParamName">The enumeration name</param>
         /// 
         /// <returns>A populated parameter set</returns>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if an invalid or unknown OId is specified</exception>
-        public static MPKCParameters FromName(MPKCParamNames Name)
+        public static MPKCParameters FromName(MPKCParamNames ParamName)
         {
-            switch (Name)
+            switch (ParamName)
             {
                 case MPKCParamNames.FM11T40S256:
                     return (MPKCParameters)MPKCFM11T40S256.DeepCopy();
@@ -196,17 +196,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         }
 
         /// <summary>
+        /// Get a serialized MPKCParameters class from a parameter name
+        /// </summary>
+        /// 
+        /// <param name="ParamName">The McEliece Parameters set name</param>
+        /// 
+        /// <returns>The serialized MPKCParameters set</returns>
+        public static byte[] GetFormatted(MPKCParamNames ParamName)
+        {
+            return FromName(ParamName).ToBytes();
+        }
+
+        /// <summary>
         /// Retrieve the parameter OId by its enumeration name
         /// </summary>
         /// 
-        /// <param name="Name">The enumeration name</param>
+        /// <param name="ParamName">The enumeration name</param>
         /// 
         /// <returns>The 4 byte OId field</returns>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if an invalid or unknown OId is specified</exception>
-        public static byte[] GetID(MPKCParamNames Name)
+        public static byte[] GetID(MPKCParamNames ParamName)
         {
-            switch (Name)
+            switch (ParamName)
             {
                 case MPKCParamNames.FM11T40S256:
                     return new byte[] { 1, 1, 11, 1 };

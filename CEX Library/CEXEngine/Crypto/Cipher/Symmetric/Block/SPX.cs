@@ -112,7 +112,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         #endregion
 
         #region Fields
-        private Int32 _dfnRounds = 32;
+        private Int32 _dfnRounds = MIN_ROUNDS;
         private Int32[] _expKey;
         private bool _isDisposed = false;
         private bool _isEncryption;

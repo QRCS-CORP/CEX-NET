@@ -8,42 +8,42 @@
         /// <summary>
         /// An internal error has occured
         /// </summary>
-        Internal = 21,
+        Internal = 61,
         /// <summary>
         /// The host refused the connection
         /// </summary>
-        Refusal = 22,
+        Refusal = 62,
         /// <summary>
         /// The host was disconnected from the session
         /// </summary>
-        Disconnected = 23,
+        Disconnected = 63,
         /// <summary>
         /// The host requires a re-transmission of the data
         /// </summary>
-        Resend = 24,
+        Resend = 64,
         /// <summary>
         /// The host received data that was out of sequence
         /// </summary>
-        OutOfSequence = 25,
+        OutOfSequence = 65,
         /// <summary>
         /// The data can not be recovered, attempt a resync
         /// </summary>
-        DataLost = 26,
+        DataLost = 66,
         /// <summary>
         /// Tear down the connection
         /// </summary>
-        Terminate = 27,
+        Terminate = 67,
         /// <summary>
         /// Response to a data lost messagem attempt to resync crypto stream
         /// </summary>
-        Resync = 28,
+        Resync = 68,
         /// <summary>
         /// The response is an echo
         /// </summary>
-        Echo = 29,
+        Echo = 69,
         /// <summary>
         /// The message is a keep alive
         /// </summary>
-        KeepAlive = 30
+        KeepAlive = 80
     }
 }

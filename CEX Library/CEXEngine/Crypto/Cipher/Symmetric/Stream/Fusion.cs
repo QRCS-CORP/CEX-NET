@@ -6,6 +6,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Generator;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using System.Threading.Tasks;
 #endregion
 
 #region License Information
@@ -74,7 +75,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
     /// <revision date="2015/01/23" version="1.3.0.0">Secondary release using an assignable Digest in the HKDF engine</revision>
     /// <revision date="2015/03/15" version="1.3.2.0">Added the IkmSize optional parameter to the constructor, and the DistributionCode property</revision>
     /// <revision date="2015/05/14" version="1.3.5.0">Added the IV property</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
+    /// <revision date="2015/07/01" version="1.4.0.a">Added library exceptions</revision>
+    /// <revision date="2015/09/15" version="1.4.0.b">Added the ParallelOption property</revision>
     /// </revisionHistory>
     /// 
     /// <remarks>
@@ -168,6 +170,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         private bool _isParallel = false;
         private int[] _legalKeySizes = new int[LEGAL_KEYS];
         private int _parallelBlockSize = PARALLEL_DEFBLOCK;
+        private ParallelOptions _parallelOption = null;
         private Int32[] _sprBox = new Int32[SBOX_SIZE];
         #endregion
 
@@ -307,6 +310,35 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
             get { return ProcessorCount * BLOCK_SIZE; }
         }
 
+        /// <summary>
+        /// Get/Set: The parallel loops ParallelOptions
+        /// <para>The MaxDegreeOfParallelism of the parallel loop is equal to the Environment.ProcessorCount by default</para>
+        /// </summary>
+        public ParallelOptions ParallelOption
+        {
+            get
+            {
+                if (_parallelOption == null)
+                    _parallelOption = new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount };
+
+                return _parallelOption;
+            }
+            set
+            {
+                if (value != null)
+                {
+                    if (value.MaxDegreeOfParallelism < 1)
+                        throw new CryptoSymmetricException("Fusion:ParallelOption", "MaxDegreeOfParallelism can not be less than 1!", new ArgumentException());
+                    else if (value.MaxDegreeOfParallelism == 1)
+                        _isParallel = false;
+                    else if (value.MaxDegreeOfParallelism % 2 != 0)
+                        throw new CryptoSymmetricException("Fusion:ParallelOption", "MaxDegreeOfParallelism can not be an odd number; must be either 1, or a divisible of 2!", new ArgumentException());
+
+                    _parallelOption = value;
+                }
+            }
+        }
+
         /// <remarks>
         /// Processor count
         /// </remarks>
@@ -340,8 +372,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
             if (ProcessorCount > 1 && ProcessorCount % 2 != 0)
                 ProcessorCount--;
 
-            IsParallel = ProcessorCount > 1;
             _dfnRounds = Rounds;
+
+            if (ProcessorCount > 1)
+            {
+                _parallelOption = new ParallelOptions() { MaxDegreeOfParallelism = ProcessorCount };
+                _isParallel = true;
+            }
+
         }
 
         /// <summary>
@@ -403,17 +441,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
             else
             {
                 // parallel CTR processing //
-                int prcCount = ProcessorCount;
-                int alnSize = Output.Length / BLOCK_SIZE;
-                int cnkSize = (alnSize / prcCount) * BLOCK_SIZE;
-                int rndSize = cnkSize * prcCount;
+                int cnkSize = (Output.Length / BLOCK_SIZE / ProcessorCount) * BLOCK_SIZE;
+                int rndSize = cnkSize * ProcessorCount;
                 int subSize = (cnkSize / BLOCK_SIZE);
 
                 // create jagged array of 'sub counters'
-                byte[][] vectors = new byte[prcCount][];
+                byte[][] vectors = new byte[ProcessorCount][];
 
                 // create random, and xor to output in parallel
-                System.Threading.Tasks.Parallel.For(0, prcCount, i =>
+                System.Threading.Tasks.Parallel.For(0, ProcessorCount, ParallelOption, i =>
                 {
                     // offset counter by chunk size / block size
                     vectors[i] = Increase(_ctrVector, subSize * i);
@@ -428,14 +464,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
                 if (rndSize < Output.Length)
                 {
                     int fnlSize = Output.Length % rndSize;
-                    byte[] rand = Generate(fnlSize, vectors[prcCount - 1]);
+                    byte[] rand = Generate(fnlSize, vectors[ProcessorCount - 1]);
 
                     for (int i = 0; i < fnlSize; i++)
                         Output[i + rndSize] = (byte)(Input[i + rndSize] ^ rand[i]);
                 }
 
                 // copy the last counter position to class variable
-                Buffer.BlockCopy(vectors[prcCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
+                Buffer.BlockCopy(vectors[ProcessorCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
             }
         }
 
@@ -474,17 +510,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
             else
             {
                 // parallel CTR processing //
-                int prcCount = ProcessorCount;
-                int alnSize = ParallelBlockSize / BLOCK_SIZE;
-                int cnkSize = (alnSize / prcCount) * BLOCK_SIZE;
-                int rndSize = cnkSize * prcCount;
+                int cnkSize = (ParallelBlockSize / BLOCK_SIZE / ProcessorCount) * BLOCK_SIZE;
+                int rndSize = cnkSize * ProcessorCount;
                 int subSize = (cnkSize / BLOCK_SIZE);
 
                 // create jagged array of 'sub counters'
-                byte[][] vectors = new byte[prcCount][];
+                byte[][] vectors = new byte[ProcessorCount][];
 
                 // create random, and xor to output in parallel
-                System.Threading.Tasks.Parallel.For(0, prcCount, i =>
+                System.Threading.Tasks.Parallel.For(0, ProcessorCount, ParallelOption, i =>
                 {
                     // offset counter by chunk size / block size
                     vectors[i] = Increase(_ctrVector, subSize * i);
@@ -500,14 +534,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
                 if (rndSize < ParallelBlockSize)
                 {
                     int fnlSize = ParallelBlockSize % rndSize;
-                    byte[] rand = Generate(fnlSize, vectors[prcCount - 1]);
+                    byte[] rand = Generate(fnlSize, vectors[ProcessorCount - 1]);
 
                     for (int i = 0; i < fnlSize; i++)
                         Output[i + OutOffset + rndSize] = (byte)(Input[i + InOffset + rndSize] ^ rand[i]);
                 }
 
                 // copy the last counter position to class variable
-                Buffer.BlockCopy(vectors[prcCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
+                Buffer.BlockCopy(vectors[ProcessorCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
             }
         }
 
@@ -547,17 +581,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
             else
             {
                 // parallel CTR processing //
-                int prcCount = ProcessorCount;
-                int alnSize = ParallelBlockSize / BLOCK_SIZE;
-                int cnkSize = (alnSize / prcCount) * BLOCK_SIZE;
-                int rndSize = cnkSize * prcCount;
+                int cnkSize = (ParallelBlockSize / BLOCK_SIZE / ProcessorCount) * BLOCK_SIZE;
+                int rndSize = cnkSize * ProcessorCount;
                 int subSize = (cnkSize / BLOCK_SIZE);
 
                 // create jagged array of 'sub counters'
-                byte[][] vectors = new byte[prcCount][];
+                byte[][] vectors = new byte[ProcessorCount][];
 
                 // create random, and xor to output in parallel
-                System.Threading.Tasks.Parallel.For(0, prcCount, i =>
+                System.Threading.Tasks.Parallel.For(0, ProcessorCount, ParallelOption, i =>
                 {
                     // offset counter by chunk size / block size
                     vectors[i] = Increase(_ctrVector, subSize * i);
@@ -573,14 +605,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
                 if (rndSize < Length)
                 {
                     int fnlSize = Length % rndSize;
-                    byte[] rand = Generate(fnlSize, vectors[prcCount - 1]);
+                    byte[] rand = Generate(fnlSize, vectors[ProcessorCount - 1]);
 
                     for (int i = 0; i < fnlSize; i++)
                         Output[i + OutOffset + rndSize] = (byte)(Input[i + InOffset + rndSize] ^ rand[i]);
                 }
 
                 // copy the last counter position to class variable
-                Buffer.BlockCopy(vectors[prcCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
+                Buffer.BlockCopy(vectors[ProcessorCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
             }
         }
         #endregion

@@ -439,7 +439,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             Buffer.BlockCopy(Key, 0, hkdfKey, 0, _ikmSize);
             Buffer.BlockCopy(Key, _ikmSize, hkdfSalt, 0, saltSize);
 
-            // HKDF generator expands array using an SHA512 HMAC
+            // HKDF generator expands array
             using (HKDF gen = new HKDF(_keyEngine, false))
             {
                 gen.Initialize(hkdfSalt, hkdfKey, _hkdfInfo);
@@ -479,7 +479,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 // sbox members as MDS matrix multiplies 
                 _sprBox[keyCtr * 2] = MDS0[(byte)Q0[(byte)Q0[Y0] ^ sbKey[4]] ^ sbKey[0]];
                 _sprBox[keyCtr * 2 + 1] = MDS1[(byte)Q0[Q1[Y1] ^ sbKey[5]] ^ sbKey[1]];
-                _sprBox[(keyCtr * 2) + 0x200] = MDS2[(byte)Q1[(byte)Q0[Y2] ^ sbKey[6]] ^ sbKey[2]];
+                _sprBox[keyCtr * 2 + 0x200] = MDS2[(byte)Q1[(byte)Q0[Y2] ^ sbKey[6]] ^ sbKey[2]];
                 _sprBox[keyCtr++ * 2 + 0x201] = MDS3[(byte)Q1[(byte)Q1[Y3] ^ sbKey[7]] ^ sbKey[3]];
             }
 

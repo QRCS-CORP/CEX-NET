@@ -123,14 +123,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// Retrieve a parameter set by its enumeration name
         /// </summary>
         /// 
-        /// <param name="Name">The enumeration name</param>
+        /// <param name="ParamName">The enumeration name</param>
         /// 
         /// <returns>A populated parameter set</returns>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if an invalid or unknown parameter name is used.</exception>
-        public static RLWEParameters FromName(RLWEParamNames Name)
+        public static RLWEParameters FromName(RLWEParamNames ParamName)
         {
-            switch (Name)
+            switch (ParamName)
             {
                 case RLWEParamNames.N256Q7681:
                     return (RLWEParameters)RLWEN256Q7681.DeepCopy();
@@ -142,17 +142,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         }
 
         /// <summary>
+        /// Get a serialized RLWEParameters class from a parameter name
+        /// </summary>
+        /// 
+        /// <param name="ParamName">The Ring-LWE Parameters set name</param>
+        /// 
+        /// <returns>The serialized RLWEParameters set</returns>
+        public static byte[] GetFormatted(RLWEParamNames ParamName)
+        {
+            return FromName(ParamName).ToBytes();
+        }
+
+        /// <summary>
         /// Retrieve the OId for a parameter set
         /// </summary>
         /// 
-        /// <param name="Name">The enumeration name</param>
+        /// <param name="ParamName">The enumeration name</param>
         /// 
         /// <returns>The 4 byte OId field</returns>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if an invalid or unknown parameter name is used.</exception>
-        public static byte[] GetID(RLWEParamNames Name)
+        public static byte[] GetID(RLWEParamNames ParamName)
         {
-            switch (Name)
+            switch (ParamName)
             {
                 case RLWEParamNames.N256Q7681:
                     return new byte[] { 3, 2, 2, 1 };

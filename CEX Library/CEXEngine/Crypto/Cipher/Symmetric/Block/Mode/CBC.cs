@@ -2,6 +2,7 @@
 using System;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using System.Threading.Tasks;
 #endregion
 
 #region License Information
@@ -57,7 +58,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
     /// <revisionHistory>
     /// <revision date="2014/11/11" version="1.2.0.0">Initial release</revision>
     /// <revision date="2015/01/23" version="1.3.0.0">Changes to formatting and documentation</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
+    /// <revision date="2015/07/01" version="1.4.0.a">Added library exceptions</revision>
+    /// <revision date="2015/09/15" version="1.4.0.b">Added the ParallelOption property</revision>
     /// </revisionHistory>
     /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block Namespace</seealso>
@@ -97,6 +99,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         private bool _isInitialized = false;
         private bool _isParallel = false;
         private int _parallelBlockSize = PARALLEL_DEFBLOCK;
+        private ParallelOptions _parallelOption = null;
         #endregion
 
         #region Properties
@@ -202,6 +205,35 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
             get { return ProcessorCount * BlockSize; }
         }
 
+        /// <summary>
+        /// Get/Set: The parallel loops ParallelOptions
+        /// <para>The MaxDegreeOfParallelism of the parallel loop is equal to the Environment.ProcessorCount by default</para>
+        /// </summary>
+        public ParallelOptions ParallelOption
+        {
+            get
+            {
+                if (_parallelOption == null)
+                    _parallelOption = new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount };
+
+                return _parallelOption;
+            }
+            set
+            {
+                if (value != null)
+                {
+                    if (value.MaxDegreeOfParallelism < 1)
+                        throw new CryptoSymmetricException("CBC:ParallelOption", "MaxDegreeOfParallelism can not be less than 1!", new ArgumentException());
+                    else if (value.MaxDegreeOfParallelism == 1)
+                        _isParallel = false;
+                    else if (value.MaxDegreeOfParallelism % 2 != 0)
+                        throw new CryptoSymmetricException("CBC:ParallelOption", "MaxDegreeOfParallelism can not be an odd number; must be either 1, or a divisible of 2!", new ArgumentException());
+                    
+                    _parallelOption = value;
+                }
+            }
+        }
+
         /// <remarks>
         /// Processor count
         /// </remarks>
@@ -230,7 +262,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
             if (ProcessorCount % 2 != 0)
                 ProcessorCount--;
 
-            IsParallel = ProcessorCount > 1;
+            if (ProcessorCount > 1)
+            {
+                _parallelOption = new ParallelOptions() { MaxDegreeOfParallelism = ProcessorCount };
+                _isParallel = true;
+            }
         }
 
         private CBC()
@@ -414,12 +450,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
             else
             {
                 // parallel CBC decryption
-                int prcCount = ProcessorCount;
-                int cnkSize = ParallelBlockSize / prcCount;
+                int cnkSize = ParallelBlockSize / ProcessorCount;
                 int blkCount = (cnkSize / _blockSize);
-                byte[][] vectors = new byte[prcCount][];
+                byte[][] vectors = new byte[ProcessorCount][];
 
-                for (int i = 0; i < prcCount; i++)
+                for (int i = 0; i < ProcessorCount; i++)
                 {
                     vectors[i] = new byte[_blockSize];
 
@@ -430,14 +465,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
                         Buffer.BlockCopy(_cbcIv, 0, vectors[i], 0, _blockSize);
                 }
 
-                System.Threading.Tasks.Parallel.For(0, prcCount, i =>
+                System.Threading.Tasks.Parallel.For(0, ProcessorCount, ParallelOption, i =>
                 {
                     for (int j = 0; j < blkCount; j++)
                         ProcessDecrypt(Input, (i * cnkSize) + (j * _blockSize), Output, (i * cnkSize) + (j * _blockSize), vectors[i]);
                 });
 
                 // copy the last vector to class variable
-                Buffer.BlockCopy(vectors[prcCount - 1], 0, _cbcIv, 0, _cbcIv.Length);
+                Buffer.BlockCopy(vectors[ProcessorCount - 1], 0, _cbcIv, 0, _cbcIv.Length);
             }
         }
 
@@ -468,7 +503,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
                         Buffer.BlockCopy(_cbcIv, 0, vectors[i], 0, _blockSize);
                 }
 
-                System.Threading.Tasks.Parallel.For(0, ProcessorCount, i =>
+                System.Threading.Tasks.Parallel.For(0, ProcessorCount, ParallelOption, i =>
                 {
                     for (int j = 0; j < blkCount; j++)
                         ProcessDecrypt(Input, InOffset + (i * cnkSize) + (j * _blockSize), Output, OutOffset + (i * cnkSize) + (j * _blockSize), vectors[i]);

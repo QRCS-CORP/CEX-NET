@@ -28,7 +28,7 @@ namespace DTMClientTest
         public void TestExchange()
         {
             // dtm server exchange parameters X11RNS1R2
-            DtmParameters cltDtmParams = DtmParamSets.FromName(DtmParamSets.DtmParamNames.X42RNS1R1);       // preset contains all the settings required for the exchange
+            DtmParameters cltDtmParams = DtmParamSets.FromName(DtmParamSets.DtmParamNames.X42RNR1R1);       // preset contains all the settings required for the exchange
 
             // dtm client id
             DtmClient cltDtmId = new DtmClient(
@@ -48,7 +48,7 @@ namespace DTMClientTest
             _dtmClient.SessionError += new DtmKex.SessionErrorDelegate(OnSessionError);                     // notify of any error conditions; includes the exception, and a severity code contained in the option flag
 
             // client connects and starts the exchange
-            _dtmClient.Connect(IPAddress.Loopback, 1024);//IPAddress.Parse("192.168.1.102")
+            _dtmClient.Connect(IPAddress.Loopback, 1024);
             // wait for the connection
             _initDone.WaitOne();
             // start the message stream
@@ -74,8 +74,7 @@ namespace DTMClientTest
 
         private void OnFileRequest(object owner, DtmFileRequestEventArgs args)
         {
-            // set the args.Cancel to true to refuse a file: args.Cancel = true;
-            // ..or get the file name
+            // set the args.Cancel to true to refuse a file or get the file name
             string fileName = args.FilePath;
             // prepend the destination directory
             args.FilePath = Path.Combine(@"C:\Tests\Saved\Test", fileName);

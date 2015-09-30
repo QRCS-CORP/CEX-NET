@@ -357,10 +357,30 @@ namespace VTDev.Libraries.CEXEngine.Networking
 
         #region Constructor
         /// <summary>
-        /// Initialize this class
+        /// Initialize this class; use this constructor with the Listen or Connect methods
         /// </summary>
         public TcpSocket()
         {
+        }
+
+        /// <summary>
+        /// Initialize this class with a connected socket instance
+        /// </summary>
+        /// 
+        /// <param name="Client">The initialized and connected socket instance</param>
+        /// <param name="Receiving">Start an asyncronous receive operation</param>
+        /// 
+        /// <exception cref="CryptoSocketException">Throws if the socket instance is null or not connected</exception>
+        public TcpSocket(Socket Client, bool Receiving = true)
+        {
+            if (_cltSocket == null)
+                throw new CryptoSocketException("TcpSocket:Ctor", "The socket instance can not be null!", new InvalidOperationException());
+            if (!_cltSocket.Connected)
+                throw new CryptoSocketException("TcpSocket:Ctor", "Tyhe socket must be initialized and connected!", new InvalidOperationException());
+
+            _cltSocket = Client;
+            if (Receiving)
+                ReceiveAsync();
         }
 
         /// <summary>
@@ -426,67 +446,6 @@ namespace VTDev.Libraries.CEXEngine.Networking
             }
 
             return stream;
-        }
-
-        /// <summary>
-        /// Test if an application is listening on a port
-        /// </summary>
-        /// 
-        /// <param name="Port">The port to test</param>
-        /// 
-        /// <returns>Returns <c>true</c> if an application is listening on the port, otherwise <c>false</c></returns>
-        /// 
-        /// <exception cref="CryptoSocketException">Thrown if the operation is in an error state</exception>
-        public bool IsPortOpen(int Port)
-        {
-            var listener = default(TcpListener);
-
-            try
-            {
-                listener = new TcpListener(IPAddress.Any, Port);
-                listener.Start();
-
-                return true;
-            }
-            catch (SocketException)
-            {
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            finally
-            {
-                if (listener != null)
-                    listener.Stop();
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Get an open and randomly selected port number within a range
-        /// </summary>
-        /// 
-        /// <param name="From">The minimum port number (default is 49152)</param>
-        /// <param name="To">The maximum port number (default is 65535)</param>
-        /// <returns>An open port number</returns>
-        /// 
-        /// <exception cref="CryptoSocketException">Thrown if the operation is in an error state</exception>
-        public int NextOpenPort(int From = 49152, int To = 65535)
-        {
-            CSPRng rnd = new CSPRng();
-
-            int port = -1;
-
-            do
-            {
-                if (IsPortOpen((port = rnd.Next(From, To))))
-                    break;
-
-            } while (true);
-
-            return port;
         }
         #endregion
 

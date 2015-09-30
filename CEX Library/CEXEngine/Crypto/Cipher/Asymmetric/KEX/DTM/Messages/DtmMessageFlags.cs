@@ -8,6 +8,6 @@
         /// <summary>
         /// The payload is a post-exchange encrypted datagram
         /// </summary>
-        Transmission = 61,
+        Transmission = 41,
     }
 }

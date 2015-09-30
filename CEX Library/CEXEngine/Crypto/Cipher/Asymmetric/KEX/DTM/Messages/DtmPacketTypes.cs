@@ -12,18 +12,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages
         /// <summary>
         /// The packet contains a service instruction
         /// </summary>
-        Service = 1,
+        Service = 51,
         /// <summary>
         /// The packet contains message data
         /// </summary>
-        Message = 2,
+        Message = 52,
         /// <summary>
         /// The packet contains file transfer information
         /// </summary>
-        Transfer = 3,
+        Transfer = 53,
         /// <summary>
         /// The packet is part of a key exchange
         /// </summary>
-        Exchange = 4
+        Exchange = 54
     }
 }

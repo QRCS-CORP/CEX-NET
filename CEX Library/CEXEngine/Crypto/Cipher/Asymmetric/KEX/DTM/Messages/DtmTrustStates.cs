@@ -8,14 +8,14 @@
         /// <summary>
         /// No trust relationship exists
         /// </summary>
-        None = 0,
+        None = 81,
         /// <summary>
         /// A partial trust has been established
         /// </summary>
-        Partial = 1,
+        Partial = 82,
         /// <summary>
         /// Full trust has been established
         /// </summary>
-        Full = 2
+        Full = 83
     }
 }

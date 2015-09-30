@@ -190,14 +190,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         /// Retrieve a parameter set by its enumeration name
         /// </summary>
         /// 
-        /// <param name="Name">The enumeration name</param>
+        /// <param name="ParamName">The enumeration name</param>
         /// 
         /// <returns>A populated parameter set</returns>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if an invalid or unknown OId is specified</exception>
-        public static RNBWParameters FromName(RNBWParamNames Name)
+        public static RNBWParameters FromName(RNBWParamNames ParamName)
         {
-            switch (Name)
+            switch (ParamName)
             {
                 case RNBWParamNames.N33L5:
                     return (RNBWParameters)RNBWN33L5.DeepCopy();
@@ -219,17 +219,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         }
 
         /// <summary>
+        /// Get a serialized RNBWParameters class from a parameter name
+        /// </summary>
+        /// 
+        /// <param name="ParamName">The RNBW Parameters set name</param>
+        /// 
+        /// <returns>The serialized RNBWParameters set</returns>
+        public static byte[] GetFormatted(RNBWParamNames ParamName)
+        {
+            return FromName(ParamName).ToBytes();
+        }
+
+        /// <summary>
         /// Retrieve the parameter OId by its enumeration name
         /// </summary>
         /// 
-        /// <param name="Name">The enumeration name</param>
+        /// <param name="ParamName">The enumeration name</param>
         /// 
         /// <returns>The 4 byte OId field</returns>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if an invalid or unknown OId is specified</exception>
-        public static byte[] GetID(RNBWParamNames Name)
+        public static byte[] GetID(RNBWParamNames ParamName)
         {
-            switch (Name)
+            switch (ParamName)
             {
                 case RNBWParamNames.N33L5:
                     return new byte[] { 4, 1, 1, 1 };

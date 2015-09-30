@@ -182,11 +182,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         }
 
         /// <summary>
-        /// Get: Number of random bits to prepend to the message; should be a multiple of 8
+        /// Get/Set: Number of random bits to prepend to the message; should be a multiple of 8
         /// </summary>
         public int Db
         {
             get { return _Db; }
+            set { _Db = value; }
         }
 
         /// <summary>
@@ -309,7 +310,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         }
 
         /// <summary>
-        /// Get: The maximum  length of a plaintext message in bytes
+        /// Get: The maximum length of a plaintext message in bytes
         /// </summary>
         public int MessageMax
         {
@@ -327,19 +328,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         }
 
         /// <summary>
-        /// Get: Minimum number of hash calls for the IGF to make
+        /// Get/Set: Minimum number of hash calls for the IGF to make
         /// </summary>
         public int MinIGFHashCalls
         {
             get { return _minIGFHashCalls; }
+            set { _minIGFHashCalls = value; }
         }
 
         /// <summary>
-        /// Get: Minimum number of calls to generate the masking polynomial
+        /// Get/Set: Minimum number of calls to generate the masking polynomial
         /// </summary>
         public int MinMGFHashCalls
         {
             get { return _minMGFHashCalls; }
+            set { _minMGFHashCalls = value; }
         }
 
         /// <summary>

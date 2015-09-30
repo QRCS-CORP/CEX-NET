@@ -182,14 +182,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// Retrieve a parameter set by its enumeration name
         /// </summary>
         /// 
-        /// <param name="Name">The enumeration name</param>
+        /// <param name="ParamName">The enumeration name</param>
         /// 
         /// <returns>A populated parameter set</returns>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if an invalid or unknown OId is used</exception>
-        public static NTRUParameters FromName(NTRUParamNames Name)
+        public static NTRUParameters FromName(NTRUParamNames ParamName)
         {
-            switch (Name)
+            switch (ParamName)
             {
                 case NTRUParamNames.A2011439:
                     return (NTRUParameters)APR2011439.DeepCopy();
@@ -221,17 +221,92 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         }
 
         /// <summary>
+        /// Get a serialized NTRUParameters class from a parameter name.
+        /// <para>Can optionally randomize Db, MinIGFHashCalls, and MinMGFHashCalls fields using the Multiplier parameters.</para>
+        /// </summary>
+        /// 
+        /// <param name="ParamName">The NTRU Parameters set name</param>
+        /// 
+        /// <param name="DbReduceMultiplier">If set between <c>0.1</c> and <c>1.0</c>, randomizes the Db field length, if <c>0.0</c> (default), returns the serialized parameter set default.
+        /// <para>The Db field is set to a ranged random number from the default parameter set <c>value</c> to <c>value - (value * multiplier)</c>. 
+        /// The Db field determines how many bytes of random are prepended to the message before encryption.
+        /// Recommended range is minimum 0.1, to a maximum of 0.4.</para></param>
+        /// 
+        /// <param name="IgfIncreaseMultiplier">If set between <c>0.1</c> and <c>1.0</c>, the MinIGFHashCalls value is randomized, if <c>0.0</c> (default), returns the parameter set defaults.
+        /// <para>The MinIGFHashCalls is set to a random value ranged between the parameter sets default <c>value</c>, up to <c>value + (value * multiplier)</c>.
+        /// The MinIGFHashCalls value determine the number of times the hashing function is cycled during the igf polynomial generation.
+        /// Recommended range is minimum 0.1, to a maximum of 0.2; larger values significantly impact processing times.</para></param>
+        /// 
+        /// <param name="MgfIncreaseMultiplier">If set between <c>0.1</c> and <c>1.0</c>, the MinMGFHashCalls value is randomized, if <c>0.0</c> (default), returns the parameter set defaults.
+        /// <para>The MinMGFHashCalls is set to a random value ranged between the parameter sets default <c>value</c>, up to <c>value + (value * multiplier)</c>.
+        /// The MinMGFHashCalls value determine the number of times the hashing function is cycled during the igf mask polynomial generation.
+        /// Recommended range is minimum 0.1, to a maximum of 0.2; larger values significantly impact processing times.</para></param>
+        /// 
+        /// <returns>The serialized NTRUParameters set</returns>
+        /// 
+        /// <exception cref="CryptoAsymmetricException">Thrown if the input value is out of range; (valid range is 0.0 to 1.0)</exception>
+        public static byte[] GetFormatted(NTRUParamNames ParamName, double DbReduceMultiplier = 0.0, double IgfIncreaseMultiplier = 0.0, double MgfIncreaseMultiplier = 0.0)
+        {
+            if (DbReduceMultiplier > 1.0 || IgfIncreaseMultiplier < 0.0 || IgfIncreaseMultiplier > 1.0 || IgfIncreaseMultiplier < 0.0)
+                throw new CryptoAsymmetricException("NTRUParameters:GetFormatted", "The Multiplier value can not be less than 0.0 and cannot exceed 1.0!", new ArgumentOutOfRangeException());
+
+            if (DbReduceMultiplier == 0.0 && IgfIncreaseMultiplier == 0.0 && MgfIncreaseMultiplier == 0.0)
+            {
+                return FromName(ParamName).ToBytes();
+            }
+            else
+            {
+                NTRUParameters param = FromName(ParamName);
+                var prng = new Prng.CSPRng();
+                int diff;
+
+                if (DbReduceMultiplier > 0.0)
+                {
+                    diff = (int)Math.Abs(param.Db * DbReduceMultiplier);
+
+                    // set the db to a random in range of param value, to value - value * DbReduceMultiplier
+                    if (diff > 0)
+                    {
+                        // get a random int
+                        int pnum = prng.Next(param.Db - diff, param.Db);
+                        // round it, must be divisible by 8
+                        param.Db = pnum - pnum % 8;
+                    }
+                }
+
+                if (IgfIncreaseMultiplier > 0.0)
+                {
+                    // raise igf calls to default +* IgfIncreaseThreshold
+                    diff = (int)Math.Abs(param.MinIGFHashCalls * IgfIncreaseMultiplier);
+                    if (diff > 0)
+                        param.MinIGFHashCalls = prng.Next(param.MinIGFHashCalls, param.MinIGFHashCalls + diff);
+                }
+
+                if (MgfIncreaseMultiplier > 0.0)
+                {
+                    // raise mgf calls to default +* MgfIncreaseThreshold
+                    diff = (int)Math.Abs(param.MinMGFHashCalls * MgfIncreaseMultiplier);
+                    if (diff > 0)
+                        param.MinMGFHashCalls = prng.Next(param.MinMGFHashCalls, param.MinMGFHashCalls + diff);
+                }
+                prng.Dispose();
+
+                return param.ToBytes();
+            }
+        }
+
+        /// <summary>
         /// Retrieve the OId for a parameter set
         /// </summary>
         /// 
-        /// <param name="Name">The enumeration name</param>
+        /// <param name="ParamName">The enumeration name</param>
         /// 
         /// <returns>The parameters 4 byte OId</returns>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if an invalid name is used</exception>
-        public static byte[] GetID(NTRUParamNames Name)
+        public static byte[] GetID(NTRUParamNames ParamName)
         {
-            switch (Name)
+            switch (ParamName)
             {
                 case NTRUParamNames.A2011439:
                     return new byte[] { 2, 2, 1, 101 };

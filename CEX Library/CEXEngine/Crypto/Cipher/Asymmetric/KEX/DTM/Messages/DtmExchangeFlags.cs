@@ -8,42 +8,42 @@
         /// <summary>
         /// Public id fields exchange
         /// </summary>
-        Connect = 1,
+        Connect = 31,
         /// <summary>
         /// Exchange full Public Identity
         /// </summary>
-        Init = 2,
+        Init = 32,
         /// <summary>
         /// Exchange Asymmetric Public keys
         /// </summary>
-        PreAuth = 3,
+        PreAuth = 33,
         /// <summary>
         /// Exchange Symmetric KeyParams
         /// </summary>
-        AuthEx = 4,
+        AuthEx = 34,
         /// <summary>
         /// Exchange Private Id's
         /// </summary>
-        Auth = 5,
+        Auth = 35,
         /// <summary>
         /// Exchange Primary Asymmetric parameter OId's
         /// </summary>
-        Sync = 6,
+        Sync = 36,
         /// <summary>
         /// Exchange Primary Public Keys
         /// </summary>
-        PrimeEx = 7,
+        PrimeEx = 37,
         /// <summary>
         /// Exchange Primary Symmetric keys
         /// </summary>
-        Primary = 8,
+        Primary = 38,
         /// <summary>
         /// The VPN is established
         /// </summary>
-        Established = 9,
+        Established = 39,
         /// <summary>
         /// Negotiate the minimum security requirements
         /// </summary>
-        Negotiate = 10
+        Negotiate = 40
     }
 }

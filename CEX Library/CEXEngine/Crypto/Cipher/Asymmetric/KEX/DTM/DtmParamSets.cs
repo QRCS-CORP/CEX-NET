@@ -45,6 +45,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     /// </summary>
     /// 
     /// <remarks>
+    /// <para>There are four descending security classifications, X1, X2, X3, and X4, with X1 to be considered as the most secure, and X4 as optimized for best performance with standard configurations.
+    /// As of the 1.4b release, the asymmetric cipher pairing is static; Ring-LWE for the <c>Authenticaion Phase</c> of the exchange, and NTRU in the <c>Primary Phase</c> of the key exchange.
+    /// This will change when additional asymmetric ciphers are added to the library distribution.
+    /// The set considered as the strongest in a class is always the first parameter set in the grouping; ex. DTMX11RNS1R2 or X1.1.
+    /// The X1 and X2 parameter sets use one of the HX series ciphers (RHX, SHX, THX) as the primary transmission cipher. The HX ciphers use a cryptographically strong 
+    /// Key Derivation Function (HKDF) powered by Skein, Keccak, Blake or SHA-2, to create the working keys used by the cipher. 
+    /// The HX ciphers also use an increased number of diffusion rounds. HX cipher round counts are 22 for Rijndael, 40 for Serpent, and 20 with Twofish in the X1 and X2 parameter sets. 
+    /// The increased number of rounds adds security by creating a more diffused output, strongly mitigating differential and algebraic based attack vectors.</para>
+    /// 
+    /// <description><h4>Security Classification Definitions:</h4></description>
+    /// <list type="bullet">
+    /// <item><description>X1: Asymmetric ciphers are Ring-LWE/NTRU, symmetric ciphers using a 256 bit key (auth-phase), and an HKDF/Keccak-512 strengthened HX series cipher (primary-phase).</description></item>
+    /// <item><description>X2: Asymmetric ciphers are Ring-LWE/NTRU, symmetric ciphers are a standard series cipher (256 bit key), and an HX/Skein-512 symmetric cipher implementation.</description></item>
+    /// <item><description>X3: Asymmetric ciphers are Ring-LWE/NTRU, and symmetric ciphers using 256/512 bit keys (auth/primary).</description></item>
+    /// <item><description>X4: Asymmetric ciphers are Ring-LWE/NTRU, and standard symmetric cipher configurations using 256 bit keys.</description></item>
+    /// </list>
+    /// 
     /// <description><h4>The 16 byte Parameter OId configuration:</h4></description>
     /// <list type="bullet">
     /// <item><description>The bytes <c>0</c> through <c>3</c> are the Auth-Stage asymmetric parameters OId.</description></item>
@@ -66,65 +83,125 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         public enum DtmParamNames : int
         {
             /// <summary>
-            /// Class 1, X1.1 Configuration: Optimized for maximum security; (this is the recommended X1 parameter set).
-            /// <para>Authentication Stage: Ring-LWE and 40 rounds of Serpent.
-            /// Primary Stage: NTRU and 22 rounds of RHX with the Keccak512 Kdf.
+            /// Class 1, X1.1 Configuration: Optimized for maximum security.
+            /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent.
+            /// Primary Stage: NTRU and 22 rounds of RHX with the Keccak-512 powered Kdf.
             /// Random bytes appended and prepended to exchange entities and message packets.
             /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
             /// </summary>
             X11RNS1R2 = 1,
             /// <summary>
             /// Class 1, X1.2 Configuration: Optimized for maximum security.
-            /// <para>Authentication Stage: Ring-LWE and 20 rounds of TwoFish.
-            /// Primary Stage: NTRU and 40 rounds of SHX with the Keccak512 Kdf.
+            /// <para>Authentication Stage: Ring-LWE and 14 rounds of Rijndael (AES256).
+            /// Primary Stage: NTRU and 22 rounds of RHX with the Keccak-512 powered Kdf.
             /// Random bytes appended and prepended to exchange entities and message packets.
             /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
             /// </summary>
-            X12RNT1S2,
+            X12RNR1R2,
+            /// <summary>
+            /// Class 1, X1.3 Configuration: Optimized for maximum security.
+            /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent.
+            /// Primary Stage: NTRU and 40 rounds of SHX with the Keccak-512 powered Kdf.
+            /// Random bytes appended and prepended to exchange entities and message packets.
+            /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
+            /// </summary>
+            X13RNS1S2,
+            /// <summary>
+            /// Class 1, X1.4 Configuration: Optimized for maximum security.
+            /// <para>Authentication Stage: Ring-LWE and 16 rounds of Twofish.
+            /// Primary Stage: NTRU and 20 rounds of THX with the Keccak-512 powered Kdf.
+            /// Random bytes appended and prepended to exchange entities and message packets.
+            /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
+            /// </summary>
+            X14RNT1T2,
             /// <summary>
             /// Class 2, X2.1 Configuration: Optimized for maximum security.
-            /// <para>Authentication Stage: McEliece and 22 rounds of RHX.
-            /// Primary Stage: NTRU and 22 rounds of THX with the Skein512 Kdf.
+            /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent.
+            /// Primary Stage: NTRU and 22 rounds of RHX with the Skein512 Kdf.
             /// Random bytes appended and prepended to exchange entities and message packets.
             /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
             /// </summary>
-            X21MNR2T2,
+            X21RNS1R2,
             /// <summary>
-            /// Class 2, X2.2 Configuration: Optimized for security and speed; (this is the recommended x2 parameter set).
-            /// <para>Authentication Stage: McEliece and 40 rounds of SHX.
+            /// Class 2, X2.2 Configuration: Optimized for maximum security.
+            /// <para>Authentication Stage: Ring-LWE and 14 rounds of Rijndael (AES256).
             /// Primary Stage: NTRU and 22 rounds of RHX with the Skein512 Kdf.
-            /// Random bytes appended and prepended to exchange entities.
+            /// Random bytes appended and prepended to exchange entities and message packets.
             /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
             /// </summary>
-            X22MNS2R2,
+            X22RNR1R2,
+            /// <summary>
+            /// Class 2, X2.3 Configuration: Optimized for maximum security.
+            /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent.
+            /// Primary Stage: NTRU and 40 rounds of SHX with the Skein512 Kdf.
+            /// Random bytes appended and prepended to exchange entities and message packets.
+            /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
+            /// </summary>
+            X23RNS1S2,
+            /// <summary>
+            /// Class 2, X2.3 Configuration: Optimized for maximum security.
+            /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent.
+            /// Primary Stage: NTRU and 40 rounds of SHX with the Skein512 Kdf.
+            /// Random bytes appended and prepended to exchange entities and message packets.
+            /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
+            /// </summary>
+            X24RNT1T2,
             /// <summary>
             /// Class 3, X3.1 Configuration: Optimized for security and speed.
-            /// <para>Authentication Stage: McEliece and 20 rounds of Twofish.
-            /// Primary Stage: NTRU and 22 rounds of RHX with the Skein512 Kdf.
+            /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent with a 256 bit key.
+            /// Primary Stage: NTRU and 22 rounds of Rijndael with a 512 bit key.
             /// Random bytes appended and prepended to exchange entities.
             /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
             /// </summary>
-            X31RNT1R2,
+            X31RNS1R1,
             /// <summary>
             /// Class 3, X3.2 Configuration: Optimized for security and speed.
-            /// <para>Authentication Stage: Ring-LWE and 40 rounds of Serpent.
-            /// Primary Stage: NTRU and 20 rounds of THX with the Skein512 Kdf.
+            /// <para>Authentication Stage: Ring-LWE and 14 rounds of Rijndael with a 256 bit key (AES256).
+            /// Primary Stage: NTRU and 22 rounds of Rijndael with a 512 bit key.
             /// Random bytes appended and prepended to exchange entities.
             /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
             /// </summary>
-            X32RNS1T2,
+            X32RNR1R1,
+            /// <summary>
+            /// Class 3, X3.3 Configuration: Optimized for security and speed.
+            /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent with a 256 bit key.
+            /// Primary Stage: NTRU and 32 rounds of Serpent with a 512 bit key.
+            /// Random bytes appended and prepended to exchange entities.
+            /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
+            /// </summary>
+            X33RNS1S1,
+            /// <summary>
+            /// Class 3, X3.4 Configuration: Optimized for security and speed.
+            /// <para>Authentication Stage: Ring-LWE and 16 rounds of Twofish with a 256 bit key.
+            /// Primary Stage: NTRU and 20 rounds of Twofish with a 512 bit key.
+            /// Random bytes appended and prepended to exchange entities.
+            /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
+            /// </summary>
+            X34RNT1T1,
             /// <summary>
             /// Class 4, X4.1 Configuration: Optimized for speed.
-            /// <para>Authentication Stage: Ring-LWE and 16 rounds of Twofish.
-            /// Primary Stage: NTRU and 14 rounds of Rijndael.</para>
+            /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent.
+            /// Primary Stage: NTRU and 14 rounds of Rijndael (AES256).</para>
             /// </summary>
-            X41RNT1R1,
+            X41RNS1R1,
             /// <summary>
             /// Class 4, X4.2 Configuration: Optimized for speed.
-            /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent.
-            /// Primary Stage: NTRU and 22 rounds of Rijndael.</para>
+            /// <para>Authentication Stage: Ring-LWE and 14 rounds of Rijndael (AES256).
+            /// Primary Stage: NTRU and 14 rounds of Rijndael (AES256).</para>
             /// </summary>
-            X42RNS1R1
+            X42RNR1R1,
+            /// <summary>
+            /// Class 4, X4.3 Configuration: Optimized for speed.
+            /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent.
+            /// Primary Stage: NTRU and 32 rounds of Serpent.</para>
+            /// </summary>
+            X43RNS1S1,
+            /// <summary>
+            /// Class 4, X4.4 Configuration: Optimized for speed.
+            /// <para>Authentication Stage: Ring-LWE and 16 rounds of Twofish.
+            /// Primary Stage: NTRU and 16 rounds of Twofish.</para>
+            /// </summary>
+            X44RNT1T1
         }
 
         /// <summary>
@@ -171,25 +248,44 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
                 throw new CryptoAsymmetricException("DtmParamSets:FromId", "OId is not a valid DtmParameters parameter id!", new ArgumentException());
             if (OId[4] != 1 && OId[4] != 2 && OId[4] != 3)
                 throw new CryptoAsymmetricException("DtmParamSets:FromId", "OId is not a valid DtmParameters parameter id!", new ArgumentException());
-
+            // x1
             if (Compare.AreEqual(OId, GetID(DtmParamNames.X11RNS1R2)))
                 return (DtmParameters)DTMX11RNS1R2.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X12RNT1S2)))
-                return (DtmParameters)DTMX12RNT1S2.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X21MNR2T2)))
-                return (DtmParameters)DTMX21MNR2T2.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X22MNS2R2)))
-                return (DtmParameters)DTMX22MNS2R2.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X31RNT1R2)))
-                return (DtmParameters)DTMX31RNT1R2.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X32RNS1T2)))
-                return (DtmParameters)DTMX32RNS1T2.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X41RNT1R1)))
-                return (DtmParameters)DTMX41RNT1R1.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X42RNS1R1)))
-                return (DtmParameters)DTMX42RNS1R1.DeepCopy();
-
-            throw new CryptoAsymmetricException("DtmParamSets:FromId", "OId does not identify a valid param set!", new ArgumentException());
+            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X12RNR1R2)))
+                return (DtmParameters)DTMX12RNR1R2.DeepCopy();
+            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X13RNS1S2)))
+                return (DtmParameters)DTMX13RNS1S2.DeepCopy();
+            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X14RNT1T2)))
+                return (DtmParameters)DTMX14RNT1T2.DeepCopy();
+            // x2
+            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X21RNS1R2)))
+                return (DtmParameters)DTMX21RNS1R2.DeepCopy();
+            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X22RNR1R2)))
+                return (DtmParameters)DTMX22RNR1R2.DeepCopy();
+            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X23RNS1S2)))
+                return (DtmParameters)DTMX23RNS1S2.DeepCopy();
+            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X24RNT1T2)))
+                return (DtmParameters)DTMX24RNT1T2.DeepCopy();
+            // x3
+            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X31RNS1R1)))
+                return (DtmParameters)DTMX31RNS1R1.DeepCopy();
+            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X32RNR1R1)))
+                return (DtmParameters)DTMX32RNR1R1.DeepCopy();
+            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X33RNS1S1)))
+                return (DtmParameters)DTMX33RNS1S1.DeepCopy();
+            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X34RNT1T1)))
+                return (DtmParameters)DTMX34RNT1T1.DeepCopy();
+            // x4
+            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X41RNS1R1)))
+                return (DtmParameters)DTMX41RNS1R1.DeepCopy();
+            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X42RNR1R1)))
+                return (DtmParameters)DTMX42RNR1R1.DeepCopy();
+            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X43RNS1S1)))
+                return (DtmParameters)DTMX43RNS1S1.DeepCopy();
+            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X44RNT1T1)))
+                return (DtmParameters)DTMX44RNT1T1.DeepCopy();
+            else
+                throw new CryptoAsymmetricException("DtmParamSets:FromId", "OId does not identify a valid param set!", new ArgumentException());
         }
 
         /// <summary>
@@ -205,22 +301,42 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         {
             switch (Name)
             {
+                // x1
                 case DtmParamNames.X11RNS1R2:
                     return (DtmParameters)DTMX11RNS1R2.DeepCopy();
-                case DtmParamNames.X12RNT1S2:
-                    return (DtmParameters)DTMX12RNT1S2.DeepCopy();
-                case DtmParamNames.X21MNR2T2:
-                    return (DtmParameters)DTMX21MNR2T2.DeepCopy();
-                case DtmParamNames.X22MNS2R2:
-                    return (DtmParameters)DTMX22MNS2R2.DeepCopy();
-                case DtmParamNames.X31RNT1R2:
-                    return (DtmParameters)DTMX31RNT1R2.DeepCopy();
-                case DtmParamNames.X32RNS1T2:
-                    return (DtmParameters)DTMX32RNS1T2.DeepCopy();
-                case DtmParamNames.X41RNT1R1:
-                    return (DtmParameters)DTMX41RNT1R1.DeepCopy();
-                case DtmParamNames.X42RNS1R1:
-                    return (DtmParameters)DTMX42RNS1R1.DeepCopy();
+                case DtmParamNames.X12RNR1R2:
+                    return (DtmParameters)DTMX12RNR1R2.DeepCopy();
+                case DtmParamNames.X13RNS1S2:
+                    return (DtmParameters)DTMX13RNS1S2.DeepCopy();
+                case DtmParamNames.X14RNT1T2:
+                    return (DtmParameters)DTMX14RNT1T2.DeepCopy();
+                // x2
+                case DtmParamNames.X21RNS1R2:
+                    return (DtmParameters)DTMX21RNS1R2.DeepCopy();
+                case DtmParamNames.X22RNR1R2:
+                    return (DtmParameters)DTMX22RNR1R2.DeepCopy();
+                case DtmParamNames.X23RNS1S2:
+                    return (DtmParameters)DTMX23RNS1S2.DeepCopy();
+                case DtmParamNames.X24RNT1T2:
+                    return (DtmParameters)DTMX24RNT1T2.DeepCopy();
+                // x3
+                case DtmParamNames.X31RNS1R1:
+                    return (DtmParameters)DTMX31RNS1R1.DeepCopy();
+                case DtmParamNames.X32RNR1R1:
+                    return (DtmParameters)DTMX32RNR1R1.DeepCopy();
+                case DtmParamNames.X33RNS1S1:
+                    return (DtmParameters)DTMX33RNS1S1.DeepCopy();
+                case DtmParamNames.X34RNT1T1:
+                    return (DtmParameters)DTMX34RNT1T1.DeepCopy();
+                // x4
+                case DtmParamNames.X41RNS1R1:
+                    return (DtmParameters)DTMX41RNS1R1.DeepCopy();
+                case DtmParamNames.X42RNR1R1:
+                    return (DtmParameters)DTMX42RNR1R1.DeepCopy();
+                case DtmParamNames.X43RNS1S1:
+                    return (DtmParameters)DTMX43RNS1S1.DeepCopy();
+                case DtmParamNames.X44RNT1T1:
+                    return (DtmParameters)DTMX44RNT1T1.DeepCopy();
                 default:
                     throw new CryptoAsymmetricException("DtmParamSets:FromName", "The enumeration name is unknown!", new ArgumentException());
             }
@@ -237,13 +353,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// <exception cref="CryptoAsymmetricException">Thrown if an invalid or unknown parameter name is used.</exception>
         public static SecurityContexts GetContext(byte[] OId)
         {
-            if (Compare.AreEqual(OId, GetID(DtmParamNames.X11RNS1R2)) || Compare.AreEqual(OId, GetID(DtmParamNames.X12RNT1S2)))
+            // x1
+            if (Compare.AreEqual(OId, GetID(DtmParamNames.X11RNS1R2)) || Compare.AreEqual(OId, GetID(DtmParamNames.X12RNR1R2)) ||
+                Compare.AreEqual(OId, GetID(DtmParamNames.X13RNS1S2)) || Compare.AreEqual(OId, GetID(DtmParamNames.X14RNT1T2)))
                 return SecurityContexts.X1;
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X21MNR2T2)) || Compare.AreEqual(OId, GetID(DtmParamNames.X22MNS2R2)))
+            // x2
+            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X21RNS1R2)) || Compare.AreEqual(OId, GetID(DtmParamNames.X22RNR1R2)) ||
+                Compare.AreEqual(OId, GetID(DtmParamNames.X23RNS1S2)) || Compare.AreEqual(OId, GetID(DtmParamNames.X24RNT1T2)))
                 return SecurityContexts.X2;
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X31RNT1R2)) || Compare.AreEqual(OId, GetID(DtmParamNames.X32RNS1T2)))
+            // x3
+            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X31RNS1R1)) || Compare.AreEqual(OId, GetID(DtmParamNames.X32RNR1R1)) ||
+                Compare.AreEqual(OId, GetID(DtmParamNames.X33RNS1S1)) || Compare.AreEqual(OId, GetID(DtmParamNames.X34RNT1T1)))
                 return SecurityContexts.X3;
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X41RNT1R1)) || Compare.AreEqual(OId, GetID(DtmParamNames.X42RNS1R1)))
+            // x4
+            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X41RNS1R1)) || Compare.AreEqual(OId, GetID(DtmParamNames.X42RNR1R1)) ||
+                Compare.AreEqual(OId, GetID(DtmParamNames.X43RNS1S1)) || Compare.AreEqual(OId, GetID(DtmParamNames.X44RNT1T1)))
                 return SecurityContexts.X4;
             else
                 throw new CryptoAsymmetricException("DtmParamSets:GetContext", "The OId is unknown!", new ArgumentException());
@@ -262,17 +386,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         {
             switch (Name)
             {
+                // x1
                 case DtmParamNames.X11RNS1R2:
-                case DtmParamNames.X12RNT1S2:
+                case DtmParamNames.X12RNR1R2:
+                case DtmParamNames.X13RNS1S2:
+                case DtmParamNames.X14RNT1T2:
                     return SecurityContexts.X1;
-                case DtmParamNames.X21MNR2T2:
-                case DtmParamNames.X22MNS2R2:
+                // x2
+                case DtmParamNames.X21RNS1R2:
+                case DtmParamNames.X22RNR1R2:
+                case DtmParamNames.X23RNS1S2:
+                case DtmParamNames.X24RNT1T2:
                     return SecurityContexts.X2;
-                case DtmParamNames.X31RNT1R2:
-                case DtmParamNames.X32RNS1T2:
+                // x3
+                case DtmParamNames.X31RNS1R1:
+                case DtmParamNames.X32RNR1R1:
+                case DtmParamNames.X33RNS1S1:
+                case DtmParamNames.X34RNT1T1:
                     return SecurityContexts.X3;
-                case DtmParamNames.X41RNT1R1:
-                case DtmParamNames.X42RNS1R1:
+                // x4
+                case DtmParamNames.X41RNS1R1:
+                case DtmParamNames.X42RNR1R1:
+                case DtmParamNames.X43RNS1S1:
+                case DtmParamNames.X44RNT1T1:
                     return SecurityContexts.X4;
                 default:
                     throw new CryptoAsymmetricException("DtmParamSets:GetContext", "The enumeration name is unknown!", new ArgumentException());
@@ -292,38 +428,74 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         {
             switch (Name)
             {
+                // x1
                 case DtmParamNames.X11RNS1R2:
                     return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1931),
                         new byte[] { (byte)BlockCiphers.SPX, 0, (byte)BlockCiphers.RHX, (byte)Digests.Keccak512, 1, 1, 0, 0 });
-                case DtmParamNames.X12RNT1S2:
+                case DtmParamNames.X12RNR1R2:
                     return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1931),
-                        new byte[] { (byte)BlockCiphers.TFX, 0, (byte)BlockCiphers.SHX, (byte)Digests.Keccak512, 1, 2, 0, 0 });
-                case DtmParamNames.X21MNR2T2:
-                    return ArrayUtils.Concat(MPKCParamSets.GetID(MPKCParamSets.MPKCParamNames.FM12T67S256),
-                        NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1861),
-                        new byte[] { (byte)BlockCiphers.RHX, (byte)Digests.Skein512, (byte)BlockCiphers.THX, (byte)Digests.Skein512, 2, 1, 0, 0 });
-                case DtmParamNames.X22MNS2R2:
-                    return ArrayUtils.Concat(MPKCParamSets.GetID(MPKCParamSets.MPKCParamNames.FM12T67S256),
-                        NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1861),
-                        new byte[] { (byte)BlockCiphers.SHX, (byte)Digests.Skein512, (byte)BlockCiphers.RHX, (byte)Digests.Skein512, 2, 2, 0, 0 });
-                case DtmParamNames.X31RNT1R2:
-                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
-                        NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1861),
-                        new byte[] { (byte)BlockCiphers.TFX, 0, (byte)BlockCiphers.RHX, (byte)Digests.Skein512, 3, 1, 0, 0 });
-                case DtmParamNames.X32RNS1T2:
+                        new byte[] { (byte)BlockCiphers.RDX, 0, (byte)BlockCiphers.RHX, (byte)Digests.Keccak512, 1, 2, 0, 0 });
+                case DtmParamNames.X13RNS1S2:
                     return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1931),
-                        new byte[] { (byte)BlockCiphers.TFX, 0, (byte)BlockCiphers.RHX, (byte)Digests.Skein512, 3, 2, 0, 0 });
-                case DtmParamNames.X41RNT1R1:
+                        new byte[] { (byte)BlockCiphers.SPX, 0, (byte)BlockCiphers.SHX, (byte)Digests.Keccak512, 1, 3, 0, 0 });
+                case DtmParamNames.X14RNT1T2:
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                        NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1931),
+                        new byte[] { (byte)BlockCiphers.TFX, 0, (byte)BlockCiphers.THX, (byte)Digests.Keccak512, 1, 4, 0, 0 });
+                // x2
+                case DtmParamNames.X21RNS1R2:
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                        NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1499EP1),
+                        new byte[] { (byte)BlockCiphers.SPX, 0, (byte)BlockCiphers.RHX, (byte)Digests.Skein512, 2, 1, 0, 0 });
+                case DtmParamNames.X22RNR1R2:
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                        NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1499EP1),
+                        new byte[] { (byte)BlockCiphers.RDX, 0, (byte)BlockCiphers.RHX, (byte)Digests.Skein512, 2, 2, 0, 0 });
+                case DtmParamNames.X23RNS1S2:
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                        NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1499EP1),
+                        new byte[] { (byte)BlockCiphers.SPX, 0, (byte)BlockCiphers.SHX, (byte)Digests.Skein512, 2, 3, 0, 0 });
+                case DtmParamNames.X24RNT1T2:
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                        NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1499EP1),
+                        new byte[] { (byte)BlockCiphers.TFX, 0, (byte)BlockCiphers.THX, (byte)Digests.Skein512, 2, 4, 0, 0 });
+                // x3
+                case DtmParamNames.X31RNS1R1:
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                        NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1087EP2),
+                        new byte[] { (byte)BlockCiphers.SPX, 0, (byte)BlockCiphers.RDX, 0, 3, 1, 0, 0 });
+                case DtmParamNames.X32RNR1R1:
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                        NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1087EP2),
+                        new byte[] { (byte)BlockCiphers.RDX, 0, (byte)BlockCiphers.RDX, 0, 3, 2, 0, 0 });
+                case DtmParamNames.X33RNS1S1:
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                        NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1087EP2),
+                        new byte[] { (byte)BlockCiphers.SPX, 0, (byte)BlockCiphers.SPX, 0, 3, 3, 0, 0 });
+                case DtmParamNames.X34RNT1T1:
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                        NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1087EP2),
+                        new byte[] { (byte)BlockCiphers.TFX, 0, (byte)BlockCiphers.TFX, 0, 3, 4, 0, 0 });
+                // x4
+                case DtmParamNames.X41RNS1R1:
                     return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FA2011743),
-                        new byte[] { (byte)BlockCiphers.TFX, 0, (byte)BlockCiphers.RDX, 0, 4, 1, 0, 0 });
-                case DtmParamNames.X42RNS1R1:
+                        new byte[] { (byte)BlockCiphers.SPX, 0, (byte)BlockCiphers.RDX, 0, 4, 1, 0, 0 });
+                case DtmParamNames.X42RNR1R1:
                     return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FA2011743),
-                        new byte[] { (byte)BlockCiphers.SPX, 0, (byte)BlockCiphers.RDX, 0, 4, 2, 0, 0 });
+                        new byte[] { (byte)BlockCiphers.RDX, 0, (byte)BlockCiphers.RDX, 0, 4, 2, 0, 0 });
+                case DtmParamNames.X43RNS1S1:
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                        NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FA2011743),
+                        new byte[] { (byte)BlockCiphers.SPX, 0, (byte)BlockCiphers.SPX, 0, 4, 3, 0, 0 });
+                case DtmParamNames.X44RNT1T1:
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                        NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FA2011743),
+                        new byte[] { (byte)BlockCiphers.TFX, 0, (byte)BlockCiphers.TFX, 0, 4, 4, 0, 0 });
                 default:
                     throw new CryptoAsymmetricException("DtmParamSets:GetID", "The Parameter Name is not recognized!", new ArgumentException());
             }
@@ -331,15 +503,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         #endregion
 
         #region Parameter Sets
-        // param name: Security Class 'X' followed by optimization type and sub class: 1 or 2 is best security, 3 is security and speed, 4 is best speed
-        // convention: first letter of asymmetric cipher and set/subset for both ciphers, then both symmetric ciphers first letter and type (1 for standard, 2 for extended)
+        /* Note: Param naming Convention 
+           Security Class 'X' followed by optimization type and sub class: 1 or 2 is best security, 3 is security and speed, 4 is best speed
+           convention: first letter of asymmetric cipher and set/subset for both ciphers, then both symmetric ciphers first letter and type (1 for standard, 2 for extended) */
 
-        // X1 //
-
+        #region X1
         /// <summary>
-        /// Class 1, X1.1 Configuration: Optimized for maximum security; (this is the recommended X1 parameter set).
-        /// <para>Authentication Stage: Ring-LWE and 40 rounds of Serpent.
-        /// Primary Stage: NTRU and 22 rounds of RHX with the Keccak512 Kdf.
+        /// Class 1, X1.1 Configuration: Optimized for maximum security.
+        /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent.
+        /// Primary Stage: NTRU and 22 rounds of RHX with the Keccak-512 powered Kdf.
         /// Random bytes appended and prepended to exchange entities and message packets.
         /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
         /// </summary>
@@ -349,9 +521,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             // the auth-stage asymmetric ciphers parameter oid (can also be a serialized parameter)
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
             // the primary-stage asymmetric ciphers parameter oid
-            NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1931),
+            NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.CX1931, 0.2),
             // the auth-stage symmetric ciphers description
-            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R40),
+            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
             // the primary-stage symmetric ciphers description
             new DtmSession(BlockCiphers.RHX, 208, IVSizes.V128, RoundCounts.R22, Digests.Keccak512),
             // the random generator used to pad messages
@@ -372,7 +544,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             0,
             // the maximum number of random bytes prepended to each post-exchange message
             0,
-            // the maximum delay time before transmitting the primary public key   
+            // the maximum delay time before transmitting the primary public key (actual time is a random number of milliseconds up to this value)
             200,
             // the maximum delay time before transmitting the symmetric key
             10,
@@ -381,16 +553,40 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
 
         /// <summary>
         /// Class 1, X1.2 Configuration: Optimized for maximum security.
-        /// <para>Authentication Stage: Ring-LWE and 20 rounds of TwoFish.
-        /// Primary Stage: NTRU and 40 rounds of SHX with the Keccak512 Kdf.
+        /// <para>Authentication Stage: Ring-LWE and 14 rounds of Rijndael (AES256).
+        /// Primary Stage: NTRU and 22 rounds of RHX with the Keccak-512 powered Kdf.
         /// Random bytes appended and prepended to exchange entities and message packets.
         /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
         /// </summary>
-        public static readonly DtmParameters DTMX12RNT1S2 = new DtmParameters(
-            GetID(DtmParamNames.X12RNT1S2),
+        public static readonly DtmParameters DTMX12RNR1R2 = new DtmParameters(
+            GetID(DtmParamNames.X12RNR1R2),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
-            NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1931),
-            new DtmSession(BlockCiphers.TFX, 32, IVSizes.V128, RoundCounts.R20),
+            NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.CX1931, 0.2),
+            new DtmSession(BlockCiphers.RDX, 32, IVSizes.V128, RoundCounts.R14),
+            new DtmSession(BlockCiphers.RHX, 208, IVSizes.V128, RoundCounts.R22, Digests.Keccak512),
+            Prngs.CSPRng,
+            1000,
+            1000,
+            200,
+            200,
+            200,
+            200,
+            100,
+            100,
+            200);
+
+        /// <summary>
+        /// Class 1, X1.3 Configuration: Optimized for maximum security.
+        /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent.
+        /// Primary Stage: NTRU and 40 rounds of SHX with the Keccak-512 powered Kdf.
+        /// Random bytes appended and prepended to exchange entities and message packets.
+        /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
+        /// </summary>
+        public static readonly DtmParameters DTMX13RNS1S2 = new DtmParameters(
+            GetID(DtmParamNames.X13RNS1S2),
+            RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+            NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.CX1931, 0.2),
+            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
             new DtmSession(BlockCiphers.SHX, 208, IVSizes.V128, RoundCounts.R40, Digests.Keccak512),
             Prngs.CSPRng,
             1000,
@@ -403,21 +599,45 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             100,
             200);
 
-        // X2 //
-
         /// <summary>
-        /// Class 2, X2.1 Configuration: Optimized for maximum security.
-        /// <para>Authentication Stage: McEliece and 22 rounds of RHX.
-        /// Primary Stage: NTRU and 22 rounds of THX with the Skein512 Kdf.
+        /// Class 1, X1.4 Configuration: Optimized for maximum security.
+        /// <para>Authentication Stage: Ring-LWE and 16 rounds of Twofish.
+        /// Primary Stage: NTRU and 20 rounds of THX with the Keccak-512 powered Kdf.
         /// Random bytes appended and prepended to exchange entities and message packets.
         /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
         /// </summary>
-        public static readonly DtmParameters DTMX21MNR2T2 = new DtmParameters(
-            GetID(DtmParamNames.X21MNR2T2),
-            MPKCParamSets.GetID(MPKCParamSets.MPKCParamNames.FM12T67S256),
-            NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1861),
+        public static readonly DtmParameters DTMX14RNT1T2 = new DtmParameters(
+            GetID(DtmParamNames.X14RNT1T2),
+            RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+            NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.CX1931, 0.2),
+            new DtmSession(BlockCiphers.TFX, 32, IVSizes.V128, RoundCounts.R16),
+            new DtmSession(BlockCiphers.THX, 208, IVSizes.V128, RoundCounts.R20, Digests.Keccak512),
+            Prngs.CSPRng,
+            1000,
+            1000,
+            200,
+            200,
+            200,
+            200,
+            100,
+            100,
+            200);
+        #endregion
+
+        #region X2
+        /// <summary>
+        /// Class 2, X2.1 Configuration: Optimized for maximum security.
+        /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent.
+        /// Primary Stage: NTRU and 22 rounds of RHX with the Skein512 Kdf.
+        /// Random bytes appended and prepended to exchange entities and message packets.
+        /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
+        /// </summary>
+        public static readonly DtmParameters DTMX21RNS1R2 = new DtmParameters(
+            GetID(DtmParamNames.X21RNS1R2),
+            RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+            NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FE1499EP1, 0.2),
+            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
             new DtmSession(BlockCiphers.RHX, 192, IVSizes.V128, RoundCounts.R22, Digests.Skein512),
-            new DtmSession(BlockCiphers.THX, 192, IVSizes.V128, RoundCounts.R22, Digests.Skein512),
             Prngs.CSPRng,
             1000,
             1000,
@@ -430,17 +650,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             200);
 
         /// <summary>
-        /// Class 2, X2.2 Configuration: Optimized for security and speed; (this is the recommended x2 parameter set).
-        /// <para>Authentication Stage: McEliece and 40 rounds of SHX.
+        /// Class 2, X2.2 Configuration: Optimized for maximum security.
+        /// <para>Authentication Stage: Ring-LWE and 14 rounds of Rijndael (AES256).
         /// Primary Stage: NTRU and 22 rounds of RHX with the Skein512 Kdf.
-        /// Random bytes appended and prepended to exchange entities.
+        /// Random bytes appended and prepended to exchange entities and message packets.
         /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
         /// </summary>
-        public static readonly DtmParameters DTMX22MNS2R2 = new DtmParameters(
-            GetID(DtmParamNames.X22MNS2R2),
-            MPKCParamSets.GetID(MPKCParamSets.MPKCParamNames.FM12T67S256),
-            NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1861),
-            new DtmSession(BlockCiphers.SHX, 192, IVSizes.V128, RoundCounts.R40, Digests.Skein512),
+        public static readonly DtmParameters DTMX22RNR1R2 = new DtmParameters(
+            GetID(DtmParamNames.X22RNR1R2),
+            RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+            NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FE1499EP1, 0.2),
+            new DtmSession(BlockCiphers.RDX, 32, IVSizes.V128, RoundCounts.R14),
             new DtmSession(BlockCiphers.RHX, 192, IVSizes.V128, RoundCounts.R22, Digests.Skein512),
             Prngs.CSPRng,
             1000,
@@ -449,25 +669,73 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             200,
             200,
             200,
-            0,
-            0,
+            100,
+            100,
             200);
 
-        // X3 //
+        /// <summary>
+        /// Class 2, X2.3 Configuration: Optimized for maximum security.
+        /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent.
+        /// Primary Stage: NTRU and 40 rounds of SHX with the Skein512 Kdf.
+        /// Random bytes appended and prepended to exchange entities and message packets.
+        /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
+        /// </summary>
+        public static readonly DtmParameters DTMX23RNS1S2 = new DtmParameters(
+            GetID(DtmParamNames.X23RNS1S2),
+            RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+            NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FE1499EP1, 0.2),
+            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
+            new DtmSession(BlockCiphers.SHX, 192, IVSizes.V128, RoundCounts.R40, Digests.Skein512),
+            Prngs.CSPRng,
+            1000,
+            1000,
+            200,
+            200,
+            200,
+            200,
+            100,
+            100,
+            200);
 
+        /// <summary>
+        /// Class 2, X2.4 Configuration: Optimized for maximum security.
+        /// <para>Authentication Stage: Ring-LWE and 16 rounds of Twofish.
+        /// Primary Stage: NTRU and 20 rounds of THX with the Skein512 Kdf.
+        /// Random bytes appended and prepended to exchange entities and message packets.
+        /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
+        /// </summary>
+        public static readonly DtmParameters DTMX24RNT1T2 = new DtmParameters(
+            GetID(DtmParamNames.X24RNT1T2),
+            RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+            NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FE1499EP1, 0.2),
+            new DtmSession(BlockCiphers.TFX, 32, IVSizes.V128, RoundCounts.R16),
+            new DtmSession(BlockCiphers.THX, 192, IVSizes.V128, RoundCounts.R20, Digests.Skein512),
+            Prngs.CSPRng,
+            1000,
+            1000,
+            200,
+            200,
+            200,
+            200,
+            100,
+            100,
+            200);
+        #endregion
+
+        #region X3
         /// <summary>
         /// Class 3, X3.1 Configuration: Optimized for security and speed.
-        /// <para>Authentication Stage: Ring-LWE and 20 rounds of Twofish.
-        /// Primary Stage: NTRU and 22 rounds of RHX with the Skein512 Kdf.
+        /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent with a 256 bit key.
+        /// Primary Stage: NTRU and 22 rounds of Rijndael with a 512 bit key.
         /// Random bytes appended and prepended to exchange entities.
         /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
         /// </summary>
-        public static readonly DtmParameters DTMX31RNT1R2 = new DtmParameters(
-            GetID(DtmParamNames.X31RNT1R2),
+        public static readonly DtmParameters DTMX31RNS1R1 = new DtmParameters(
+            GetID(DtmParamNames.X31RNS1R1),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
-            NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1861),
-            new DtmSession(BlockCiphers.TFX, 32, IVSizes.V128, RoundCounts.R20),
-            new DtmSession(BlockCiphers.RHX, 192, IVSizes.V128, RoundCounts.R22, Digests.Skein512),
+            NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FE1087EP2, 0.2),
+            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
+            new DtmSession(BlockCiphers.RDX, 64, IVSizes.V128, RoundCounts.R22),
             Prngs.CSPRng,
             1000,
             1000,
@@ -481,17 +749,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
 
         /// <summary>
         /// Class 3, X3.2 Configuration: Optimized for security and speed.
-        /// <para>Authentication Stage: Ring-LWE and 40 rounds of Serpent.
-        /// Primary Stage: NTRU and 20 rounds of THX with the Skein512 Kdf.
+        /// <para>Authentication Stage: Ring-LWE and 14 rounds of Rijndael with a 256 bit key (AES256).
+        /// Primary Stage: NTRU and 22 rounds of Rijndael with a 512 bit key.
         /// Random bytes appended and prepended to exchange entities.
         /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
         /// </summary>
-        public static readonly DtmParameters DTMX32RNS1T2 = new DtmParameters(
-            GetID(DtmParamNames.X32RNS1T2),
+        public static readonly DtmParameters DTMX32RNR1R1 = new DtmParameters(
+            GetID(DtmParamNames.X32RNR1R1),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
-            NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1931),
-            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R40),
-            new DtmSession(BlockCiphers.THX, 192, IVSizes.V128, RoundCounts.R20, Digests.Skein512),
+            NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FE1087EP2, 0.2),
+            new DtmSession(BlockCiphers.RDX, 32, IVSizes.V128, RoundCounts.R14),
+            new DtmSession(BlockCiphers.RDX, 64, IVSizes.V128, RoundCounts.R22),
             Prngs.CSPRng,
             1000,
             1000,
@@ -503,33 +771,108 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             0,
             200);
 
-        // X4 //
+        /// <summary>
+        /// Class 3, X3.3 Configuration: Optimized for security and speed.
+        /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent with a 256 bit key.
+        /// Primary Stage: NTRU and 32 rounds of Serpent with a 512 bit key.
+        /// Random bytes appended and prepended to exchange entities.
+        /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
+        /// </summary>
+        public static readonly DtmParameters DTMX33RNS1S1 = new DtmParameters(
+            GetID(DtmParamNames.X33RNS1S1),
+            RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+            NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FE1087EP2, 0.2),
+            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
+            new DtmSession(BlockCiphers.SPX, 64, IVSizes.V128, RoundCounts.R32),
+            Prngs.CSPRng,
+            1000,
+            1000,
+            200,
+            200,
+            200,
+            200,
+            0,
+            0,
+            200);
 
         /// <summary>
-        /// Class 4, X4.1 Configuration: Optimized for speed.
-        /// <para>Authentication Stage: Ring-LWE and 16 rounds of Twofish.
-        /// Primary Stage: NTRU and 14 rounds of Rijndael.</para>
+        /// Class 3, X3.4 Configuration: Optimized for security and speed.
+        /// <para>Authentication Stage: Ring-LWE and 16 rounds of Twofish with a 256 bit key.
+        /// Primary Stage: NTRU and 20 rounds of Twofish with a 512 bit key.
+        /// Random bytes appended and prepended to exchange entities.
+        /// Maximum 200 Millisecond transmission delay post primary key creation.</para>
         /// </summary>
-        public static readonly DtmParameters DTMX41RNT1R1 = new DtmParameters(
-            GetID(DtmParamNames.X41RNT1R1),
+        public static readonly DtmParameters DTMX34RNT1T1 = new DtmParameters(
+            GetID(DtmParamNames.X34RNT1T1),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
-            NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FA2011743),
+            NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FE1087EP2, 0.2),
             new DtmSession(BlockCiphers.TFX, 32, IVSizes.V128, RoundCounts.R16),
+            new DtmSession(BlockCiphers.TFX, 64, IVSizes.V128, RoundCounts.R20),
+            Prngs.CSPRng,
+            1000,
+            1000,
+            200,
+            200,
+            200,
+            200,
+            0,
+            0,
+            200);
+        #endregion
+
+        #region X4
+        /// <summary>
+        /// Class 4, X4.1 Configuration: Optimized for speed.
+        /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent.
+        /// Primary Stage: NTRU and 14 rounds of Rijndael (AES256).</para>
+        /// </summary>
+        public static readonly DtmParameters DTMX41RNS1R1 = new DtmParameters(
+            GetID(DtmParamNames.X41RNS1R1),
+            RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+            NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FA2011743, 0.2),
+            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
             new DtmSession(BlockCiphers.RDX, 32, IVSizes.V128, RoundCounts.R14),
             Prngs.CSPRng);
 
         /// <summary>
         /// Class 4, X4.2 Configuration: Optimized for speed.
-        /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent.
-        /// Primary Stage: NTRU and 22 rounds of Rijndael.</para>
+        /// <para>Authentication Stage: Ring-LWE and 14 rounds of Rijndael (AES256).
+        /// Primary Stage: NTRU and 14 rounds of Rijndael (AES256).</para>
         /// </summary>
-        public static readonly DtmParameters DTMX42RNS1R1 = new DtmParameters(
-            GetID(DtmParamNames.X42RNS1R1),
+        public static readonly DtmParameters DTMX42RNR1R1 = new DtmParameters(
+            GetID(DtmParamNames.X42RNR1R1),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
-            NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FA2011743),
-            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
-            new DtmSession(BlockCiphers.RDX, 64, IVSizes.V128, RoundCounts.R22),
+            NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FA2011743, 0.2),
+            new DtmSession(BlockCiphers.RDX, 32, IVSizes.V128, RoundCounts.R14),
+            new DtmSession(BlockCiphers.RDX, 32, IVSizes.V128, RoundCounts.R14),
             Prngs.CSPRng);
+
+        /// <summary>
+        /// Class 4, X4.3 Configuration: Optimized for speed.
+        /// <para>Authentication Stage: Ring-LWE and 32 rounds of Serpent.
+        /// Primary Stage: NTRU and 32 rounds of Serpent.</para>
+        /// </summary>
+        public static readonly DtmParameters DTMX43RNS1S1 = new DtmParameters(
+            GetID(DtmParamNames.X43RNS1S1),
+            RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+            NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FA2011743, 0.2),
+            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
+            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
+            Prngs.CSPRng);
+
+        /// <summary>
+        /// Class 4, X4.4 Configuration: Optimized for speed.
+        /// <para>Authentication Stage: Ring-LWE and 16 rounds of Twofish.
+        /// Primary Stage: NTRU and 16 rounds of Twofish.</para>
+        /// </summary>
+        public static readonly DtmParameters DTMX44RNT1T1 = new DtmParameters(
+            GetID(DtmParamNames.X44RNT1T1),
+            RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+            NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FA2011743, 0.2),
+            new DtmSession(BlockCiphers.TFX, 32, IVSizes.V128, RoundCounts.R16),
+            new DtmSession(BlockCiphers.TFX, 32, IVSizes.V128, RoundCounts.R16),
+            Prngs.CSPRng);
+        #endregion
         #endregion
     }
 }

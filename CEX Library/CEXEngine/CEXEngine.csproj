@@ -86,6 +86,7 @@
     <Compile Include="CryptoException\CryptoNetworkingException.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Common\AsymmetricContainer.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Common\AsymmetricUtils.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\DtmServer.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Arguments\DtmFileRequestEventArgs.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\DtmParamSets.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Messages\DtmErrorFlags.cs" />
@@ -104,6 +105,7 @@
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmetricParameters.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmetricSign.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Arguments\DtmDataReceivedEventArgs.cs" />
+    <Compile Include="Networking\TcpServer.cs" />
     <Compile Include="Networking\TcpSocket.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\DtmKex.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Arguments\DtmErrorEventArgs.cs" />
@@ -114,7 +116,6 @@
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Structures\DtmIdentity.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Arguments\DtmIdentityEventArgs.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Arguments\DtmPacketEventArgs.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Structures\DtmMessage.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\DtmParameters.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Encrypt\McEliece\Algebra\GF2Matrix.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Encrypt\McEliece\Algebra\GF2mField.cs" />
@@ -366,6 +367,7 @@
     <Compile Include="Tools\FileTools.cs" />
     <Compile Include="Tools\HexConverter.cs" />
     <Compile Include="Utility\IntUtils.cs" />
+    <Compile Include="Utility\NetworkUtils.cs" />
     <Compile Include="Utility\ParallelUtils.cs" />
     <Compile Include="Utility\SystemUtils.cs" />
   </ItemGroup>

@@ -8,22 +8,22 @@
         /// <summary>
         /// An information message
         /// </summary>
-        Information = 1,
+        Information = 21,
         /// <summary>
         /// An error has been handled
         /// </summary>
-        Warning = 2,
+        Warning = 22,
         /// <summary>
         /// The network connection has experienced an error
         /// </summary>
-        Connection = 3,
+        Connection = 23,
         /// <summary>
         /// Data has been lost, but might be recovered
         /// </summary>
-        DataLoss = 4,
+        DataLoss = 24,
         /// <summary>
         /// A critical error has occured, haltin operations
         /// </summary>
-        Critical = 5
+        Critical = 25
     }
 }

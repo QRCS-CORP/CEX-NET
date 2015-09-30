@@ -8,22 +8,22 @@
         /// <summary>
         /// Packet contains a transfer request
         /// </summary>
-        Request = 41,
+        Request = 71,
         /// <summary>
         /// The transfer request was refused
         /// </summary>
-        Refused = 42,
+        Refused = 72,
         /// <summary>
         /// Packet contains transmission data
         /// </summary>
-        DataChunk = 43,
+        DataChunk = 73,
         /// <summary>
         /// The transfer receive operation has completed
         /// </summary>
-        Received = 44,
+        Received = 74,
         /// <summary>
         /// The transfer send operation has completed
         /// </summary>
-        Sent = 45
+        Sent = 75
     }
 }

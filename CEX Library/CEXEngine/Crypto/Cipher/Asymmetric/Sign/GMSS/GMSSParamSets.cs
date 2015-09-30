@@ -162,14 +162,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// Retrieve a parameter set by its enumeration name
         /// </summary>
         /// 
-        /// <param name="Name">The enumeration name</param>
+        /// <param name="ParamName">The enumeration name</param>
         /// 
         /// <returns>A populated parameter set</returns>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if an invalid or unknown OId is specified</exception>
-        public static GMSSParameters FromName(GMSSParamNames Name)
+        public static GMSSParameters FromName(GMSSParamNames ParamName)
         {
-            switch (Name)
+            switch (ParamName)
             {
                 case GMSSParamNames.N2P10:
                     return (GMSSParameters)GMSSN2P10.DeepCopy();
@@ -183,17 +183,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         }
 
         /// <summary>
+        /// Get a serialized GMSSParameters class from a parameter name
+        /// </summary>
+        /// 
+        /// <param name="ParamName">The GMSS Parameters set name</param>
+        /// 
+        /// <returns>The serialized GMSSParameters set</returns>
+        public static byte[] GetFormatted(GMSSParamNames ParamName)
+        {
+            return FromName(ParamName).ToBytes();
+        }
+
+        /// <summary>
         /// Retrieve the parameter OId by its enumeration name
         /// </summary>
         /// 
-        /// <param name="Name">The enumeration name</param>
+        /// <param name="ParamName">The enumeration name</param>
         /// 
         /// <returns>The 4 byte OId field</returns>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if an invalid or unknown OId is specified</exception>
-        public static byte[] GetID(GMSSParamNames Name)
+        public static byte[] GetID(GMSSParamNames ParamName)
         {
-            switch (Name)
+            switch (ParamName)
             {
                 case GMSSParamNames.N2P10:
                     return new byte[] { 5, 1, 1, 1 };
