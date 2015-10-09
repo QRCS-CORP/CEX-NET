@@ -1,10 +1,10 @@
 ﻿#region Directives
 using System;
 using System.Collections.Generic;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Utility;
-using VTDev.Libraries.CEXEngine.Crypto.Digest;
-using VTDev.Libraries.CEXEngine.Utility;
 using System.IO;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Utility;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Digest;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmetic
@@ -104,10 +104,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
 
             len = reader.ReadInt32();
             data = reader.ReadBytes(len);
-            byte[][] statByte = ArrayUtils.ToArray2x8(data);
+            byte[][] statByte = ArrayEx.ToArray2x8(data);
             len = reader.ReadInt32();
             data = reader.ReadBytes(len);
-            int[] statInt = ArrayUtils.ToArray32(data);
+            int[] statInt = ArrayEx.ToArray32(data);
             _msgDigestTree = Digest;
 
             // decode statInt
@@ -283,7 +283,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         public byte[][] GetStatByte()
         {
 
-            byte[][] statByte = ArrayUtils.CreateJagged<byte[][]>(3 + _tailLength, _msgDigestTree.DigestSize);
+            byte[][] statByte = ArrayEx.CreateJagged<byte[][]>(3 + _tailLength, _msgDigestTree.DigestSize);
             statByte[0] = _firstNode;
             statByte[1] = _seedActive;
             statByte[2] = _seedNext;
@@ -392,11 +392,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
             byte[] data;
 
-            data = ArrayUtils.ToBytes(GetStatByte());//200
+            data = ArrayEx.ToBytes(GetStatByte());//200
             writer.Write(data.Length);
             writer.Write(data);//3,0,0,0
 
-            data = ArrayUtils.ToBytes(GetStatInt());//24 -0,0,0
+            data = ArrayEx.ToBytes(GetStatInt());//24 -0,0,0
             writer.Write(data.Length);
             writer.Write(data);
             writer.BaseStream.Seek(0, SeekOrigin.Begin);

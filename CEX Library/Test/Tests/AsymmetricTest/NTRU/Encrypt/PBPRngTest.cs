@@ -3,8 +3,9 @@ using System;
 using System.Text;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
-using VTDev.Libraries.CEXEngine.Tools;
 using VTDev.Projects.CEX.Test.Tests;
+using VTDev.Projects.CEX.Test.Helper;
+using VTDev.Libraries.CEXEngine.Tools;
 #endregion
 
 namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
@@ -66,19 +67,19 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
         {
             PBPRng rng = CreateRng();
 
-            if (!Compare.True(rng.Next(1) < 2))
+            if (!Evaluate.True(rng.Next(1) < 2))
                 throw new Exception("PBPRng: next random test failed!");
-            if (!Compare.True(rng.Next(1) >= 0))
+            if (!Evaluate.True(rng.Next(1) >= 0))
                 throw new Exception("PBPRng: next random test failed!");
-            if (!Compare.True(rng.Next(8) < 256))
+            if (!Evaluate.True(rng.Next(8) < 256))
                 throw new Exception("PBPRng: next random test failed!");
-            if (!Compare.True(rng.Next(8) >= 0))
+            if (!Evaluate.True(rng.Next(8) >= 0))
                 throw new Exception("PBPRng: next random test failed!");
-            if (!Compare.True(rng.Next(11) < 2048))
+            if (!Evaluate.True(rng.Next(11) < 2048))
                 throw new Exception("PBPRng: next random test failed!");
-            if (!Compare.True(rng.Next(11) >= 0))
+            if (!Evaluate.True(rng.Next(11) >= 0))
                 throw new Exception("PBPRng: next random test failed!");
-            if (!Compare.True(rng.Next(31) >= 0))
+            if (!Evaluate.True(rng.Next(31) >= 0))
                 throw new Exception("PBPRng: next random test failed!");
         }
 
@@ -95,7 +96,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
             byte[] data2 = new byte[32];
             rng2.GetBytes(data2);
             // should be equal
-            if (!Compare.AreEqual(data1, data2))
+            if (!Evaluate.AreEqual(data1, data2))
                 throw new Exception("PBPRng: create branch test failed!");
         }
 

@@ -191,7 +191,7 @@ namespace VTDev.Projects.CEX
                             byte[] hash = mstrm.ComputeMac(inStream.Length - hdrOffset, hdrOffset);
 
                             // compare, notify and abort on failure
-                            if (!Compare.AreEqual(chksum, hash))
+                            if (!Evaluate.AreEqual(chksum, hash))
                             {
                                 MessageBox.Show("Message hash does not match! The file has been tampered with.");
                                 return;

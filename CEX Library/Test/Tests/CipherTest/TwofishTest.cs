@@ -157,7 +157,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                     engine.Transform(outBytes, outBytes);
             }
 
-            if (Compare.AreEqual(outBytes, Output) == false)
+            if (Evaluate.AreEqual(outBytes, Output) == false)
                 throw new Exception("Twofish MonteCarlo: Arrays are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
         }
 
@@ -171,7 +171,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 tfx.EncryptBlock(Input, outBytes);
             }
 
-            if (Compare.AreEqual(outBytes, Output) == false)
+            if (Evaluate.AreEqual(outBytes, Output) == false)
                 throw new Exception("Twofish Vector: Encrypted arrays are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
 
             using (TFX tfx = new TFX())
@@ -180,7 +180,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 tfx.Transform(Output, outBytes);
             }
 
-            if (Compare.AreEqual(outBytes, Input) == false)
+            if (Evaluate.AreEqual(outBytes, Input) == false)
                 throw new Exception("Twofish Vector: Decrypted arrays are not equal! Expected: " + HexConverter.ToString(Input) + " Received: " + HexConverter.ToString(outBytes));
         }
         #endregion

@@ -1,10 +1,9 @@
 ﻿#region Directives
 using System;
-using System.Collections;
-using VTDev.Libraries.CEXEngine.Numeric;
-using VTDev.Libraries.CEXEngine.Crypto.Prng;
-using VTDev.Libraries.CEXEngine.Utility;
 using System.Collections.Generic;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Prng;
+using VTDev.Libraries.CEXEngine.Numeric;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Algebra
@@ -59,7 +58,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             // only ONB-implementations for type 1 and type 2
             if (_mType < 3)
             {
-                MultM = ArrayUtils.CreateJagged<int[][]>(DegreeN, 2);
+                MultM = ArrayEx.CreateJagged<int[][]>(DegreeN, 2);
                 for (int i = 0; i < DegreeN; i++)
                 {
                     MultM[i][0] = -1;
@@ -406,9 +405,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns <c>A^-1</c></returns>
         private int[][] InvMatrix(int[][] A)
         {
-            int[][] b = ArrayUtils.CreateJagged<int[][]>(DegreeN, DegreeN);
+            int[][] b = ArrayEx.CreateJagged<int[][]>(DegreeN, DegreeN);
             b = A;
-            int[][] inv = ArrayUtils.CreateJagged<int[][]>(DegreeN, DegreeN);
+            int[][] inv = ArrayEx.CreateJagged<int[][]>(DegreeN, DegreeN);
 
             for (int i = 0; i < DegreeN; i++)
                 inv[i][i] = 1;

@@ -139,7 +139,7 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
 
             Digest.DoFinal(hash, 0);
 
-            if (Compare.AreEqual(Expected, hash) == false)
+            if (Evaluate.AreEqual(Expected, hash) == false)
                 throw new Exception("Blake: Expected hash is not equal! Expected: " + HexConverter.ToString(Expected) + " Received: " + HexConverter.ToString(hash));
         }
         #endregion

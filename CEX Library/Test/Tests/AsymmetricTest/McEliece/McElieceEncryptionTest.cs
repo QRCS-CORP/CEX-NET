@@ -44,7 +44,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.McEliece
         {
             try
             {
-                //TestKey();
+                TestKey();
                 TestEncrypt();
                 OnProgress(new TestEventArgs("Passed CCA2 encryption tests"));
 
@@ -82,7 +82,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.McEliece
                 dec = cipher.Decrypt(enc);
             }
 
-            if (!Compare.AreEqual(dec, data))
+            if (!Evaluate.AreEqual(dec, data))
                 throw new Exception("TestKey test: decryption failure!");
             OnProgress(new TestEventArgs("Passed sub-key test"));
         }
@@ -108,7 +108,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.McEliece
                 mpe.Initialize(akp.PrivateKey);
                 byte[] dec = mpe.Decrypt(enc);
 
-                if (!Compare.AreEqual(dec, data))
+                if (!Evaluate.AreEqual(dec, data))
                     throw new Exception("Encryption test: decryption failure!");
                 OnProgress(new TestEventArgs("Passed Fujisaki encryption test"));
             }
@@ -128,7 +128,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.McEliece
                 mpe.Initialize(akp.PrivateKey);
                 byte[] dec = mpe.Decrypt(enc);
 
-                if (!Compare.AreEqual(dec, data))
+                if (!Evaluate.AreEqual(dec, data))
                     throw new Exception("Encryption test: decryption failure!");
                 OnProgress(new TestEventArgs("Passed KobaraImai encryption test"));
             }
@@ -148,7 +148,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.McEliece
                 mpe.Initialize(akp.PrivateKey);
                 byte[] dec = mpe.Decrypt(enc);
 
-                if (!Compare.AreEqual(dec, data))
+                if (!Evaluate.AreEqual(dec, data))
                     throw new Exception("Encryption test: decryption failure!");
                 OnProgress(new TestEventArgs("Passed Pointcheval encryption test"));
             }

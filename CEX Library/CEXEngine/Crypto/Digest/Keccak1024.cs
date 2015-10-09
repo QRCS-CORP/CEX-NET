@@ -44,7 +44,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     /// <summary>
     /// <h3>Keccak1024: An implementation of the SHA-3 Keccak digest.</h3>
     /// <h4>Note: Experimental! may need future adjustments</h4>
-    /// <para>SHA-3 competition winner<cite>SHA-3 Standardization</cite>: The Keccak<cite>Keccak</cite> digest</para>
+    /// <para>SHA-3 competition winner<cite>SHA-3 Standardization</cite>: The Keccak<cite>Keccak</cite> digest; extended to 1024 bit digest output, 
+    /// (though maximum security is actually around 800 bits)</para>
     /// </summary>
     /// 
     /// <example>

@@ -84,7 +84,7 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
             for (int i = 0; i != 1024; i++)
                 rGen.Generate(output);
 
-            if (Compare.AreEqual(Expected, output) == false)
+            if (Evaluate.AreEqual(Expected, output) == false)
                 throw new Exception("DGCDRBG: Values are not equal! Expected: " + HexConverter.ToString(output) + " Received: " + HexConverter.ToString(Expected));
         }
         #endregion

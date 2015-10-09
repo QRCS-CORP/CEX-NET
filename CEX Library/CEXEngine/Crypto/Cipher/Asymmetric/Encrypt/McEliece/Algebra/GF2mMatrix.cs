@@ -1,6 +1,6 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Numeric;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
@@ -52,7 +52,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 throw new ArgumentException("GF2mMatrix: Given array is not encoded matrix over GF(2^m)!");
 
             this.ColumnCount = (Encoded.Length - 4) / n;
-            MatrixN = ArrayUtils.CreateJagged<int[][]>(this.RowCount, this.ColumnCount);
+            MatrixN = ArrayEx.CreateJagged<int[][]>(this.RowCount, this.ColumnCount);
             count = 4;
 
             for (int i = 0; i < this.RowCount; i++)
@@ -111,12 +111,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 throw new ArithmeticException("GF2mMatrix: Matrix is not invertible!");
 
             // clone this matrix
-            int[][] tmpMatrix = ArrayUtils.CreateJagged<int[][]>(RowCount, RowCount);
+            int[][] tmpMatrix = ArrayEx.CreateJagged<int[][]>(RowCount, RowCount);
             for (int i = RowCount - 1; i >= 0; i--)
                 tmpMatrix[i] = IntUtils.DeepCopy(MatrixN[i]);
 
             // initialize inverse matrix as unit matrix
-            int[][] invMatrix = ArrayUtils.CreateJagged<int[][]>(RowCount, RowCount);
+            int[][] invMatrix = ArrayEx.CreateJagged<int[][]>(RowCount, RowCount);
             for (int i = RowCount - 1; i >= 0; i--)
                 invMatrix[i][i] = 1;
 

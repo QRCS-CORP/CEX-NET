@@ -1,9 +1,9 @@
 #region Directives
 using System;
 using System.IO;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.CryptoException;
-using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polynomial

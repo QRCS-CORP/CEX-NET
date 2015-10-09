@@ -613,7 +613,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
 
             for (int i = 0; i < keyIds.Length; i++)
             {
-                if (Compare.AreEqual(keyIds[i], KeyId))
+                if (Compare.IsEqual(keyIds[i], KeyId))
                     return i;
             }
 

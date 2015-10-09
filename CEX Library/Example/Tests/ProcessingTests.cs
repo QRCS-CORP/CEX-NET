@@ -151,7 +151,7 @@ namespace VTDev.Projects.CEX.Tests
             }
 
             // compare decrypted output with data
-            if (!Compare.AreEqual(tmpstrm.ToArray(), data))
+            if (!Evaluate.AreEqual(tmpstrm.ToArray(), data))
                 throw new Exception();
         }
 
@@ -218,7 +218,7 @@ namespace VTDev.Projects.CEX.Tests
             }
 
             // compare decrypted output with data
-            if (!Compare.AreEqual(tmpstrm.ToArray(), data))
+            if (!Evaluate.AreEqual(tmpstrm.ToArray(), data))
                 throw new Exception();
         }
 
@@ -250,7 +250,7 @@ namespace VTDev.Projects.CEX.Tests
                 code2 = kc.ComputeHash(data);
 
             // compare the hash codes
-            if (!Compare.AreEqual(code1, code2))
+            if (!Evaluate.AreEqual(code1, code2))
                 throw new Exception();
         }
 
@@ -289,7 +289,7 @@ namespace VTDev.Projects.CEX.Tests
             }
 
             // compare the hash codes
-            if (!Compare.AreEqual(code1, code2))
+            if (!Evaluate.AreEqual(code1, code2))
                 throw new Exception();
         }
 

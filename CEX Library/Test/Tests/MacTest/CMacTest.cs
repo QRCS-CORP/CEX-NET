@@ -117,7 +117,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
                 mac.DoFinal(hash, 0);
             }
 
-            if (!Compare.AreEqual(Expected, hash))
+            if (!Evaluate.AreEqual(Expected, hash))
                 throw new Exception("CMAC is not equal! Expected: " + HexConverter.ToString(Expected) + " Received: " + HexConverter.ToString(hash));
         }
         #endregion

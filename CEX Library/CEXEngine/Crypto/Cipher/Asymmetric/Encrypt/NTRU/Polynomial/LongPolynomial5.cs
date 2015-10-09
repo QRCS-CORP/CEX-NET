@@ -1,5 +1,5 @@
 #region Directives
-using VTDev.Libraries.CEXEngine.Utility;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polynomial
@@ -61,7 +61,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>The multiplication product</returns>
         public LongPolynomial5 Multiply(ITernaryPolynomial Factor)
         {
-            long[][] prod = ArrayUtils.CreateJagged<long[][]>(5, _coeffs.Length + (Factor.Size() + 4) / 5 - 1);
+            long[][] prod = ArrayEx.CreateJagged<long[][]>(5, _coeffs.Length + (Factor.Size() + 4) / 5 - 1);
             int[] pIdx = Factor.GetOnes();
 
             // multiply ones

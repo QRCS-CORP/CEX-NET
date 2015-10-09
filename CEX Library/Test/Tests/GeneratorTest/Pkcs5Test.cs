@@ -93,7 +93,7 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
                 gen.Generate(outBytes, 0, Size);
             }
 
-            if (Compare.AreEqual(outBytes, Output) == false)
+            if (Evaluate.AreEqual(outBytes, Output) == false)
                 throw new Exception("PKCS5: Values are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
 
             using (PKCS5 gen = new PKCS5(new SHA256HMAC(), Iterations))
@@ -102,7 +102,7 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
                 gen.Generate(outBytes, 0, Size);
             }
 
-            if (Compare.AreEqual(outBytes, Output) == false)
+            if (Evaluate.AreEqual(outBytes, Output) == false)
                 throw new Exception("PKCS5: Values are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
         }
         #endregion

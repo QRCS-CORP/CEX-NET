@@ -86,17 +86,22 @@
     <Compile Include="CryptoException\CryptoNetworkingException.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Common\AsymmetricContainer.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Common\AsymmetricUtils.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\DtmServer.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Arguments\DtmFileRequestEventArgs.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Argument\DtmKeyRequestedArgs.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Argument\DtmKeySynchronizedArgs.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Support\DtmNameClient.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Support\DtmNameServer.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Argument\DtmFileRequestArgs.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\DtmParamSets.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Messages\DtmErrorFlags.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Messages\DtmErrorSeverity.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Messages\DtmExchangeFlags.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Messages\DtmTransferFlags.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Messages\DtmMessageFlags.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Structures\DtmFileInfo.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Flag\DtmErrorFlags.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Flag\DtmErrorSeverityFlags.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Flag\DtmExchangeFlags.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Flag\DtmTransferFlags.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Flag\DtmMessageFlags.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Structure\DtmFileInfoSruct.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Structure\DtmForwardKeyStruct.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Support\DtmBufferSizes.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Support\DtmFileTransfer.cs" />
+    <Compile Include="Crypto\Common\Compare.cs" />
     <Compile Include="Networking\PacketBuffer.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmerticGenerator.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmetricCipher.cs" />
@@ -104,18 +109,18 @@
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmetricKeyPair.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmetricParameters.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmetricSign.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Arguments\DtmDataReceivedEventArgs.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Argument\DtmDataReceivedArgs.cs" />
     <Compile Include="Networking\TcpServer.cs" />
     <Compile Include="Networking\TcpSocket.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\DtmKex.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Arguments\DtmErrorEventArgs.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Messages\DtmServiceFlags.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Arguments\DtmEstablishedEventArgs.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Messages\DtmTrustStates.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Structures\DtmClient.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Structures\DtmIdentity.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Arguments\DtmIdentityEventArgs.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Arguments\DtmPacketEventArgs.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Argument\DtmErrorArgs.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Flag\DtmServiceFlags.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Argument\DtmEstablishedArgs.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Flag\DtmForwardingFlags.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Structure\DtmClientStruct.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Structure\DtmIdentityStruct.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Argument\DtmIdentityArgs.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Argument\DtmPacketArgs.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\DtmParameters.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Encrypt\McEliece\Algebra\GF2Matrix.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Encrypt\McEliece\Algebra\GF2mField.cs" />
@@ -153,7 +158,7 @@
     <Compile Include="Crypto\Cipher\Asymmetric\Encrypt\McEliece\MPKCPrivateKey.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Encrypt\McEliece\MPKCPublicKey.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Encrypt\McEliece\MPKCSign.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Messages\DtmPacketTypes.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Flag\DtmPacketFlags.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Encrypt\NTRU\Arithmetic\BigIntEuclidean.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Encrypt\NTRU\Arithmetic\IntEuclidean.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Encrypt\NTRU\Arithmetic\SchonhageStrassen.cs" />
@@ -277,7 +282,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Crypto\Processing\Structure\CipherKey.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Structures\DtmPacket.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Structure\DtmPacketStruct.cs" />
     <Compile Include="CryptoException\CryptoAsymmetricException.cs" />
     <Compile Include="CryptoException\CryptoAsymmetricSignException.cs" />
     <Compile Include="CryptoException\CryptoGeneratorException.cs" />
@@ -317,7 +322,7 @@
     <Compile Include="Crypto\Processing\StreamDigest.cs" />
     <Compile Include="Crypto\Processing\StreamMac.cs" />
     <Compile Include="Crypto\Processing\Structure\PackageInfo.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Structures\DtmSession.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Structure\DtmSessionStruct.cs" />
     <Compile Include="CryptoException\CryptoSocketException.cs" />
     <Compile Include="CryptoException\CryptoSymmetricException.cs" />
     <Compile Include="Numeric\BigDecimal.cs" />
@@ -352,16 +357,19 @@
     <Compile Include="Crypto\Cipher\Symmetric\Block\Padding\ZeroPad.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Security\SecureDelete.cs" />
+    <Compile Include="Tools\Evaluate.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Tools\Compress.cs" />
+    <Compile Include="Tools\Ent.cs" />
     <Compile Include="Tools\NetworkTools.cs" />
-    <Compile Include="Utility\ArrayEx.cs" />
+    <Compile Include="Crypto\Common\ArrayEx.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Utility\ArrayUtils.cs" />
     <Compile Include="Utility\BigIntUtils.cs" />
     <Compile Include="Utility\ByteUtils.cs" />
     <Compile Include="Utility\CharUtils.cs" />
-    <Compile Include="Tools\Compare.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Tools\DirectoryTools.cs" />
     <Compile Include="Tools\DriveTools.cs" />
     <Compile Include="Tools\FileTools.cs" />

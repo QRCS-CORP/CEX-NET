@@ -67,7 +67,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
             MemoryStream os = new MemoryStream();
             param.WriteTo(os);
             MemoryStream ins = new MemoryStream(os.ToArray());
-            if (!Compare.Equals(param, new NTRUParameters(ins)))
+            if (!Evaluate.Equals(param, new NTRUParameters(ins)))
                 throw new Exception("NtruParameters: load and save test failed!");
         }
 
@@ -75,17 +75,17 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
         {
             NTRUParameters param = NTRUParamSets.APR2011439;
             NTRUParameters param2 = (NTRUParameters)param.DeepCopy();
-            if (!Compare.Equals(param, param2))
+            if (!Evaluate.Equals(param, param2))
                 throw new Exception("NtruParameters: cloned copy is not equal!");
 
             param = NTRUParamSets.APR2011439FAST;
             param2 = (NTRUParameters)param.DeepCopy();
 
-            if (!Compare.Equals(param, param2)) 
+            if (!Evaluate.Equals(param, param2)) 
                 throw new Exception("NtruParameters: cloned copy is not equal!");
 
             param2.Digest = Digests.Blake512;
-            if (Compare.Equals(param, param2))
+            if (Evaluate.Equals(param, param2))
                 throw new Exception("NtruParameters: cloned copy is not equal!");
         }
         #endregion

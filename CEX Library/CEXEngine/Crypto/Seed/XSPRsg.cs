@@ -2,8 +2,8 @@
 using System;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.CryptoException;
-using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 #region License Information
@@ -115,7 +115,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         /// </summary>
         public void Initialize()
         {
-            _stateSeed = XorShift3(ArrayUtils.Concat(NetStats(), ProcessStats(), ThreadStats(), TimeStats()), MAX_ALLOC);
+            _stateSeed = XorShift3(ArrayEx.Concat(NetStats(), ProcessStats(), ThreadStats(), TimeStats()), MAX_ALLOC);
             _stateOffset = 0;
         }
 

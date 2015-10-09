@@ -103,7 +103,7 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
 
                 Digest.DoFinal(hash, 0);
 
-                if (Compare.AreEqual(_expected[index, i], hash) == false)
+                if (Evaluate.AreEqual(_expected[index, i], hash) == false)
                     throw new Exception("SHA2Vector: Expected hash is not equal! Expected: " + HexConverter.ToString(_expected[index, i]) + " Received: " + HexConverter.ToString(hash));
             }
         }

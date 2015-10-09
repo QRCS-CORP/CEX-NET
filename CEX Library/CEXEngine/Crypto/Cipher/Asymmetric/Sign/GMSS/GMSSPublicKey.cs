@@ -2,9 +2,8 @@
 using System;
 using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.CryptoException;
-using VTDev.Libraries.CEXEngine.Utility;
-using VTDev.Libraries.CEXEngine.Tools;
 #endregion
 
 #region License Information
@@ -233,7 +232,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
 
             GMSSPublicKey other = (GMSSPublicKey)Obj;
 
-            if (!Compare.AreEqual(_publicKey, other.PublicKey))
+            if (!Compare.IsEqual(_publicKey, other.PublicKey))
                 return false;
 
             return true;

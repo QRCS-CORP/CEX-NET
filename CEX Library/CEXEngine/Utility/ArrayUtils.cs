@@ -6,7 +6,8 @@ using System.IO;
 namespace VTDev.Libraries.CEXEngine.Utility
 {
     /// <summary>
-    /// Extended array methods
+    /// Extended array methods 
+    /// <para>Security Change: 1.4B, all internal methods are now done through the CEXEngine.Crypto.Common.ArrayEx class.</para>
     /// </summary>
     public static class ArrayUtils
     {

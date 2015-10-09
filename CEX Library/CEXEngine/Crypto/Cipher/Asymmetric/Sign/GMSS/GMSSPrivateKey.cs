@@ -1,15 +1,15 @@
 ﻿#region Directives
 using System;
+using System.Collections.Generic;
 using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmetic;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Utility;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Digest;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.CryptoException;
 using VTDev.Libraries.CEXEngine.Utility;
-using VTDev.Libraries.CEXEngine.Tools;
-using VTDev.Libraries.CEXEngine.Crypto.Digest;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Utility;
-using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
-using System.Collections.Generic;
 #endregion
 
 #region License Information
@@ -228,7 +228,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                 _keep = new byte[_numLayer][][];
 
                 for (int i = 0; i < _numLayer; i++)
-                    _keep[i] = ArrayUtils.CreateJagged<byte[][]>((int)Math.Floor((decimal)_heightOfTrees[i] / 2), _mdLength);
+                    _keep[i] = ArrayEx.CreateJagged<byte[][]>((int)Math.Floor((decimal)_heightOfTrees[i] / 2), _mdLength);
             }
             else
             {
@@ -370,7 +370,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// <param name="PrivateKey">The GMSSPrivateKey to copy</param>
         private GMSSPrivateKey(GMSSPrivateKey PrivateKey)
         {
-            _index = ArrayUtils.Clone(PrivateKey._index); //N
+            _index = ArrayEx.Clone(PrivateKey._index); //N
             _currentSeeds = GMSSUtil.Clone(PrivateKey._currentSeeds);
             _nextNextSeeds = GMSSUtil.Clone(PrivateKey._nextNextSeeds);
             _currentAuthPaths = GMSSUtil.Clone(PrivateKey._currentAuthPaths);
@@ -426,67 +426,67 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                 len = reader.ReadInt32();
                 if (len < 1)
                 {
-                    _currentSeeds = ArrayUtils.CreateJagged<byte[][]>(0, 0);
+                    _currentSeeds = ArrayEx.CreateJagged<byte[][]>(0, 0);
                 }
                 else
                 {
                     data = reader.ReadBytes(len);
-                    _currentSeeds = ArrayUtils.ToArray2x8(data);
+                    _currentSeeds = ArrayEx.ToArray2x8(data);
                 }
 
                 len = reader.ReadInt32();
                 if (len < 1)
                 {
-                    _nextNextSeeds = ArrayUtils.CreateJagged<byte[][]>(0, 0);
+                    _nextNextSeeds = ArrayEx.CreateJagged<byte[][]>(0, 0);
                 }
                 else
                 {
                     data = reader.ReadBytes(len);
-                    _nextNextSeeds = ArrayUtils.ToArray2x8(data);
+                    _nextNextSeeds = ArrayEx.ToArray2x8(data);
                 }
 
                 len = reader.ReadInt32();
                 if (len < 1)
                 {
-                    _currentAuthPaths = ArrayUtils.CreateJagged<byte[][][]>(0, 0);
+                    _currentAuthPaths = ArrayEx.CreateJagged<byte[][][]>(0, 0);
                 }
                 else
                 {
                     data = reader.ReadBytes(len);
-                    _currentAuthPaths = ArrayUtils.ToArray3x8(data);
+                    _currentAuthPaths = ArrayEx.ToArray3x8(data);
                 }
 
                 len = reader.ReadInt32();
                 if (len < 1)
                 {
-                    _nextAuthPaths = ArrayUtils.CreateJagged<byte[][][]>(0, 0);
+                    _nextAuthPaths = ArrayEx.CreateJagged<byte[][][]>(0, 0);
                 }
                 else
                 {
                     data = reader.ReadBytes(len);
-                    _nextAuthPaths = ArrayUtils.ToArray3x8(data);
+                    _nextAuthPaths = ArrayEx.ToArray3x8(data);
                 }
 
                 len = reader.ReadInt32();
                 if (len < 1)
                 {
-                    _keep = ArrayUtils.CreateJagged<byte[][][]>(0, 0);
+                    _keep = ArrayEx.CreateJagged<byte[][][]>(0, 0);
                 }
                 else
                 {
                     data = reader.ReadBytes(len);
-                    _keep = ArrayUtils.ToArray3x8(data);
+                    _keep = ArrayEx.ToArray3x8(data);
                 }
 
                 len = reader.ReadInt32();
                 if (len < 1)
                 {
-                    _currentTreehash = ArrayUtils.CreateJagged<Treehash[][]>(0, 0);
+                    _currentTreehash = ArrayEx.CreateJagged<Treehash[][]>(0, 0);
                 }
                 else
                 {
                     len2 = reader.ReadInt32();
-                    _currentTreehash = ArrayUtils.CreateJagged<Treehash[][]>(len, len2);
+                    _currentTreehash = ArrayEx.CreateJagged<Treehash[][]>(len, len2);
                     for (int i = 0; i < _currentTreehash.Length; i++)
                     {
                         for (int j = 0; j < _currentTreehash[i].Length; j++)
@@ -501,12 +501,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                 len = reader.ReadInt32();
                 if (len < 1)
                 {
-                    _nextTreehash = ArrayUtils.CreateJagged<Treehash[][]>(0, 0);
+                    _nextTreehash = ArrayEx.CreateJagged<Treehash[][]>(0, 0);
                 }
                 else
                 {
                     len2 = reader.ReadInt32();
-                    _nextTreehash = ArrayUtils.CreateJagged<Treehash[][]>(len, len2);
+                    _nextTreehash = ArrayEx.CreateJagged<Treehash[][]>(len, len2);
                     for (int i = 0; i < _nextTreehash.Length; i++)
                     {
                         for (int j = 0; j < _nextTreehash[i].Length; j++)
@@ -553,12 +553,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                 len = reader.ReadInt32();
                 if (len < 1)
                 {
-                    _currentRetain = ArrayUtils.CreateJagged<List<byte[]>[][]>(0, 0);
+                    _currentRetain = ArrayEx.CreateJagged<List<byte[]>[][]>(0, 0);
                 }
                 else
                 {
                     len2 = reader.ReadInt32();
-                    _currentRetain = ArrayUtils.CreateJagged<List<byte[]>[][]>(len, len2);
+                    _currentRetain = ArrayEx.CreateJagged<List<byte[]>[][]>(len, len2);
                     for (int i = 0; i < _currentRetain.Length; i++)
                     {
                         for (int j = 0; j < _currentRetain[i].Length; j++)
@@ -574,12 +574,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                 len = reader.ReadInt32();
                 if (len < 1)
                 {
-                    _nextRetain = ArrayUtils.CreateJagged<List<byte[]>[][]>(0, 0);
+                    _nextRetain = ArrayEx.CreateJagged<List<byte[]>[][]>(0, 0);
                 }
                 else
                 {
                     len2 = reader.ReadInt32();
-                    _nextRetain = ArrayUtils.CreateJagged<List<byte[]>[][]>(len, len2);
+                    _nextRetain = ArrayEx.CreateJagged<List<byte[]>[][]>(len, len2);
                     for (int i = 0; i < _nextRetain.Length; i++)
                     {
                         for (int j = 0; j < _nextRetain[i].Length; j++)
@@ -595,23 +595,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                 len = reader.ReadInt32();
                 if (len < 1)
                 {
-                    _nextRoot = ArrayUtils.CreateJagged<byte[][]>(0, 0);
+                    _nextRoot = ArrayEx.CreateJagged<byte[][]>(0, 0);
                 }
                 else
                 {
                     data = reader.ReadBytes(len);
-                    _nextRoot = ArrayUtils.ToArray2x8(data);
+                    _nextRoot = ArrayEx.ToArray2x8(data);
                 }
 
                 len = reader.ReadInt32();
                 if (len < 1)
                 {
-                    _currentRootSig = ArrayUtils.CreateJagged<byte[][]>(0, 0);
+                    _currentRootSig = ArrayEx.CreateJagged<byte[][]>(0, 0);
                 }
                 else
                 {
                     data = reader.ReadBytes(len);
-                    _currentRootSig = ArrayUtils.ToArray2x8(data);
+                    _currentRootSig = ArrayEx.ToArray2x8(data);
                 }
             }
             catch (Exception ex)
@@ -700,7 +700,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             }
             else
             {
-                data = ArrayUtils.ToBytes(_currentSeeds);
+                data = ArrayEx.ToBytes(_currentSeeds);
                 writer.Write(data.Length);
                 writer.Write(data);
             }
@@ -711,7 +711,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             }
             else
             {
-                data = ArrayUtils.ToBytes(_nextNextSeeds);
+                data = ArrayEx.ToBytes(_nextNextSeeds);
                 writer.Write(data.Length);
                 writer.Write(data);
             }
@@ -722,7 +722,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             }
             else
             {
-                data = ArrayUtils.ToBytes(_currentAuthPaths);
+                data = ArrayEx.ToBytes(_currentAuthPaths);
                 writer.Write(data.Length);
                 writer.Write(data);
             }
@@ -733,7 +733,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             }
             else
             {
-                data = ArrayUtils.ToBytes(_nextAuthPaths);
+                data = ArrayEx.ToBytes(_nextAuthPaths);
                 writer.Write(data.Length);
                 writer.Write(data);
             }
@@ -744,7 +744,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             }
             else
             {
-                data = ArrayUtils.ToBytes(_keep);
+                data = ArrayEx.ToBytes(_keep);
                 writer.Write(data.Length);
                 writer.Write(data);
             }
@@ -802,7 +802,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                     writer.Write(_currentStack.Length);
                     for (int i = 0; i < _currentStack.Length; i++)
                     {
-                        data = ArrayUtils.ToBytes(_currentStack[i].ToArray());
+                        data = ArrayEx.ToBytes(_currentStack[i].ToArray());
                         writer.Write(data.Length);
                         writer.Write(data);
                     }
@@ -824,7 +824,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                     writer.Write(_nextStack.Length);
                     for (int i = 0; i < _nextStack.Length; i++)
                     {
-                        data = ArrayUtils.ToBytes(_nextStack[i].ToArray());
+                        data = ArrayEx.ToBytes(_nextStack[i].ToArray());
                         writer.Write(data.Length);
                         writer.Write(data);
                     }
@@ -843,7 +843,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                 {
                     for (int j = 0; j < _currentRetain[i].Length; j++)
                     {
-                        data = ArrayUtils.ToBytes(_currentRetain[i][j].ToArray());
+                        data = ArrayEx.ToBytes(_currentRetain[i][j].ToArray());
                         writer.Write(data.Length);
                         writer.Write(data);
                     }
@@ -862,7 +862,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                 {
                     for (int j = 0; j < _nextRetain[i].Length; j++)
                     {
-                        data = ArrayUtils.ToBytes(_nextRetain[i][j].ToArray());
+                        data = ArrayEx.ToBytes(_nextRetain[i][j].ToArray());
                         writer.Write(data.Length);
                         writer.Write(data);
                     }
@@ -875,7 +875,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             }
             else
             {
-                data = ArrayUtils.ToBytes(_nextRoot);
+                data = ArrayEx.ToBytes(_nextRoot);
                 writer.Write(data.Length);
                 writer.Write(data);
             }
@@ -886,7 +886,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             }
             else
             {
-                data = ArrayUtils.ToBytes(_currentRootSig);
+                data = ArrayEx.ToBytes(_currentRootSig);
                 writer.Write(data.Length);
                 writer.Write(data);
             }
@@ -1437,13 +1437,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             GMSSPrivateKey other = (GMSSPrivateKey)Obj;
 
             if (_currentSeeds != null && _currentSeeds.Length > 0)
-                if (!Compare.AreEqual(ArrayUtils.ToBytes(_currentSeeds), ArrayUtils.ToBytes(other._currentSeeds)))
+                if (!Compare.IsEqual(ArrayEx.ToBytes(_currentSeeds), ArrayEx.ToBytes(other._currentSeeds)))
                     return false;
             if (_currentAuthPaths != null && _currentAuthPaths.Length > 0)
-                if (!Compare.AreEqual(ArrayUtils.ToBytes(_currentAuthPaths), ArrayUtils.ToBytes(other._currentAuthPaths)))
+                if (!Compare.IsEqual(ArrayEx.ToBytes(_currentAuthPaths), ArrayEx.ToBytes(other._currentAuthPaths)))
                     return false;
             if (_keep != null && _keep.Length > 0)
-                if (!Compare.AreEqual(ArrayUtils.ToBytes(_keep), ArrayUtils.ToBytes(other._keep)))
+                if (!Compare.IsEqual(ArrayEx.ToBytes(_keep), ArrayEx.ToBytes(other._keep)))
                     return false;
 
             return true;

@@ -2,11 +2,11 @@
 using System;
 using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Encode;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
-using VTDev.Libraries.CEXEngine.Numeric;
-using VTDev.Libraries.CEXEngine.Tools;
-using VTDev.Libraries.CEXEngine.Utility;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Numeric;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polynomial
@@ -363,7 +363,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
             int maxIndex = 1 << BITS_PER_INDEX;
             byte[] bin1 = ArrayEncoder.EncodeModQ(_ones, maxIndex);//13l - (9,2048)
             byte[] bin2 = ArrayEncoder.EncodeModQ(_negOnes, maxIndex);
-            byte[] bin = ArrayUtils.Concat(ArrayEncoder.ToByteArray(_ones.Length), ArrayEncoder.ToByteArray(_negOnes.Length), bin1, bin2);
+            byte[] bin = ArrayEx.Concat(ArrayEncoder.ToByteArray(_ones.Length), ArrayEncoder.ToByteArray(_negOnes.Length), bin1, bin2);
 
             return bin;
         }
@@ -415,9 +415,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
             SparseTernaryPolynomial other = (SparseTernaryPolynomial)Obj;
             if (_N != other._N)
                 return false;
-            if (!Compare.AreEqual(_negOnes, other._negOnes))
+            if (!Compare.IsEqual(_negOnes, other._negOnes))
                 return false;
-            if (!Compare.AreEqual(_ones, other._ones))
+            if (!Compare.IsEqual(_ones, other._ones))
                 return false;
 
             return true;

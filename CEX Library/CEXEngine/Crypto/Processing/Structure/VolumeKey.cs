@@ -302,8 +302,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
 
                 // adjust the header params
                 vkey.Count++;
-                ArrayUtils.AddAt(ref vkey.FileId, Id, vkey.Count);
-                ArrayUtils.AddAt(ref vkey.State, (byte)0, vkey.Count);
+                ArrayEx.AddAt(ref vkey.FileId, Id, vkey.Count);
+                ArrayEx.AddAt(ref vkey.State, (byte)0, vkey.Count);
                 // copy header to mem
                 vkey.ToStream().WriteTo(keyMem);
 
@@ -484,15 +484,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
                 // adjust the count
                 vkey.Count--;
                 // create reduced arrays
-                ArrayUtils.RemoveAt(ref vkey.FileId, index);
-                ArrayUtils.RemoveAt(ref vkey.State, index);
+                ArrayEx.RemoveAt(ref vkey.FileId, index);
+                ArrayEx.RemoveAt(ref vkey.State, index);
 
                 // get the key material
                 int klen = vkey.Description.KeySize + vkey.Description.IvSize;
                 int koff = klen * index;
                 byte[] data = new byte[klen * vkey.Count];
                 KeyStream.Read(data, 0, data.Length);
-                ArrayUtils.RemoveRange(ref data, koff, koff + klen);
+                ArrayEx.RemoveRange(ref data, koff, koff + klen);
                 keyMem.Write(data, 0, data.Length);
 
                 // overwrite stream w/ new key

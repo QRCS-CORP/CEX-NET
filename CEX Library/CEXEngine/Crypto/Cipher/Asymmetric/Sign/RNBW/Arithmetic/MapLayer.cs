@@ -1,9 +1,9 @@
 ﻿#region Directives
 using System;
 using System.IO;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.CryptoException;
-using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmetic
@@ -133,9 +133,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
             _OI = ViNext - Vi;
 
             // the coefficients of all polynomials in this layer  
-            _coeffAlpha = ArrayUtils.CreateJagged<short[][][]>(_OI, _OI, _VI);
-            _coeffBeta = ArrayUtils.CreateJagged<short[][][]>(_OI, _VI, _VI);
-            _coeffGamma = ArrayUtils.CreateJagged<short[][]>(_OI, _viNext);
+            _coeffAlpha = ArrayEx.CreateJagged<short[][][]>(_OI, _OI, _VI);
+            _coeffBeta = ArrayEx.CreateJagged<short[][][]>(_OI, _VI, _VI);
+            _coeffGamma = ArrayEx.CreateJagged<short[][]>(_OI, _viNext);
             _coeffEta = new short[_OI];
 
             int numOfPoly = _OI; // number of polynomials per layer
@@ -192,19 +192,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _coeffAlpha = ArrayUtils.ToArray3x16(data);
+                _coeffAlpha = ArrayEx.ToArray3x16(data);
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _coeffBeta = ArrayUtils.ToArray3x16(data);
+                _coeffBeta = ArrayEx.ToArray3x16(data);
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _coeffGamma = ArrayUtils.ToArray2x16(data);
+                _coeffGamma = ArrayEx.ToArray2x16(data);
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _coeffEta = ArrayUtils.ToArray16(data);
+                _coeffEta = ArrayEx.ToArray16(data);
                 
             }
             catch (IOException ex)
@@ -250,7 +250,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
             // temporary variable needed for the multiplication
             short tmpMult = 0;
             // coeff: 1st index = which polynomial, 2nd index=which variable
-            short[][] coeff = ArrayUtils.CreateJagged<short[][]>(_OI, _OI + 1);
+            short[][] coeff = ArrayEx.CreateJagged<short[][]>(_OI, _OI + 1);
             // free coefficient per polynomial
             short[] sum = new short[_OI];
 
@@ -371,19 +371,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
             writer.Write(_VI);
             writer.Write(_viNext);
 
-            data = ArrayUtils.ToBytes(_coeffAlpha);
+            data = ArrayEx.ToBytes(_coeffAlpha);
             writer.Write(data.Length);
             writer.Write(data);
 
-            data = ArrayUtils.ToBytes(_coeffBeta);
+            data = ArrayEx.ToBytes(_coeffBeta);
             writer.Write(data.Length);
             writer.Write(data);
 
-            data = ArrayUtils.ToBytes(_coeffGamma);
+            data = ArrayEx.ToBytes(_coeffGamma);
             writer.Write(data.Length);
             writer.Write(data);
 
-            data = ArrayUtils.ToBytes(_coeffEta);
+            data = ArrayEx.ToBytes(_coeffEta);
             writer.Write(data.Length);
             writer.Write(data);
 

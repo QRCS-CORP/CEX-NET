@@ -827,7 +827,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
 
                 _isListening = true;
                 _lsnSocket.Listen(MaxConnections);
-                // create the state object.
+                // create the state object
                 StateToken state = new StateToken(_lsnSocket);
                 // accept the incoming clients
                 _lsnSocket.BeginAccept(new AsyncCallback(ListenCallback), state);

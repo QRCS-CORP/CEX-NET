@@ -2,9 +2,9 @@
 using System;
 using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
-using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
-using VTDev.Libraries.CEXEngine.Tools;
+using VTDev.Libraries.CEXEngine.CryptoException;
 using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
@@ -198,7 +198,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
                 len = reader.ReadInt32();
                 _VI = new int[len];
                 data = reader.ReadBytes(len * 4);
-                _VI = ArrayUtils.ToArray32(data);
+                _VI = ArrayEx.ToArray32(data);
             }
             catch (Exception ex)
             {
@@ -276,7 +276,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
             writer.Write((int)_rndEngine);
             writer.Write(_oId);
             writer.Write(_VI.Length);
-            byte[] data = ArrayUtils.ToBytes(_VI);
+            byte[] data = ArrayEx.ToBytes(_VI);
             writer.Write(data);
             writer.Seek(0, SeekOrigin.Begin);
 
@@ -383,7 +383,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
             RNBWParameters other = (RNBWParameters)Obj;
 
-            if (!Compare.AreEqual(_VI, other.Vi))
+            if (!Compare.IsEqual(_VI, other.Vi))
                 return false;
             if (_rndEngine != other.RandomEngine)
                 return false;

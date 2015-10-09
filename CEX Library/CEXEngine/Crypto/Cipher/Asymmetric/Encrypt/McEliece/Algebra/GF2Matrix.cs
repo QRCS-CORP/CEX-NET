@@ -1,11 +1,11 @@
 ﻿#region Directives
 using System;
 using System.Text;
+using System.Threading.Tasks;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Numeric;
-using VTDev.Libraries.CEXEngine.Tools;
 using VTDev.Libraries.CEXEngine.Utility;
-using System.Threading.Tasks;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Algebra
@@ -52,7 +52,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 throw new ArithmeticException("Encoded array is not an encoded matrix over GF(2)!");
             
             _length = IntUtils.URShift((ColumnCount + 31), 5);
-            _matrix = ArrayUtils.CreateJagged<int[][]>(RowCount, _length);
+            _matrix = ArrayEx.CreateJagged<int[][]>(RowCount, _length);
 
             // number of "full" integer
             int q = ColumnCount >> 5;
@@ -197,7 +197,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             RowCount = M;
             ColumnCount = N;
             _length = IntUtils.URShift((N + 31), 5);
-            _matrix = ArrayUtils.CreateJagged<int[][]>(RowCount, _length);
+            _matrix = ArrayEx.CreateJagged<int[][]>(RowCount, _length);
 
             for (int i = 0; i < RowCount; i++)
             {
@@ -217,7 +217,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             RowCount = N;
             ColumnCount = N;
             _length = IntUtils.URShift((N + 31), 5);
-            _matrix = ArrayUtils.CreateJagged<int[][]>(RowCount, _length);
+            _matrix = ArrayEx.CreateJagged<int[][]>(RowCount, _length);
 
             for (int i = 0; i < RowCount; i++)
             {
@@ -242,7 +242,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             RowCount = N;
             ColumnCount = N;
             _length = IntUtils.URShift((N + 31), 5);
-            _matrix = ArrayUtils.CreateJagged<int[][]>(RowCount, _length);
+            _matrix = ArrayEx.CreateJagged<int[][]>(RowCount, _length);
             for (int i = 0; i < RowCount; i++)
             {
                 int q = IntUtils.URShift(i, 5);
@@ -272,7 +272,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             RowCount = N;
             ColumnCount = N;
             _length = IntUtils.URShift((N + 31), 5);
-            _matrix = ArrayUtils.CreateJagged<int[][]>(RowCount, _length);
+            _matrix = ArrayEx.CreateJagged<int[][]>(RowCount, _length);
             int rest = N & 0x1f;
             int help;
 
@@ -311,7 +311,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             RowCount = N;
             ColumnCount = N;
             _length = IntUtils.URShift((N + 31), 5);
-            _matrix = ArrayUtils.CreateJagged<int[][]>(RowCount, _length);
+            _matrix = ArrayEx.CreateJagged<int[][]>(RowCount, _length);
             GF2Matrix lm = new GF2Matrix(N, Matrix.MATRIX_TYPE_RANDOM_LT, SecRnd);
             GF2Matrix um = new GF2Matrix(N, Matrix.MATRIX_TYPE_RANDOM_UT, SecRnd);
             GF2Matrix rm = (GF2Matrix)lm.RightMultiply(um);
@@ -359,7 +359,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns <c>(this)^T</c></returns>
         public Matrix ComputeTranspose()
         {
-            int[][] result = ArrayUtils.CreateJagged<int[][]>(ColumnCount, IntUtils.URShift((RowCount + 31), 5));
+            int[][] result = ArrayEx.CreateJagged<int[][]>(ColumnCount, IntUtils.URShift((RowCount + 31), 5));
 
             for (int i = 0; i < RowCount; i++)
             {
@@ -417,7 +417,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             Permutation p = new Permutation(N, SecRnd);
             int[] pVec = p.GetVector();
 
-            int[][] matrix = ArrayUtils.CreateJagged<int[][]>(N, length);
+            int[][] matrix = ArrayEx.CreateJagged<int[][]>(N, length);
             for (int i = 0; i < N; i++)
                 Array.Copy(rm._matrix[pVec[i]], 0, matrix[i], 0, length);
 
@@ -676,7 +676,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 throw new ArithmeticException("GF2Matrix: empty submatrix!");
 
             int length = (RowCount + 31) >> 5;
-            int[][] result = ArrayUtils.CreateJagged<int[][]>(RowCount, length);
+            int[][] result = ArrayEx.CreateJagged<int[][]>(RowCount, length);
             int bitMask = (1 << (RowCount & 0x1f)) - 1;
             if (bitMask == 0)
                 bitMask = -1;
@@ -831,12 +831,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 throw new ArithmeticException("GF2Matrix: Matrix is not invertible!");
 
             // clone this matrix
-            int[][] tmpMatrix = ArrayUtils.CreateJagged<int[][]>(RowCount, _length);
+            int[][] tmpMatrix = ArrayEx.CreateJagged<int[][]>(RowCount, _length);
             for (int i = RowCount - 1; i >= 0; i--)
                 tmpMatrix[i] = IntUtils.DeepCopy(_matrix[i]);
 
             // initialize inverse matrix as unit matrix
-            int[][] invMatrix = ArrayUtils.CreateJagged<int[][]>(RowCount, _length);
+            int[][] invMatrix = ArrayEx.CreateJagged<int[][]>(RowCount, _length);
             for (int i = RowCount - 1; i >= 0; i--)
             {
                 int q = i >> 5;
@@ -905,7 +905,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
 
             for (int i = 0; i < RowCount; i++)
             {
-                if (!Compare.AreEqual(_matrix[i], otherMatrix._matrix[i]))
+                if (!Compare.IsEqual(_matrix[i], otherMatrix._matrix[i]))
                     return false;
             }
 

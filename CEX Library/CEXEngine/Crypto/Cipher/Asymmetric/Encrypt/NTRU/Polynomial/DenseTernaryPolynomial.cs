@@ -1,8 +1,8 @@
 #region Directives
 using System;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Encode;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
-using VTDev.Libraries.CEXEngine.Tools;
 using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
@@ -201,7 +201,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         public override bool Equals(Object Obj)
         {
             if (Obj.GetType().IsAssignableFrom(typeof(DenseTernaryPolynomial)))
-                return Compare.AreEqual(Coeffs, ((DenseTernaryPolynomial)Obj).Coeffs);
+                return Compare.IsEqual(Coeffs, ((DenseTernaryPolynomial)Obj).Coeffs);
             else
                 return false;
         }

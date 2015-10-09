@@ -495,7 +495,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 {
                     mode.Transform(Input[index, i], outBytes);
 
-                    if (Compare.AreEqual(outBytes, Output[index, i]) == false)
+                    if (Evaluate.AreEqual(outBytes, Output[index, i]) == false)
                         throw new Exception("ECB Mode: Encrypted arrays are not equal!");
                 }
             }
@@ -510,7 +510,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 {
                     mode.Transform(Input[index, i], outBytes);
 
-                    if (Compare.AreEqual(outBytes, _output[index, i]) == false)
+                    if (Evaluate.AreEqual(outBytes, _output[index, i]) == false)
                         throw new Exception("ECB Mode: Decrypted arrays are not equal!");
                 }
             }
@@ -535,7 +535,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 {
                     mode.Transform(Input[index, i], outBytes);
 
-                    if (Compare.AreEqual(outBytes, Output[index, i]) == false)
+                    if (Evaluate.AreEqual(outBytes, Output[index, i]) == false)
                         throw new Exception("CBC Mode: Encrypted arrays are not equal!");
                 }
             }
@@ -549,7 +549,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 {
                     mode.Transform(Input[index, i], outBytes);
 
-                    if (Compare.AreEqual(outBytes, _output[index, i]) == false)
+                    if (Evaluate.AreEqual(outBytes, _output[index, i]) == false)
                         throw new Exception("CBC Mode: Decrypted arrays are not equal!");
                 }
             }
@@ -574,7 +574,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 {
                     mode1.Transform(Input[index, i], 0, outBytes, 0);
 
-                    if (Compare.AreEqual(outBytes, Output[index, i]) == false)
+                    if (Evaluate.AreEqual(outBytes, Output[index, i]) == false)
                         throw new Exception("CFB Mode: Encrypted arrays are not equal!");
                 }
             }
@@ -589,7 +589,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 {
                     mode2.Transform(Input[index, i], outBytes);
 
-                    if (Compare.AreEqual(outBytes, _output[index, i]) == false)
+                    if (Evaluate.AreEqual(outBytes, _output[index, i]) == false)
                         throw new Exception("CFB Mode: Decrypted arrays are not equal!");
                 }
             }
@@ -614,7 +614,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 {
                     mode.Transform(Input[index, i], outBytes);
 
-                    if (Compare.AreEqual(outBytes, Output[index, i]) == false)
+                    if (Evaluate.AreEqual(outBytes, Output[index, i]) == false)
                         throw new Exception("OFB Mode: Encrypted arrays are not equal!");
                 }
             }
@@ -629,7 +629,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 {
                     mode.Transform(Input[index, i], outBytes);
 
-                    if (Compare.AreEqual(outBytes, _output[index, i]) == false)
+                    if (Evaluate.AreEqual(outBytes, _output[index, i]) == false)
                         throw new Exception("OFB Mode: Decrypted arrays are not equal!");
                 }
             }
@@ -654,7 +654,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 {
                     mode.Transform(Input[index, i], outBytes);
 
-                    if (Compare.AreEqual(outBytes, Output[index, i]) == false)
+                    if (Evaluate.AreEqual(outBytes, Output[index, i]) == false)
                         throw new Exception("CTR Mode: Encrypted arrays are not equal!");
                 }
             }
@@ -668,7 +668,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 {
                     mode.Transform(Input[index, i], outBytes);
 
-                    if (Compare.AreEqual(outBytes, _output[index, i]) == false)
+                    if (Evaluate.AreEqual(outBytes, _output[index, i]) == false)
                         throw new Exception("CTR Mode: Decrypted arrays are not equal!");
                 }
             }

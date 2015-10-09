@@ -142,12 +142,12 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
                 trnHash = new byte[Out256.Length];
                 Buffer.BlockCopy(hash, 0, trnHash, 0, Out256.Length);
 
-                if (!Compare.AreEqual(Out256, trnHash))
+                if (!Evaluate.AreEqual(Out256, trnHash))
                     throw new Exception("SHA256HMAC is not equal! Expected: " + HexConverter.ToString(Out256) + " Received: " + HexConverter.ToString(trnHash));
             }
             else
             {
-                if (!Compare.AreEqual(Out256, hash))
+                if (!Evaluate.AreEqual(Out256, hash))
                     throw new Exception("SHA256HMAC is not equal! Expected: " + HexConverter.ToString(Out256) + " Received: " + HexConverter.ToString(hash));
             }
 
@@ -163,12 +163,12 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
                 trnHash = new byte[Out256.Length];
                 Buffer.BlockCopy(hash, 0, trnHash, 0, Out256.Length);
 
-                if (!Compare.AreEqual(Out256, trnHash))
+                if (!Evaluate.AreEqual(Out256, trnHash))
                     throw new Exception("SHA256HMAC is not equal! Expected: " + HexConverter.ToString(Out256) + " Received: " + HexConverter.ToString(trnHash));
             }
             else
             {
-                if (!Compare.AreEqual(Out256, hash))
+                if (!Evaluate.AreEqual(Out256, hash))
                     throw new Exception("SHA256HMAC is not equal! Expected: " + HexConverter.ToString(Out256) + " Received: " + HexConverter.ToString(hash));
             }
 
@@ -184,12 +184,12 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
                 trnHash = new byte[Out512.Length];
                 Buffer.BlockCopy(hash, 0, trnHash, 0, Out512.Length);
 
-                if (!Compare.AreEqual(Out512, trnHash))
+                if (!Evaluate.AreEqual(Out512, trnHash))
                     throw new Exception("SHA512HMAC is not equal! Expected: " + HexConverter.ToString(Out512) + " Received: " + HexConverter.ToString(trnHash));
             }
             else
             {
-                if (!Compare.AreEqual(Out512, hash))
+                if (!Evaluate.AreEqual(Out512, hash))
                     throw new Exception("SHA512HMAC is not equal! Expected: " + HexConverter.ToString(Out512) + " Received: " + HexConverter.ToString(hash));
             }
 
@@ -205,12 +205,12 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
                 trnHash = new byte[Out512.Length];
                 Buffer.BlockCopy(hash, 0, trnHash, 0, Out512.Length);
 
-                if (!Compare.AreEqual(Out512, trnHash))
+                if (!Evaluate.AreEqual(Out512, trnHash))
                     throw new Exception("SHA512HMAC is not equal! Expected: " + HexConverter.ToString(Out512) + " Received: " + HexConverter.ToString(trnHash));
             }
             else
             {
-                if (!Compare.AreEqual(Out512, hash))
+                if (!Evaluate.AreEqual(Out512, hash))
                     throw new Exception("SHA512HMAC is not equal! Expected: " + HexConverter.ToString(Out512) + " Received: " + HexConverter.ToString(hash));
             }
         }

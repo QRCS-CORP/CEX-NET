@@ -1,12 +1,11 @@
 ﻿#region Directives
 using System;
-using System.IO;
-using VTDev.Libraries.CEXEngine.Crypto.Digest;
-using VTDev.Libraries.CEXEngine.Crypto.Mac;
-using VTDev.Libraries.CEXEngine.Utility;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Mac;
 using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 

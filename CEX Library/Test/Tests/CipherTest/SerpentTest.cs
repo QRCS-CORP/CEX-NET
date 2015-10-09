@@ -212,7 +212,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 engine.DecryptBlock(outBytes, decBytes);
             }
 
-            if (Compare.AreEqual(inBytes, decBytes) == false)
+            if (Evaluate.AreEqual(inBytes, decBytes) == false)
                 throw new Exception("Serpent: Decrypted arrays are not equal! Expected: " + HexConverter.ToString(inBytes) + " Received: " + HexConverter.ToString(decBytes));
         }
 
@@ -229,7 +229,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                     engine.Transform(outBytes, outBytes);
             }
 
-            if (Compare.AreEqual(outBytes, Output) == false)
+            if (Evaluate.AreEqual(outBytes, Output) == false)
                 throw new Exception("Serpent MonteCarlo: Arrays are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
         }
 
@@ -243,7 +243,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 enc.EncryptBlock(Input, outBytes);
             }
 
-            if (Compare.AreEqual(Output, outBytes) == false)
+            if (Evaluate.AreEqual(Output, outBytes) == false)
                 throw new Exception("SerpentVector: Encrypted arrays are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
 
             using (SPX dec = new SPX())
@@ -252,7 +252,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 dec.DecryptBlock(Output, outBytes);
             }
 
-            if (Compare.AreEqual(Input, outBytes) == false)
+            if (Evaluate.AreEqual(Input, outBytes) == false)
                 throw new Exception("SerpentVector: Decrypted arrays are not equal! Expected: " + HexConverter.ToString(Input) + " Received: " + HexConverter.ToString(outBytes));
         }
         #endregion

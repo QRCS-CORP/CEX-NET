@@ -338,8 +338,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         {
             byte[] prk = new byte[_hashLength];
 
-            _digestMac.Initialize(new KeyParams(Ikm));
-
             if (Salt == null)
                 _digestMac.Initialize(new KeyParams(new byte[_hashLength]));
             else

@@ -79,7 +79,7 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
                 gen.Generate(outBytes, 0, Size);
             }
 
-            if (Compare.AreEqual(outBytes, Output) == false)
+            if (Evaluate.AreEqual(outBytes, Output) == false)
                 throw new Exception("PBKDF2: Values are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
         }
         #endregion

@@ -130,13 +130,13 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 engine.Initialize(true, new KeyParams(Key));
                 engine.Transform(Input, outBytes);
 
-                if (Compare.AreEqual(outBytes, Output) == false)
+                if (Evaluate.AreEqual(outBytes, Output) == false)
                     throw new Exception("Rijndael: Encrypted arrays are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
 
                 engine.Initialize(false, new KeyParams(Key));
                 engine.Transform(Output, outBytes);
 
-                if (Compare.AreEqual(outBytes, Input) == false)
+                if (Evaluate.AreEqual(outBytes, Input) == false)
                     throw new Exception("Rijndael: Decrypted arrays are not equal! Expected: " + HexConverter.ToString(Input) + " Received: " + HexConverter.ToString(outBytes));
             }
         }

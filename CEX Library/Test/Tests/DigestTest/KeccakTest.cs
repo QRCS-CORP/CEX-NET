@@ -233,7 +233,7 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
 
                 Digest.DoFinal(hash, 0);
 
-                if (Compare.AreEqual(HexConverter.Decode(Expected[i]), hash) == false)
+                if (Evaluate.AreEqual(HexConverter.Decode(Expected[i]), hash) == false)
                     throw new Exception("Keccak: Expected hash is not equal! Expected: " + Expected[i] + " Received: " + HexConverter.ToString(hash));
             }
 
@@ -245,7 +245,7 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
             Digest.BlockUpdate(k64, 0, k64.Length);
             Digest.DoFinal(hash, 0);
 
-            if (Compare.AreEqual(HexConverter.Decode(Expected[_messages.Length]), hash) == false)
+            if (Evaluate.AreEqual(HexConverter.Decode(Expected[_messages.Length]), hash) == false)
                 throw new Exception("Keccak: Expected hash is not equal! Expected: " + Expected[_messages.Length] + " Received: " + HexConverter.ToString(hash));
 
             for (int i = 0; i != k64.Length; i++)
@@ -253,7 +253,7 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
 
             Digest.DoFinal(hash, 0);
 
-            if (Compare.AreEqual(HexConverter.Decode(Expected[_messages.Length]), hash) == false)
+            if (Evaluate.AreEqual(HexConverter.Decode(Expected[_messages.Length]), hash) == false)
                 throw new Exception("Keccak: Expected hash is not equal! Expected: " + Expected[_messages.Length] + " Received: " + HexConverter.ToString(hash));
 
             for (int i = 0; i != k64.Length; i++)
@@ -262,7 +262,7 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
             Digest.BlockUpdate(k64, 0, k64.Length);
             Digest.DoFinal(hash, 0);
 
-            if (Compare.AreEqual(HexConverter.Decode(Expected[_messages.Length + 1]), hash) == false)
+            if (Evaluate.AreEqual(HexConverter.Decode(Expected[_messages.Length + 1]), hash) == false)
                 throw new Exception("Keccak: Expected hash is not equal! Expected: " + Expected[_messages.Length + 1] + " Received: " + HexConverter.ToString(hash));
 
             for (int i = 0; i != 64; i++)
@@ -273,7 +273,7 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
 
             Digest.DoFinal(hash, 0);
 
-            if (Compare.AreEqual(HexConverter.Decode(Expected[_messages.Length + 1]), hash) == false)
+            if (Evaluate.AreEqual(HexConverter.Decode(Expected[_messages.Length + 1]), hash) == false)
                 throw new Exception("Keccak: Expected hash is not equal! Expected: " + Expected[_messages.Length + 1] + " Received: " + HexConverter.ToString(hash));
 
             DoFinalTest(Digest);
@@ -305,7 +305,7 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
 
                 digest.DoFinal(outBytes, i);
 
-                if (Compare.AreEqual(expected, outBytes) == false)
+                if (Evaluate.AreEqual(expected, outBytes) == false)
                     throw new Exception("Keccak DoFinal: Expected hash is not equal! Expected: " + HexConverter.ToString(expected) + " Received: " + HexConverter.ToString(outBytes));
             }
         }
@@ -325,7 +325,7 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
                 mac.BlockUpdate(mData, 0, mData.Length);
                 mac.DoFinal(macV, 0);
 
-                if (Compare.AreEqual(HexConverter.Decode(Expected[i]), macV) == false)
+                if (Evaluate.AreEqual(HexConverter.Decode(Expected[i]), macV) == false)
                     throw new Exception("Keccak HMAC: Expected hash is not equal! Expected: " + Expected[i] + " Received: " + HexConverter.ToString(macV));
             }
 

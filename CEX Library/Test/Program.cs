@@ -27,6 +27,7 @@ namespace Test
             ConsoleUtils.SizeConsole(80, 60);
             ConsoleUtils.CenterConsole();
             Console.Title = "CEX Test Suite";
+            Console.BufferHeight = 400;
 
             Console.WriteLine("**********************************************");
             Console.WriteLine("* CEX Version 1.4                            *");
@@ -172,7 +173,7 @@ namespace Test
             // sign and verify
             Console.WriteLine("******TESTING SIGNING FUNCTIONS******");
             RunTest(new RNBWSignTest());
-            Console.WriteLine("");/**/
+            Console.WriteLine("");
 
 
             Console.WriteLine(">>> GMSS IMPLEMENTATION TESTS <<<");
@@ -190,11 +191,11 @@ namespace Test
             // sign and verify
             Console.WriteLine("******TESTING SIGNING FUNCTIONS******");
             RunTest(new GMSSSignTest());
-            Console.WriteLine("");/**/
+            Console.WriteLine("");
 
 
             Console.WriteLine("Completed! Press any key to close..");
-            Console.ReadKey();/**/
+            Console.ReadKey();
         }
 
         private static void RunTest(ITest Test)

@@ -96,7 +96,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 blockSize = cipher.ParallelBlockSize;
                 enc2 = Transform2(cipher, data, blockSize);
 
-                if (Compare.AreEqual(enc1, enc2) == false)
+                if (Evaluate.AreEqual(enc1, enc2) == false)
                     throw new Exception("Parallel CTR: Encrypted output is not equal!");
 
                 // linear 1
@@ -105,7 +105,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 blockSize = cipher.BlockSize;
                 enc2 = Transform1(cipher, data, blockSize);
 
-                if (Compare.AreEqual(enc1, enc2) == false)
+                if (Evaluate.AreEqual(enc1, enc2) == false)
                     throw new Exception("Parallel CTR: Encrypted output is not equal!");
 
                 // linear 2
@@ -114,7 +114,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 blockSize = cipher.BlockSize;
                 enc2 = Transform2(cipher, data, blockSize);
 
-                if (Compare.AreEqual(enc1, enc2) == false)
+                if (Evaluate.AreEqual(enc1, enc2) == false)
                     throw new Exception("Parallel CTR: Encrypted output is not equal!");
 
                 // decrypt //
@@ -130,7 +130,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 blockSize = cipher.ParallelBlockSize;
                 dec2 = Transform2(cipher, enc2, blockSize);
 
-                if (Compare.AreEqual(dec1, dec2) == false)
+                if (Evaluate.AreEqual(dec1, dec2) == false)
                     throw new Exception("Parallel CTR: Decrypted output is not equal!");
 
                 // linear 1
@@ -139,7 +139,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 blockSize = cipher.BlockSize;
                 dec2 = Transform1(cipher, enc1, blockSize);
 
-                if (Compare.AreEqual(dec1, dec2) == false)
+                if (Evaluate.AreEqual(dec1, dec2) == false)
                     throw new Exception("Parallel CTR: Decrypted output is not equal!");
 
                 // linear 2
@@ -148,13 +148,13 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 blockSize = cipher.BlockSize;
                 dec2 = Transform2(cipher, enc2, blockSize);
 
-                if (Compare.AreEqual(dec1, dec2) == false)
+                if (Evaluate.AreEqual(dec1, dec2) == false)
                     throw new Exception("Parallel CTR: Decrypted output is not equal!");
             }
 
-            if (Compare.AreEqual(data, dec1) == false)
+            if (Evaluate.AreEqual(data, dec1) == false)
                 throw new Exception("Parallel CTR: Decrypted output is not equal!");
-            if (Compare.AreEqual(data, dec2) == false)
+            if (Evaluate.AreEqual(data, dec2) == false)
                 throw new Exception("Parallel CTR: Decrypted output is not equal!");
 
             OnProgress(new TestEventArgs("Passed Parallel CTR encryption and decryption tests.."));
@@ -178,7 +178,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 blockSize = cipher.BlockSize;
                 enc2 = Transform2(cipher, data, blockSize);
 
-                if (Compare.AreEqual(enc1, enc2) == false)
+                if (Evaluate.AreEqual(enc1, enc2) == false)
                     throw new Exception("Parallel CBC: Decrypted output is not equal!");
 
                 // decrypt //
@@ -194,7 +194,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 blockSize = cipher.BlockSize;
                 dec2 = Transform1(cipher, enc2, blockSize);
 
-                if (Compare.AreEqual(dec1, dec2) == false)
+                if (Evaluate.AreEqual(dec1, dec2) == false)
                     throw new Exception("Parallel CBC: Decrypted output is not equal!");
 
                 // t2 parallel
@@ -209,13 +209,13 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 blockSize = cipher.BlockSize;
                 dec2 = Transform2(cipher, enc1, blockSize);
 
-                if (Compare.AreEqual(dec1, dec2) == false)
+                if (Evaluate.AreEqual(dec1, dec2) == false)
                     throw new Exception("Parallel CBC: Decrypted output is not equal!");
             }
 
-            if (Compare.AreEqual(dec1, data) == false)
+            if (Evaluate.AreEqual(dec1, data) == false)
                 throw new Exception("Parallel CBC: Decrypted output is not equal!");
-            if (Compare.AreEqual(dec2, data) == false)
+            if (Evaluate.AreEqual(dec2, data) == false)
                 throw new Exception("Parallel CBC: Decrypted output is not equal!");
 
             OnProgress(new TestEventArgs("Passed Parallel CBC decryption tests.."));
@@ -238,7 +238,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 blockSize = cipher.BlockSize;
                 enc2 = Transform2(cipher, data, blockSize);
 
-                if (Compare.AreEqual(enc1, enc2) == false)
+                if (Evaluate.AreEqual(enc1, enc2) == false)
                     throw new Exception("Parallel CFB: Decrypted output is not equal!");
 
                 // decrypt //
@@ -254,7 +254,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 blockSize = cipher.BlockSize;
                 dec2 = Transform1(cipher, enc2, blockSize);
 
-                if (Compare.AreEqual(dec1, dec2) == false)
+                if (Evaluate.AreEqual(dec1, dec2) == false)
                     throw new Exception("Parallel CFB: Decrypted output is not equal!");
 
                 // t2 parallel
@@ -269,13 +269,13 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 blockSize = cipher.BlockSize;
                 dec2 = Transform2(cipher, enc1, blockSize);
 
-                if (Compare.AreEqual(dec1, dec2) == false)
+                if (Evaluate.AreEqual(dec1, dec2) == false)
                     throw new Exception("Parallel CFB: Decrypted output is not equal!");
             }
 
-            if (Compare.AreEqual(data, dec1) == false)
+            if (Evaluate.AreEqual(data, dec1) == false)
                 throw new Exception("Parallel CFB: Decrypted output is not equal!");
-            if (Compare.AreEqual(data, dec2) == false)
+            if (Evaluate.AreEqual(data, dec2) == false)
                 throw new Exception("Parallel CFB: Decrypted output is not equal!");
 
             OnProgress(new TestEventArgs("Passed Parallel CFB decryption tests.."));

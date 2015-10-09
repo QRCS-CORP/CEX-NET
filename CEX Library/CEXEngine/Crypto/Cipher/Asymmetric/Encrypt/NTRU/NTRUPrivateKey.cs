@@ -1,11 +1,12 @@
 #region Directives
 using System;
 using System.IO;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Encode;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polynomial;
-using VTDev.Libraries.CEXEngine.Utility;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 #region License Information
@@ -246,7 +247,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
             else
                 tBin = T.ToIntegerPolynomial().ToBinary3Tight();
 
-            return ArrayUtils.Concat(ArrayEncoder.ToByteArray(N), ArrayEncoder.ToByteArray(Q), flagsByte, tBin);
+            return ArrayEx.Concat(ArrayEncoder.ToByteArray(N), ArrayEncoder.ToByteArray(Q), flagsByte, tBin);
         }
 
         /// <summary>

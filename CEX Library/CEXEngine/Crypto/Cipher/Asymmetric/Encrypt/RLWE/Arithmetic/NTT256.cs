@@ -1,10 +1,9 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Utility;
-using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using System.Threading.Tasks;
-using VTDev.Libraries.CEXEngine.Tools;
-using System.Collections.Generic;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Prng;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.Arithmetic
@@ -150,7 +149,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.Arithm
             uint[] lmsg = new uint[M];
             uint[] lmsg2 = new uint[M];
 
-            uint[][] cpt = ArrayUtils.Split(Convert8To32(Message), Message.Length / 4);
+            uint[][] cpt = ArrayEx.Split(Convert8To32(Message), Message.Length / 4);
             RLWEDecrypt(cpt[0], cpt[1], Convert8To32(PrivateKey.R2));
             QBDecode(cpt[0]);
             ArrangeFinal(cpt[0], lmsg2);
@@ -179,7 +178,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.Arithm
             // pub a + p, message m, ciphertest c1 + c2
             RLWEEncrypt(Convert8To32(PublicKey.A), cpt1, cpt2, lmsg, Convert8To32(PublicKey.P));
 
-            return ArrayUtils.Concat(Convert32To8(cpt1), Convert32To8(cpt2));
+            return ArrayEx.Concat(Convert32To8(cpt1), Convert32To8(cpt2));
         }
 
         /// <summary>

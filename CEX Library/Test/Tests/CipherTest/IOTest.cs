@@ -136,7 +136,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             }
 
             // not equal
-            if (Compare.AreEqual(Output, outBytes) == false)
+            if (Evaluate.AreEqual(Output, outBytes) == false)
                 throw new Exception(OutCipher.Name + ": IO-4: EncryptArray: Arrays are not equal!");
 
             // 3: DecryptBlock
@@ -149,7 +149,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 throw new Exception(InCipher.Name + ": IO-D5: DecryptArray Failure " + Ex.Message);
             }
 
-            if (Compare.AreEqual(Input, inBytes) == false)
+            if (Evaluate.AreEqual(Input, inBytes) == false)
                 throw new Exception(InCipher.Name + ": IO-D5: Arrays are not equal!");
 
             // 4: EncryptBlock
@@ -163,7 +163,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             }
 
             // not equal
-            if (Compare.AreEqual(Output, outBytes) == false)
+            if (Evaluate.AreEqual(Output, outBytes) == false)
                 throw new Exception(OutCipher.Name + ": IO-6: EncryptArray: Arrays are not equal!");
 
             // 5: DecryptBlock
@@ -176,7 +176,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 throw new Exception(InCipher.Name + ": IO-D7: DecryptArray Failure " + Ex.Message);
             }
 
-            if (Compare.AreEqual(Input, inBytes) == false)
+            if (Evaluate.AreEqual(Input, inBytes) == false)
                 throw new Exception(InCipher.Name + ": IO-D7: Arrays are not equal!");
 
         }
@@ -200,7 +200,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                     Cipher.Transform(outBytes, i * 16, inBytes, i * 16);
 
                 // equal
-                if (Compare.AreEqual(Input, inBytes) == false)
+                if (Evaluate.AreEqual(Input, inBytes) == false)
                     throw new Exception(Cipher.Name + ": IO-2: Arrays are not equal!");
             }
             catch (Exception Ex)

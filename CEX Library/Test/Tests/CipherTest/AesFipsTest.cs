@@ -166,13 +166,13 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 engine.Initialize(true, new KeyParams(Key));
                 engine.Transform(Input, outBytes);
 
-                if (Compare.AreEqual(outBytes, Output) == false)
+                if (Evaluate.AreEqual(outBytes, Output) == false)
                     throw new Exception("AES: Encrypted arrays are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
 
                 engine.Initialize(false, new KeyParams(Key));
                 engine.Transform(Output, outBytes);
 
-                if (Compare.AreEqual(outBytes, Input) == false)
+                if (Evaluate.AreEqual(outBytes, Input) == false)
                     throw new Exception("AES: Decrypted arrays are not equal! Expected: " + HexConverter.ToString(Input) + " Received: " + HexConverter.ToString(outBytes));
             }
         }
@@ -190,7 +190,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                     engine.Transform(outBytes, outBytes);
             }
 
-            if (Compare.AreEqual(outBytes, Output) == false)
+            if (Evaluate.AreEqual(outBytes, Output) == false)
                 throw new Exception("AES MonteCarlo: Arrays are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
 
             using (RDX engine = new RDX())
@@ -201,7 +201,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                     engine.Transform(outBytes, outBytes);
             }
 
-            if (Compare.AreEqual(outBytes, Input) == false)
+            if (Evaluate.AreEqual(outBytes, Input) == false)
                 throw new Exception("AES MonteCarlo: Arrays are not equal! Expected: " + HexConverter.ToString(Input) + " Received: " + HexConverter.ToString(outBytes));
         }
         #endregion

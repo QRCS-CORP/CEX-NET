@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using VTDev.Libraries.CEXEngine.Tools;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
@@ -331,14 +331,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
 
             MessageHeader other = (MessageHeader)Obj;
 
-            if (!Compare.AreEqual(KeyID, other.KeyID))
+            if (!Compare.IsEqual(KeyID, other.KeyID))
                 return false;
-            if (!Compare.AreEqual(Extension, other.Extension))
+            if (!Compare.IsEqual(Extension, other.Extension))
                 return false;
 
             if (MessageMac != null)
             {
-                if (!Compare.AreEqual(MessageMac, other.MessageMac))
+                if (!Compare.IsEqual(MessageMac, other.MessageMac))
                     return false;
             }
 

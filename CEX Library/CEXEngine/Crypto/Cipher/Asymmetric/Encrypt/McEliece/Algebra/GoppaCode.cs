@@ -1,11 +1,9 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Numeric;
+using System.Threading.Tasks;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Utility;
-using System.Threading.Tasks;
-using VTDev.Libraries.CEXEngine.Tools;
-using System.Threading;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Algebra
@@ -141,9 +139,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             int n = 1 << m;
             int t = Gp.Degree;
             // create matrix H over GF(2^m)
-            int[][] hArray = ArrayUtils.CreateJagged<int[][]>(t, n);
+            int[][] hArray = ArrayEx.CreateJagged<int[][]>(t, n);
             // create matrix YZ
-            int[][] yz = ArrayUtils.CreateJagged<int[][]>(t, n);
+            int[][] yz = ArrayEx.CreateJagged<int[][]>(t, n);
 
             if (ParallelUtils.IsParallel)
             {
@@ -196,7 +194,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             }
 
             // convert to matrix over GF(2)
-            int[][] result = ArrayUtils.CreateJagged<int[][]>(t * m, IntUtils.URShift((n + 31), 5));
+            int[][] result = ArrayEx.CreateJagged<int[][]>(t * m, IntUtils.URShift((n + 31), 5));
 
             if (ParallelUtils.IsParallel)
             {

@@ -120,7 +120,7 @@ namespace VTDev.Projects.CEX.Test.Tests
                 chacha.Transform(enc, dec);
             }
 
-            if (!Compare.AreEqual(data, dec))
+            if (!Evaluate.AreEqual(data, dec))
                 throw new Exception("ChaCha: Decrypted arrays are not equal!");
         }
 
@@ -133,14 +133,14 @@ namespace VTDev.Projects.CEX.Test.Tests
                 chacha.Initialize(new KeyParams(Key, Vector));
                 chacha.Transform(Input, 0, Input.Length, outBytes, 0);
 
-                if (Compare.AreEqual(outBytes, Output) == false)
+                if (Evaluate.AreEqual(outBytes, Output) == false)
                     throw new Exception("ChaChaVector: Encrypted arrays are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
 
                 chacha.Initialize(new KeyParams(Key, Vector));
                 chacha.Transform(Output, 0, Output.Length, outBytes, 0);
             }
 
-            if (Compare.AreEqual(outBytes, Input) == false)
+            if (Evaluate.AreEqual(outBytes, Input) == false)
                 throw new Exception("ChaChaVector: Decrypted arrays are not equal! Expected: " + HexConverter.ToString(Input) + " Received: " + HexConverter.ToString(outBytes));
         }
 

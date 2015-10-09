@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.CryptoException;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structures;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure;
 #endregion
 
 #region License Information
@@ -13,7 +13,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structures;
 // 
 // Copyright (C) 2015 John Underhill
 // This file is part of the CEX Cryptographic library.
-
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -39,15 +39,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     /// <para>The DtmParameters class is used to define the working parameters used by the DTM Key Exchange using a DtmKex instance.</para>
     /// <para>The bytes <c>0</c> through <c>3</c> are the Auth-Phase asymmetric parameters OId.
     /// The next 4 bytes are the Primary-Phase asymmetric parameters OId.
-    /// Bytes <c>8</c> and <c>9</c> identify the Auth-Phase DtmSession symmetric cipher parameters.
-    /// Bytes <c>10</c> and <c>11</c> identify the Primary-Phase DtmSession symmetric cipher parameters.
+    /// Bytes <c>8</c> and <c>9</c> identify the Auth-Phase DtmSessionStruct symmetric cipher parameters.
+    /// Bytes <c>10</c> and <c>11</c> identify the Primary-Phase DtmSessionStruct symmetric cipher parameters.
     /// The last <c>4</c> bytes are used to uniquely identify the parameter set.</para>
     /// </summary>
     /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structures.DtmClient">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structures DtmClient structure</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structures.DtmIdentity">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structures DtmIdentity structure</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structures.DtmPacket">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structures DtmPacket structure</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structures.DtmSession">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structures DtmSession structure</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure.DtmClientStruct">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure DtmClientStruct structure</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure.DtmIdentityStruct">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure DtmIdentityStruct structure</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure.DtmPacketStruct">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure DtmPacket structure</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure.DtmSessionStruct">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure DtmSessionStruct structure</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmKex">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM DtmKex class</seealso>
     /// 
     /// <revisionHistory>
@@ -75,11 +75,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// <summary>
         /// The <c>Auth-Phase</c> Symmetric sessions cipher parameters; contains a complete description of the Symmetric cipher
         /// </summary>
-        public DtmSession AuthSession;
+        public DtmSessionStruct AuthSession;
         /// <summary>
         /// The <c>Primary-Phase</c> Symmetric sessions cipher parameters; contains a complete description of the Symmetric cipher
         /// </summary>
-        public DtmSession PrimarySession;
+        public DtmSessionStruct PrimarySession;
         /// <summary>
         /// The Prng type used to pad messages
         /// </summary>
@@ -152,7 +152,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// <param name="MaxAsmKeyDelayMS">(Optional) The maximum delay time before sending the <c>Primary-Phase</c> Asymmetric key; the minimum time is 1 half max, a value of <c>0</c> has no delay</param>
         /// <param name="MaxSymKeyDelayMS">(Optional) The maximum delay time before sending the <c>Primary-Phase</c> Symmetric key; the minimum time is 1 half max, a value of <c>0</c> has no delay</param>
         /// <param name="MaxMessageDelayMS">(Optional) The maximum delay time before sending message traffic; the minimum time is <c>0</c>, a value of <c>0</c> has no delay</param>
-        public DtmParameters(byte[] OId, byte[] AuthPkeId, byte[] PrimaryPkeId, DtmSession AuthSession, DtmSession PrimarySession, Prngs RandomEngine = Prngs.CTRPrng, int MaxAsmKeyAppend = 0, int MaxAsmKeyPrePend = 0, int MaxAsmParamsAppend = 0, 
+        public DtmParameters(byte[] OId, byte[] AuthPkeId, byte[] PrimaryPkeId, DtmSessionStruct AuthSession, DtmSessionStruct PrimarySession, Prngs RandomEngine = Prngs.CTRPrng, int MaxAsmKeyAppend = 0, int MaxAsmKeyPrePend = 0, int MaxAsmParamsAppend = 0, 
             int MaxAsmParamsPrePend = 0, int MaxSymKeyAppend = 0, int MaxSymKeyPrePend = 0, int MaxMessageAppend = 0, int MaxMessagePrePend = 0, int MaxAsmKeyDelayMS = 0, int MaxSymKeyDelayMS = 0, int MaxMessageDelayMS = 0)
         {
             this.OId = OId;
@@ -185,7 +185,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         }
 
         /// <summary>
-        /// Constructs a DtmIdentity from a stream
+        /// Constructs a DtmIdentityStruct from a stream
         /// </summary>
         /// 
         /// <param name="ParametersStream">Stream containing a serialized DtmParameters</param>
@@ -205,10 +205,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             PrimaryPkeId = reader.ReadBytes(len);
             len = reader.ReadInt32();
             data = reader.ReadBytes(len);
-            AuthSession = new DtmSession(data);
+            AuthSession = new DtmSessionStruct(data);
             len = reader.ReadInt32();
             data = reader.ReadBytes(len);
-            PrimarySession = new DtmSession(data);
+            PrimarySession = new DtmSessionStruct(data);
             RandomEngine = (Prngs)reader.ReadByte();
             MaxAsmKeyAppend = reader.ReadInt32();
             MaxAsmKeyPrePend = reader.ReadInt32();

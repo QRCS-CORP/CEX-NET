@@ -74,7 +74,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Tools
             MemoryStream cmp2 = cmp.DeCompressStream(cstm);
             cmp2.Position = 0;
 
-            if (!Compare.AreEqual(data, cmp2.ToArray()))
+            if (!Evaluate.AreEqual(data, cmp2.ToArray()))
                 throw new Exception("CompressionTest: decompressed array is not equal!");
 
             cmp.CompressionFormat = Compress.CompressionFormats.GZip;
@@ -83,7 +83,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Tools
             cmp2 = cmp.DeCompressStream(cstm);
             cmp2.Position = 0;
 
-            if (!Compare.AreEqual(data, cmp2.ToArray()))
+            if (!Evaluate.AreEqual(data, cmp2.ToArray()))
                 throw new Exception("CompressionTest: decompressed array is not equal!");
         }
         #endregion

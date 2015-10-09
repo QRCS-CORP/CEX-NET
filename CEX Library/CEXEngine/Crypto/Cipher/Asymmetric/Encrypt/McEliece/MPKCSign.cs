@@ -3,10 +3,10 @@ using System;
 using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCCiphers;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.CryptoException;
-using VTDev.Libraries.CEXEngine.Tools;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
@@ -264,7 +264,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             byte[] chksum = _asyCipher.Decrypt(Code);
             byte[] hash = Compute(InputStream);
 
-            return Compare.AreEqual(hash, chksum);
+            return Compare.IsEqual(hash, chksum);
         }
 
         /// <summary>
@@ -294,7 +294,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             byte[] chksum = _asyCipher.Decrypt(Code);
             byte[] hash = Compute(Input, Offset, Length);
 
-            return Compare.AreEqual(hash, chksum);
+            return Compare.IsEqual(hash, chksum);
         }
         #endregion
 

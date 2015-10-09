@@ -116,7 +116,7 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
                     hash = skein1024.ComputeHash(Data);
             }
 
-            if (Compare.AreEqual(hash, Expected) == false)
+            if (Evaluate.AreEqual(hash, Expected) == false)
                 throw new Exception("Skein256: Hash values are not equal! Expected: " + HexConverter.ToString(Expected) + " Received: " + HexConverter.ToString(hash));
         }
         #endregion

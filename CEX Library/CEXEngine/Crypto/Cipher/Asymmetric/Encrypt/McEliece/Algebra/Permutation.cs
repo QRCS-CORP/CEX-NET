@@ -1,8 +1,8 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Numeric;
-using VTDev.Libraries.CEXEngine.Tools;
 using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
@@ -188,7 +188,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
 
             Permutation otherPerm = (Permutation)Obj;
 
-            return Compare.AreEqual(_perm, otherPerm._perm);
+            return Compare.IsEqual(_perm, otherPerm._perm);
         }
 
         /// <summary>

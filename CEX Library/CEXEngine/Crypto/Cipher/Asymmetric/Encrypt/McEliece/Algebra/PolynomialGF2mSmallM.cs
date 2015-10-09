@@ -1,10 +1,10 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Crypto.Prng;
-using VTDev.Libraries.CEXEngine.Tools;
-using VTDev.Libraries.CEXEngine.Utility;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Prng;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Algebra
@@ -638,7 +638,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
 
             PolynomialGF2mSmallM p = (PolynomialGF2mSmallM)Obj;
 
-            if ((_field.Equals(p._field)) && (_degree.Equals(p._degree)) && (Compare.AreEqual(_coefficients, p._coefficients)))
+            if ((_field.Equals(p._field)) && (_degree.Equals(p._degree)) && (Compare.IsEqual(_coefficients, p._coefficients)))
                 return true;
 
             return false;

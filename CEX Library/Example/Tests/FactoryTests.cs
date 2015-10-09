@@ -65,11 +65,11 @@ namespace VTDev.Projects.CEX.Tests
             if (!cikey.Description.Equals(desc))
                 throw new Exception();
             // compare key material
-            if (!Compare.AreEqual(key1.IKM, key2.IKM))
+            if (!Evaluate.AreEqual(key1.IKM, key2.IKM))
                 throw new Exception();
-            if (!Compare.AreEqual(key1.IV, key2.IV))
+            if (!Evaluate.AreEqual(key1.IV, key2.IV))
                 throw new Exception();
-            if (!Compare.AreEqual(key1.Key, key2.Key))
+            if (!Evaluate.AreEqual(key1.Key, key2.Key))
                 throw new Exception();
 
             if (File.Exists(path))
@@ -123,11 +123,11 @@ namespace VTDev.Projects.CEX.Tests
                     pf.Extract(id, out desc2, out kp1, out ext);
 
                 // compare key material
-                if (!Compare.AreEqual(kp1.Key, kp2.Key))
+                if (!Evaluate.AreEqual(kp1.Key, kp2.Key))
                     throw new Exception();
-                if (!Compare.AreEqual(kp1.IV, kp2.IV))
+                if (!Evaluate.AreEqual(kp1.IV, kp2.IV))
                     throw new Exception();
-                if (!Compare.AreEqual(pkey.ExtensionKey, ext))
+                if (!Evaluate.AreEqual(pkey.ExtensionKey, ext))
                     throw new Exception();
                 if (!desc.Equals(desc2))
                     throw new Exception();
@@ -182,9 +182,9 @@ namespace VTDev.Projects.CEX.Tests
                     vf.Extract(id, out desc2, out kp2);
 
                 // compare key material
-                if (!Compare.AreEqual(kp1.Key, kp2.Key))
+                if (!Evaluate.AreEqual(kp1.Key, kp2.Key))
                     throw new Exception();
-                if (!Compare.AreEqual(kp1.IV, kp2.IV))
+                if (!Evaluate.AreEqual(kp1.IV, kp2.IV))
                     throw new Exception();
                 if (!desc.Equals(desc2))
                     throw new Exception();

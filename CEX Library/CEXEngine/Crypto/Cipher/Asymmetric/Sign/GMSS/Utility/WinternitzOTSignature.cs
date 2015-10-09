@@ -1,5 +1,6 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Utility;
 #endregion
@@ -51,7 +52,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Utility
             _ckmSize = GetLog((_msgSize << W) + 1);
             _keysize = _msgSize + (int)Math.Ceiling((double)_ckmSize / (double)W);
             // define the private key messagesize
-            _privateKeyOTS = ArrayUtils.CreateJagged<byte[][]>(_keysize, _mdsize);
+            _privateKeyOTS = ArrayEx.CreateJagged<byte[][]>(_keysize, _mdsize);
             // gmssRandom.setSeed(seed0);
             byte[] dummy = new byte[_mdsize];
             Array.Copy(Seed, 0, dummy, 0, dummy.Length);

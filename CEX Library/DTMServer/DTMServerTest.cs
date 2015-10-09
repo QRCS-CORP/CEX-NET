@@ -4,9 +4,9 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Arguments;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Messages;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structures;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Argument;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Flag;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure;
 
 namespace DTMServerTest
 {
@@ -29,10 +29,10 @@ namespace DTMServerTest
         public void TestExchange()
         {
             // dtm server exchange parameters X11RNS1R2
-            DtmParameters srvDtmParams = DtmParamSets.FromName(DtmParamSets.DtmParamNames.X41RNS1R1);       // preset contains all the settings required for the exchange
+            DtmParameters srvDtmParams = DtmParamSets.FromName(DtmParamSets.DtmParamNames.X44RNT1T1);       // preset contains all the settings required for the exchange
 
             // dtm server id
-            DtmClient srvDmtId = new DtmClient(
+            DtmClientStruct srvDmtId = new DtmClientStruct(
                 new byte[] { 3, 3, 3, 3 },      // the clients public id, (should be at least 32 bytes, can be used as a contact lookup and initial auth)
                 new byte[] { 4, 4, 4, 4 });     // the clients secret id, (secret id can be anything.. a serialized structure, signed data, hash, etc)
 
@@ -49,10 +49,15 @@ namespace DTMServerTest
             
             Console.WriteLine(CON_TITLE + "Waiting for a connection..");
 
+            // forward secrecy framework
+            _dtmServer.KeyRequested += new DtmKex.KeyRequestedDelegate(OnKeyRequested);
+            _dtmServer.KeySynchronized += new DtmKex.KeySynchronizedDelegate(OnKeySynchronized);
+
             // server starts listening
             _dtmServer.Listen(IPAddress.Any, Port);
             // wait for the key exchange to complete
             _initDone.WaitOne();
+
             // start the message stream
             StartMessageStream();
         }
@@ -62,20 +67,20 @@ namespace DTMServerTest
         /// <summary>
         /// Fires when a post-exchange packet containing processed data is received
         /// </summary>
-        private void OnDataReceived(object owner, DtmDataReceivedEventArgs args)
+        private void OnDataReceived(object owner, DtmDataReceivedArgs args)
         {
             Console.WriteLine(Encoding.ASCII.GetString(args.Message.ToArray()));
             Console.Write(CON_TITLE);
         }
 
-        private void OnFileReceived(object owner, DtmPacketEventArgs args)
+        private void OnFileReceived(object owner, DtmPacketArgs args)
         {
             // file transfer is complete
             Console.WriteLine(CON_TITLE + "The file transfer has completed!");
             Console.WriteLine(CON_TITLE);
         }
 
-        private void OnFileRequest(object owner, DtmFileRequestEventArgs args)
+        private void OnFileRequest(object owner, DtmFileRequestArgs args)
         {
             // set the args.Cancel to true to refuse a file
             //args.Cancel = true;
@@ -88,16 +93,39 @@ namespace DTMServerTest
         /// <summary>
         /// Fires when a packet containing an identity is received, the args contain the id
         /// </summary>
-        private void OnIdentityReceived(object owner, DtmIdentityEventArgs args)
+        private void OnIdentityReceived(object owner, DtmIdentityArgs args)
         {
             Console.WriteLine(CON_TITLE + String.Format("Server received an identity packet: {0}", IdToString(args.DtmID.Identity)));
+        }
+
+        /// <summary>
+        /// Forward symmetric key has been requested
+        /// </summary>
+        private void OnKeyRequested(object owner, DtmKeyRequestedArgs args)
+        {
+            // you can modify the arguments to adjust valid lifespan (stored in the DtmForwardKeyStruct), or cancel the request
+            // lifespan in ms
+            args.LifeSpan = 86000;
+            // start time
+            args.OptionsFlag = DateTime.Now.ToFileTimeUtc();
+
+            Console.WriteLine(CON_TITLE + "Server received a forward key request");
+        }
+
+        /// <summary>
+        /// Forward symmetric keys have been exchanged
+        /// </summary>
+        private void OnKeySynchronized(object owner, DtmKeySynchronizedArgs args)
+        {
+            Console.WriteLine(CON_TITLE + "Server exchanged forward session keys");
+            Console.Write(CON_TITLE);
         }
 
         /// <summary>
         /// Fires each time a packet is received, the args contain the exchange state. 
         /// The size of the payload and a Cancel token, when set to true, will terminate the session
         /// </summary>
-        private void OnPacketReceived(object owner, DtmPacketEventArgs args)
+        private void OnPacketReceived(object owner, DtmPacketArgs args)
         {
             if (!((DtmKex)owner).IsEstablished)
                 Console.WriteLine(CON_TITLE + String.Format("Server received a packet; {0}", (DtmExchangeFlags)args.Message));
@@ -110,7 +138,7 @@ namespace DTMServerTest
         /// <summary>
         /// Fires each time a packet is sent, the args contain the exchange state and the echo flag.
         /// </summary>
-        private void OnPacketSent(object owner, DtmPacketEventArgs args)
+        private void OnPacketSent(object owner, DtmPacketArgs args)
         {
             if (!((DtmKex)owner).IsEstablished)
                 Console.WriteLine(CON_TITLE + String.Format("Server sent a packet; {0}", (DtmExchangeFlags)args.Message));
@@ -119,7 +147,7 @@ namespace DTMServerTest
         /// <summary>
         /// Fired when the session is fully established, the args contain the forward and return symmetric session keys
         /// </summary>
-        private void OnSessionEstablished(object owner, DtmEstablishedEventArgs args)
+        private void OnSessionEstablished(object owner, DtmEstablishedArgs args)
         {
             Console.WriteLine(CON_TITLE + "The Server VPN state is UP");
         }
@@ -127,11 +155,11 @@ namespace DTMServerTest
         /// <summary>
         /// Fires when an error has occured; contains the exception and the errors operational severity
         /// </summary>
-        private void OnSessionError(object owner, DtmErrorEventArgs args)
+        private void OnSessionError(object owner, DtmErrorArgs args)
         {
             // in case window is closed; should call disconnect in a forms closing event
             if (_dtmServer.IsConnected)
-                Console.WriteLine(CON_TITLE + "Severity:" + (DtmErrorSeverity)args.Severity + "Message: " + args.Message);
+                Console.WriteLine(CON_TITLE + "Severity:" + (DtmErrorSeverityFlags)args.Severity + "Message: " + args.Message);
         }
         #endregion
 
@@ -145,15 +173,19 @@ namespace DTMServerTest
             Console.WriteLine(CON_TITLE + "Key Exchange completed!");
             Console.WriteLine(CON_TITLE + "Type a message and press *Enter* to send..");
             Console.WriteLine(CON_TITLE + "Type *Quit* to Exit..");
-            Console.Write(CON_TITLE);
-            byte[] btmsg;
-            string smsg;
+
+            // test key ratcheting mechanism
+            //_dtmServer.ForwardKeyRequest(true);
 
             // test sending files
             /*_dtmServer.SendFile(@"C:\Tests\Saved\tiny.txt");
             _dtmServer.SendFile(@"C:\Tests\Saved\small.txt");
             _dtmServer.SendFile(@"C:\Tests\Saved\medium.txt");
             _dtmServer.SendFile(@"C:\Tests\Saved\large.txt");*/
+
+            Console.Write(CON_TITLE);
+            byte[] btmsg;
+            string smsg;
 
             do
             {
@@ -180,9 +212,9 @@ namespace DTMServerTest
         /// <summary>
         /// Creates a serialized request packet (DtmPacket)
         /// </summary>
-        private MemoryStream CreateRequest(DtmPacketTypes Message, short State)
+        private MemoryStream CreateRequest(DtmPacketFlags Message, short State)
         {
-            MemoryStream ret = new DtmPacket(Message, 0, 0, State).ToStream();
+            MemoryStream ret = new DtmPacketStruct(Message, 0, 0, State).ToStream();
             ret.Seek(0, SeekOrigin.Begin);
             return ret;
         }
@@ -190,9 +222,9 @@ namespace DTMServerTest
         /// <summary>
         /// Get the packet header from the stream
         /// </summary>
-        private DtmPacket ReadPacket(Stream PacketStream)
+        private DtmPacketStruct ReadPacket(Stream PacketStream)
         {
-            return new DtmPacket(PacketStream);
+            return new DtmPacketStruct(PacketStream);
         }
 
         private string IdToString(byte[] Id)

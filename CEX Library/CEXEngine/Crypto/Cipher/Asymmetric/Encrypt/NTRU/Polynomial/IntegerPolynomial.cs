@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Arithmetic;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Encode;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.CryptoException;
 using VTDev.Libraries.CEXEngine.Numeric;
-using VTDev.Libraries.CEXEngine.Tools;
 using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
@@ -1425,7 +1425,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         public override bool Equals(Object Obj)
         {
             if (Obj.GetType().IsAssignableFrom(typeof(IntegerPolynomial)))
-                return Compare.AreEqual(Coeffs, ((IntegerPolynomial)Obj).Coeffs);
+                return Compare.IsEqual(Coeffs, ((IntegerPolynomial)Obj).Coeffs);
             else
                 return false;
         }

@@ -113,7 +113,7 @@ namespace Test.Tests
                 mpe.Initialize(akp.PrivateKey);
                 byte[] dec = mpe.Decrypt(enc);
 
-                if (!Compare.AreEqual(dec, data))
+                if (!Evaluate.AreEqual(dec, data))
                     throw new Exception("EncryptionKey: decryption failure!");
                 OnProgress(new TestEventArgs("Passed encryption test"));
             }

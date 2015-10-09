@@ -79,7 +79,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
             {
                 NTRUKeyGenerator ntru = new NTRUKeyGenerator(ep);
                 NTRUKeyPair kp1 = (NTRUKeyPair)ntru.GenerateKeyPair();
-                if (!Compare.True(kp1.IsValid()))
+                if (!Evaluate.True(kp1.IsValid()))
                     throw new Exception("NtruKeyPair generated key pair is invalid!");
             }
         }
@@ -111,7 +111,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
             // encode to byte[] and reconstruct
             byte[] enc = kp.ToBytes();
             NTRUKeyPair kp2 = new NTRUKeyPair(enc);
-            if (!Compare.Equals(kp, kp2))
+            if (!Evaluate.Equals(kp, kp2))
                 throw new Exception("NtruKeyPair encoding test failed!");
 
             // encode to OutputStream and reconstruct
@@ -119,7 +119,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
             kp.WriteTo(bos);
             MemoryStream bis = new MemoryStream(bos.ToArray());
             NTRUKeyPair kp3 = new NTRUKeyPair(bis);
-            if (!Compare.Equals(kp, kp3))
+            if (!Evaluate.Equals(kp, kp3))
                 throw new Exception("NtruKeyPair encoding test failed!");
         }
         #endregion

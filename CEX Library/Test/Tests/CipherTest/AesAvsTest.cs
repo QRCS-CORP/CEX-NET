@@ -139,7 +139,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 engine.Initialize(true, new KeyParams(Key));
                 engine.Transform(Input, outBytes);
 
-                if (Compare.AreEqual(outBytes, Output) == false)
+                if (Evaluate.AreEqual(outBytes, Output) == false)
                     throw new Exception("AESAVS: Encrypted arrays are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
             }
         }

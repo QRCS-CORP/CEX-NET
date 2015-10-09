@@ -2,10 +2,10 @@
 using System;
 using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
-using VTDev.Libraries.CEXEngine.Tools;
-using VTDev.Libraries.CEXEngine.Utility;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 #region License Information
@@ -809,7 +809,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
                 return false;
             if (MinIGFHashCalls != other.MinIGFHashCalls)
                 return false;
-            if (!Compare.AreEqual(OId, other.OId))
+            if (!Compare.IsEqual(OId, other.OId))
                 return false;
             if (PkLen != other.PkLen)
                 return false;

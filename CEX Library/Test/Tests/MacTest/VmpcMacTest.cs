@@ -77,7 +77,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
                 mac.DoFinal(hash, 0);
             }
 
-            if (!Compare.AreEqual(_expected, hash))
+            if (!Evaluate.AreEqual(_expected, hash))
                 throw new Exception("VMPCMAC is not equal! Expected: " + HexConverter.ToString(_expected) + " Received: " + HexConverter.ToString(hash));
         }
         #endregion

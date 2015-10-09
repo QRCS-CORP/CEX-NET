@@ -82,7 +82,7 @@ namespace Test.Tests
                 dec = cipher.Decrypt(enc);
             }
 
-            if (!Compare.AreEqual(dec, data))
+            if (!Evaluate.AreEqual(dec, data))
                 throw new Exception("TestKey test: decryption failure!");
             OnProgress(new TestEventArgs("Passed sub-key test"));
         }
@@ -106,7 +106,7 @@ namespace Test.Tests
                 mpe.Initialize(akp.PrivateKey);
                 byte[] dec = mpe.Decrypt(enc);
 
-                if (!Compare.AreEqual(dec, data))
+                if (!Evaluate.AreEqual(dec, data))
                     throw new Exception("Encryption test: decryption failure!");
                 OnProgress(new TestEventArgs(string.Format("Passed N:{0} Q:{1} encryption test", Param.N, Param.Q)));
             }

@@ -1,5 +1,6 @@
 #region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Numeric;
 using VTDev.Libraries.CEXEngine.Utility;
 #endregion
@@ -829,7 +830,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Arithm
             int aBitIdx = 0;
             int numPieces = (A.Length * 32 + BitLength - 1) / BitLength;
             int pieceLength = (BitLength + 31) / 32;   // in ints
-            int[][] b = ArrayUtils.CreateJagged<int[][]>(numPieces, pieceLength);
+            int[][] b = ArrayEx.CreateJagged<int[][]>(numPieces, pieceLength);
 
             for (int i = 0; i < b.Length; i++)
             {
@@ -871,7 +872,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Arithm
         /// </remarks>
         private static int[][] SplitInts(int[] A, int NumPieces, int PieceSize, int TargetPieceSize)
         {
-            int[][] ai = ArrayUtils.CreateJagged<int[][]>(NumPieces, TargetPieceSize);
+            int[][] ai = ArrayEx.CreateJagged<int[][]>(NumPieces, TargetPieceSize);
 
             for (int i = 0; i < A.Length / PieceSize; i++)
                 Array.Copy(A, i * PieceSize, ai[i], 0, PieceSize);

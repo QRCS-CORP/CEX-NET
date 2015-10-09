@@ -124,7 +124,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     ///     }
     /// 
     ///     // compare decrypted output with data
-    ///     if (!Compare.AreEqual(tmpstrm.ToArray(), data))
+    ///     if (!Equate.AreEqual(tmpstrm.ToArray(), data))
     ///         throw new Exception();
     /// }
     /// </code>

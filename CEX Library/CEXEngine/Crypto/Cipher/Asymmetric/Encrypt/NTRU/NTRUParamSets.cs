@@ -69,7 +69,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
             CX1931,
             /// <summary>
             /// Experimental, use with caution. Uses a larger ring and Skein512.
-            /// <para>MaxText: 219, N:1861 Q:2048, Df:290, PublicKey Size: 2563, PrivateKey Size: 374</para>
+            /// <para>MaxText: 227, N:1861 Q:2048, Df:290, PublicKey Size: 2563, PrivateKey Size: 374</para>
             /// </summary>
             CX1861,
             /// <summary>
@@ -227,30 +227,34 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// 
         /// <param name="ParamName">The NTRU Parameters set name</param>
         /// 
-        /// <param name="DbReduceMultiplier">If set between <c>0.1</c> and <c>1.0</c>, randomizes the Db field length, if <c>0.0</c> (default), returns the serialized parameter set default.
+        /// <param name="DbMaxReductionFactor">If set between <c>0.1</c> and <c>0.4</c>, randomizes the Db field length, if <c>0.0</c> (default), returns the serialized parameter set default value.
         /// <para>The Db field is set to a ranged random number from the default parameter set <c>value</c> to <c>value - (value * multiplier)</c>. 
         /// The Db field determines how many bytes of random are prepended to the message before encryption.
         /// Recommended range is minimum 0.1, to a maximum of 0.4.</para></param>
         /// 
-        /// <param name="IgfIncreaseMultiplier">If set between <c>0.1</c> and <c>1.0</c>, the MinIGFHashCalls value is randomized, if <c>0.0</c> (default), returns the parameter set defaults.
+        /// <param name="IgfMaxAccretionFactor">If set between <c>0.1</c> and <c>0.5</c>, the MinIGFHashCalls value is randomized, if <c>0.0</c> (default), returns the parameter set default value.
         /// <para>The MinIGFHashCalls is set to a random value ranged between the parameter sets default <c>value</c>, up to <c>value + (value * multiplier)</c>.
         /// The MinIGFHashCalls value determine the number of times the hashing function is cycled during the igf polynomial generation.
         /// Recommended range is minimum 0.1, to a maximum of 0.2; larger values significantly impact processing times.</para></param>
         /// 
-        /// <param name="MgfIncreaseMultiplier">If set between <c>0.1</c> and <c>1.0</c>, the MinMGFHashCalls value is randomized, if <c>0.0</c> (default), returns the parameter set defaults.
+        /// <param name="MgfMaxAccretionFactor">If set between <c>0.1</c> and <c>0.5</c>, the MinMGFHashCalls value is randomized, if <c>0.0</c> (default), returns the parameter set default value.
         /// <para>The MinMGFHashCalls is set to a random value ranged between the parameter sets default <c>value</c>, up to <c>value + (value * multiplier)</c>.
         /// The MinMGFHashCalls value determine the number of times the hashing function is cycled during the igf mask polynomial generation.
         /// Recommended range is minimum 0.1, to a maximum of 0.2; larger values significantly impact processing times.</para></param>
         /// 
         /// <returns>The serialized NTRUParameters set</returns>
         /// 
-        /// <exception cref="CryptoAsymmetricException">Thrown if the input value is out of range; (valid range is 0.0 to 1.0)</exception>
-        public static byte[] GetFormatted(NTRUParamNames ParamName, double DbReduceMultiplier = 0.0, double IgfIncreaseMultiplier = 0.0, double MgfIncreaseMultiplier = 0.0)
+        /// <exception cref="CryptoAsymmetricException">Thrown if the input value is out of range</exception>
+        public static byte[] GetFormatted(NTRUParamNames ParamName, double DbMaxReductionFactor = 0.0, double IgfMaxAccretionFactor = 0.0, double MgfMaxAccretionFactor = 0.0)
         {
-            if (DbReduceMultiplier > 1.0 || IgfIncreaseMultiplier < 0.0 || IgfIncreaseMultiplier > 1.0 || IgfIncreaseMultiplier < 0.0)
-                throw new CryptoAsymmetricException("NTRUParameters:GetFormatted", "The Multiplier value can not be less than 0.0 and cannot exceed 1.0!", new ArgumentOutOfRangeException());
+            if (DbMaxReductionFactor > 0.4 || DbMaxReductionFactor < 0.0)
+                throw new CryptoAsymmetricException("NTRUParameters:GetFormatted", "The DbMaxReductionFactor value can not be less than 0.0 and cannot exceed 0.4!", new ArgumentOutOfRangeException());
+            if (IgfMaxAccretionFactor > 0.5 || IgfMaxAccretionFactor < 0.0)
+                throw new CryptoAsymmetricException("NTRUParameters:GetFormatted", "The IgfMaxAccretionFactor value can not be less than 0.0 and cannot exceed 0.5!", new ArgumentOutOfRangeException());
+            if (MgfMaxAccretionFactor > 0.5 || MgfMaxAccretionFactor < 0.0)
+                throw new CryptoAsymmetricException("NTRUParameters:GetFormatted", "The MgfMaxAccretionFactor value can not be less than 0.0 and cannot exceed 0.5!", new ArgumentOutOfRangeException());
 
-            if (DbReduceMultiplier == 0.0 && IgfIncreaseMultiplier == 0.0 && MgfIncreaseMultiplier == 0.0)
+            if (DbMaxReductionFactor == 0.0 && IgfMaxAccretionFactor == 0.0 && MgfMaxAccretionFactor == 0.0)
             {
                 return FromName(ParamName).ToBytes();
             }
@@ -260,9 +264,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
                 var prng = new Prng.CSPRng();
                 int diff;
 
-                if (DbReduceMultiplier > 0.0)
+                if (DbMaxReductionFactor > 0.0)
                 {
-                    diff = (int)Math.Abs(param.Db * DbReduceMultiplier);
+                    diff = (int)Math.Abs(param.Db * DbMaxReductionFactor);
 
                     // set the db to a random in range of param value, to value - value * DbReduceMultiplier
                     if (diff > 0)
@@ -274,18 +278,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
                     }
                 }
 
-                if (IgfIncreaseMultiplier > 0.0)
+                if (IgfMaxAccretionFactor > 0.0)
                 {
                     // raise igf calls to default +* IgfIncreaseThreshold
-                    diff = (int)Math.Abs(param.MinIGFHashCalls * IgfIncreaseMultiplier);
+                    diff = (int)Math.Abs(param.MinIGFHashCalls * IgfMaxAccretionFactor);
                     if (diff > 0)
                         param.MinIGFHashCalls = prng.Next(param.MinIGFHashCalls, param.MinIGFHashCalls + diff);
                 }
 
-                if (MgfIncreaseMultiplier > 0.0)
+                if (MgfMaxAccretionFactor > 0.0)
                 {
                     // raise mgf calls to default +* MgfIncreaseThreshold
-                    diff = (int)Math.Abs(param.MinMGFHashCalls * MgfIncreaseMultiplier);
+                    diff = (int)Math.Abs(param.MinMGFHashCalls * MgfMaxAccretionFactor);
                     if (diff > 0)
                         param.MinMGFHashCalls = prng.Next(param.MinMGFHashCalls, param.MinMGFHashCalls + diff);
                 }
@@ -351,7 +355,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// Experimental, use with caution. Uses a larger ring and Skein512.
         /// <para>MaxText: 219, N:1861 Q:2048, Df:290, PublicKey Size: 2563, PrivateKey Size: 374</para>
         /// </summary>
-        public static readonly NTRUParameters CX1861SK512 = new NTRUParameters(new byte[] { 2, 3, 1, 7 }, 1861, 2048, 290, 290, 0, 1024, 14, 22, 10, true, true, false, Digests.Skein512, Prngs.CTRPrng);
+        public static readonly NTRUParameters CX1861SK512 = new NTRUParameters(new byte[] { 2, 3, 1, 7 }, 1861, 2048, 290, 290, 0, 960, 14, 22, 10, true, true, false, Digests.Skein512, Prngs.CTRPrng);
         /// <summary>
         /// A conservative parameter set that gives 256 bits of security and is optimized for key size.
         /// <para>MaxText: 170, N:1087 Q:2048, Df:120, PublicKey Size: 1499, PrivateKey Size: 221</para>

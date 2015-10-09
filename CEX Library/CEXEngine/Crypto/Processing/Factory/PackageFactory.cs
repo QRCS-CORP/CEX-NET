@@ -180,22 +180,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 // store the master policy flag
                 KeyPolicy = _keyPackage.KeyPolicy;
                 // did we create this key
-                IsCreator = Compare.AreEqual(_keyOwner.OriginId, _keyPackage.Authority.OriginId);
+                IsCreator = Compare.IsEqual(_keyOwner.OriginId, _keyPackage.Authority.OriginId);
 
                 // key made by master auth, valid only if authenticated by PackageAuth, IdentityRestrict or DomainRestrict
                 if (PackageKey.KeyHasPolicy(KeyPolicy, (long)KeyPolicies.MasterAuth))
                 {
-                    if (Compare.AreEqual(_keyOwner.DomainId, _keyPackage.Authority.DomainId))
+                    if (Compare.IsEqual(_keyOwner.DomainId, _keyPackage.Authority.DomainId))
                     {
                         LastError = "";
                         return KeyScope.Creator;
                     }
-                    else if (Compare.AreEqual(_keyOwner.PackageId, _keyPackage.Authority.PackageId))
+                    else if (Compare.IsEqual(_keyOwner.PackageId, _keyPackage.Authority.PackageId))
                     {
                         LastError = "";
                         return KeyScope.Creator;
                     }
-                    else if (Compare.AreEqual(_keyOwner.TargetId, _keyPackage.Authority.TargetId))
+                    else if (Compare.IsEqual(_keyOwner.TargetId, _keyPackage.Authority.TargetId))
                     {
                         LastError = "";
                         return KeyScope.Creator;
@@ -206,10 +206,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 if (PackageKey.KeyHasPolicy(KeyPolicy, (long)KeyPolicies.IdentityRestrict))
                 {
                     // test only if not creator
-                    if (!Compare.AreEqual(_keyOwner.OriginId, _keyPackage.Authority.OriginId))
+                    if (!Compare.IsEqual(_keyOwner.OriginId, _keyPackage.Authority.OriginId))
                     {
                         // owner target field is set as a target OriginId hash
-                        if (!Compare.AreEqual(_keyOwner.TargetId, _keyPackage.Authority.TargetId))
+                        if (!Compare.IsEqual(_keyOwner.TargetId, _keyPackage.Authority.TargetId))
                         {
                             LastError = "You are not the intendant recipient of this key! Access is denied.";
                             return KeyScope.NoAccess;
@@ -220,7 +220,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 if (PackageKey.KeyHasPolicy(KeyPolicy, (long)KeyPolicies.DomainRestrict))
                 {
                     // the key is domain restricted
-                    if (!Compare.AreEqual(_keyOwner.DomainId, _keyPackage.Authority.DomainId))
+                    if (!Compare.IsEqual(_keyOwner.DomainId, _keyPackage.Authority.DomainId))
                     {
                         LastError = "Domain identification check has failed! You must be a member of the same Domain as the Creator of this key.";
                         return KeyScope.NoAccess;
@@ -230,7 +230,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 // the key package id is an authentication passphrase hash
                 if (PackageKey.KeyHasPolicy(KeyPolicy, (long)KeyPolicies.PackageAuth))
                 {
-                    if (!Compare.AreEqual(_keyOwner.PackageId, _keyPackage.Authority.PackageId))
+                    if (!Compare.IsEqual(_keyOwner.PackageId, _keyPackage.Authority.PackageId))
                     {
                         LastError = "Key Package authentication has failed! Access is denied.";
                         return KeyScope.NoAccess;
@@ -250,7 +250,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 // only the key creator is allowed access 
                 if (PackageKey.KeyHasPolicy(KeyPolicy, (long)KeyPolicies.NoExport))
                 {
-                    if (!Compare.AreEqual(_keyOwner.OriginId, _keyPackage.Authority.OriginId))
+                    if (!Compare.IsEqual(_keyOwner.OriginId, _keyPackage.Authority.OriginId))
                     {
                         LastError = "Only the Creator of this key is authorized! Access is denied.";
                         return KeyScope.NoAccess;
@@ -283,7 +283,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
 
             for (int i = 0; i < _keyPackage.SubKeyID.Length; i++)
             {
-                if (Compare.AreEqual(KeyId, _keyPackage.SubKeyID[i]))
+                if (Compare.IsEqual(KeyId, _keyPackage.SubKeyID[i]))
                     return i;
             }
             return -1;

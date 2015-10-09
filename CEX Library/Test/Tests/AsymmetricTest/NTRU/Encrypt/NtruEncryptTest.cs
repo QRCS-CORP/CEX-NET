@@ -96,7 +96,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
                     ntru.Initialize(kp);
                     byte[] decrypted = ntru.Decrypt(encrypted);
 
-                    if (!Compare.AreEqual(plainText, decrypted))
+                    if (!Evaluate.AreEqual(plainText, decrypted))
                         throw new Exception("NtruEncryptTest: digest test failed!");
                 }
             }
@@ -209,7 +209,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
             ntru.Initialize(kp);
             byte[] decrypted = ntru.Decrypt(encrypted);
 
-            if (!Compare.AreEqual(plainText, decrypted))
+            if (!Evaluate.AreEqual(plainText, decrypted))
                 throw new Exception("NtruEncryptTest: text encryption test failed!");
         }
 
@@ -222,7 +222,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
             ntru.Initialize(kp);
             byte[] decrypted = ntru.Decrypt(encrypted);
 
-            if (!Compare.AreEqual(plainText, decrypted))
+            if (!Evaluate.AreEqual(plainText, decrypted))
                 throw new Exception("NtruEncryptTest: empty bytes encryption test failed!");
         }
 
@@ -236,7 +236,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
             ntru.Initialize(kp);
             byte[] decrypted = ntru.Decrypt(encrypted);
 
-            if (!Compare.AreEqual(plainText, decrypted))
+            if (!Evaluate.AreEqual(plainText, decrypted))
                 throw new Exception("NtruEncryptTest: maximum length test failed!");
         }
 
@@ -252,7 +252,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
                 ntru.Initialize(kp);
                 byte[] decrypted = ntru.Decrypt(encrypted);
 
-                if (!Compare.AreEqual(plainText, decrypted))
+                if (!Evaluate.AreEqual(plainText, decrypted))
                     throw new Exception("NtruEncryptTest: maximum length test failed!");
                 // should have thrown
                 throw new Exception("NtruEncryptTest: maximum exceeded message test failed!");
@@ -278,7 +278,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
             byte[] encrypted = ntru.Encrypt(plainText);
             ntru.Initialize(kp);
             byte[] decrypted = ntru.Decrypt(encrypted);
-            if (!Compare.AreEqual(plainText, decrypted))
+            if (!Evaluate.AreEqual(plainText, decrypted))
                 throw new Exception("NtruEncryptTest: slow dense polynomial encoded key test failed!");
 
             // sparse polynomials
@@ -291,7 +291,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
             encrypted = ntru.Encrypt(plainText);
             ntru.Initialize(kp);
             decrypted = ntru.Decrypt(encrypted);
-            if (!Compare.AreEqual(plainText, decrypted))
+            if (!Evaluate.AreEqual(plainText, decrypted))
                 throw new Exception("NtruEncryptTest: slow sparse polynomial encoded key test failed!");
         }
 
@@ -310,7 +310,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
             byte[] encrypted = ntru.Encrypt(plainText);
             ntru.Initialize(kp);
             byte[] decrypted = ntru.Decrypt(encrypted);
-            if (!Compare.AreEqual(plainText, decrypted))
+            if (!Evaluate.AreEqual(plainText, decrypted))
                 throw new Exception("NtruEncryptTest: fast encoded key test failed!");
         }
 
@@ -339,7 +339,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
             using (NTRUKeyGenerator kg = new NTRUKeyGenerator(param, false))
                 kp3 = (NTRUKeyPair)kg.GenerateKeyPair(passphrase, salt);
 
-            if (!Compare.False(kp1.Equals(kp3)))
+            if (!Evaluate.False(kp1.Equals(kp3)))
                 throw new Exception("NtruEncryptTest: key pair generation test failed!");
         }
 
@@ -367,7 +367,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
                 NTRUEncrypt ntru = new NTRUEncrypt(param);
                 ntru.Initialize(kp.PublicKey);
                 byte[] encrypted = ntru.Encrypt(plainText);
-                if (!Compare.Equals(param.GetOutputLength(), encrypted.Length))
+                if (!Evaluate.Equals(param.GetOutputLength(), encrypted.Length))
                     throw new Exception("NtruEncryptTest: output length test failed!");
             }
         }

@@ -2,13 +2,12 @@
 using System;
 using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Utility;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
-using VTDev.Libraries.CEXEngine.CryptoException;
-using VTDev.Libraries.CEXEngine.Tools;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmetic;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Utility;
+using VTDev.Libraries.CEXEngine.CryptoException;
 using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
@@ -365,7 +364,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             // copy the main tree authentication path
             for (int j = 0; j < _numLayer; j++)
             {
-                _currentAuthPaths[j] = ArrayUtils.CreateJagged<byte[][]>(helpCurrentAuthPaths[j].Length, _mdLength);
+                _currentAuthPaths[j] = ArrayEx.CreateJagged<byte[][]>(helpCurrentAuthPaths[j].Length, _mdLength);
                 for (int i = 0; i < helpCurrentAuthPaths[j].Length; i++)
                     Array.Copy(helpCurrentAuthPaths[j][i], 0, _currentAuthPaths[j][i], 0, _mdLength);
             }
@@ -498,7 +497,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                     return false;
 
                 // get authentication path from the signature
-                authPath = ArrayUtils.CreateJagged<byte[][]>(_gmssPS.HeightOfTrees[j], _mdLength);//new byte[gmssPS.GetHeightOfTrees()[j]][mdLength];
+                authPath = ArrayEx.CreateJagged<byte[][]>(_gmssPS.HeightOfTrees[j], _mdLength);//new byte[gmssPS.GetHeightOfTrees()[j]][mdLength];
                 for (int i = 0; i < authPath.Length; i++)
                 {
                     Array.Copy(Signature, nextEntry, authPath[i], 0, _mdLength);
@@ -536,7 +535,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
 
             // now help contains the root of the maintree
             // test if help is equal to the GMSS public key
-            if (Compare.AreEqual(_pubKeyBytes, help))
+            if (Compare.IsEqual(_pubKeyBytes, help))
                 success = true;
 
             return success;

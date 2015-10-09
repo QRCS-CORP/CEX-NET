@@ -2,9 +2,9 @@
 using System;
 using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.CryptoException;
 using VTDev.Libraries.CEXEngine.Utility;
-using VTDev.Libraries.CEXEngine.Tools;
 #endregion
 
 #region License Information
@@ -133,15 +133,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _coeffQuadratic = ArrayUtils.ToArray2x16(data);
+                _coeffQuadratic = ArrayEx.ToArray2x16(data);
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _coeffSingular = ArrayUtils.ToArray2x16(data);
+                _coeffSingular = ArrayEx.ToArray2x16(data);
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _coeffScalar = ArrayUtils.ToArray16(data);
+                _coeffScalar = ArrayEx.ToArray16(data);
             }
             catch (Exception ex)
             {
@@ -221,15 +221,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
             writer.Write(_docLength);
 
-            data = ArrayUtils.ToBytes(_coeffQuadratic);
+            data = ArrayEx.ToBytes(_coeffQuadratic);
             writer.Write(data.Length);
             writer.Write(data);
 
-            data = ArrayUtils.ToBytes(_coeffSingular);
+            data = ArrayEx.ToBytes(_coeffSingular);
             writer.Write(data.Length);
             writer.Write(data);
 
-            data = ArrayUtils.ToBytes(_coeffScalar);
+            data = ArrayEx.ToBytes(_coeffScalar);
             writer.Write(data.Length);
             writer.Write(data);
 
@@ -305,11 +305,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
             if (!_docLength.Equals(other.DocLength))
                 return false;
-            if (!Compare.AreEqual(ArrayUtils.ToBytes(_coeffQuadratic), ArrayUtils.ToBytes(other.CoeffQuadratic)))
+            if (!Compare.IsEqual(ArrayEx.ToBytes(_coeffQuadratic), ArrayEx.ToBytes(other.CoeffQuadratic)))
                 return false;
-            if (!Compare.AreEqual(ArrayUtils.ToBytes(_coeffSingular), ArrayUtils.ToBytes(other.CoeffSingular)))
+            if (!Compare.IsEqual(ArrayEx.ToBytes(_coeffSingular), ArrayEx.ToBytes(other.CoeffSingular)))
                 return false;
-            if (!Compare.AreEqual(ArrayUtils.ToBytes(_coeffScalar), ArrayUtils.ToBytes(other.CoeffScalar)))
+            if (!Compare.IsEqual(ArrayEx.ToBytes(_coeffScalar), ArrayEx.ToBytes(other.CoeffScalar)))
                 return false;
 
             return true;

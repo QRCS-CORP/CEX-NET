@@ -1,6 +1,7 @@
 #region Directives
 using System;
 using System.IO;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.CryptoException;
 using VTDev.Libraries.CEXEngine.Numeric;
 using VTDev.Libraries.CEXEngine.Utility;

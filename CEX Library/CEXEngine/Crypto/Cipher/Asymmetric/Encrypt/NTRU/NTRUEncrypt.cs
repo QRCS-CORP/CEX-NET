@@ -4,12 +4,12 @@ using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Encode;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polynomial;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
-using VTDev.Libraries.CEXEngine.Tools;
-using VTDev.Libraries.CEXEngine.Utility;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 #region License Information
@@ -281,7 +281,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
                 reader.Read(p0, 0, p0.Length);
             }
 
-            if (!Compare.AreEqual(p0, new byte[p0.Length]))
+            if (!Compare.IsEqual(p0, new byte[p0.Length]))
                 throw new CryptoAsymmetricException("NTRUEncrypt:Decrypt", "The message is not followed by zeroes!", new InvalidDataException());
 
             byte[] sData = GetSeed(cm, pub, cb);
@@ -667,7 +667,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
                     writer.SetLength(0);
                     writer.SetLength(hashLen);
                     // get the hash
-                    byte[] hash = _dgtEngine.ComputeHash(ArrayUtils.Concat(Z, IntUtils.IntToBytes(counter)));
+                    byte[] hash = _dgtEngine.ComputeHash(ArrayEx.Concat(Z, IntUtils.IntToBytes(counter)));
                     writer.Write(hash, 0, hash.Length);
                     counter++;
                 }

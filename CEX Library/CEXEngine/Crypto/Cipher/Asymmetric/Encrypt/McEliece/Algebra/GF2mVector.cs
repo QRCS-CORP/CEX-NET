@@ -1,7 +1,7 @@
 ﻿#region Directives
 using System;
 using System.Text;
-using VTDev.Libraries.CEXEngine.Tools;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
@@ -135,7 +135,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (!_field.Equals(otherVec.Field))
                 return false;
 
-            return Compare.AreEqual(IntArrayForm, otherVec.IntArrayForm);
+            return Compare.IsEqual(IntArrayForm, otherVec.IntArrayForm);
         }
 
         /// <summary>

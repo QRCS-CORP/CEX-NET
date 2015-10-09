@@ -99,7 +99,7 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
                 gen.Generate(outBytes, 0, Size);
             }
 
-            if (Compare.AreEqual(outBytes, Output) == false)
+            if (Evaluate.AreEqual(outBytes, Output) == false)
                 throw new Exception("HKDF: Values are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
 
             using (HKDF gen = new HKDF(new SHA256HMAC()))
@@ -108,7 +108,7 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
                 gen.Generate(outBytes, 0, Size);
             }
 
-            if (Compare.AreEqual(outBytes, Output) == false)
+            if (Evaluate.AreEqual(outBytes, Output) == false)
                 throw new Exception("HKDF: Values are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
         }
         #endregion

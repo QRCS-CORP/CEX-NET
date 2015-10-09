@@ -1,9 +1,9 @@
 ﻿#region Directives
 using System;
 using System.Text;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Numeric;
-using VTDev.Libraries.CEXEngine.Tools;
 using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
@@ -398,7 +398,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             GF2Vector otherVec = (GF2Vector)Obj;
             if (Length != otherVec.Length)
                 return false;
-            if (!Compare.AreEqual(_elements, otherVec._elements))
+            if (!Compare.IsEqual(_elements, otherVec._elements))
                 return false;
 
             return true;

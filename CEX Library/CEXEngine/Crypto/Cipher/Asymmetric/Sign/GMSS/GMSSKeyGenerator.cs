@@ -1,15 +1,14 @@
 ﻿#region Directives
 using System;
+using System.Collections.Generic;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmetic;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Utility;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Digest;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.CryptoException;
-using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
-using VTDev.Libraries.CEXEngine.Utility;
-using System.Threading.Tasks;
-using VTDev.Libraries.CEXEngine.Crypto.Digest;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Utility;
-using System.Collections.Generic;
 #endregion
 
 #region License Information
@@ -209,12 +208,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
 
             for (int i = 0; i < _numLayer; i++)
             {
-                currentAuthPaths[i] = ArrayUtils.CreateJagged<byte[][]>(_heightOfTrees[i], _mdLength);//new byte[heightOfTrees[i]][mdLength];
+                currentAuthPaths[i] = ArrayEx.CreateJagged<byte[][]>(_heightOfTrees[i], _mdLength);//new byte[heightOfTrees[i]][mdLength];
                 currentTreehash[i] = new Treehash[_heightOfTrees[i] - _K[i]];
 
                 if (i > 0)
                 {
-                    nextAuthPaths[i - 1] = ArrayUtils.CreateJagged<byte[][]>(_heightOfTrees[i], _mdLength);//new byte[heightOfTrees[i]][mdLength];
+                    nextAuthPaths[i - 1] = ArrayEx.CreateJagged<byte[][]>(_heightOfTrees[i], _mdLength);//new byte[heightOfTrees[i]][mdLength];
                     nextTreehash[i - 1] = new Treehash[_heightOfTrees[i] - _K[i]];
                 }
 
@@ -224,17 +223,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             }
 
             // initialize roots
-            byte[][] currentRoots = ArrayUtils.CreateJagged<byte[][]>(_numLayer, _mdLength);
-            byte[][] nextRoots = ArrayUtils.CreateJagged<byte[][]>(_numLayer - 1, _mdLength);
+            byte[][] currentRoots = ArrayEx.CreateJagged<byte[][]>(_numLayer, _mdLength);
+            byte[][] nextRoots = ArrayEx.CreateJagged<byte[][]>(_numLayer - 1, _mdLength);
             // initialize seeds
-            byte[][] seeds = ArrayUtils.CreateJagged<byte[][]>(_numLayer, _mdLength);
+            byte[][] seeds = ArrayEx.CreateJagged<byte[][]>(_numLayer, _mdLength);
 
             // initialize seeds[] by copying starting-seeds of first trees of each layer
             for (int i = 0; i < _numLayer; i++)
                 Array.Copy(_currentSeeds[i], 0, seeds[i], 0, _mdLength);
 
             // initialize rootSigs
-            _currentRootSigs = ArrayUtils.CreateJagged<byte[][]>(_numLayer - 1, _mdLength);//new byte[numLayer - 1][mdLength];
+            _currentRootSigs = ArrayEx.CreateJagged<byte[][]>(_numLayer - 1, _mdLength);//new byte[numLayer - 1][mdLength];
 
             // calculation of current authpaths and current rootsigs (AUTHPATHS, SIG) from bottom up to the root
             for (int h = _numLayer - 1; h >= 0; h--)
@@ -284,7 +283,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             byte[] btlen = new byte[4];
             Buffer.BlockCopy(len, 0, btlen, 0, btlen.Length);
 
-            GMSSPublicKey pubKey = new GMSSPublicKey(ArrayUtils.Concat(btlen, currentRoots[0]));
+            GMSSPublicKey pubKey = new GMSSPublicKey(ArrayEx.Concat(btlen, currentRoots[0]));
 
             // generate the JDKGMSSPrivateKey
             GMSSPrivateKey privKey = new GMSSPrivateKey(_currentSeeds, _nextNextSeeds, currentAuthPaths, nextAuthPaths, currentTreehash, 
@@ -411,8 +410,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             _K = _gmssParams.K;
 
             // seeds
-            _currentSeeds = ArrayUtils.CreateJagged<byte[][]>(_numLayer, _mdLength);
-            _nextNextSeeds = ArrayUtils.CreateJagged<byte[][]>(_numLayer - 1, _mdLength);
+            _currentSeeds = ArrayEx.CreateJagged<byte[][]>(_numLayer, _mdLength);
+            _nextNextSeeds = ArrayEx.CreateJagged<byte[][]>(_numLayer - 1, _mdLength);
 
             // generation of initial seeds
             for (int i = 0; i < _numLayer; i++)

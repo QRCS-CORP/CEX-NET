@@ -1,12 +1,11 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structures;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.CryptoException;
-using VTDev.Libraries.CEXEngine.Tools;
 using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
@@ -15,7 +14,7 @@ using VTDev.Libraries.CEXEngine.Utility;
 // 
 // Copyright (C) 2015 John Underhill
 // This file is part of the CEX Cryptographic library.
-
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -66,8 +65,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     /// <list type="bullet">
     /// <item><description>The bytes <c>0</c> through <c>3</c> are the Auth-Stage asymmetric parameters OId.</description></item>
     /// <item><description>The bytes <c>4</c> through <c>7</c> are the Primary-Stage asymmetric parameters OId.</description></item>
-    /// <item><description>Bytes <c>8</c> and <c>9</c> identify the Auth-Stage DtmSession symmetric cipher parameters.</description></item>
-    /// <item><description>Bytes <c>10</c> and <c>11</c> identify the Primary-Stage DtmSession symmetric cipher parameters.</description></item>
+    /// <item><description>Bytes <c>8</c> and <c>9</c> identify the Auth-Stage DtmSessionStruct symmetric cipher parameters.</description></item>
+    /// <item><description>Bytes <c>10</c> and <c>11</c> identify the Primary-Stage DtmSessionStruct symmetric cipher parameters.</description></item>
     /// <item><description>The third byte: <c>SubSet</c>, defines the PolyType; simple <c>1</c> or product form <c>2</c>.</description></item>
     /// <item><description>The last <c>4</c> bytes are used to uniquely identify the parameter set.</description></item>
     /// </list>
@@ -249,40 +248,40 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             if (OId[4] != 1 && OId[4] != 2 && OId[4] != 3)
                 throw new CryptoAsymmetricException("DtmParamSets:FromId", "OId is not a valid DtmParameters parameter id!", new ArgumentException());
             // x1
-            if (Compare.AreEqual(OId, GetID(DtmParamNames.X11RNS1R2)))
+            if (Compare.IsEqual(OId, GetID(DtmParamNames.X11RNS1R2)))
                 return (DtmParameters)DTMX11RNS1R2.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X12RNR1R2)))
+            else if (Compare.IsEqual(OId, GetID(DtmParamNames.X12RNR1R2)))
                 return (DtmParameters)DTMX12RNR1R2.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X13RNS1S2)))
+            else if (Compare.IsEqual(OId, GetID(DtmParamNames.X13RNS1S2)))
                 return (DtmParameters)DTMX13RNS1S2.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X14RNT1T2)))
+            else if (Compare.IsEqual(OId, GetID(DtmParamNames.X14RNT1T2)))
                 return (DtmParameters)DTMX14RNT1T2.DeepCopy();
             // x2
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X21RNS1R2)))
+            else if (Compare.IsEqual(OId, GetID(DtmParamNames.X21RNS1R2)))
                 return (DtmParameters)DTMX21RNS1R2.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X22RNR1R2)))
+            else if (Compare.IsEqual(OId, GetID(DtmParamNames.X22RNR1R2)))
                 return (DtmParameters)DTMX22RNR1R2.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X23RNS1S2)))
+            else if (Compare.IsEqual(OId, GetID(DtmParamNames.X23RNS1S2)))
                 return (DtmParameters)DTMX23RNS1S2.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X24RNT1T2)))
+            else if (Compare.IsEqual(OId, GetID(DtmParamNames.X24RNT1T2)))
                 return (DtmParameters)DTMX24RNT1T2.DeepCopy();
             // x3
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X31RNS1R1)))
+            else if (Compare.IsEqual(OId, GetID(DtmParamNames.X31RNS1R1)))
                 return (DtmParameters)DTMX31RNS1R1.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X32RNR1R1)))
+            else if (Compare.IsEqual(OId, GetID(DtmParamNames.X32RNR1R1)))
                 return (DtmParameters)DTMX32RNR1R1.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X33RNS1S1)))
+            else if (Compare.IsEqual(OId, GetID(DtmParamNames.X33RNS1S1)))
                 return (DtmParameters)DTMX33RNS1S1.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X34RNT1T1)))
+            else if (Compare.IsEqual(OId, GetID(DtmParamNames.X34RNT1T1)))
                 return (DtmParameters)DTMX34RNT1T1.DeepCopy();
             // x4
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X41RNS1R1)))
+            else if (Compare.IsEqual(OId, GetID(DtmParamNames.X41RNS1R1)))
                 return (DtmParameters)DTMX41RNS1R1.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X42RNR1R1)))
+            else if (Compare.IsEqual(OId, GetID(DtmParamNames.X42RNR1R1)))
                 return (DtmParameters)DTMX42RNR1R1.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X43RNS1S1)))
+            else if (Compare.IsEqual(OId, GetID(DtmParamNames.X43RNS1S1)))
                 return (DtmParameters)DTMX43RNS1S1.DeepCopy();
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X44RNT1T1)))
+            else if (Compare.IsEqual(OId, GetID(DtmParamNames.X44RNT1T1)))
                 return (DtmParameters)DTMX44RNT1T1.DeepCopy();
             else
                 throw new CryptoAsymmetricException("DtmParamSets:FromId", "OId does not identify a valid param set!", new ArgumentException());
@@ -354,20 +353,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         public static SecurityContexts GetContext(byte[] OId)
         {
             // x1
-            if (Compare.AreEqual(OId, GetID(DtmParamNames.X11RNS1R2)) || Compare.AreEqual(OId, GetID(DtmParamNames.X12RNR1R2)) ||
-                Compare.AreEqual(OId, GetID(DtmParamNames.X13RNS1S2)) || Compare.AreEqual(OId, GetID(DtmParamNames.X14RNT1T2)))
+            if (Compare.IsEqual(OId, GetID(DtmParamNames.X11RNS1R2)) || Compare.IsEqual(OId, GetID(DtmParamNames.X12RNR1R2)) ||
+                Compare.IsEqual(OId, GetID(DtmParamNames.X13RNS1S2)) || Compare.IsEqual(OId, GetID(DtmParamNames.X14RNT1T2)))
                 return SecurityContexts.X1;
             // x2
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X21RNS1R2)) || Compare.AreEqual(OId, GetID(DtmParamNames.X22RNR1R2)) ||
-                Compare.AreEqual(OId, GetID(DtmParamNames.X23RNS1S2)) || Compare.AreEqual(OId, GetID(DtmParamNames.X24RNT1T2)))
+            else if (Compare.IsEqual(OId, GetID(DtmParamNames.X21RNS1R2)) || Compare.IsEqual(OId, GetID(DtmParamNames.X22RNR1R2)) ||
+                Compare.IsEqual(OId, GetID(DtmParamNames.X23RNS1S2)) || Compare.IsEqual(OId, GetID(DtmParamNames.X24RNT1T2)))
                 return SecurityContexts.X2;
             // x3
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X31RNS1R1)) || Compare.AreEqual(OId, GetID(DtmParamNames.X32RNR1R1)) ||
-                Compare.AreEqual(OId, GetID(DtmParamNames.X33RNS1S1)) || Compare.AreEqual(OId, GetID(DtmParamNames.X34RNT1T1)))
+            else if (Compare.IsEqual(OId, GetID(DtmParamNames.X31RNS1R1)) || Compare.IsEqual(OId, GetID(DtmParamNames.X32RNR1R1)) ||
+                Compare.IsEqual(OId, GetID(DtmParamNames.X33RNS1S1)) || Compare.IsEqual(OId, GetID(DtmParamNames.X34RNT1T1)))
                 return SecurityContexts.X3;
             // x4
-            else if (Compare.AreEqual(OId, GetID(DtmParamNames.X41RNS1R1)) || Compare.AreEqual(OId, GetID(DtmParamNames.X42RNR1R1)) ||
-                Compare.AreEqual(OId, GetID(DtmParamNames.X43RNS1S1)) || Compare.AreEqual(OId, GetID(DtmParamNames.X44RNT1T1)))
+            else if (Compare.IsEqual(OId, GetID(DtmParamNames.X41RNS1R1)) || Compare.IsEqual(OId, GetID(DtmParamNames.X42RNR1R1)) ||
+                Compare.IsEqual(OId, GetID(DtmParamNames.X43RNS1S1)) || Compare.IsEqual(OId, GetID(DtmParamNames.X44RNT1T1)))
                 return SecurityContexts.X4;
             else
                 throw new CryptoAsymmetricException("DtmParamSets:GetContext", "The OId is unknown!", new ArgumentException());
@@ -430,70 +429,70 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             {
                 // x1
                 case DtmParamNames.X11RNS1R2:
-                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1931),
                         new byte[] { (byte)BlockCiphers.SPX, 0, (byte)BlockCiphers.RHX, (byte)Digests.Keccak512, 1, 1, 0, 0 });
                 case DtmParamNames.X12RNR1R2:
-                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1931),
                         new byte[] { (byte)BlockCiphers.RDX, 0, (byte)BlockCiphers.RHX, (byte)Digests.Keccak512, 1, 2, 0, 0 });
                 case DtmParamNames.X13RNS1S2:
-                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1931),
                         new byte[] { (byte)BlockCiphers.SPX, 0, (byte)BlockCiphers.SHX, (byte)Digests.Keccak512, 1, 3, 0, 0 });
                 case DtmParamNames.X14RNT1T2:
-                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1931),
                         new byte[] { (byte)BlockCiphers.TFX, 0, (byte)BlockCiphers.THX, (byte)Digests.Keccak512, 1, 4, 0, 0 });
                 // x2
                 case DtmParamNames.X21RNS1R2:
-                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1499EP1),
                         new byte[] { (byte)BlockCiphers.SPX, 0, (byte)BlockCiphers.RHX, (byte)Digests.Skein512, 2, 1, 0, 0 });
                 case DtmParamNames.X22RNR1R2:
-                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1499EP1),
                         new byte[] { (byte)BlockCiphers.RDX, 0, (byte)BlockCiphers.RHX, (byte)Digests.Skein512, 2, 2, 0, 0 });
                 case DtmParamNames.X23RNS1S2:
-                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1499EP1),
                         new byte[] { (byte)BlockCiphers.SPX, 0, (byte)BlockCiphers.SHX, (byte)Digests.Skein512, 2, 3, 0, 0 });
                 case DtmParamNames.X24RNT1T2:
-                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1499EP1),
                         new byte[] { (byte)BlockCiphers.TFX, 0, (byte)BlockCiphers.THX, (byte)Digests.Skein512, 2, 4, 0, 0 });
                 // x3
                 case DtmParamNames.X31RNS1R1:
-                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1087EP2),
                         new byte[] { (byte)BlockCiphers.SPX, 0, (byte)BlockCiphers.RDX, 0, 3, 1, 0, 0 });
                 case DtmParamNames.X32RNR1R1:
-                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1087EP2),
                         new byte[] { (byte)BlockCiphers.RDX, 0, (byte)BlockCiphers.RDX, 0, 3, 2, 0, 0 });
                 case DtmParamNames.X33RNS1S1:
-                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1087EP2),
                         new byte[] { (byte)BlockCiphers.SPX, 0, (byte)BlockCiphers.SPX, 0, 3, 3, 0, 0 });
                 case DtmParamNames.X34RNT1T1:
-                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1087EP2),
                         new byte[] { (byte)BlockCiphers.TFX, 0, (byte)BlockCiphers.TFX, 0, 3, 4, 0, 0 });
                 // x4
                 case DtmParamNames.X41RNS1R1:
-                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FA2011743),
                         new byte[] { (byte)BlockCiphers.SPX, 0, (byte)BlockCiphers.RDX, 0, 4, 1, 0, 0 });
                 case DtmParamNames.X42RNR1R1:
-                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FA2011743),
                         new byte[] { (byte)BlockCiphers.RDX, 0, (byte)BlockCiphers.RDX, 0, 4, 2, 0, 0 });
                 case DtmParamNames.X43RNS1S1:
-                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FA2011743),
                         new byte[] { (byte)BlockCiphers.SPX, 0, (byte)BlockCiphers.SPX, 0, 4, 3, 0, 0 });
                 case DtmParamNames.X44RNT1T1:
-                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FA2011743),
                         new byte[] { (byte)BlockCiphers.TFX, 0, (byte)BlockCiphers.TFX, 0, 4, 4, 0, 0 });
                 default:
@@ -523,9 +522,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             // the primary-stage asymmetric ciphers parameter oid
             NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.CX1931, 0.2),
             // the auth-stage symmetric ciphers description
-            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
+            new DtmSessionStruct(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
             // the primary-stage symmetric ciphers description
-            new DtmSession(BlockCiphers.RHX, 208, IVSizes.V128, RoundCounts.R22, Digests.Keccak512),
+            new DtmSessionStruct(BlockCiphers.RHX, 208, IVSizes.V128, RoundCounts.R22, Digests.Keccak512),
             // the random generator used to pad messages
             Prngs.CSPRng,
             // the maximum number of random bytes appended to a public key (actual number of bytes is chosen at random)
@@ -562,8 +561,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             GetID(DtmParamNames.X12RNR1R2),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
             NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.CX1931, 0.2),
-            new DtmSession(BlockCiphers.RDX, 32, IVSizes.V128, RoundCounts.R14),
-            new DtmSession(BlockCiphers.RHX, 208, IVSizes.V128, RoundCounts.R22, Digests.Keccak512),
+            new DtmSessionStruct(BlockCiphers.RDX, 32, IVSizes.V128, RoundCounts.R14),
+            new DtmSessionStruct(BlockCiphers.RHX, 208, IVSizes.V128, RoundCounts.R22, Digests.Keccak512),
             Prngs.CSPRng,
             1000,
             1000,
@@ -586,8 +585,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             GetID(DtmParamNames.X13RNS1S2),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
             NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.CX1931, 0.2),
-            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
-            new DtmSession(BlockCiphers.SHX, 208, IVSizes.V128, RoundCounts.R40, Digests.Keccak512),
+            new DtmSessionStruct(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
+            new DtmSessionStruct(BlockCiphers.SHX, 208, IVSizes.V128, RoundCounts.R40, Digests.Keccak512),
             Prngs.CSPRng,
             1000,
             1000,
@@ -610,8 +609,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             GetID(DtmParamNames.X14RNT1T2),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
             NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.CX1931, 0.2),
-            new DtmSession(BlockCiphers.TFX, 32, IVSizes.V128, RoundCounts.R16),
-            new DtmSession(BlockCiphers.THX, 208, IVSizes.V128, RoundCounts.R20, Digests.Keccak512),
+            new DtmSessionStruct(BlockCiphers.TFX, 32, IVSizes.V128, RoundCounts.R16),
+            new DtmSessionStruct(BlockCiphers.THX, 208, IVSizes.V128, RoundCounts.R20, Digests.Keccak512),
             Prngs.CSPRng,
             1000,
             1000,
@@ -636,8 +635,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             GetID(DtmParamNames.X21RNS1R2),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
             NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FE1499EP1, 0.2),
-            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
-            new DtmSession(BlockCiphers.RHX, 192, IVSizes.V128, RoundCounts.R22, Digests.Skein512),
+            new DtmSessionStruct(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
+            new DtmSessionStruct(BlockCiphers.RHX, 192, IVSizes.V128, RoundCounts.R22, Digests.Skein512),
             Prngs.CSPRng,
             1000,
             1000,
@@ -660,8 +659,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             GetID(DtmParamNames.X22RNR1R2),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
             NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FE1499EP1, 0.2),
-            new DtmSession(BlockCiphers.RDX, 32, IVSizes.V128, RoundCounts.R14),
-            new DtmSession(BlockCiphers.RHX, 192, IVSizes.V128, RoundCounts.R22, Digests.Skein512),
+            new DtmSessionStruct(BlockCiphers.RDX, 32, IVSizes.V128, RoundCounts.R14),
+            new DtmSessionStruct(BlockCiphers.RHX, 192, IVSizes.V128, RoundCounts.R22, Digests.Skein512),
             Prngs.CSPRng,
             1000,
             1000,
@@ -684,8 +683,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             GetID(DtmParamNames.X23RNS1S2),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
             NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FE1499EP1, 0.2),
-            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
-            new DtmSession(BlockCiphers.SHX, 192, IVSizes.V128, RoundCounts.R40, Digests.Skein512),
+            new DtmSessionStruct(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
+            new DtmSessionStruct(BlockCiphers.SHX, 192, IVSizes.V128, RoundCounts.R40, Digests.Skein512),
             Prngs.CSPRng,
             1000,
             1000,
@@ -708,8 +707,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             GetID(DtmParamNames.X24RNT1T2),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
             NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FE1499EP1, 0.2),
-            new DtmSession(BlockCiphers.TFX, 32, IVSizes.V128, RoundCounts.R16),
-            new DtmSession(BlockCiphers.THX, 192, IVSizes.V128, RoundCounts.R20, Digests.Skein512),
+            new DtmSessionStruct(BlockCiphers.TFX, 32, IVSizes.V128, RoundCounts.R16),
+            new DtmSessionStruct(BlockCiphers.THX, 192, IVSizes.V128, RoundCounts.R20, Digests.Skein512),
             Prngs.CSPRng,
             1000,
             1000,
@@ -734,8 +733,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             GetID(DtmParamNames.X31RNS1R1),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
             NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FE1087EP2, 0.2),
-            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
-            new DtmSession(BlockCiphers.RDX, 64, IVSizes.V128, RoundCounts.R22),
+            new DtmSessionStruct(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
+            new DtmSessionStruct(BlockCiphers.RDX, 64, IVSizes.V128, RoundCounts.R22),
             Prngs.CSPRng,
             1000,
             1000,
@@ -758,8 +757,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             GetID(DtmParamNames.X32RNR1R1),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
             NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FE1087EP2, 0.2),
-            new DtmSession(BlockCiphers.RDX, 32, IVSizes.V128, RoundCounts.R14),
-            new DtmSession(BlockCiphers.RDX, 64, IVSizes.V128, RoundCounts.R22),
+            new DtmSessionStruct(BlockCiphers.RDX, 32, IVSizes.V128, RoundCounts.R14),
+            new DtmSessionStruct(BlockCiphers.RDX, 64, IVSizes.V128, RoundCounts.R22),
             Prngs.CSPRng,
             1000,
             1000,
@@ -782,8 +781,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             GetID(DtmParamNames.X33RNS1S1),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
             NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FE1087EP2, 0.2),
-            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
-            new DtmSession(BlockCiphers.SPX, 64, IVSizes.V128, RoundCounts.R32),
+            new DtmSessionStruct(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
+            new DtmSessionStruct(BlockCiphers.SPX, 64, IVSizes.V128, RoundCounts.R32),
             Prngs.CSPRng,
             1000,
             1000,
@@ -806,8 +805,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             GetID(DtmParamNames.X34RNT1T1),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
             NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FE1087EP2, 0.2),
-            new DtmSession(BlockCiphers.TFX, 32, IVSizes.V128, RoundCounts.R16),
-            new DtmSession(BlockCiphers.TFX, 64, IVSizes.V128, RoundCounts.R20),
+            new DtmSessionStruct(BlockCiphers.TFX, 32, IVSizes.V128, RoundCounts.R16),
+            new DtmSessionStruct(BlockCiphers.TFX, 64, IVSizes.V128, RoundCounts.R20),
             Prngs.CSPRng,
             1000,
             1000,
@@ -830,8 +829,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             GetID(DtmParamNames.X41RNS1R1),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
             NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FA2011743, 0.2),
-            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
-            new DtmSession(BlockCiphers.RDX, 32, IVSizes.V128, RoundCounts.R14),
+            new DtmSessionStruct(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
+            new DtmSessionStruct(BlockCiphers.RDX, 32, IVSizes.V128, RoundCounts.R14),
             Prngs.CSPRng);
 
         /// <summary>
@@ -843,8 +842,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             GetID(DtmParamNames.X42RNR1R1),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
             NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FA2011743, 0.2),
-            new DtmSession(BlockCiphers.RDX, 32, IVSizes.V128, RoundCounts.R14),
-            new DtmSession(BlockCiphers.RDX, 32, IVSizes.V128, RoundCounts.R14),
+            new DtmSessionStruct(BlockCiphers.RDX, 32, IVSizes.V128, RoundCounts.R14),
+            new DtmSessionStruct(BlockCiphers.RDX, 32, IVSizes.V128, RoundCounts.R14),
             Prngs.CSPRng);
 
         /// <summary>
@@ -856,8 +855,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             GetID(DtmParamNames.X43RNS1S1),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
             NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FA2011743, 0.2),
-            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
-            new DtmSession(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
+            new DtmSessionStruct(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
+            new DtmSessionStruct(BlockCiphers.SPX, 32, IVSizes.V128, RoundCounts.R32),
             Prngs.CSPRng);
 
         /// <summary>
@@ -869,8 +868,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             GetID(DtmParamNames.X44RNT1T1),
             RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
             NTRUParamSets.GetFormatted(NTRUParamSets.NTRUParamNames.FA2011743, 0.2),
-            new DtmSession(BlockCiphers.TFX, 32, IVSizes.V128, RoundCounts.R16),
-            new DtmSession(BlockCiphers.TFX, 32, IVSizes.V128, RoundCounts.R16),
+            new DtmSessionStruct(BlockCiphers.TFX, 32, IVSizes.V128, RoundCounts.R16),
+            new DtmSessionStruct(BlockCiphers.TFX, 32, IVSizes.V128, RoundCounts.R16),
             Prngs.CSPRng);
         #endregion
         #endregion

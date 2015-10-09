@@ -80,7 +80,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
             if (File.Exists(path))
                 File.Delete(path);
 
-            if ((Compare.AreEqual(x1, y1) == false))
+            if ((Evaluate.AreEqual(x1, y1) == false))
                 throw new Exception("Failed! Mac outputs are not equal");
 
             OnProgress(new TestEventArgs("Passed round 1 comparisons.."));
@@ -92,7 +92,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
             if (File.Exists(path))
                 File.Delete(path);
 
-            if ((Compare.AreEqual(x1, y1) == false))
+            if ((Evaluate.AreEqual(x1, y1) == false))
                 throw new Exception("Failed! Mac outputs are not equal");
 
             OnProgress(new TestEventArgs("Passed round 2 comparisons.."));
@@ -104,7 +104,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
             if (File.Exists(path))
                 File.Delete(path);
 
-            if ((Compare.AreEqual(x1, y1) == false))
+            if ((Evaluate.AreEqual(x1, y1) == false))
                 throw new Exception("Failed! Mac outputs are not equal");
 
             OnProgress(new TestEventArgs("Passed round 3 comparisons.."));
@@ -157,7 +157,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
             using (SHA512HMAC mac2 = new SHA512HMAC(IKm))
                 hash2 = mac2.ComputeMac(data);
 
-            return Compare.AreEqual(hash1, hash2);
+            return Evaluate.AreEqual(hash1, hash2);
         }
         #endregion
     }

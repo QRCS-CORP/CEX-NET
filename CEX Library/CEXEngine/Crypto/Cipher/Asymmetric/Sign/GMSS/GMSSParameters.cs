@@ -2,9 +2,9 @@
 using System;
 using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.CryptoException;
-using VTDev.Libraries.CEXEngine.Tools;
 using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
@@ -222,11 +222,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                 _rndEngineType = (Prngs)reader.ReadByte();
                 _numLayers = reader.ReadInt32();
                 len = reader.ReadInt32();
-                _heightOfTrees = ArrayUtils.ToArray32(reader.ReadBytes(len));
+                _heightOfTrees = ArrayEx.ToArray32(reader.ReadBytes(len));
                 len = reader.ReadInt32();
-                _winternitzParameter = ArrayUtils.ToArray32(reader.ReadBytes(len));
+                _winternitzParameter = ArrayEx.ToArray32(reader.ReadBytes(len));
                 len = reader.ReadInt32();
-                _K = ArrayUtils.ToArray32(reader.ReadBytes(len));
+                _K = ArrayEx.ToArray32(reader.ReadBytes(len));
             }
             catch (Exception ex)
             {
@@ -341,15 +341,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             writer.Write((byte)_rndEngineType);
             writer.Write(_numLayers);
 
-            data = ArrayUtils.ToBytes(_heightOfTrees);
+            data = ArrayEx.ToBytes(_heightOfTrees);
             writer.Write(data.Length);
             writer.Write(data);
 
-            data = ArrayUtils.ToBytes(_winternitzParameter);
+            data = ArrayEx.ToBytes(_winternitzParameter);
             writer.Write(data.Length);
             writer.Write(data);
 
-            data = ArrayUtils.ToBytes(_K);
+            data = ArrayEx.ToBytes(_K);
             writer.Write(data.Length);
             writer.Write(data);
             writer.Seek(0, SeekOrigin.Begin);
@@ -422,9 +422,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                     throw new CryptoAsymmetricException("GMSSParameters:Ctor", "Wrong parameter H or w (H > 3 and w > 1 required)!", new ArgumentException());
             }
 
-            _heightOfTrees = ArrayUtils.Clone(HeightOfTrees);
-            _winternitzParameter = ArrayUtils.Clone(WinternitzParameter);
-            _K = ArrayUtils.Clone(K);
+            _heightOfTrees = ArrayEx.Clone(HeightOfTrees);
+            _winternitzParameter = ArrayEx.Clone(WinternitzParameter);
+            _K = ArrayEx.Clone(K);
         }
         #endregion
 
@@ -467,11 +467,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
 
             GMSSParameters other = (GMSSParameters)Obj;
 
-            if (!Compare.AreEqual(_heightOfTrees, other.HeightOfTrees))
+            if (!Compare.IsEqual(_heightOfTrees, other.HeightOfTrees))
                 return false;
-            if (!Compare.AreEqual(_winternitzParameter, other.WinternitzParameter))
+            if (!Compare.IsEqual(_winternitzParameter, other.WinternitzParameter))
                 return false;
-            if (!Compare.AreEqual(_K, other.K))
+            if (!Compare.IsEqual(_K, other.K))
                 return false;
             if (_numLayers != other.NumLayers)
                 return false;
