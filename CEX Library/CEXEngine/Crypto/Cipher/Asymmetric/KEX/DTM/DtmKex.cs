@@ -394,6 +394,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// </summary>
         private const int EXCHTIMEOUT = 1000 * 240;
         /// <summary>
+        /// The keepalive timer interval
+        /// </summary>
+        private const int PULSEINTERVAL = 60000000; // ToDo: 60 * 1000
+        /// <summary>
         /// The maximum size of a single message
         /// </summary>
         private const int MAXRCVBUFFER = 1024 * 1000 * 240;
@@ -916,6 +920,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             _clientSocket = new TcpSocket();
             _clientSocket.Connected += new TcpSocket.ConnectedDelegate(OnClientConnected);
             _clientSocket.DataReceived += new TcpSocket.DataReceivedDelegate(OnDataReceived);
+            _clientSocket.TcpSocketError += new TcpSocket.TcpSocketErrorDelegate(OnTcpSocketError);
 
             try
             {
@@ -947,6 +952,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             _clientSocket = new TcpSocket();
             _clientSocket.Connected += new TcpSocket.ConnectedDelegate(OnClientConnected);
             _clientSocket.DataReceived += new TcpSocket.DataReceivedDelegate(OnDataReceived);
+            _clientSocket.TcpSocketError += new TcpSocket.TcpSocketErrorDelegate(OnTcpSocketError);
 
             try
             {
@@ -1059,6 +1065,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             _clientSocket = new TcpSocket();
             _clientSocket.Connected += new TcpSocket.ConnectedDelegate(OnServerConnected);
             _clientSocket.DataReceived += new TcpSocket.DataReceivedDelegate(OnDataReceived);
+            _clientSocket.TcpSocketError += new TcpSocket.TcpSocketErrorDelegate(OnTcpSocketError);
 
             try
             {
@@ -1088,6 +1095,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             _clientSocket = new TcpSocket();
             _clientSocket.Connected += new TcpSocket.ConnectedDelegate(OnServerConnected);
             _clientSocket.DataReceived += new TcpSocket.DataReceivedDelegate(OnDataReceived);
+            _clientSocket.TcpSocketError += new TcpSocket.TcpSocketErrorDelegate(OnTcpSocketError);
 
             try
             {
@@ -1401,28 +1409,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
                     // message stream
                     case DtmPacketFlags.Message:
                         {
-                            // process message
-                            switch ((DtmMessageFlags)pktHdr.PacketFlag)
+                            try
                             {
-                                case DtmMessageFlags.Text:
-                                    {
-                                        try
-                                        {
-                                            // received stream data
-                                            ReceiveMessage(PacketStream);
-                                        }
-                                        catch (Exception)
-                                        {
-                                            // packet corrupted, request a retransmission and exit
-                                            Transmit(DtmPacketFlags.Service, (short)DtmServiceFlags.Resend, pktHdr.Sequence);
-                                            return;
-                                        }
-
-                                        // echo the packet to remove it from remote buffer
-                                        Transmit(DtmPacketFlags.Service, (short)DtmServiceFlags.Echo, pktHdr.Sequence);
-                                        break;
-                                    }
+                                // received stream data
+                                ReceiveMessage(PacketStream);
                             }
+                            catch (Exception)
+                            {
+                                // packet corrupted, request a retransmission and exit
+                                Transmit(DtmPacketFlags.Service, (short)DtmServiceFlags.Resend, pktHdr.Sequence);
+                                return;
+                            }
+
+                            // echo the packet to remove it from remote buffer
+                            Transmit(DtmPacketFlags.Service, (short)DtmServiceFlags.Echo, pktHdr.Sequence);
                             break;
                         }
                     // service messages
@@ -1934,7 +1934,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             // return the data
             if (DataReceived != null)
             {
-                DtmDataReceivedArgs args = new DtmDataReceivedArgs(new MemoryStream(dec), 0);
+                DtmDataReceivedArgs args = new DtmDataReceivedArgs(new MemoryStream(dec), pktHdr.PacketFlag);
                 DataReceived(this, args);
             }
         }
@@ -2302,6 +2302,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// </remarks>
         private void ProcessConnect(MemoryStream PacketStream)
         {
+            _exchangeState = DtmExchangeFlags.Connect;
             // seek past header
             PacketStream.Seek(DtmPacketStruct.GetHeaderSize(), SeekOrigin.Begin);
             // get the clients id structure
@@ -2311,7 +2312,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             if (IdentityReceived != null)
             {
                 DtmIdentityArgs args = new DtmIdentityArgs(DtmExchangeFlags.Connect, (long)DtmErrorFlags.ConnectionRefused, _cltIdentity);
-
                 IdentityReceived(this, args);
 
                 if (args.Cancel)
@@ -2418,6 +2418,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// </remarks>
         private void ProcessInit(MemoryStream PacketStream)
         {
+            _exchangeState = DtmExchangeFlags.Init;
             // seek past header
             PacketStream.Seek(DtmPacketStruct.GetHeaderSize(), SeekOrigin.Begin);
             // get the clients id structure
@@ -2472,6 +2473,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// <param name="PacketStream">A Stream containing the raw packet data</param>
         private void ProcessPreAuth(MemoryStream PacketStream)
         {
+            _exchangeState = DtmExchangeFlags.PreAuth;
             // seek past header
             PacketStream.Seek(DtmPacketStruct.GetHeaderSize(), SeekOrigin.Begin);
             // get client params
@@ -2515,6 +2517,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// <param name="PacketStream">A Stream containing the raw packet data</param>
         private void ProcessAuthEx(MemoryStream PacketStream)
         {
+            _exchangeState = DtmExchangeFlags.AuthEx;
             // get the header
             DtmPacketStruct pktHdr = new DtmPacketStruct(PacketStream);
             // read the data
@@ -2558,6 +2561,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// <param name="PacketStream">A Stream containing the raw packet data</param>
         private void ProcessAuth(MemoryStream PacketStream)
         {
+            _exchangeState = DtmExchangeFlags.Auth;
             // get the header
             DtmPacketStruct pktHdr = new DtmPacketStruct(PacketStream);
             byte[] data = new byte[pktHdr.PayloadLength];
@@ -2595,6 +2599,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// <returns>A raw packet containing the packet header, and the servers private identity</returns>
         private MemoryStream CreateSync()
         {
+            _exchangeState = DtmExchangeFlags.Sync;
             // change to primary parameters
             _srvIdentity = new DtmIdentityStruct(_dtmHost.SecretId, _dtmParameters.PrimaryPkeId, _dtmParameters.PrimarySession, 0);
             // serialize identity
@@ -2618,6 +2623,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// <param name="PacketStream">A Stream containing the raw packet data</param>
         private void ProcessSync(MemoryStream PacketStream)
         {
+            _exchangeState = DtmExchangeFlags.Sync;
             // get the header
             DtmPacketStruct pktHdr = new DtmPacketStruct(PacketStream);
             // read the data
@@ -2685,6 +2691,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// <param name="PacketStream">A Stream containing the raw packet data</param>
         private void ProcessPrimeEx(MemoryStream PacketStream)
         {
+            _exchangeState = DtmExchangeFlags.PrimeEx;
             // get the header
             DtmPacketStruct pktHdr = new DtmPacketStruct(PacketStream);
             // read the data
@@ -2736,6 +2743,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// <param name="PacketStream">A Stream containing the raw packet data</param>
         private void ProcessPrimary(MemoryStream PacketStream)
         {
+            _exchangeState = DtmExchangeFlags.Primary;
             // get the header
             DtmPacketStruct pktHdr = new DtmPacketStruct(PacketStream);
             // read the data
@@ -2782,6 +2790,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// <param name="PacketStream">A Stream containing the raw packet data</param>
         private void ProcessEstablish(MemoryStream PacketStream)
         {
+            _exchangeState = DtmExchangeFlags.Established;
             // clear the auth processors
             _srvSymProcessor.Dispose();
             _cltSymProcessor.Dispose();
@@ -3011,7 +3020,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             _pulseTimer = new System.Timers.Timer();
             _pulseTimer.Elapsed += new ElapsedEventHandler(OnTimerPulse);
             // 1 second intervals
-            _pulseTimer.Interval = 1000;
+            _pulseTimer.Interval = PULSEINTERVAL;
             _pulseTimer.Start();
         }
 
@@ -3707,6 +3716,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             }
 
             return Message;
+        }
+        #endregion
+
+        #region Event Handlers
+        /// <summary>
+        /// Forwards any TCP errors originating from the client
+        /// </summary>
+        private void OnTcpSocketError(object owner, CryptoSocketException ex)
+        {
+            if (SessionError != null)
+                SessionError(this, new DtmErrorArgs(ex, DtmErrorSeverityFlags.Connection));
         }
         #endregion
 

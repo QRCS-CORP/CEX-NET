@@ -24,7 +24,7 @@
         /// <summary>
         /// An implementation of a Hash based Key Derivation PKCS#5 Version 2
         /// </summary>
-        PKCS5,
+        PBKDF2,
         /// <summary>
         /// An implementation of a Salsa20 Counter based DRBG
         /// </summary>

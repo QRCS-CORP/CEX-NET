@@ -45,22 +45,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <summary>
         /// Identical to the standard Skein initialization.
         /// </summary>
-        Normal,
+        Normal = 0,
         /// <summary>
         /// Creates the initial state with zeros instead of the configuration block, then initializes the hash.
         /// This does not start a new UBI block type, and must be done manually.
         /// </summary>
-        ZeroedState,
+        ZeroedState = 1,
         /// <summary>
         /// Leaves the initial state set to its previous value, which is then chained with subsequent block transforms.
         /// This does not start a new UBI block type, and must be done manually.
         /// </summary>
-        ChainedState,
+        ChainedState = 2,
         /// <summary>
         /// Creates the initial state by chaining the previous state value with the config block, then initializes the hash.
         /// This starts a new UBI block type with the standard Payload type.
         /// </summary>
-        ChainedConfig
+        ChainedConfig = 3
     }
 
     #region UbiTweak
@@ -111,12 +111,32 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         private const UInt64 T1FlagFinal = unchecked((UInt64)1 << 63);
         private const UInt64 T1FlagFirst = unchecked((UInt64)1 << 62);
 
+        private UInt64[] _tweak;
+
         /// <summary>
         /// Initialize this class
         /// </summary>
         public UbiTweak()
         {
-            Tweak = new UInt64[2];
+            _tweak = new UInt64[2];
+        }
+
+        /// <summary>
+        /// Gets or sets the number of bits processed so far, inclusive.
+        /// </summary>
+        public Int64 BitsProcessed
+        {
+            get { return (long)_tweak[0]; }
+            set { _tweak[0] = (ulong)value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the current UBI block type.
+        /// </summary>
+        public UbiType BlockType
+        {
+            get { return (UbiType)(_tweak[1] >> 56); }
+            set { _tweak[1] = (UInt64)value << 56; }
         }
 
         /// <summary>
@@ -124,11 +144,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// </summary>
         public bool IsFirstBlock
         {
-            get { return (Tweak[1] & T1FlagFirst) != 0; }
+            get { return (_tweak[1] & T1FlagFirst) != 0; }
             set
             {
                 long mask = value ? 1 : 0;
-                Tweak[1] = (Tweak[1] & ~T1FlagFirst) | ((ulong)-mask & T1FlagFirst);
+                _tweak[1] = (_tweak[1] & ~T1FlagFirst) | ((ulong)-mask & T1FlagFirst);
             }
         }
 
@@ -137,46 +157,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// </summary>
         public bool IsFinalBlock
         {
-            get { return (Tweak[1] & T1FlagFinal) != 0; }
+            get { return (_tweak[1] & T1FlagFinal) != 0; }
             set
             {
                 long mask = value ? 1 : 0;
-                Tweak[1] = (Tweak[1] & ~T1FlagFinal) | ((ulong)-mask & T1FlagFinal);
+                _tweak[1] = (_tweak[1] & ~T1FlagFinal) | ((ulong)-mask & T1FlagFinal);
             }
-        }
-
-        /// <summary>
-        /// Gets or sets the current tree level.
-        /// </summary>
-        public byte TreeLevel
-        {
-            get { return (byte)((Tweak[1] >> 48) & 0x3f); }
-            set
-            {
-                if (value > 63)
-                    throw new CryptoHashException("Skein:TreeLevel", "Tree level must be between 0 and 63, inclusive.", new Exception());
-
-                Tweak[1] &= ~((UInt64)0x3f << 48);
-                Tweak[1] |= (UInt64)value << 48;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the number of bits processed so far, inclusive.
-        /// </summary>
-        public Int64 BitsProcessed
-        {
-            get { return (long)Tweak[0]; }
-            set { Tweak[0] = (ulong)value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the current UBI block type.
-        /// </summary>
-        public UbiType BlockType
-        {
-            get { return (UbiType)(Tweak[1] >> 56); }
-            set { Tweak[1] = (UInt64)value << 56; }
         }
 
         /// <summary>
@@ -191,10 +177,30 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         }
 
         /// <summary>
+        /// Gets or sets the current tree level.
+        /// </summary>
+        public byte TreeLevel
+        {
+            get { return (byte)((_tweak[1] >> 48) & 0x3f); }
+            set
+            {
+                if (value > 63)
+                    throw new CryptoHashException("Skein:TreeLevel", "Tree level must be between 0 and 63, inclusive.", new Exception());
+
+                _tweak[1] &= ~((UInt64)0x3f << 48);
+                _tweak[1] |= (UInt64)value << 48;
+            }
+        }
+
+        /// <summary>
         /// The current Threefish tweak value.
         /// </summary>
         [CLSCompliant(false)]
-        public UInt64[] Tweak { get; private set; }
+        public UInt64[] Tweak 
+        {
+            get { return _tweak; }
+            private set { _tweak = value; }
+        }
     }
     #endregion
 
@@ -251,20 +257,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         private const int BLOCK_SIZE = 32;
         private const int DIGEST_SIZE = 32;
         private const int STATE_SIZE = 256;
+        private const int STATE_BYTES = STATE_SIZE / 8;
+		private const int STATE_WORDS = STATE_SIZE / 64;
+        private const int STATE_OUTPUT = (STATE_SIZE + 7) / 8;
         #endregion
 
         #region Fields
-        private int _bytesFilled; 
         private Threefish256 _blockCipher;
+        private int _bytesFilled; 
         private UInt64[] _cipherInput;
-        private int _cipherStateBits;
-        private int _cipherStateBytes;
-        private int _cipherStateWords;
+        private UInt64[] _configString;
+        private UInt64[] _configValue;
+        private UInt64[] _digestState;
         private byte[] _inputBuffer;
+        private SkeinInitializationType _initializationType;
         private bool _isDisposed = false;
         private int _outputBytes;
-        private UInt64[] _digestState;
-        private int _stateSize;
+        private UbiTweak _ubiParameters;
         #endregion
 
         #region Properties
@@ -280,13 +289,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// The post-chain configuration value
         /// </summary>
         [CLSCompliant(false)]
-        public UInt64[] ConfigValue { get; private set; }
+        public UInt64[] ConfigValue 
+        {
+            get { return _configValue; }
+            private set { _configValue = value; }
+        }
 
         /// <summary>
         /// The pre-chain configuration string
         /// </summary>
         [CLSCompliant(false)]
-        public UInt64[] ConfigString { get; private set; }
+        public UInt64[] ConfigString 
+        {
+            get { return _configString; }
+            private set { _configString = value; }
+        }
 
         /// <summary>
         /// Get: Size of returned digest in bytes
@@ -299,7 +316,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <summary>
         /// The initialization type
         /// </summary>
-        public SkeinInitializationType InitializationType { get; private set; }
+        public SkeinInitializationType InitializationType 
+        {
+            get { return _initializationType; }
+            private set { _initializationType = value; }
+        }
 
         /// <summary>
         /// Get: The Digest name
@@ -314,13 +335,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// </summary>
         public int StateSize
         {
-            get { return _cipherStateBits; }
+            get { return STATE_SIZE; }
         }
 
         /// <summary>
         /// Ubi Tweak parameters
         /// </summary>
-        public UbiTweak UbiParameters { get; private set; }
+        public UbiTweak UbiParameters 
+        {
+            get { return _ubiParameters; }
+            private set { _ubiParameters = value; }
+        }
         #endregion
 
         #region Constructor
@@ -331,23 +356,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="InitializationType">Digest initialization type <see cref="SkeinInitializationType"/></param>
         public Skein256(SkeinInitializationType InitializationType = SkeinInitializationType.Normal)
         {
-            this.InitializationType = InitializationType;
-
-            _cipherStateBits = STATE_SIZE;
-            _cipherStateBytes = STATE_SIZE / 8;
-            _cipherStateWords = STATE_SIZE / 64;
+            _initializationType = InitializationType;
             _outputBytes = (STATE_SIZE + 7) / 8;
             _blockCipher = new Threefish256();
+            // allocate buffers
+            _inputBuffer = new byte[STATE_BYTES];
+            _cipherInput = new UInt64[STATE_WORDS];
+            _digestState = new UInt64[STATE_WORDS];
+            // allocate tweak
+            _ubiParameters = new UbiTweak();
+            // generate the configuration string
+            // allocate config value
+            _configValue = new UInt64[STATE_BYTES];
+            // set the state size for the configuration
+            _configString = new UInt64[STATE_BYTES];
+            _configString[1] = (UInt64)DigestSize * 8;
 
-            // Allocate buffers
-            _inputBuffer = new byte[_cipherStateBytes];
-            _cipherInput = new UInt64[_cipherStateWords];
-            _digestState = new UInt64[_cipherStateWords];
-
-            // Allocate tweak
-            UbiParameters = new UbiTweak();
-            // Generate the configuration string
-            SkeinConfig();
             SetSchema(83, 72, 65, 51); // "SHA3"
             SetVersion(1);
             GenerateConfiguration();
@@ -381,23 +405,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             int bytesDone = 0;
             int offset = InOffset;
 
-            // Fill input buffer
+            // fill input buffer
             while (bytesDone < Length && offset < Input.Length)
             {
-                // Do a transform if the input buffer is filled
-                if (_bytesFilled == _cipherStateBytes)
+                // do a transform if the input buffer is filled
+                if (_bytesFilled == STATE_BYTES)
                 {
-                    // Copy input buffer to cipher input buffer
-                    InputBufferToCipherInput();
+                    // copy input buffer to cipher input buffer
+                    for (int i = 0; i < STATE_WORDS; i++)
+                        _cipherInput[i] = BytesToUInt64(_inputBuffer, i * 8);
 
-                    // Process the block
-                    ProcessBlock(_cipherStateBytes);
-
-                    // Clear first flag, which will be set
-                    // by Initialize() if this is the first transform
-                    UbiParameters.IsFirstBlock = false;
-
-                    // Reset buffer fill count
+                    // process the block
+                    ProcessBlock(STATE_BYTES);
+                    // clear first flag, which will be set by Initialize() if this is the first transform
+                    _ubiParameters.IsFirstBlock = false;
+                    // reset buffer fill count
                     _bytesFilled = 0;
                 }
 
@@ -420,7 +442,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
             BlockUpdate(Input, 0, Input.Length);
             DoFinal(hash, 0);
-
             Reset();
 
             return hash;
@@ -443,52 +464,40 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             if (Output.Length - OutOffset < DigestSize)
                 throw new CryptoHashException("Skein256:DoFinal", "The Output buffer is too short!", new ArgumentOutOfRangeException());
 
-            int i;
-
-            // Pad left over space in input buffer with zeros
-            // and 
-            for (i = _bytesFilled; i < _inputBuffer.Length; i++)
+            // pad left over space in input buffer with zeros
+            for (int i = _bytesFilled; i < _inputBuffer.Length; i++)
                 _inputBuffer[i] = 0;
-
             // copy to cipher input buffer
-            InputBufferToCipherInput();
+            for (int i = 0; i < STATE_WORDS; i++)
+                _cipherInput[i] = BytesToUInt64(_inputBuffer, i * 8);
 
-            // Do final message block
-            UbiParameters.IsFinalBlock = true;
+            // do final message block
+            _ubiParameters.IsFinalBlock = true;
             ProcessBlock(_bytesFilled);
 
-            // Clear cipher input
-            for (i = 0; i < _cipherInput.Length; i++)
-                _cipherInput[i] = 0;
+            // clear cipher input
+            Array.Clear(_cipherInput, 0, _cipherInput.Length);
+            // do output block counter mode output
+            byte[] hash = new byte[_outputBytes];
+            UInt64[] oldState = new UInt64[STATE_WORDS];
+            // save old state
+            Array.Copy(_digestState, oldState, _digestState.Length);
 
-            // Do output block counter mode output
-            int j;
-
-            var hash = new byte[_outputBytes];
-            var oldState = new UInt64[_cipherStateWords];
-
-            // Save old state
-            for (j = 0; j < _digestState.Length; j++)
-                oldState[j] = _digestState[j];
-
-            for (i = 0; i < _outputBytes; i += _cipherStateBytes)
+            for (int i = 0; i < _outputBytes; i += STATE_BYTES)
             {
-                UbiParameters.StartNewBlockType(UbiType.Out);
-                UbiParameters.IsFinalBlock = true;
+                _ubiParameters.StartNewBlockType(UbiType.Out);
+                _ubiParameters.IsFinalBlock = true;
                 ProcessBlock(8);
 
-                // Output a chunk of the hash
+                // output a chunk of the hash
                 int outputSize = _outputBytes - i;
-                if (outputSize > _cipherStateBytes)
-                    outputSize = _cipherStateBytes;
+                if (outputSize > STATE_BYTES)
+                    outputSize = STATE_BYTES;
 
                 PutBytes(_digestState, hash, i, outputSize);
-
-                // Restore old state
-                for (j = 0; j < _digestState.Length; j++)
-                    _digestState[j] = oldState[j];
-
-                // Increment counter
+                // restore old state
+                Array.Copy(oldState, _digestState, oldState.Length);
+                // increment counter
                 _cipherInput[0]++;
             }
 
@@ -511,29 +520,32 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             switch (InitializationType)
             {
                 case SkeinInitializationType.Normal:
-                    // Normal initialization
-                    Initialize();
+                    {
+                        // normal initialization
+                        Initialize();
+                    }
                     return;
-
                 case SkeinInitializationType.ZeroedState:
-                    // Copy the configuration value to the state
-                    for (int i = 0; i < _digestState.Length; i++)
-                        _digestState[i] = 0;
+                    {
+                        // copy the configuration value to the state
+                        for (int i = 0; i < _digestState.Length; i++)
+                            _digestState[i] = 0;
+                    }
                     break;
-
-                case SkeinInitializationType.ChainedState:
-                    // Keep the state as it is and do nothing
-                    break;
-
                 case SkeinInitializationType.ChainedConfig:
-                    // Generate a chained configuration
-                    GenerateConfiguration(_digestState);
-                    // Continue initialization
-                    Initialize();
+                    {
+                        // generate a chained configuration
+                        GenerateConfiguration(_digestState);
+                        // continue initialization
+                        Initialize();
+                    }
                     return;
+                case SkeinInitializationType.ChainedState:
+                    // keep the state as it is and do nothing
+                    break;
             }
 
-            // Reset bytes filled
+            // reset bytes filled
             _bytesFilled = 0;
         }
 
@@ -559,37 +571,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
         #region SkeinConfig
         /// <remarks>
-        /// Default configuration
-        /// </remarks>
-        private void SkeinConfig()
-        {
-            _stateSize = StateSize;
-            // Allocate config value
-            ConfigValue = new UInt64[StateSize / 8];
-            // Set the state size for the configuration
-            ConfigString = new UInt64[ConfigValue.Length];
-            ConfigString[1] = (UInt64)DigestSize * 8;
-        }
-
-        /// <remarks>
         /// Default generation function
         /// </remarks>
         private void GenerateConfiguration()
         {
-            var cipher = new Threefish256();
-            var tweak = new UbiTweak();
+            Threefish256 cipher = new Threefish256();
+            UbiTweak tweak = new UbiTweak();
 
-            // Initialize the tweak value
+            // initialize the tweak value
             tweak.StartNewBlockType(UbiType.Config);
             tweak.IsFinalBlock = true;
             tweak.BitsProcessed = 32;
 
             cipher.SetTweak(tweak.Tweak);
-            cipher.Encrypt(ConfigString, ConfigValue);
+            cipher.Encrypt(_configString, _configValue);
 
-            ConfigValue[0] ^= ConfigString[0];
-            ConfigValue[1] ^= ConfigString[1];
-            ConfigValue[2] ^= ConfigString[2];
+            _configValue[0] ^= _configString[0];
+            _configValue[1] ^= _configString[1];
+            _configValue[2] ^= _configString[2];
         }
 
         /// <summary>
@@ -600,21 +599,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         [CLSCompliant(false)]
         public void GenerateConfiguration(UInt64[] InitialState)
         {
-            var cipher = new Threefish256();
-            var tweak = new UbiTweak();
+            Threefish256 cipher = new Threefish256();
+            UbiTweak tweak = new UbiTweak();
 
-            // Initialize the tweak value
+            // initialize the tweak value
             tweak.StartNewBlockType(UbiType.Config);
             tweak.IsFinalBlock = true;
             tweak.BitsProcessed = 32;
 
             cipher.SetKey(InitialState);
             cipher.SetTweak(tweak.Tweak);
-            cipher.Encrypt(ConfigString, ConfigValue);
+            cipher.Encrypt(_configString, _configValue);
 
-            ConfigValue[0] ^= ConfigString[0];
-            ConfigValue[1] ^= ConfigString[1];
-            ConfigValue[2] ^= ConfigString[2];
+            _configValue[0] ^= _configString[0];
+            _configValue[1] ^= _configString[1];
+            _configValue[2] ^= _configString[2];
         }
 
         /// <summary>
@@ -629,17 +628,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             if (Schema.Length != 4)
                 throw new CryptoHashException("Skein256:SetSchema", "Schema must be 4 bytes.", new Exception());
 
-            UInt64 n = ConfigString[0];
+            UInt64 n = _configString[0];
 
-            // Clear the schema bytes
+            // clear the schema bytes
             n &= ~(UInt64)0xfffffffful;
-            // Set schema bytes
+            // set schema bytes
             n |= (UInt64)Schema[3] << 24;
             n |= (UInt64)Schema[2] << 16;
             n |= (UInt64)Schema[1] << 8;
             n |= (UInt64)Schema[0];
 
-            ConfigString[0] = n;
+            _configString[0] = n;
         }
 
         /// <summary>
@@ -654,8 +653,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             if (Version < 0 || Version > 3)
                 throw new CryptoHashException("Skein256:SetVersion", "Version must be between 0 and 3, inclusive.", new Exception());
 
-            ConfigString[0] &= ~((UInt64)0x03 << 32);
-            ConfigString[0] |= (UInt64)Version << 32;
+            _configString[0] &= ~((UInt64)0x03 << 32);
+            _configString[0] |= (UInt64)Version << 32;
         }
 
         /// <summary>
@@ -665,8 +664,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="Size">Leaf size</param>
         public void SetTreeLeafSize(byte Size)
         {
-            ConfigString[2] &= ~(UInt64)0xff;
-            ConfigString[2] |= (UInt64)Size;
+            _configString[2] &= ~(UInt64)0xff;
+            _configString[2] |= (UInt64)Size;
         }
 
         /// <summary>
@@ -676,8 +675,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="Size">Fan out size</param>
         public void SetTreeFanOutSize(byte Size)
         {
-            ConfigString[2] &= ~((UInt64)0xff << 8);
-            ConfigString[2] |= (UInt64)Size << 8;
+            _configString[2] &= ~((UInt64)0xff << 8);
+            _configString[2] |= (UInt64)Size << 8;
         }
 
         /// <summary>
@@ -692,8 +691,64 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             if (Height == 1)
                 throw new CryptoHashException("Skein256:SetMaxTreeHeight", "Tree height must be zero or greater than 1.", new Exception());
 
-            ConfigString[2] &= ~((UInt64)0xff << 16);
-            ConfigString[2] |= (UInt64)Height << 16;
+            _configString[2] &= ~((UInt64)0xff << 16);
+            _configString[2] |= (UInt64)Height << 16;
+        }
+        #endregion
+
+        #region Private Methods
+        private void Initialize()
+        {
+            // copy the configuration value to the state
+            for (int i = 0; i < _digestState.Length; i++)
+                _digestState[i] = _configValue[i];
+
+            // set up tweak for message block
+            _ubiParameters.StartNewBlockType(UbiType.Message);
+
+            // reset bytes filled
+            _bytesFilled = 0;
+        }
+
+        private void ProcessBlock(int bytes)
+        {
+            // set the key to the current state
+            _blockCipher.SetKey(_digestState);
+
+            // update tweak
+            _ubiParameters.BitsProcessed += (Int64)bytes;
+            _blockCipher.SetTweak(_ubiParameters.Tweak);
+
+            // encrypt block
+            _blockCipher.Encrypt(_cipherInput, _digestState);
+
+            // feed-forward input with state
+            for (int i = 0; i < _cipherInput.Length; i++)
+                _digestState[i] ^= _cipherInput[i];
+        }
+
+        private static UInt64 BytesToUInt64(byte[] Input, int InOffset)
+        {
+            UInt64 n = Input[InOffset];
+            n |= (UInt64)Input[InOffset + 1] << 8;
+            n |= (UInt64)Input[InOffset + 2] << 16;
+            n |= (UInt64)Input[InOffset + 3] << 24;
+            n |= (UInt64)Input[InOffset + 4] << 32;
+            n |= (UInt64)Input[InOffset + 5] << 40;
+            n |= (UInt64)Input[InOffset + 6] << 48;
+            n |= (UInt64)Input[InOffset + 7] << 56;
+
+            return n;
+        }
+
+        private static void PutBytes(UInt64[] Input, byte[] Output, int Offset, int ByteCount)
+        {
+            int j = 0;
+            for (int i = 0; i < ByteCount; i++)
+            {
+                Output[Offset + i] = (byte)((Input[i / 8] >> j) & 0xff);
+                j = (j + 8) % 64;
+            }
         }
         #endregion
 
@@ -716,7 +771,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             #region Constructor
             internal Threefish256()
             {
-                // Create the expanded key array
+                // create the expanded key array
                 _expandedTweak = new UInt64[ExpandedTweakSize];
                 _expandedKey = new UInt64[ExpandedKeySize];
                 _expandedKey[ExpandedKeySize - 1] = KeyScheduleConst;
@@ -738,182 +793,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
                 }
             }
 
-            internal void Decrypt(UInt64[] Input, UInt64[] Output)
-            {
-                // Cache the block, key, and tweak
-                UInt64 B0 = Input[0], B1 = Input[1], 
-                    B2 = Input[2], B3 = Input[3];
-                UInt64 K0 = _expandedKey[0], K1 = _expandedKey[1], 
-                    K2 = _expandedKey[2], K3 = _expandedKey[3], 
-                    K4 = _expandedKey[4];
-                UInt64 T0 = _expandedTweak[0], T1 = _expandedTweak[1], 
-                    T2 = _expandedTweak[2];
-
-                B0 -= K3;
-                B1 -= K4 + T0;
-                B2 -= K0 + T1;
-                B3 -= K1 + 18;
-                UnMix(ref B0, ref B3, 32);
-                UnMix(ref B2, ref B1, 32);
-                UnMix(ref B0, ref B1, 58);
-                UnMix(ref B2, ref B3, 22);
-                UnMix(ref B0, ref B3, 46);
-                UnMix(ref B2, ref B1, 12);
-                UnMix(ref B0, ref B1, 25, K2, K3 + T2);
-                UnMix(ref B2, ref B3, 33, K4 + T0, K0 + 17);
-                UnMix(ref B0, ref B3, 5);
-                UnMix(ref B2, ref B1, 37);
-                UnMix(ref B0, ref B1, 23);
-                UnMix(ref B2, ref B3, 40);
-                UnMix(ref B0, ref B3, 52);
-                UnMix(ref B2, ref B1, 57);
-                UnMix(ref B0, ref B1, 14, K1, K2 + T1);
-                UnMix(ref B2, ref B3, 16, K3 + T2, K4 + 16);
-                UnMix(ref B0, ref B3, 32);
-                UnMix(ref B2, ref B1, 32);
-                UnMix(ref B0, ref B1, 58);
-                UnMix(ref B2, ref B3, 22);
-                UnMix(ref B0, ref B3, 46);
-                UnMix(ref B2, ref B1, 12);
-                UnMix(ref B0, ref B1, 25, K0, K1 + T0);
-                UnMix(ref B2, ref B3, 33, K2 + T1, K3 + 15);
-                UnMix(ref B0, ref B3, 5);
-                UnMix(ref B2, ref B1, 37);
-                UnMix(ref B0, ref B1, 23);
-                UnMix(ref B2, ref B3, 40);
-                UnMix(ref B0, ref B3, 52);
-                UnMix(ref B2, ref B1, 57);
-                UnMix(ref B0, ref B1, 14, K4, K0 + T2);
-                UnMix(ref B2, ref B3, 16, K1 + T0, K2 + 14);
-                UnMix(ref B0, ref B3, 32);
-                UnMix(ref B2, ref B1, 32);
-                UnMix(ref B0, ref B1, 58);
-                UnMix(ref B2, ref B3, 22);
-                UnMix(ref B0, ref B3, 46);
-                UnMix(ref B2, ref B1, 12);
-                UnMix(ref B0, ref B1, 25, K3, K4 + T1);
-                UnMix(ref B2, ref B3, 33, K0 + T2, K1 + 13);
-                UnMix(ref B0, ref B3, 5);
-                UnMix(ref B2, ref B1, 37);
-                UnMix(ref B0, ref B1, 23);
-                UnMix(ref B2, ref B3, 40);
-                UnMix(ref B0, ref B3, 52);
-                UnMix(ref B2, ref B1, 57);
-                UnMix(ref B0, ref B1, 14, K2, K3 + T0);
-                UnMix(ref B2, ref B3, 16, K4 + T1, K0 + 12);
-                UnMix(ref B0, ref B3, 32);
-                UnMix(ref B2, ref B1, 32);
-                UnMix(ref B0, ref B1, 58);
-                UnMix(ref B2, ref B3, 22);
-                UnMix(ref B0, ref B3, 46);
-                UnMix(ref B2, ref B1, 12);
-                UnMix(ref B0, ref B1, 25, K1, K2 + T2);
-                UnMix(ref B2, ref B3, 33, K3 + T0, K4 + 11);
-                UnMix(ref B0, ref B3, 5);
-                UnMix(ref B2, ref B1, 37);
-                UnMix(ref B0, ref B1, 23);
-                UnMix(ref B2, ref B3, 40);
-                UnMix(ref B0, ref B3, 52);
-                UnMix(ref B2, ref B1, 57);
-                UnMix(ref B0, ref B1, 14, K0, K1 + T1);
-                UnMix(ref B2, ref B3, 16, K2 + T2, K3 + 10);
-                UnMix(ref B0, ref B3, 32);
-                UnMix(ref B2, ref B1, 32);
-                UnMix(ref B0, ref B1, 58);
-                UnMix(ref B2, ref B3, 22);
-                UnMix(ref B0, ref B3, 46);
-                UnMix(ref B2, ref B1, 12);
-                UnMix(ref B0, ref B1, 25, K4, K0 + T0);
-                UnMix(ref B2, ref B3, 33, K1 + T1, K2 + 9);
-                UnMix(ref B0, ref B3, 5);
-                UnMix(ref B2, ref B1, 37);
-                UnMix(ref B0, ref B1, 23);
-                UnMix(ref B2, ref B3, 40);
-                UnMix(ref B0, ref B3, 52);
-                UnMix(ref B2, ref B1, 57);
-                UnMix(ref B0, ref B1, 14, K3, K4 + T2);
-                UnMix(ref B2, ref B3, 16, K0 + T0, K1 + 8);
-                UnMix(ref B0, ref B3, 32);
-                UnMix(ref B2, ref B1, 32);
-                UnMix(ref B0, ref B1, 58);
-                UnMix(ref B2, ref B3, 22);
-                UnMix(ref B0, ref B3, 46);
-                UnMix(ref B2, ref B1, 12);
-                UnMix(ref B0, ref B1, 25, K2, K3 + T1);
-                UnMix(ref B2, ref B3, 33, K4 + T2, K0 + 7);
-                UnMix(ref B0, ref B3, 5);
-                UnMix(ref B2, ref B1, 37);
-                UnMix(ref B0, ref B1, 23);
-                UnMix(ref B2, ref B3, 40);
-                UnMix(ref B0, ref B3, 52);
-                UnMix(ref B2, ref B1, 57);
-                UnMix(ref B0, ref B1, 14, K1, K2 + T0);
-                UnMix(ref B2, ref B3, 16, K3 + T1, K4 + 6);
-                UnMix(ref B0, ref B3, 32);
-                UnMix(ref B2, ref B1, 32);
-                UnMix(ref B0, ref B1, 58);
-                UnMix(ref B2, ref B3, 22);
-                UnMix(ref B0, ref B3, 46);
-                UnMix(ref B2, ref B1, 12);
-                UnMix(ref B0, ref B1, 25, K0, K1 + T2);
-                UnMix(ref B2, ref B3, 33, K2 + T0, K3 + 5);
-                UnMix(ref B0, ref B3, 5);
-                UnMix(ref B2, ref B1, 37);
-                UnMix(ref B0, ref B1, 23);
-                UnMix(ref B2, ref B3, 40);
-                UnMix(ref B0, ref B3, 52);
-                UnMix(ref B2, ref B1, 57);
-                UnMix(ref B0, ref B1, 14, K4, K0 + T1);
-                UnMix(ref B2, ref B3, 16, K1 + T2, K2 + 4);
-                UnMix(ref B0, ref B3, 32);
-                UnMix(ref B2, ref B1, 32);
-                UnMix(ref B0, ref B1, 58);
-                UnMix(ref B2, ref B3, 22);
-                UnMix(ref B0, ref B3, 46);
-                UnMix(ref B2, ref B1, 12);
-                UnMix(ref B0, ref B1, 25, K3, K4 + T0);
-                UnMix(ref B2, ref B3, 33, K0 + T1, K1 + 3);
-                UnMix(ref B0, ref B3, 5);
-                UnMix(ref B2, ref B1, 37);
-                UnMix(ref B0, ref B1, 23);
-                UnMix(ref B2, ref B3, 40);
-                UnMix(ref B0, ref B3, 52);
-                UnMix(ref B2, ref B1, 57);
-                UnMix(ref B0, ref B1, 14, K2, K3 + T2);
-                UnMix(ref B2, ref B3, 16, K4 + T0, K0 + 2);
-                UnMix(ref B0, ref B3, 32);
-                UnMix(ref B2, ref B1, 32);
-                UnMix(ref B0, ref B1, 58);
-                UnMix(ref B2, ref B3, 22);
-                UnMix(ref B0, ref B3, 46);
-                UnMix(ref B2, ref B1, 12);
-                UnMix(ref B0, ref B1, 25, K1, K2 + T1);
-                UnMix(ref B2, ref B3, 33, K3 + T2, K4 + 1);
-                UnMix(ref B0, ref B3, 5);
-                UnMix(ref B2, ref B1, 37);
-                UnMix(ref B0, ref B1, 23);
-                UnMix(ref B2, ref B3, 40);
-                UnMix(ref B0, ref B3, 52);
-                UnMix(ref B2, ref B1, 57);
-                UnMix(ref B0, ref B1, 14, K0, K1 + T0);
-                UnMix(ref B2, ref B3, 16, K2 + T1, K3);
-
-                Output[0] = B0;
-                Output[1] = B1;
-                Output[2] = B2;
-                Output[3] = B3;
-            }
-
             internal void Encrypt(UInt64[] input, UInt64[] output)
             {
-                // Cache the block, key, and tweak
-                UInt64 b0 = input[0], b1 = input[1],
-                      b2 = input[2], b3 = input[3];
-                UInt64 k0 = _expandedKey[0], k1 = _expandedKey[1],
-                      k2 = _expandedKey[2], k3 = _expandedKey[3],
-                      k4 = _expandedKey[4];
-                UInt64 t0 = _expandedTweak[0], t1 = _expandedTweak[1],
-                      t2 = _expandedTweak[2];
+                // cache the block, key, and tweak
+                UInt64 b0 = input[0];
+                UInt64 b1 = input[1];
+                UInt64 b2 = input[2];
+                UInt64 b3 = input[3];
+                UInt64 k0 = _expandedKey[0];
+                UInt64 k1 = _expandedKey[1];
+                UInt64 k2 = _expandedKey[2];
+                UInt64 k3 = _expandedKey[3];
+                UInt64 k4 = _expandedKey[4];
+                UInt64 t0 = _expandedTweak[0];
+                UInt64 t1 = _expandedTweak[1];
+                UInt64 t2 = _expandedTweak[2];
 
                 Mix(ref b0, ref b1, 14, k0, k1 + t0);
                 Mix(ref b2, ref b3, 16, k2 + t1, k3);
@@ -1125,68 +1019,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
                 _expandedKey[i] = parity;
             }
             #endregion
-        }
-        #endregion
-
-        #region Private Methods
-        private void Initialize()
-        {
-            // Copy the configuration value to the state
-            for (int i = 0; i < _digestState.Length; i++)
-                _digestState[i] = ConfigValue[i];
-
-            // Set up tweak for message block
-            UbiParameters.StartNewBlockType(UbiType.Message);
-
-            // Reset bytes filled
-            _bytesFilled = 0;
-        }
-
-        // Moves the byte input buffer to the UInt64 cipher input
-        private void InputBufferToCipherInput()
-        {
-            for (int i = 0; i < _cipherStateWords; i++)
-                _cipherInput[i] = BytesToUInt64(_inputBuffer, i * 8);
-        }
-
-        private void ProcessBlock(int bytes)
-        {
-            // Set the key to the current state
-            _blockCipher.SetKey(_digestState);
-
-            // Update tweak
-            UbiParameters.BitsProcessed += (Int64)bytes;
-            _blockCipher.SetTweak(UbiParameters.Tweak);
-
-            // Encrypt block
-            _blockCipher.Encrypt(_cipherInput, _digestState);
-
-            // Feed-forward input with state
-            for (int i = 0; i < _cipherInput.Length; i++)
-                _digestState[i] ^= _cipherInput[i];
-        }
-
-        private static UInt64 BytesToUInt64(byte[] Input, int InOffset)
-        {
-            UInt64 n = Input[InOffset];
-            n |= (UInt64)Input[InOffset + 1] << 8;
-            n |= (UInt64)Input[InOffset + 2] << 16;
-            n |= (UInt64)Input[InOffset + 3] << 24;
-            n |= (UInt64)Input[InOffset + 4] << 32;
-            n |= (UInt64)Input[InOffset + 5] << 40;
-            n |= (UInt64)Input[InOffset + 6] << 48;
-            n |= (UInt64)Input[InOffset + 7] << 56;
-            return n;
-        }
-
-        private static void PutBytes(UInt64[] Input, byte[] Output, int Offset, int ByteCount)
-        {
-            int j = 0;
-            for (int i = 0; i < ByteCount; i++)
-            {
-                Output[Offset + i] = (byte)((Input[i / 8] >> j) & 0xff);
-                j = (j + 8) % 64;
-            }
         }
         #endregion
 

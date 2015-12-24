@@ -10,7 +10,7 @@ using VTDev.Libraries.CEXEngine.Tools;
 namespace VTDev.Projects.CEX.Test.Tests.DigestTest
 {
     /// <summary>
-    /// Compares the normal mode of StreamCipher with the Concurrent mode for equality
+    /// Compares the linear mode of StreamDigest with the Concurrent mode for equality
     /// </summary>
     public class StreamDigestTest : ITest
     {

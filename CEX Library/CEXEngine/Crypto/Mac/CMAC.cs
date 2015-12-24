@@ -98,21 +98,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 
         #region Fields
         private int _blockSize = 0;
+        private KeyParams _cipherKey;
         private ICipherMode _cipherMode;
-        private int _digestSize;
         private bool _disposeEngine = true;
         private bool _isDisposed = false;
         private bool _isInitialized = false;
+        private int _macSize;
         private byte[] _msgCode;
-        private byte[] _tmpZeroes;
         private byte[] _wrkBuffer;
         private int _wrkOffset;
-        private byte[] _L, _LU, _LU2;
+        private byte[] _K1, _K2;
         #endregion
 
         #region Properties
         /// <summary>
-        /// Get: The Digests internal blocksize in bytes
+        /// Get: The Macs internal blocksize in bytes
         /// </summary>
         public int BlockSize
         {
@@ -121,11 +121,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         }
 
         /// <summary>
-        /// Get: Size of returned digest in bytes
+        /// Get: Size of returned mac in bytes
         /// </summary>
-        public int DigestSize
+        public int MacSize
         {
-            get { return _digestSize; }
+            get { return _macSize; }
         }
 
         /// <summary>
@@ -167,10 +167,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
             _disposeEngine = DisposeEngine;
             _cipherMode = new CBC(Cipher);
             _blockSize = _cipherMode.BlockSize;
-            _digestSize = MacBits / 8;
+            _macSize = MacBits / 8;
             _msgCode = new byte[_blockSize];
             _wrkBuffer = new byte[_blockSize];
-            _tmpZeroes = new byte[_blockSize];
             _wrkOffset = 0;
         }
 
@@ -202,30 +201,34 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
             if ((InOffset + Length) > Input.Length)
                 throw new CryptoMacException("CMAC:BlockUpdate", "The Input buffer is too short!", new ArgumentOutOfRangeException());
 
-            int gapLen = _blockSize - _wrkOffset;
-
-            if (Length > gapLen)
+            if (_wrkOffset == _blockSize)
             {
-                Buffer.BlockCopy(Input, InOffset, _wrkBuffer, _wrkOffset, gapLen);
-
                 _cipherMode.Transform(_wrkBuffer, 0, _msgCode, 0);
-
                 _wrkOffset = 0;
-                Length -= gapLen;
-                InOffset += gapLen;
+            }
+
+            int diff = _blockSize - _wrkOffset;
+            if (Length > diff)
+            {
+                Buffer.BlockCopy(Input, InOffset, _wrkBuffer, _wrkOffset, diff);
+                _cipherMode.Transform(_wrkBuffer, 0, _msgCode, 0);
+                _wrkOffset = 0;
+                Length -= diff;
+                InOffset += diff;
 
                 while (Length > _blockSize)
                 {
                     _cipherMode.Transform(Input, InOffset, _msgCode, 0);
-
                     Length -= _blockSize;
                     InOffset += _blockSize;
                 }
             }
 
-            Buffer.BlockCopy(Input, InOffset, _wrkBuffer, _wrkOffset, Length);
-
-            _wrkOffset += Length;
+            if (Length > 0)
+            {
+                Buffer.BlockCopy(Input, InOffset, _wrkBuffer, _wrkOffset, Length);
+                _wrkOffset += Length;
+            }
         }
 
         /// <summary>
@@ -237,7 +240,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <returns>Mac Hash value</returns>
         public byte[] ComputeMac(byte[] Input)
         {
-            byte[] hash = new byte[_digestSize];
+            if (!_isInitialized)
+                throw new CryptoGeneratorException("CMAC:ComputeMac", "The Mac is not initialized!", new InvalidOperationException());
+
+            byte[] hash = new byte[_macSize];
 
             BlockUpdate(Input, 0, Input.Length);
             DoFinal(hash, 0);
@@ -257,68 +263,60 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <exception cref="CryptoMacException">Thrown if Output array is too small</exception>
         public int DoFinal(byte[] Output, int OutOffset)
         {
-            if (Output.Length - OutOffset < _digestSize)
+            if (Output.Length - OutOffset < _macSize)
                 throw new CryptoMacException("CMAC:DoFinal", "The Output buffer is too short!", new ArgumentOutOfRangeException());
 
-            byte[] lu;
+            if (_wrkOffset != _blockSize)
+	        {
+		        ISO7816 pad =  new ISO7816();
+		        pad.AddPadding(_wrkBuffer, _wrkOffset);
+                for (int i = 0; i < _msgCode.Length; i++)
+                    _wrkBuffer[i] ^= _K2[i];
+	        }
+	        else
+	        {
+                for (int i = 0; i < _msgCode.Length; i++)
+                    _wrkBuffer[i] ^= _K1[i];
+	        }
 
-            if (_wrkOffset == _blockSize)
-            {
-                lu = _LU;
-            }
-            else
-            {
-                new ISO7816().AddPadding(_wrkBuffer, _wrkOffset);
-                lu = _LU2;
-            }
+	        _cipherMode.Transform(_wrkBuffer, 0, _msgCode, 0);
+            Buffer.BlockCopy(_msgCode, 0, Output, OutOffset, _macSize);
+	        Reset();
 
-            for (int i = 0; i < _msgCode.Length; i++)
-                _wrkBuffer[i] ^= lu[i];
-
-            _cipherMode.Transform(_wrkBuffer, 0, _msgCode, 0);
-
-            Buffer.BlockCopy(_msgCode, 0, Output, OutOffset, _digestSize);
-
-            Reset();
-
-            return _digestSize;
+            return _macSize;
         }
 
         /// <summary>
         /// Initialize the Cipher MAC.
-        /// <para>Uses the Key field, and optionally the IV field of the KeyParams class.</para>
+        /// <para>Uses the Key or IKM field, and optionally the IV field of the KeyParams class.</para>
         /// </summary>
         /// 
-        /// <param name="KeyParam">A <see cref="KeyParams"/> containing the cipher Key and optional IV. 
-        /// <para>Uses the Key field of the KeyParams parameter, and optionally the IV.
-        /// Key size must be one of the <c>LegalKeySizes</c> of the underlying cipher.
-        /// IV size must be the ciphers blocksize.
-        /// </para>
+        /// <param name="MacKey">A byte array containing the cipher Key. 
+        /// <para>Key size must be one of the <c>LegalKeySizes</c> of the underlying cipher.</para>
         /// </param>
+        /// <param name="IV">A byte array containing the cipher Initialization Vector.
+        /// <para>IV size must be the ciphers blocksize.</para></param>
         /// 
         /// <exception cref="CryptoMacException">Thrown if an invalid Input size is chosen</exception>
-        public void Initialize(KeyParams KeyParam)
+        public void Initialize(byte[] MacKey, byte[] IV)
         {
-            if (KeyParam.Key == null)
+            if (MacKey == null)
                 throw new CryptoMacException("CMAC:Initialize", "Key can not be null!", new ArgumentNullException());
 
-            byte[] tmpIv;
-            if (KeyParam.IV == null || KeyParam.IV.Length != _blockSize)
-                tmpIv = new byte[_blockSize];
-            else
-                tmpIv = KeyParam.IV;
+            if (IV == null)
+                IV = new byte[_blockSize];
+            if (IV.Length != _blockSize)
+                Array.Resize<byte>(ref IV, _blockSize);
 
-            // convert for cipher
-            KeyParams key = new KeyParams(KeyParam.Key, tmpIv);
-            _cipherMode.Initialize(true, key);
-
-            _L = new byte[_tmpZeroes.Length];
-            _cipherMode.Transform(_tmpZeroes, 0, _L, 0);
-            _LU = DoubleLu(_L);
-            _LU2 = DoubleLu(_LU);
-            _cipherMode.Initialize(true, key);
-
-            _isInitialized = true;
+            _cipherKey =  new KeyParams(MacKey, IV);
+	        _cipherMode.Initialize(true, _cipherKey);
+            byte[] lu = new byte[_blockSize];
+	        byte[] tmpz = new byte[_blockSize];
+	        _cipherMode.Transform(tmpz, 0, lu, 0);
+	        _K1 = GenerateSubkey(lu);
+	        _K2 = GenerateSubkey(_K1);
+	        _cipherMode.Initialize(true, _cipherKey);
+	        _isInitialized = true;
         }
 
         /// <summary>
@@ -326,6 +324,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// </summary>
         public void Reset()
         {
+            _cipherMode.Initialize(true, _cipherKey);
             Array.Clear(_wrkBuffer, 0, _wrkBuffer.Length);
             _wrkOffset = 0;
         }
@@ -348,7 +347,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         #endregion
 
         #region Private Methods
-        private byte[] DoubleLu(byte[] Input)
+        private byte[] GenerateSubkey(byte[] Input)
         {
             int firstBit = (Input[0] & 0xFF) >> 7;
             byte[] ret = new byte[Input.Length];
@@ -359,7 +358,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
             ret[Input.Length - 1] = (byte)(Input[Input.Length - 1] << 1);
 
             if (firstBit == 1)
-                ret[Input.Length - 1] ^= Input.Length == 16 ? CONST_128 : CONST_64;
+                ret[Input.Length - 1] ^= Input.Length == _blockSize ? CONST_128 : CONST_64;
             
             return ret;
         }
@@ -391,30 +390,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
                         Array.Clear(_msgCode, 0, _msgCode.Length);
                         _msgCode = null;
                     }
-                    if (_tmpZeroes != null)
-                    {
-                        Array.Clear(_tmpZeroes, 0, _tmpZeroes.Length);
-                        _tmpZeroes = null;
-                    }
                     if (_wrkBuffer != null)
                     {
                         Array.Clear(_wrkBuffer, 0, _wrkBuffer.Length);
                         _wrkBuffer = null;
                     }
-                    if (_L != null)
+                    if (_K1 != null)
                     {
-                        Array.Clear(_L, 0, _L.Length);
-                        _L = null;
+                        Array.Clear(_K1, 0, _K1.Length);
+                        _K1 = null;
                     }
-                    if (_LU != null)
+                    if (_K2 != null)
                     {
-                        Array.Clear(_LU, 0, _LU.Length);
-                        _LU = null;
-                    }
-                    if (_LU2 != null)
-                    {
-                        Array.Clear(_LU2, 0, _LU2.Length);
-                        _LU2 = null;
+                        Array.Clear(_K2, 0, _K2.Length);
+                        _K2 = null;
                     }
                 }
                 finally

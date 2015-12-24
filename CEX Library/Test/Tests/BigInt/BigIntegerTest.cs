@@ -180,8 +180,6 @@ namespace VTDev.Projects.CEX.Test.Tests.BigInt
         {
             // regression test for HARMONY-1047
             Throw(() => new BigInteger(Int32.MaxValue, (Random)null), "BigInteger: failed regression test");
-
-
             bi = new BigInteger(70, rand);
             bi2 = new BigInteger(70, rand);
             IsTrue(bi.CompareTo(zero) >= 0, "Random number is negative");

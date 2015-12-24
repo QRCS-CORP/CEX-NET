@@ -8,8 +8,9 @@ using VTDev.Libraries.CEXEngine.Tools;
 namespace VTDev.Projects.CEX.Test.Tests.MacTest
 {
     /// <summary>
-    /// Vector test used by Bouncy Castle:
-    /// http://grepcode.com/file/repo1.maven.org/maven2/org.bouncycastle/bcprov-ext-jdk15on/1.51/org/bouncycastle/crypto/test/VMPCMacTest.java?av=f
+    /// VMAC implementation vector comparison tests.
+	/// <para>Vector test used by the official documentation:
+	/// <see href="http://vmpcfunction.com/vmpc_mac.pdf"/></para>
     /// </summary>
     public class VmpcMacTest : ITest
     {
@@ -72,7 +73,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
 
             using (VMPCMAC mac = new VMPCMAC())
             {
-                mac.Initialize(new KeyParams(_key, _iv));
+                mac.Initialize(_key, _iv);
                 mac.BlockUpdate(data, 0, data.Length);
                 mac.DoFinal(hash, 0);
             }

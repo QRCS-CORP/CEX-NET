@@ -111,7 +111,10 @@
     <Compile Include="Tests\CipherTest\AesFipsTest.cs" />
     <Compile Include="Tests\CipherTest\ChaChaTest.cs" />
     <Compile Include="Tests\CipherTest\CipherModeTest.cs" />
+    <Compile Include="Tests\CipherTest\DrbgOutputTest.cs" />
+    <Compile Include="Tests\CipherTest\HXCipherOutputTest.cs" />
     <Compile Include="Tests\CipherTest\IOTest.cs" />
+    <Compile Include="Tests\CipherTest\PaddingTest.cs" />
     <Compile Include="Tests\CipherTest\ParallelModeTest.cs" />
     <Compile Include="Tests\CipherTest\RijndaelTest.cs" />
     <Compile Include="Tests\CipherTest\SalsaTest.cs" />

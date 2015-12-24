@@ -104,6 +104,8 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             byte[] data = rng.GetBytes(2048);
             byte[] enc = new byte[2048];
             byte[] dec = new byte[2048];
+            byte[] enc2 = new byte[2048];
+            byte[] dec2 = new byte[2048];
             rng.Dispose();
 
             using (Salsa20 salsa = new Salsa20(10))
@@ -112,15 +114,34 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 salsa.Initialize(new KeyParams(key, iv));
                 salsa.IsParallel = false;
                 salsa.Transform(data, enc);
+
+                // encrypt parallel
+                salsa.Initialize(new KeyParams(key, iv));
+                salsa.IsParallel = true;
+                salsa.ParallelBlockSize = 2048;
+                salsa.Transform(data, enc2);
+
+                if (!Evaluate.AreEqual(enc, enc2))
+                    throw new Exception("Salsa20: Encrypted arrays are not equal!");
+
+                // decrypt linear
+                salsa.Initialize(new KeyParams(key, iv));
+                salsa.IsParallel = false;
+                salsa.Transform(enc, dec);
+
                 // decrypt parallel
                 salsa.Initialize(new KeyParams(key, iv));
                 salsa.IsParallel = true;
                 salsa.ParallelBlockSize = 2048;
-                salsa.Transform(enc, dec);
-            }
+                salsa.Transform(enc2, dec2);
 
-            if (!Evaluate.AreEqual(data, dec))
-                throw new Exception("Salsa20: Decrypted arrays are not equal!");
+                if (!Evaluate.AreEqual(dec, dec2))
+                    throw new Exception("Salsa20: Decrypted arrays are not equal!");
+                if (!Evaluate.AreEqual(dec, data))
+                    throw new Exception("Salsa20: Decrypted arrays are not equal!");
+                if (!Evaluate.AreEqual(dec2, data))
+                    throw new Exception("Salsa20: Decrypted arrays are not equal!");
+            }
         }
 
         private void VectorTest(int Rounds, byte[] Key, byte[] Vector, byte[] Input, byte[] Output)

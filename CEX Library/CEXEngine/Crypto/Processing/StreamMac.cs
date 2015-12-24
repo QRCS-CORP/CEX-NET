@@ -132,7 +132,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         #region Constructor
         /// <summary>
-        /// Initialize the class with a digest enumeration
+        /// Initialize the class with an initialized Mac instance
         /// </summary>
         /// 
         /// <param name="Mac">The initialized <see cref="IMac"/> instance</param>
@@ -266,7 +266,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         private byte[] Compute(long Length)
         {
             long bytesTotal = 0;
-            byte[] chkSum = new byte[_macEngine.DigestSize];
+            byte[] chkSum = new byte[_macEngine.MacSize];
 
             if (!_isConcurrent)
             {

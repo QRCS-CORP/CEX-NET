@@ -102,7 +102,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         private UInt32[] _hashVal = new UInt32[8];
         private bool _isDisposed = false;
         private bool _isNullT;
-        private UInt32[] _salt64 = new UInt32[4];
+        private UInt32[] _salt32 = new UInt32[4];
         private static int[] _ftSigma;
         private byte[] _digestState = new byte[64];
         private UInt32[] _M = new UInt32[16];
@@ -160,6 +160,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         {
             Initialize();
         }
+
+        
+        /// <summary>
+        /// Initialize the class with a salt value
+        /// </summary>
+        /// 
+        /// <param name="Salt">The optional salt value; must be 4 uint in length</param>
+        public Blake256(UInt32[] Salt)
+        {
+            if (Salt.Length != 4)
+                throw new CryptoHashException("Blake256:Ctor", "The Salt array length must be 4!", new ArgumentOutOfRangeException());
+
+            Array.Copy(Salt, _salt32, _salt32.Length);
+            Initialize();
+        }
+
 
         /// <summary>
         /// Finalize objects
@@ -356,10 +372,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
             Array.Copy(_hashVal, _V, 8);
 
-            _V[8] = _salt64[0] ^ 0x243F6A88U;
-            _V[9] = _salt64[1] ^ 0x85A308D3U;
-            _V[10] = _salt64[2] ^ 0x13198A2EU;
-            _V[11] = _salt64[3] ^ 0x03707344U;
+            _V[8] = _salt32[0] ^ 0x243F6A88U;
+            _V[9] = _salt32[1] ^ 0x85A308D3U;
+            _V[10] = _salt32[2] ^ 0x13198A2EU;
+            _V[11] = _salt32[3] ^ 0x03707344U;
             _V[12] = 0xA4093822U;
             _V[13] = 0x299F31D0U;
             _V[14] = 0x082EFA98U;
@@ -392,9 +408,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             for (int i = 0; i < 8; ++i) 
                 _hashVal[i] ^= _V[i + 8];
             for (int i = 0; i < 4; ++i) 
-                _hashVal[i] ^= _salt64[i];
+                _hashVal[i] ^= _salt32[i];
             for (int i = 0; i < 4; ++i) 
-                _hashVal[i + 4] ^= _salt64[i];
+                _hashVal[i + 4] ^= _salt32[i];
         }
 
         private void Initialize()
@@ -423,7 +439,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 			    7, 9, 3, 1, 13, 12, 11, 14, 2, 6, 5, 10, 4, 0, 15, 8
 		    };
 
-            Array.Clear(_salt64, 0, _salt64.Length);
+            Array.Clear(_salt32, 0, _salt32.Length);
 
             _T = 0;
             _dataLen = 0;
@@ -473,10 +489,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
                         Array.Clear(_M, 0, _M.Length);
                         _M = null;
                     }
-                    if (_salt64 != null)
+                    if (_salt32 != null)
                     {
-                        Array.Clear(_salt64, 0, _salt64.Length);
-                        _salt64 = null;
+                        Array.Clear(_salt32, 0, _salt32.Length);
+                        _salt32 = null;
                     }
                     if (_digestState != null)
                     {

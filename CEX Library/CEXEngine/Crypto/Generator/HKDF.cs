@@ -176,7 +176,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
                 throw new CryptoGeneratorException("HKDF:Ctor", "Hmac can not be null!", new ArgumentNullException());
 
             _digestMac = Hmac;
-            _hashLength = Hmac.DigestSize;
+            _hashLength = Hmac.MacSize;
 
             _keySize = Hmac.BlockSize;
         }
@@ -207,7 +207,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
             if (Salt == null)
                 throw new CryptoGeneratorException("HKDF:Initialize", "Salt can not be null!", new ArgumentNullException());
 
-            _digestMac.Initialize(new KeyParams(Salt));
+            _digestMac.Initialize(Salt, null);
             _generatedBytes = 0;
             _currentT = new byte[_hashLength];
             _isInitialized = true;
@@ -228,7 +228,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
             if (Ikm == null)
                 throw new CryptoGeneratorException("HKDF:Initialize", "IKM can not be null!", new ArgumentNullException());
 
-            _digestMac.Initialize(new KeyParams(Extract(Salt, Ikm)));
+            _digestMac.Initialize(Extract(Salt, Ikm), null);
             _generatedBytes = 0;
             _currentT = new byte[_hashLength];
             _isInitialized = true;
@@ -250,7 +250,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
             if (Ikm == null)
                 throw new CryptoGeneratorException("HKDF:Initialize", "IKM can not be null!", new ArgumentNullException());
 
-            _digestMac.Initialize(new KeyParams(Extract(Salt, Ikm)));
+            _digestMac.Initialize(Extract(Salt, Ikm), null);
 
             if (Info != null)
                 _digestInfo = Info;
@@ -286,7 +286,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         public int Generate(byte[] Output, int OutOffset, int Size)
         {
             if ((Output.Length - Size) < OutOffset)
-                throw new CryptoGeneratorException("PKCS5:Generate", "Output buffer too small!", new Exception());
+                throw new CryptoGeneratorException("PBKDF2:Generate", "Output buffer too small!", new Exception());
             if (_generatedBytes + Size > 255 * _hashLength)
                 throw new CryptoGeneratorException("HKDF:Generate", "HKDF may only be used for 255 * HashLen bytes of output", new ArgumentOutOfRangeException());
 
@@ -339,9 +339,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
             byte[] prk = new byte[_hashLength];
 
             if (Salt == null)
-                _digestMac.Initialize(new KeyParams(new byte[_hashLength]));
+                _digestMac.Initialize(new byte[_hashLength], null);
             else
-                _digestMac.Initialize(new KeyParams(Salt));
+                _digestMac.Initialize(Salt, null);
 
             _digestMac.BlockUpdate(Ikm, 0, Ikm.Length);
             _digestMac.DoFinal(prk, 0);

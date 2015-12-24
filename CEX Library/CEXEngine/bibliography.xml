@@ -67,6 +67,12 @@
     <author>William Whyte</author>
     <link>http://grouper.ieee.org/groups/1363/lattPK/submissions/EESS1v2.pdf</link>
   </reference>
+
+  <reference name="ISO 7816">
+    <title>Identification cards -Integrated circuit cards -Part 4: Organization, security and commands for interchange</title>
+    <author>ISO</author>
+    <link>http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=36134</link>
+  </reference>
   <reference name="ISO 18033">
     <title>Information technology - Security techniques - Encryption algorithms - Part 2</title>
     <author>Victor Shoup</author>

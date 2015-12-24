@@ -31,6 +31,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         string Name { get; }
 
         /// <summary>
+        /// Get: The number of diffusion rounds processed by the transform
+        /// </summary>
+        int Rounds { get; }
+
+        /// <summary>
         /// Decrypt a single block of bytes.
         /// <para><see cref="Initialize(bool, KeyParams)"/> must be called with the Encryption flag set to <c>false</c> before this method can be used.
         /// Input and Output arrays must be at least <see cref="BlockSize"/> in length.</para>

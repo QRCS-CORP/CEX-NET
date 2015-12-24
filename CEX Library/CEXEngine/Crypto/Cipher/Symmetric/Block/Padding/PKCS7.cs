@@ -38,10 +38,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
             byte code = (byte)(Input.Length - Offset);
 
             while (Offset < Input.Length)
-            {
-                Input[Offset] = code;
-                Offset++;
-            }
+                Input[Offset++] = code;
 
             return code;
         }
@@ -55,19 +52,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         /// <returns>Length of padding</returns>
         public int GetPaddingLength(byte[] Input)
         {
-            int len = Input.Length - 1;
-            byte code = Input[len];
+            int plen = Input.Length - 1;
+	        byte code = Input[plen];
 
-            if ((int)code > len)
-                return 0;
-
-            for (int i = len; i > 0; i--)
-            {
-                if (Input[i] != code)
-                    return (len - i);
-            }
-
-            return 0;
+	        if ((int)code > plen)
+		        return (code > plen + 1) ? 0 : plen + 1;
+	        else
+		        return code;
         }
 
         /// <summary>
@@ -80,19 +71,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         /// <returns>Length of padding</returns>
         public int GetPaddingLength(byte[] Input, int Offset)
         {
-            int len = Input.Length - (Offset + 1);
-            byte code = Input[Input.Length - 1];
+            int plen = Input.Length - (Offset + 1);
+	        byte code = Input[Input.Length - 1];
 
-            if ((int)code > len)
-                return 0;
-
-            for (int i = len; i > 0; i--)
-            {
-                if (Input[Offset + i] != code)
-                    return (len - i);
-            }
-
-            return 0;
+	        if ((int)code > plen)
+		        return (code > plen + 1) ? 0 : plen + 1;
+	        else
+		        return code;
         }
         #endregion
     }

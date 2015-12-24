@@ -36,13 +36,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         public int AddPadding(byte[] Input, int Offset)
         {
             byte code = (byte)(Input.Length - Offset);
-            int len = (Input.Length - Offset) - 1;
-            byte[] data = new byte[len];
+            int plen = (Input.Length - Offset) - 1;
 
-            using (RNGCryptoServiceProvider random = new RNGCryptoServiceProvider())
-                random.GetBytes(data);
+            if (plen > 0)
+            {
+                byte[] data = new byte[plen];
+                using (RNGCryptoServiceProvider random = new RNGCryptoServiceProvider())
+                    random.GetBytes(data);
 
-            Buffer.BlockCopy(data, 0, Input, Offset, len);
+                Buffer.BlockCopy(data, 0, Input, Offset, plen);
+            }
+
             Input[Input.Length - 1] = code;
 
             return code;

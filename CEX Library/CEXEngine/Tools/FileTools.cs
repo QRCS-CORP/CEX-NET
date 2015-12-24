@@ -18,6 +18,175 @@ namespace VTDev.Libraries.CEXEngine.Tools
         #endregion
 
         #region File Tools
+
+        /// <summary>
+        /// Get the File Attributes
+        /// </summary>
+        /// <param name="FilePath">Full path to file</param>
+        /// <returns>Attributes [FileAttributes]</returns>
+        public static FileAttributes GetAttributes(string FilePath)
+        {
+            if (!File.Exists(FilePath)) return FileAttributes.Offline;
+
+            return File.GetAttributes(FilePath);
+        }
+
+        /// <summary>
+        /// Get the size of  file
+        /// </summary>
+        /// <param name="FilePath">Full path to file</param>
+        /// <returns>File length [long]</returns>
+        public static long GetSize(string FilePath)
+        {
+            try
+            {
+                return File.Exists(FilePath) ? new FileInfo(FilePath).Length : 0;
+            }
+            catch { }
+            return -1;
+        }
+
+        /// <summary>
+        /// Creates a temporary file
+        /// </summary>
+        /// <returns>File path [string]</returns>
+        public static string GetTemp()
+        {
+            return Path.GetTempFileName();
+        }
+
+        /// <summary>
+        /// Adds an extension to a file unique to the directory
+        /// </summary>
+        /// 
+        /// <param name="FullPath">Full file path</param>
+        /// <returns>Unique filename in original path</returns>
+        public static string GetUniqueName(string FullPath)
+        {
+            string folderPath = Path.GetDirectoryName(FullPath);
+            string fileName = Path.GetFileName(FullPath);
+            string fileExtension = Path.GetExtension(FullPath);
+
+            string filePath = Path.Combine(folderPath, fileName + fileExtension);
+
+            for (int i = 1; i < 10240; i++)
+            {
+                // test unique names
+                if (File.Exists(filePath))
+                    filePath = Path.Combine(folderPath, fileName + " " + i.ToString() + fileExtension);
+                else
+                    break;
+            }
+
+            return filePath;
+        }
+
+        /// <summary>
+        /// Test a file for create file access permissions
+        /// </summary>
+        /// 
+        /// <param name="FilePath">Full path to file</param>
+        /// <param name="AccessRight">File System right tested</param>
+        /// 
+        /// <returns>State [bool]</returns>
+        public static bool HasPermission(string FilePath, FileSystemRights AccessRight)
+        {
+            if (string.IsNullOrEmpty(FilePath)) return false;
+
+            try
+            {
+                AuthorizationRuleCollection rules = File.GetAccessControl(FilePath).GetAccessRules(true, true, typeof(System.Security.Principal.SecurityIdentifier));
+                WindowsIdentity identity = WindowsIdentity.GetCurrent();
+
+                foreach (FileSystemAccessRule rule in rules)
+                {
+                    if (identity.Groups.Contains(rule.IdentityReference))
+                    {
+                        if ((AccessRight & rule.FileSystemRights) == AccessRight)
+                        {
+                            if (rule.AccessControlType == AccessControlType.Allow)
+                                return true;
+                        }
+                    }
+                }
+            }
+            catch { }
+            return false;
+        }
+
+        /// <summary>
+        /// File is readable
+        /// </summary>
+        /// 
+        /// <param name="FilePath">Full path to file</param>
+        /// 
+        /// <returns>Success [bool]</returns>
+        public static bool IsReadable(string FilePath)
+        {
+            try
+            {
+                if (!File.Exists(FilePath)) 
+                    return false;
+                using (FileStream fs = new FileStream(FilePath, FileMode.Open, FileAccess.Read)) { }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Test a file to see if it is readonly
+        /// </summary>
+        /// 
+        /// <param name="FilePath">Full path to file</param>
+        /// 
+        /// <returns>Read only [bool]</returns>
+        public static bool IsReadOnly(string FilePath)
+        {
+            if (!File.Exists(FilePath)) 
+                return false;
+
+            FileAttributes fa = File.GetAttributes(FilePath);
+            return (fa.ToString().IndexOf(FileAttributes.ReadOnly.ToString()) > -1);
+        }
+
+        /// <summary>
+        /// Test if file name is valid [has extension]
+        /// </summary>
+        /// 
+        /// <param name="FileName">File name</param>
+        /// 
+        /// <returns>Valid</returns>
+        public static bool IsValidName(string FileName)
+        {
+            try
+            {
+                return (!string.IsNullOrEmpty(FileName) ? !string.IsNullOrEmpty(Path.GetExtension(FileName)) : false);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Test path to see if directory exists and file name has proper format
+        /// </summary>
+        /// 
+        /// <param name="FilePath">Full path to file</param>
+        /// 
+        /// <returns>Valid</returns>
+        public static bool IsValidPath(string FilePath)
+        {
+            if (DirectoryTools.Exists(DirectoryTools.GetPath(FilePath)))
+                if (IsValidName(FilePath))
+                    return true;
+
+            return false;
+        }
+
         /// <summary>
         /// Safely create a full path
         /// </summary>
@@ -43,160 +212,34 @@ namespace VTDev.Libraries.CEXEngine.Tools
         }
 
         /// <summary>
-        /// Test a file for create file access permissions
+        /// Remove a specific file attribute
         /// </summary>
-        /// 
         /// <param name="FilePath">Full path to file</param>
-        /// <param name="AccessRight">File System right tested</param>
-        /// 
-        /// <returns>State</returns>
-        public static bool HasPermission(string FilePath, FileSystemRights AccessRight)
+        /// <param name="Attribute">File attribute [FileAttributes]</param>
+        public static void RemoveAttribute(string FilePath, FileAttributes Attribute)
         {
-            if (string.IsNullOrEmpty(FilePath)) return false;
+            if (!File.Exists(FilePath)) return;
 
             try
             {
-                AuthorizationRuleCollection rules = File.GetAccessControl(FilePath).GetAccessRules(true, true, typeof(System.Security.Principal.SecurityIdentifier));
-                WindowsIdentity identity = WindowsIdentity.GetCurrent();
+                FileAttributes attributes = File.GetAttributes(FilePath);
 
-                foreach (FileSystemAccessRule rule in rules)
-                {
-                    if (identity.Groups.Contains(rule.IdentityReference))
-                    {
-                        if ((AccessRight & rule.FileSystemRights) == AccessRight)
-                        {
-                            if (rule.AccessControlType == AccessControlType.Allow)
-                                return true;
-                        }
-                    }
-                }
-                return false;
+                if (attributes.HasFlag(Attribute))
+                    File.SetAttributes(FilePath, attributes & ~Attribute);
             }
-            catch
-            {
-                throw;
-            }
+            catch { }
         }
 
         /// <summary>
-        /// Get the size of  file
+        /// Set a File Attribute
         /// </summary>
-        /// 
         /// <param name="FilePath">Full path to file</param>
-        /// 
-        /// <returns>File length</returns>
-        public static long GetSize(string FilePath)
+        /// <param name="Attribute">FileAttributes</param>
+        public static void SetAttributes(string FilePath, FileAttributes Attribute)
         {
-            try
-            {
-                return File.Exists(FilePath) ? new FileInfo(FilePath).Length : 0;
-            }
-            catch
-            {
-                throw;
-            }
-        }
+            if (!File.Exists(FilePath)) return;
 
-        /// <summary>
-        /// Adds an extension to a file unique to the directory
-        /// </summary>
-        /// 
-        /// <param name="FullPath">Full file path</param>
-        /// 
-        /// <returns>Unique filename in original path</returns>
-        public static string GetUniqueName(string FullPath)
-        {
-            if (!IsValidPath(FullPath)) return string.Empty;
-            if (!DirectoryTools.Exists(DirectoryTools.GetPath(FullPath))) return string.Empty;
-
-            string folderPath = DirectoryTools.GetPath(FullPath);
-            string fileName = Path.GetFileNameWithoutExtension(FullPath);
-            string fileExtension = Path.GetExtension(FullPath);
-
-            string filePath = Path.Combine(folderPath, fileName + fileExtension);
-
-            for (int i = 1; i < 10240; i++)
-            {
-                // test unique names
-                if (File.Exists(filePath))
-                    filePath = Path.Combine(folderPath, fileName + " " + i.ToString() + fileExtension);
-                else
-                    break;
-            }
-
-            return filePath;
-        }
-
-        /// <summary>
-        /// File is readable
-        /// </summary>
-        /// 
-        /// <param name="FilePath">Full path to file</param>
-        /// 
-        /// <returns>Success</returns>
-        public static bool IsReadable(string FilePath)
-        {
-            try
-            {
-                if (!File.Exists(FilePath)) return false;
-                using (FileStream fs = new FileStream(FilePath, FileMode.Open, FileAccess.Read)) { }
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Test a file to see if it is readonly
-        /// </summary>
-        /// 
-        /// <param name="FilePath">Full path to file</param>
-        /// 
-        /// <returns>Read only</returns>
-        public static bool IsReadOnly(string FilePath)
-        {
-            if (!IsValidPath(FilePath)) return false;
-            if (!File.Exists(FilePath)) return false;
-
-            FileAttributes fa = File.GetAttributes(FilePath);
-            return (fa.ToString().IndexOf(FileAttributes.ReadOnly.ToString()) > -1);
-        }
-
-        /// <summary>
-        /// Test if file name is valid [has extension]
-        /// </summary>
-        /// 
-        /// <param name="FileName">File name</param>
-        /// 
-        /// <returns>Valid</returns>
-        public static bool IsValidName(string FileName)
-        {
-            try
-            {
-                return (!string.IsNullOrEmpty(FileName) ? !string.IsNullOrEmpty(Path.GetExtension(FileName)) : false);
-            }
-            catch 
-            { 
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Test path to see if directory exists and file name has proper format
-        /// </summary>
-        /// 
-        /// <param name="FilePath">Full path to file</param>
-        /// 
-        /// <returns>Valid</returns>
-        public static bool IsValidPath(string FilePath)
-        {
-            if (DirectoryTools.Exists(DirectoryTools.GetPath(FilePath)))
-                if (IsValidName(FilePath))
-                    return true;
-
-            return false;
+            File.SetAttributes(FilePath, Attribute & GetAttributes(FilePath));
         }
 
         /// <summary>
@@ -212,6 +255,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
             fsecurity.SetOwner(Account);
             finfo.SetAccessControl(fsecurity);
         }
+
         #endregion
 
         #region Utilities

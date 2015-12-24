@@ -292,7 +292,7 @@
     <Compile Include="CryptoException\CryptoProcessingException.cs" />
     <Compile Include="CryptoException\CryptoRandomException.cs" />
     <Compile Include="Crypto\Generator\KDF2Drbg.cs" />
-    <Compile Include="Crypto\Generator\PKCS5.cs" />
+    <Compile Include="Crypto\Generator\PBKDF2.cs" />
     <Compile Include="Crypto\Common\CipherDescription.cs" />
     <Compile Include="Crypto\Processing\Structure\KeyAuthority.cs" />
     <Compile Include="Crypto\Processing\Factory\PackageFactory.cs" />

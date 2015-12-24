@@ -95,13 +95,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         #region Constructor
         /// <summary>
         /// Creates a new PassphrasePrng from a passphrase and salt,
-        /// and seeds it with the output of PKCS5
+        /// and seeds it with the output of PBKDF2
         /// </summary>
         /// 
         /// <param name="Digest">Digest engine</param>
         /// <param name="Passphrase">The passphrase</param>
         /// <param name="Salt">The salt value</param>
-        /// <param name="Iterations">The number of transformation iterations performed by the digest with PKCS5 (default is 10,000)</param>
+        /// <param name="Iterations">The number of transformation iterations performed by the digest with PBKDF2 (default is 10,000)</param>
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called (default is true)</param>
         /// 
         /// <exception cref="CryptoRandomException">Thrown if a null Digest, Passphrase or Salt are used</exception>
@@ -117,7 +117,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
             try
             {
                 _disposeEngine = DisposeEngine;
-                PKCS5 pkcs = new PKCS5(Digest, Iterations, false);
+                PBKDF2 pkcs = new PBKDF2(Digest, Iterations, false);
                 _digest = Digest;
                 pkcs.Initialize(Salt, Passphrase);
                 _rndData = new byte[_digest.BlockSize];

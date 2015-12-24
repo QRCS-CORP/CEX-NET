@@ -133,7 +133,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
 
             // test 1: HMAC interface
             HMAC hmac1 = new HMAC(new SHA256());
-            hmac1.Initialize(new KeyParams(Key));
+            hmac1.Initialize(Key);
             hash = hmac1.ComputeMac(Input);
 
             // truncated output, test case #5
@@ -154,7 +154,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
             // test 2: 256 hmac
             using (SHA256HMAC hmac2 = new SHA256HMAC())
             {
-                hmac2.Initialize(new KeyParams(Key));
+                hmac2.Initialize(Key);
                 hash = hmac2.ComputeMac(Input);
             }
 
@@ -176,7 +176,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
 
             // test 3: HMAC interface
             hmac1 = new HMAC(new SHA512());
-            hmac1.Initialize(new KeyParams(Key));
+            hmac1.Initialize(Key);
             hash = hmac1.ComputeMac(Input);
 
             if (Out512.Length != 64)
@@ -196,7 +196,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
             // test 4: 256 hmac
             using (SHA512HMAC hmac3 = new SHA512HMAC())
             {
-                hmac3.Initialize(new KeyParams(Key));
+                hmac3.Initialize(Key);
                 hash = hmac3.ComputeMac(Input);
             }
 

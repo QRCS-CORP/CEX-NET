@@ -1,7 +1,6 @@
 ﻿#region Directives
 using System;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block;
-using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Mac;
 using VTDev.Libraries.CEXEngine.Tools;
 #endregion
@@ -70,7 +69,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
         #endregion
 
         #region Public Methods
-        /// <summary></summary>
+        /// <summary>Test the CMAC implementation</summary>
         /// 
         /// <returns>State</returns>
         public string Test()
@@ -112,7 +111,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
 
             using (CMAC mac = new CMAC(new RDX(), 128))
             {
-                mac.Initialize(new KeyParams(Key));
+                mac.Initialize(Key, null);
                 mac.BlockUpdate(Input, 0, Input.Length);
                 mac.DoFinal(hash, 0);
             }

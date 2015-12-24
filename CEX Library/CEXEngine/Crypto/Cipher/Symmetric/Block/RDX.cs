@@ -166,6 +166,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         {
             get { return ALG_NAME; }
         }
+
+        /// <summary>
+        /// Get: The number of diffusion rounds processed by the transform
+        /// </summary>
+        public int Rounds
+        {
+            get { return _NR; }
+        }
         #endregion
 
         #region Constructor

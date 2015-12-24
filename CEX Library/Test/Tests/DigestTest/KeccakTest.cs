@@ -313,14 +313,14 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
         private void HMACTest(IDigest Digest, String[] Expected, byte[] TruncExpected)
         {
             HMAC mac = new HMAC(Digest);
-            byte[] macV2 = new byte[mac.DigestSize];
+            byte[] macV2 = new byte[mac.MacSize];
 
             for (int i = 0; i != _macKeys.Length; i++)
             {
-                mac.Initialize(new KeyParams(_macKeys[i]));
+                mac.Initialize(_macKeys[i]);
 
                 byte[] mData = HexConverter.Decode(_macData[i]);
-                byte[] macV = new byte[mac.DigestSize];
+                byte[] macV = new byte[mac.MacSize];
 
                 mac.BlockUpdate(mData, 0, mData.Length);
                 mac.DoFinal(macV, 0);
@@ -331,7 +331,7 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
 
             // test truncated keys
             mac = new HMAC(Digest);
-            mac.Initialize(new KeyParams(_truncKey));
+            mac.Initialize(_truncKey);
             mac.BlockUpdate(_truncData, 0, _truncData.Length);
             mac.DoFinal(macV2, 0);
 

@@ -67,7 +67,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             byte[] enc1;
             byte[] enc2;
             int blockSize;
-            KeyParams keyParam = new KeyParams(GetBytes(32), GetBytes(16));
+            KeyParams keyParam = new KeyParams(new byte[32], new byte[16]);
 
             // CTR mode
             using (CTR cipher = new CTR(new RDX()))
@@ -83,27 +83,27 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 // set parallel block size
                 cipher.ParallelBlockSize = plen;
 
-                // encrypt //
                 // parallel 1
                 cipher.Initialize(true, keyParam);
                 cipher.IsParallel = true;
                 blockSize = cipher.ParallelBlockSize;
-                enc1 = Transform1(cipher, data, blockSize);
-
-                // parallel 2
-                cipher.Initialize(true, keyParam);
-                cipher.IsParallel = true;
-                blockSize = cipher.ParallelBlockSize;
-                enc2 = Transform2(cipher, data, blockSize);
-
-                if (Evaluate.AreEqual(enc1, enc2) == false)
-                    throw new Exception("Parallel CTR: Encrypted output is not equal!");
+                enc1 = Transform2(cipher, data, blockSize);
 
                 // linear 1
                 cipher.Initialize(true, keyParam);
                 cipher.IsParallel = false;
                 blockSize = cipher.BlockSize;
-                enc2 = Transform1(cipher, data, blockSize);
+                enc2 = Transform2(cipher, data, blockSize);
+
+                if (Evaluate.AreEqual(enc1, enc2) == false)
+                    throw new Exception("Parallel CTR: Encrypted output is not equal!");
+
+                // encrypt //
+                // parallel 2
+                cipher.Initialize(true, keyParam);
+                cipher.IsParallel = true;
+                blockSize = cipher.ParallelBlockSize;
+                enc1 = Transform1(cipher, data, blockSize);
 
                 if (Evaluate.AreEqual(enc1, enc2) == false)
                     throw new Exception("Parallel CTR: Encrypted output is not equal!");
@@ -299,16 +299,24 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         /// </summary>
         private byte[] Transform1(ICipherMode Cipher, byte[] Data, int BlockSize)
         {
-            // best way, use the offsets
-            int blocks = Data.Length / BlockSize;
             byte[] outData = new byte[Data.Length];
 
-            for (int i = 0; i < blocks; i++)
-                Cipher.Transform(Data, i * BlockSize, outData, i * BlockSize);
+            if (Cipher.Name == "CTR")
+            {
+                Cipher.Transform(Data, 0, outData, 0);
+            }
+            else
+            {
+                // best way, use the offsets
+                int blocks = Data.Length / BlockSize;
 
-            // last partial in CTR
-            if (blocks * BlockSize < Data.Length)
-                Cipher.Transform(Data, blocks * BlockSize, outData, blocks * BlockSize);
+                for (int i = 0; i < blocks; i++)
+                    Cipher.Transform(Data, i * BlockSize, outData, i * BlockSize);
+
+                // last partial in CTR
+                if (blocks * BlockSize < Data.Length)
+                    Cipher.Transform(Data, blocks * BlockSize, outData, blocks * BlockSize);
+            }
 
             return outData;
         }

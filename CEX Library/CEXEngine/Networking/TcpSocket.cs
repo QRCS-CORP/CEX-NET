@@ -148,6 +148,17 @@ namespace VTDev.Libraries.CEXEngine.Networking
         /// The Data Received event; fires each time data has been received
         /// </summary>
         public event DataReceivedDelegate DataReceived;
+
+        /// <summary>
+        /// The Session Error delegate
+        /// </summary>
+        /// <param name="owner">The owner object</param>
+        /// <param name="args">A <see cref="CryptoSocketException"/> class</param>
+        public delegate void TcpSocketErrorDelegate(object owner, CryptoSocketException ex);
+        /// <summary>
+        /// The Session Error event; fires when an error has occured
+        /// </summary>
+        public event TcpSocketErrorDelegate TcpSocketError;
         #endregion
 
         #region Properties
@@ -481,7 +492,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
         {
             IPHostEntry host;
             IPAddress[] ipList;
-            IPAddress ip;
+            IPAddress ip = null;
 
             try
             {
@@ -492,7 +503,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
             }
             catch (SocketException se)
             {
-                throw new CryptoSocketException("TcpSocket:Connect", "The Tcp connect operation has failed!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:Connect", "The Tcp connect operation has failed!", se));
             }
             catch (Exception)
             {
@@ -547,7 +559,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
                 if (_cltSocket != null)
                     _cltSocket.Close();
 
-                throw new CryptoSocketException("TcpSocket:Connect", "The Tcp connect operation has failed!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:Connect", "The Tcp connect operation has failed!", se));
             }
             catch (Exception)
             {
@@ -568,7 +581,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
         {
             IPHostEntry host;
             IPAddress[] ipList;
-            IPAddress ip;
+            IPAddress ip = null;
             
             try
             {
@@ -578,7 +591,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
             }
             catch (SocketException se)
             {
-                throw new CryptoSocketException("TcpSocket:ConnectAsync", "The Tcp connect operation has failed!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:ConnectAsync", "The Tcp connect operation has failed!", se));
             }
             catch (Exception)
             {
@@ -613,7 +627,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
             }
             catch (SocketException se)
             {
-                throw new CryptoSocketException("TcpSocket:ConnectAsync", "The Tcp connect operation attempt has failed!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:ConnectAsync", "The Tcp connect operation has failed!", se));
             }
             catch (Exception)
             {
@@ -647,7 +662,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
             }
             catch (SocketException se)
             {
-                throw new CryptoSocketException("TcpSocket:ConnectCallback", "The Tcp connect operation has failed!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:ConnectCallback", "The Tcp connect operation has failed!", se));
             }
             catch (ObjectDisposedException)
             {
@@ -685,7 +701,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
         {
             IPHostEntry host;
             IPAddress[] ipList;
-            IPAddress ip;
+            IPAddress ip = null;
 
             try
             {
@@ -696,7 +712,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
             }
             catch (SocketException se)
             {
-                throw new CryptoSocketException("TcpSocket:Listen", "The Tcp listener has failed!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:Listen", "The Tcp listener has failed!", se));
             }
             catch (Exception)
             {
@@ -754,7 +771,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
             }
             catch (SocketException se)
             {
-                throw new CryptoSocketException("TcpSocket:Listen", "The Tcp listener has failed!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:Listen", "The Tcp listener has failed!", se));
             }
             catch (Exception)
             {
@@ -776,7 +794,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
         {
             IPHostEntry host;
             IPAddress[] ipList;
-            IPAddress ip;
+            IPAddress ip = null;
 
             try
             {
@@ -786,7 +804,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
             }
             catch (SocketException se)
             {
-                throw new CryptoSocketException("TcpSocket:Listen", "The Tcp listener has failed!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:ListenAsync", "The Tcp listener has failed!", se));
             }
             catch (Exception)
             {
@@ -836,7 +855,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
             }
             catch (SocketException se)
             {
-                throw new CryptoSocketException("TcpSocket:ListenAsync", "The Tcp listener has failed!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:ListenAsync", "The Tcp listener has failed!", se));
             }
             catch (Exception)
             {
@@ -885,7 +905,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
             }
             catch (SocketException se)
             {
-                throw new CryptoSocketException("TcpSocket:ListenCallback", "The Tcp listener has failed!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:ListenCallback", "The Tcp listener has failed!", se));
             }
             catch (Exception)
             {
@@ -908,7 +929,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
             }
             catch (SocketException se)
             {
-                throw new CryptoSocketException("TcpSocket:ListenStop", "The Tcp listen stop had an error!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:ListenStop", "The Tcp listener has failed!", se));
             }
             catch (Exception)
             {
@@ -935,7 +957,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
             }
             catch (SocketException se)
             {
-                throw new CryptoSocketException("TcpSocket:ReceiveAsync", "The Tcp receiver has failed!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:ReceiveAsync", "The Tcp receiver has failed!", se));
             }
             catch (Exception)
             {
@@ -962,7 +985,10 @@ namespace VTDev.Libraries.CEXEngine.Networking
                 int bytesRead = clt.EndReceive(Ar);
 
                 if (bytesRead > MaxAllocation)
-                    throw new CryptoSocketException("TcpSocket:ReceiveCallback", string.Format("The Tcp stream is larger than the maximum allocation size of {0} bytes!", MaxAllocation), new InvalidOperationException());
+                {
+                    if (TcpSocketError != null)
+                        TcpSocketError(this, new CryptoSocketException("TcpSocket:ReceiveCallback", string.Format("The Tcp stream is larger than the maximum allocation size of {0} bytes!", MaxAllocation), new InvalidOperationException()));
+                }
 
                 if (bytesRead > 0)
                 {
@@ -992,8 +1018,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
             catch (SocketException se)
             {
                 // expected when remote connection goes down
-                if (se.ErrorCode != (int)SocketError.ConnectionReset && se.ErrorCode != (int)SocketError.Disconnecting)
-                    throw new CryptoSocketException("TcpSocket:ReceiveCallback", "The Tcp receiver has failed!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success && se.SocketErrorCode != SocketError.Disconnecting)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:ReceiveCallback", "The Tcp receiver has failed!", se));
             }
             catch (ObjectDisposedException)
             {
@@ -1005,7 +1031,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
             {
                 // expected when shutting down
             }
-            catch
+            catch (Exception)
             {
                 throw;
             }
@@ -1026,14 +1052,18 @@ namespace VTDev.Libraries.CEXEngine.Networking
             try
             {
                 if (DataArray.Length > MaxAllocation)
-                    throw new CryptoSocketException("TcpSocket:Send", string.Format("The Data bytes are larger than the maximum allocation size of {0} bytes!", MaxAllocation), new InvalidOperationException());
+                {
+                    if (TcpSocketError != null)
+                        TcpSocketError(this, new CryptoSocketException("TcpSocket:Send", string.Format("The Data bytes are larger than the maximum allocation size of {0} bytes!", MaxAllocation), new InvalidOperationException()));
+                }
                 
                 // send the data to the remote device
                 _cltSocket.Send(DataArray, SocketFlag);
             }
             catch (SocketException se)
             {
-                throw new CryptoSocketException("TcpSocket:Send", "The Tcp Send operation has failed!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:Send", "The Tcp Send operation has failed!", se));
             }
             catch (ObjectDisposedException)
             {
@@ -1060,14 +1090,18 @@ namespace VTDev.Libraries.CEXEngine.Networking
             try
             {
                 if (DataStream.Length > MaxAllocation)
-                    throw new CryptoSocketException("TcpSocket:Send", string.Format("The Data bytes are larger than the maximum allocation size of {0} bytes!", MaxAllocation), new InvalidOperationException());
+                {
+                    if (TcpSocketError != null)
+                        TcpSocketError(this, new CryptoSocketException("TcpSocket:Send", string.Format("The Data bytes are larger than the maximum allocation size of {0} bytes!", MaxAllocation), new InvalidOperationException()));
+                }
 
                 // send the data to the remote device
                 _cltSocket.Send(DataStream.ToArray(), SocketFlag);
             }
             catch (SocketException se)
             {
-                throw new CryptoSocketException("TcpSocket:Send", "The Tcp Send operation has failed!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:Send", "The Tcp Send operation has failed!", se));
             }
             catch (ObjectDisposedException)
             {
@@ -1096,14 +1130,18 @@ namespace VTDev.Libraries.CEXEngine.Networking
             try
             {
                 if (DataArray.Length > MaxAllocation)
-                    throw new CryptoSocketException("TcpSocket:Send", string.Format("The Data bytes are larger than the maximum allocation size of {0} bytes!", MaxAllocation), new InvalidOperationException());
+                {
+                    if (TcpSocketError != null)
+                        TcpSocketError(this, new CryptoSocketException("TcpSocket:Send", string.Format("The Data bytes are larger than the maximum allocation size of {0} bytes!", MaxAllocation), new InvalidOperationException()));
+                }
 
                 // send the data to the remote device
                 _cltSocket.Send(DataArray, Offset, Size, SocketFlag);
             }
             catch (SocketException se)
             {
-                throw new CryptoSocketException("TcpSocket:Send", "The Tcp Send operation has failed!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:Send", "The Tcp Send operation has failed!", se));
             }
             catch (ObjectDisposedException)
             {
@@ -1129,28 +1167,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
         /// <exception cref="CryptoSocketException">Thrown if the Tcp Send operation has failed, or the maximum allocation size is exceeded</exception>
         public void Send(MemoryStream DataStream, int Offset, int Size, SocketFlags SocketFlag = SocketFlags.None)
         {
-            try
-            {
-                if (DataStream.Length > MaxAllocation)
-                    throw new CryptoSocketException("TcpSocket:Send", string.Format("The Data bytes are larger than the maximum allocation size of {0} bytes!", MaxAllocation), new InvalidOperationException());
-
-                // send the data to the remote device
-                _cltSocket.Send(DataStream.ToArray(), Offset, Size, SocketFlag);
-            }
-            catch (SocketException se)
-            {
-                throw new CryptoSocketException("TcpSocket:Send", "The Tcp Send operation has failed!", se);
-            }
-            catch (ObjectDisposedException)
-            {
-                // disconnected
-                if (DisConnected != null)
-                    DisConnected(this, SocketError.NotConnected);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            Send(DataStream.ToArray(), Offset, Size, SocketFlag);
         }
 
         /// <summary>
@@ -1166,14 +1183,18 @@ namespace VTDev.Libraries.CEXEngine.Networking
             try
             {
                 if (DataArray.Length > MaxAllocation)
-                    throw new CryptoSocketException("TcpSocket:SendAsync", string.Format("The Data bytes are larger than the maximum allocation size of {0} bytes!", MaxAllocation), new InvalidOperationException());
+                {
+                    if (TcpSocketError != null)
+                        TcpSocketError(this, new CryptoSocketException("TcpSocket:SendAsync", string.Format("The Data bytes are larger than the maximum allocation size of {0} bytes!", MaxAllocation), new InvalidOperationException()));
+                }
                 
                 // begin sending the data to the remote device
                 _cltSocket.BeginSend(DataArray, 0, DataArray.Length, SocketFlag, new AsyncCallback(SendCallback), _cltSocket);
             }
             catch (SocketException se)
             {
-                throw new CryptoSocketException("TcpSocket:SendAsync", "The Tcp Send has failed!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:SendAsync", "The Tcp Send has failed!", se));
             }
             catch (ObjectDisposedException)
             {
@@ -1197,28 +1218,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
         /// <exception cref="CryptoSocketException">Thrown if the Tcp Send operation has failed, or the maximum allocation size is exceeded</exception>
         public void SendAsync(MemoryStream DataStream, SocketFlags SocketFlag = SocketFlags.None)
         {
-            try
-            {
-                if (DataStream.Length > MaxAllocation)
-                    throw new CryptoSocketException("TcpSocket:SendAsync", string.Format("The Data bytes are larger than the maximum allocation size of {0} bytes!", MaxAllocation), new InvalidOperationException());
-
-                // begin sending the data to the remote device
-                _cltSocket.BeginSend(DataStream.ToArray(), 0, (int)DataStream.Length, SocketFlag, new AsyncCallback(SendCallback), _cltSocket);
-            }
-            catch (SocketException se)
-            {
-                throw new CryptoSocketException("TcpSocket:SendAsync", "The Tcp Send has failed!", se);
-            }
-            catch (ObjectDisposedException)
-            {
-                // disconnected
-                if (DisConnected != null)
-                    DisConnected(this, SocketError.NotConnected);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            SendAsync(DataStream.ToArray(), SocketFlag);
         }
 
         /// <summary>
@@ -1236,14 +1236,18 @@ namespace VTDev.Libraries.CEXEngine.Networking
             try
             {
                 if (DataArray.Length > MaxAllocation)
-                    throw new CryptoSocketException("TcpSocket:SendAsync", string.Format("The Data bytes are larger than the maximum allocation size of {0} bytes!", MaxAllocation), new InvalidOperationException());
+                {
+                    if (TcpSocketError != null)
+                        TcpSocketError(this, new CryptoSocketException("TcpSocket:SendAsync", string.Format("The Data bytes are larger than the maximum allocation size of {0} bytes!", MaxAllocation), new InvalidOperationException()));
+                }
 
                 // begin sending the data to the remote device
                 _cltSocket.BeginSend(DataArray, Offset, Size, SocketFlag, new AsyncCallback(SendCallback), _cltSocket);
             }
             catch (SocketException se)
             {
-                throw new CryptoSocketException("TcpSocket:SendAsync", "The Tcp Send has failed!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:SendAsync", "The Tcp Send has failed!", se));
             }
             catch (ObjectDisposedException)
             {
@@ -1269,28 +1273,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
         /// <exception cref="CryptoSocketException">Thrown if the Tcp Send operation has failed, or the maximum allocation size is exceeded</exception>
         public void SendAsync(MemoryStream DataStream, int Offset, int Size, SocketFlags SocketFlag = SocketFlags.None)
         {
-            try
-            {
-                if (DataStream.Length > MaxAllocation)
-                    throw new CryptoSocketException("TcpSocket:SendAsync", string.Format("The Data bytes are larger than the maximum allocation size of {0} bytes!", MaxAllocation), new InvalidOperationException());
-
-                // begin sending the data to the remote device
-                _cltSocket.BeginSend(DataStream.ToArray(), Offset, Size, SocketFlag, new AsyncCallback(SendCallback), _cltSocket);
-            }
-            catch (SocketException se)
-            {
-                throw new CryptoSocketException("TcpSocket:SendAsync", "The Tcp Send has failed!", se);
-            }
-            catch (ObjectDisposedException)
-            {
-                // disconnected
-                if (DisConnected != null)
-                    DisConnected(this, SocketError.NotConnected);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            SendAsync(DataStream.ToArray(), Offset, Size, SocketFlag);
         }
 
         /// <summary>
@@ -1312,7 +1295,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
             }
             catch (SocketException se)
             {
-                throw new CryptoSocketException("TcpSocket:SendCallback", "The Tcp Send has failed!", se);
+                if (TcpSocketError != null && se.SocketErrorCode != SocketError.Success)
+                    TcpSocketError(this, new CryptoSocketException("TcpSocket:SendCallback", "The Tcp Send has failed!", se));
             }
             catch (ObjectDisposedException)
             {

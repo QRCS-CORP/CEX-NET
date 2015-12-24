@@ -284,7 +284,7 @@ namespace VTDev.Projects.CEX.Tests
 
             using (HMAC hm = new HMAC(new SHA512()))
             {
-                hm.Initialize(new KeyParams(key));
+                hm.Initialize(key);
                 code2 = hm.ComputeMac(data);
             }
 

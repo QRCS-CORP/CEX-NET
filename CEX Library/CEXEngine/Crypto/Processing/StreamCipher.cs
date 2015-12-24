@@ -305,6 +305,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             if (KeyParam == null)
                 throw new CryptoProcessingException("StreamCipher:CTor", "KeyParam can not be null!", new ArgumentNullException());
 
+            SetScope();
             _disposeEngine = true;
             _isEncryption = Encryption;
             _blockSize = Header.BlockSize;
@@ -366,6 +367,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             if (!Cipher.IsInitialized)
                 throw new CryptoProcessingException("StreamCipher:CTor", "The Cipher has not been initialized!", new ArgumentException());
 
+            SetScope();
             _disposeEngine = DisposeEngine;
             _cipherEngine = Cipher;
             _isStreamCipher = false;
@@ -405,6 +407,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             if (!Cipher.IsInitialized)
                 throw new CryptoProcessingException("StreamCipher:CTor", "The Cipher has not been initialized!", new ArgumentException());
 
+            SetScope();
             _disposeEngine = DisposeEngine;
             _streamCipher = Cipher;
             _isStreamCipher = true;
@@ -925,6 +928,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
                 }
             }
         }
+        
+	    private void SetScope()
+	    {
+            _processorCount = Environment.ProcessorCount;
+		    if (_processorCount % 2 != 0)
+			    _processorCount--;
+		    if (_processorCount > 1)
+			    _isParallel = true;
+	    }
         #endregion
     }
 }

@@ -18,8 +18,8 @@
         /// </summary>
         KDF2,
         /// <summary>
-        /// An implementation of PKCS5 Version 2
+        /// An implementation of PBKDF2 Version 2
         /// </summary>
-        PKCS5
+        PBKDF2
     }
 }

@@ -82,8 +82,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
     {
         #region Constants
         private const string ALG_NAME = "VMPCMAC";
-        private const int BLOCK_SIZE = 0;
+        private const int BLOCK_SIZE = 256;
         private const int DIGEST_SIZE = 20;
+	    private const byte CT1F = (byte)0x1F;
+        private const byte CTFF = (byte)0xFF;
         #endregion
 
         #region Fields
@@ -101,7 +103,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 
         #region Properties
         /// <summary>
-        /// Get: The Digests internal blocksize in bytes.
+        /// Get: The Macs internal blocksize in bytes.
         /// <para>Not used in VMPCMAC: Block size is variable.</para>
         /// </summary>
         public int BlockSize
@@ -110,9 +112,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         }
 
         /// <summary>
-        /// Get: Size of returned digest in bytes
+        /// Get: Size of returned mac in bytes
         /// </summary>
-        public int DigestSize
+        public int MacSize
         {
             get { return DIGEST_SIZE; }
         }
@@ -167,8 +169,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
             if ((InOffset + Length) > Input.Length)
                 throw new CryptoMacException("VMPCMAC:Ctor", "The Input buffer is too short!", new ArgumentOutOfRangeException());
 
-			for (int i = 0; i < Length; i++)
-				Update(Input[i]);
+            for (int i = 0; i < Length; ++i)
+                Update(Input[InOffset + i]);
         }
 
         /// <summary>
@@ -180,7 +182,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <returns>Mac Hash value</returns>
         public byte[] ComputeMac(byte[] Input)
         {
-            byte[] hash = new byte[DigestSize];
+            if (!_isInitialized)
+                throw new CryptoGeneratorException("VMPCMAC:ComputeMac", "The Mac is not initialized!", new InvalidOperationException());
+
+            byte[] hash = new byte[MacSize];
 
             BlockUpdate(Input, 0, Input.Length);
             DoFinal(hash, 0);
@@ -203,51 +208,58 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
             if (Output.Length - OutOffset < DIGEST_SIZE)
                 throw new CryptoMacException("VMPCMAC:DoFinal", "The Output buffer is too short!", new ArgumentOutOfRangeException());
 
-            // Execute the Post-Processing Phase
-			for (int r = 1; r < 25; r++)
-			{
-				_S = _P[(_S + _P[_N & 0xff]) & 0xff];
+	        int ctr = 1;
+	        byte ptmp;
 
-				_X4 = _P[(_X4 + _X3 + r) & 0xff];
-				_X3 = _P[(_X3 + _X2 + r) & 0xff];
-				_X2 = _P[(_X2 + _X1 + r) & 0xff];
-				_X1 = _P[(_X1 + _S + r) & 0xff];
-				_T[_G & 0x1f] = (byte)(_T[_G & 0x1f] ^ _X1);
-				_T[(_G + 1) & 0x1f] = (byte)(_T[(_G + 1) & 0x1f] ^ _X2);
-				_T[(_G + 2) & 0x1f] = (byte)(_T[(_G + 2) & 0x1f] ^ _X3);
-				_T[(_G + 3) & 0x1f] = (byte)(_T[(_G + 3) & 0x1f] ^ _X4);
-				_G = (byte)((_G + 4) & 0x1f);
+	        // execute the post-processing phase
+	        while (ctr != 25)
+	        {
+		        _S = _P[(_S + _P[_N & CTFF]) & CTFF];
+		        _X4 = _P[(_X4 + _X3 + ctr) & CTFF];
+		        _X3 = _P[(_X3 + _X2 + ctr) & CTFF];
+		        _X2 = _P[(_X2 + _X1 + ctr) & CTFF];
+		        _X1 = _P[(_X1 + _S + ctr) & CTFF];
+		        _T[_G & CT1F] = (byte)(_T[_G & CT1F] ^ _X1);
+		        _T[(_G + 1) & CT1F] = (byte)(_T[(_G + 1) & CT1F] ^ _X2);
+		        _T[(_G + 2) & CT1F] = (byte)(_T[(_G + 2) & CT1F] ^ _X3);
+		        _T[(_G + 3) & CT1F] = (byte)(_T[(_G + 3) & CT1F] ^ _X4);
+		        _G = (byte)((_G + 4) & CT1F);
 
-				byte temp = _P[_N & 0xff];
-				_P[_N & 0xff] = _P[_S & 0xff];
-				_P[_S & 0xff] = temp;
-				_N = (byte)((_N + 1) & 0xff);
-			}
+		        ptmp = _P[_N & CTFF];
+		        _P[_N & CTFF] = _P[_S & CTFF];
+		        _P[_S & CTFF] = ptmp;
+		        _N = (byte)((_N + 1) & CTFF);
 
-			// Input T to the IV-phase of the VMPC KSA
-			for (int m = 0; m < 768; m++)
-			{
-				_S = _P[(_S + _P[m & 0xff] + _T[m & 0x1f]) & 0xff];
-				byte temp = _P[m & 0xff];
-				_P[m & 0xff] = _P[_S & 0xff];
-				_P[_S & 0xff] = temp;
-			}
+		        ++ctr;
+	        }
 
-			// Store 20 new outputs of the VMPC Stream Cipher input table M
-			byte[] M = new byte[20];
-			for (int i = 0; i < 20; i++)
-			{
-				_S = _P[(_S + _P[i & 0xff]) & 0xff];
-				M[i] = _P[(_P[(_P[_S & 0xff]) & 0xff] + 1) & 0xff];
+	        // input T to the IV-phase of the VMPC KSA
+	        ctr = 0;
+	        while (ctr != 768)
+	        {
+		        _S = _P[(_S + _P[ctr & CTFF] + _T[ctr & CT1F]) & CTFF];
+		        ptmp = _P[ctr & CTFF];
+		        _P[ctr & CTFF] = _P[_S & CTFF];
+		        _P[_S & CTFF] = ptmp;
 
-				byte temp = _P[i & 0xff];
+		        ++ctr;
+	        }
 
-				_P[i & 0xff] = _P[_S & 0xff];
-				_P[_S & 0xff] = temp;
-			}
+	        // store 20 new outputs of the VMPC Stream Cipher input table M
+	        byte[] M =  new byte[20];
+	        ctr = 0;
+	        while (ctr != 20)
+	        {
+		        _S = _P[(_S + _P[ctr & CTFF]) & CTFF];
+		        M[ctr] = _P[(_P[(_P[_S & CTFF]) & CTFF] + 1) & CTFF];
+		        ptmp = _P[ctr & CTFF];
+		        _P[ctr & CTFF] = _P[_S & CTFF];
+		        _P[_S & CTFF] = ptmp;
+
+		        ++ctr;
+	        }
 
 			Buffer.BlockCopy(M, 0, Output, OutOffset, M.Length);
-
             Reset();
 
 			return M.Length;
@@ -258,27 +270,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <para>Uses the Key and IV fields of the KeyParams class.</para>
         /// </summary>
         /// 
-        /// <param name="KeyParam">VMPCMAC Key and IV.
-        /// <para>Uses the Key and IV fields of the <see cref="KeyParams"/> class.
-        /// Key and IV must be between 1 and 768 bytes in length.
-        /// Key and IV should be equal in size.</para>
-        /// </param>
+        /// <param name="MacKey">A byte array containing the Key</param>
+        /// <param name="IV">A byte array containing the Initialization Vector</param>
         /// 
         /// <exception cref="CryptoMacException">Thrown if a null or invalid Key, or IV is used</exception>
-        public void Initialize(KeyParams KeyParam)
+        public void Initialize(byte[] MacKey, byte[] IV)
         {
-            if (KeyParam.Key == null)
-                throw new CryptoMacException("VMPCMAC:Initialize", "VMPCMAC Initialize KeyParams must include a Key!", new ArgumentNullException());
-            if (KeyParam.IV == null)
-                throw new CryptoMacException("VMPCMAC:Initialize", "VMPCMAC Initialize KeyParams must include an IV!", new ArgumentNullException());
-
-			_workingIV = KeyParam.IV;
-
-			if (_workingIV == null || _workingIV.Length < 1 || _workingIV.Length > 768)
+            if (MacKey == null || MacKey.Length == 0)
+                throw new CryptoMacException("VMPCMAC:Initialize", "Key can not be zero length or null!", new ArgumentNullException());
+            if (IV == null)
+                throw new CryptoMacException("VMPCMAC:Initialize", "The IV can not be null!", new ArgumentNullException());
+            if (IV == null || IV.Length < 1 || IV.Length > 768)
                 throw new CryptoMacException("VMPCMAC:Initialize", "VMPCMAC requires 1 to 768 bytes of IV!", new ArgumentOutOfRangeException());
 
-			_workingKey = KeyParam.Key;
-
+			_workingIV = (byte[])IV.Clone();
+            _workingKey = (byte[])MacKey.Clone();
 			Reset();
 
             _isInitialized = true;
@@ -289,13 +295,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// </summary>
         public void Reset()
         {
-            InitKey(_workingKey, _workingIV);
-
-			_G = _X1 = _X2 = _X3 = _X4 = _N = 0;
+            _G = _N = _S = _X1 = _X2 = _X3 = _X4 = 0;
+            _P = new byte[256];
 			_T = new byte[32];
-
 			for (int i = 0; i < 32; i++)
 				_T[i] = 0;
+
+            InitKey(_workingKey, _workingIV);
         }
 
         /// <summary>
@@ -305,25 +311,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <param name="Input">Input byte</param>
         public void Update(byte Input)
         {
-            _S = _P[(_S + _P[_N & 0xff]) & 0xff];
-			byte C = (byte)(Input ^ _P[(_P[(_P[_S & 0xff]) & 0xff] + 1) & 0xff]);
+            _S = _P[(_S + _P[_N & CTFF]) & CTFF];
+            byte btmp = (byte)(Input ^ _P[(_P[(_P[_S & CTFF]) & CTFF] + 1) & CTFF]);
 
-			_X4 = _P[(_X4 + _X3) & 0xff];
-			_X3 = _P[(_X3 + _X2) & 0xff];
-			_X2 = _P[(_X2 + _X1) & 0xff];
-			_X1 = _P[(_X1 + _S + C) & 0xff];
+            _X4 = _P[(_X4 + _X3) & CTFF];
+            _X3 = _P[(_X3 + _X2) & CTFF];
+            _X2 = _P[(_X2 + _X1) & CTFF];
+            _X1 = _P[(_X1 + _S + btmp) & CTFF];
+            _T[_G & CT1F] = (byte)(_T[_G & CT1F] ^ _X1);
+            _T[(_G + 1) & CT1F] = (byte)(_T[(_G + 1) & CT1F] ^ _X2);
+            _T[(_G + 2) & CT1F] = (byte)(_T[(_G + 2) & CT1F] ^ _X3);
+            _T[(_G + 3) & CT1F] = (byte)(_T[(_G + 3) & CT1F] ^ _X4);
+            _G = (byte)((_G + 4) & CT1F);
 
-			_T[_G & 0x1f] = (byte)(_T[_G & 0x1f] ^ _X1);
-			_T[(_G + 1) & 0x1f] = (byte)(_T[(_G + 1) & 0x1f] ^ _X2);
-			_T[(_G + 2) & 0x1f] = (byte)(_T[(_G + 2) & 0x1f] ^ _X3);
-			_T[(_G + 3) & 0x1f] = (byte)(_T[(_G + 3) & 0x1f] ^ _X4);
-
-			_G = (byte) ((_G + 4) & 0x1f);
-
-			byte temp = _P[_N & 0xff];
-			_P[_N & 0xff] = _P[_S & 0xff];
-			_P[_S & 0xff] = temp;
-			_N = (byte)((_N + 1) & 0xff);
+            btmp = _P[_N & CTFF];
+            _P[_N & CTFF] = _P[_S & CTFF];
+            _P[_S & CTFF] = btmp;
+            _N = (byte)((_N + 1) & CTFF);
         }
         #endregion
 
@@ -332,31 +336,39 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// Section 3.2, table 2 <see href="http://vmpcfunction.com/vmpc_mac.pdf">VMPC-MAC: 
         /// A Stream Cipher Based Authenticated Encryption Scheme</see>
         /// </remarks>
-		private void InitKey(byte[] KeyBytes, byte[] IvBytes)
+		private void InitKey(byte[] Key, byte[] Iv)
 		{
-			_S = 0;
-			_P = new byte[256];
+            int ctr = 0;
 
-			for (int i = 0; i < 256; i++)
-				_P[i] = (byte) i;
+            while (ctr != 256)
+            {
+                _P[ctr] = (byte)ctr;
+                ++ctr;
+            }
 
-			for (int m = 0; m < 768; m++)
-			{
-				_S = _P[(_S + _P[m & 0xff] + KeyBytes[m % KeyBytes.Length]) & 0xff];
-				byte temp = _P[m & 0xff];
-				_P[m & 0xff] = _P[_S & 0xff];
-				_P[_S & 0xff] = temp;
-			}
+            byte btmp = 0;
 
-			for (int m = 0; m < 768; m++)
-			{
-				_S = _P[(_S + _P[m & 0xff] + IvBytes[m % IvBytes.Length]) & 0xff];
-				byte temp = _P[m & 0xff];
-				_P[m & 0xff] = _P[_S & 0xff];
-				_P[_S & 0xff] = temp;
-			}
+            ctr = 0;
+            while (ctr != 768)
+            {
+                _S = _P[(_S + _P[ctr & CTFF] + Key[ctr % Key.Length]) & CTFF];
+                btmp = _P[ctr & CTFF];
+                _P[ctr & CTFF] = _P[_S & CTFF];
+                _P[_S & CTFF] = btmp;
+                ++ctr;
+            }
 
-			_N = 0;
+            ctr = 0;
+            while (ctr != 768)
+            {
+                _S = _P[(_S + _P[ctr & CTFF] + Iv[ctr % Iv.Length]) & CTFF];
+                btmp = _P[ctr & CTFF];
+                _P[ctr & CTFF] = _P[_S & CTFF];
+                _P[_S & CTFF] = btmp;
+                ++ctr;
+            }
+
+            _N = 0;
 		}
 
         #endregion

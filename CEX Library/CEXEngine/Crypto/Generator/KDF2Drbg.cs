@@ -7,14 +7,14 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 {
     /// <summary>
-    /// <h3>PBKDF2: An implementation of an Hash based Key Derivation Function.</h3>
-    /// <para>PBKDF2 as outlined in ISO 18033-2 <cite>ISO 18033</cite>.</para>
+    /// <h3>KDF2Drbg: An implementation of an Hash based Key Derivation Function.</h3>
+    /// <para>KDF2Drbg as outlined in ISO 18033-2 <cite>ISO 18033</cite>.</para>
     /// </summary> 
     /// 
     /// <example>
     /// <description>Example using an <c>IGenerator</c> interface:</description>
     /// <code>
-    /// using (IGenerator rnd = new PBKDF2(new SHA512()))
+    /// using (IGenerator rnd = new KDF2Drbg(new SHA512()))
     /// {
     ///     // initialize
     ///     rnd.Initialize(Salt, Ikm, [Nonce]);
@@ -52,7 +52,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     public class KDF2Drbg : IGenerator
     {
         #region Constants
-        private const string ALG_NAME = "PBKDF2";
+        private const string ALG_NAME = "KDF2Drbg";
         #endregion
 
         #region Fields
@@ -60,9 +60,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         private byte[] _Salt;
         private byte[] _IV;
         private bool _disposeEngine = true;
-        private int _hashLength;
+        private int _hashSize;
         private bool _isInitialized = false;
-        private int _keySize = 64;
+        private int _blockSize = 64;
         private bool _isDisposed = false;
         #endregion
 
@@ -82,8 +82,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// </summary>
         public int KeySize
         {
-            get { return _keySize; }
-            private set { _keySize = value; }
+            get { return _blockSize; }
+            private set { _blockSize = value; }
         }
 
         /// <summary>
@@ -97,18 +97,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
         #region Constructors
         /// <summary>
-        /// Creates a PBKDF2 Bytes Generator based on the given HMAC function using the default SHA512 engine
+        /// Creates a KDF2 Bytes Generator based on the given HMAC function using the default SHA512 engine
         /// </summary>
         public KDF2Drbg()
         {
             _disposeEngine = true;
             _digest = new SHA512();
-            _hashLength = _digest.DigestSize;
-            _keySize = _digest.BlockSize;
+            _hashSize = _digest.DigestSize;
+            _blockSize = _digest.BlockSize;
         }
 
         /// <summary>
-        /// Creates a PBKDF2 Bytes Generator based on the given hash function
+        /// Creates a KDF2 Bytes Generator based on the given hash function
         /// </summary>
         /// 
         /// <param name="Digest">The digest used</param>
@@ -122,8 +122,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
             _disposeEngine = DisposeEngine;
             _digest = Digest;
-            _hashLength = Digest.DigestSize;
-            _keySize = Digest.BlockSize;
+            _hashSize = Digest.DigestSize;
+            _blockSize = Digest.BlockSize;
         }
 
         /// <summary>
@@ -148,7 +148,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
             if (Salt == null)
                 throw new CryptoGeneratorException("KDF2Drbg:Initialize", "Salt can not be null!", new ArgumentNullException());
 
-            if (Salt.Length < _digest.BlockSize * 2)
+            if (Salt.Length < _blockSize + _hashSize)
             {
                 _Salt = new byte[Salt.Length];
                 // interpret as ISO18033, no IV

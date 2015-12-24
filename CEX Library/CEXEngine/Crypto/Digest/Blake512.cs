@@ -167,6 +167,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         }
 
         /// <summary>
+        /// Initialize the class with a salt value
+        /// </summary>
+        /// 
+        /// <param name="Salt">The optional salt value; must be 4 ulong in length</param>
+        public Blake512(UInt64[] Salt)
+        {
+            if (Salt.Length != 4)
+                throw new CryptoHashException("Blake512:Ctor", "The Salt array length must be 4!", new ArgumentOutOfRangeException());
+
+            Array.Copy(Salt, _salt64, _salt64.Length);
+            Initialize();
+        }
+
+        /// <summary>
         /// Finalize objects
         /// </summary>
         ~Blake512()

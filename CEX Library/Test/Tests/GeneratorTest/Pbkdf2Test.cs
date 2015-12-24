@@ -13,9 +13,9 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
     public class Pbkdf2Test : ITest
     {
         #region Constants
-        private const string DESCRIPTION = "PBKDF2 SHA-2 test vectors.";
+        private const string DESCRIPTION = "KDF2 Drbg SHA-2 test vectors.";
         private const string FAILURE = "FAILURE! ";
-        private const string SUCCESS = "SUCCESS! All PBKDF2 tests have executed succesfully.";
+        private const string SUCCESS = "SUCCESS! All KDF2 Drbg tests have executed succesfully.";
         #endregion
 
         #region Events
@@ -56,7 +56,7 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
             try
             {
                 KDF2Test(_output[0].Length, _salt[0], _output[0]);
-                OnProgress(new TestEventArgs("Passed PBKDF2 vector tests.."));
+                OnProgress(new TestEventArgs("Passed KDF2 Drbg vector tests.."));
 
                 return SUCCESS;
             }
@@ -80,7 +80,7 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
             }
 
             if (Evaluate.AreEqual(outBytes, Output) == false)
-                throw new Exception("PBKDF2: Values are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
+                throw new Exception("KDF2Drbg: Values are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
         }
         #endregion
     }

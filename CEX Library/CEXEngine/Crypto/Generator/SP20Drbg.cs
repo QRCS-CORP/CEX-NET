@@ -28,7 +28,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 // SOFTWARE.
 // 
 // Implementation Details:
-// An implementation of a Counter based Deterministic Random Byte Generator (CTRDRBG). 
+// An implementation of a Salsa20 Counter based Deterministic Random Byte Generator (SP20Drbg). 
 // Written by John Underhill, November 21, 2014
 // contact: develop@vtdev.com
 #endregion
@@ -148,7 +148,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// </summary>
         public static int[] LegalSeedSizes
         {
-            get { return new int[] { 32, 48 }; }
+            get { return new int[] { 24, 40 }; }
         }
 
         /// <summary>
@@ -272,12 +272,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
             _keySize = Salt.Length;
             _ctrVector = new int[2];
-            byte[] iv = new byte[16];
+            byte[] iv = new byte[VECTOR_SIZE];
 
-            Buffer.BlockCopy(Salt, 0, iv, 0, 16);
-            int keyLen = Salt.Length - 16;
+            Buffer.BlockCopy(Salt, 0, iv, 0, VECTOR_SIZE);
+            int keyLen = Salt.Length - VECTOR_SIZE;
             byte[] key = new byte[keyLen];
-            Buffer.BlockCopy(Salt, 16, key, 0, keyLen);
+            Buffer.BlockCopy(Salt, VECTOR_SIZE, key, 0, keyLen);
 
             SetKey(key, iv);
             _isInitialized = true;
@@ -372,8 +372,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
             if (Seed.Length >= 32)
                 Initialize(Seed);
-            else if (Seed.Length >= 8)
-                Buffer.BlockCopy(Seed, 0, _ctrVector, 0, 8);
+            else if (Seed.Length >= VECTOR_SIZE)
+                Buffer.BlockCopy(Seed, 0, _ctrVector, 0, VECTOR_SIZE);
         }
         #endregion
 

@@ -179,6 +179,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         {
             get { return ALG_NAME; }
         }
+
+        /// <summary>
+        /// Get: The number of diffusion rounds processed by the transform
+        /// </summary>
+        public int Rounds
+        {
+            get { return _dfnRounds; }
+        }
         #endregion
 
         #region Constructor
@@ -376,7 +384,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             // step 4: create the working keys by processing with the Sbox and IP
             while (cnt < keySize - 4)
             {
-                Sb3(ref Wk[cnt++], ref Wk[cnt++], ref Wk[cnt++], ref Wk[cnt++]);
+                Sb3(ref Wk[cnt++], ref Wk[cnt++], ref Wk[cnt++], ref Wk[cnt++]);//114,173,372,793
                 Sb2(ref Wk[cnt++], ref Wk[cnt++], ref Wk[cnt++], ref Wk[cnt++]);
                 Sb1(ref Wk[cnt++], ref Wk[cnt++], ref Wk[cnt++], ref Wk[cnt++]);
                 Sb0(ref Wk[cnt++], ref Wk[cnt++], ref Wk[cnt++], ref Wk[cnt++]);

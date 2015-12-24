@@ -332,37 +332,26 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         #endregion
 
         #region Parallel Methods
-        private byte[] Generate(Int32 Size, byte[] Counter)
+        private void Generate(Int32 Size, byte[] Counter, byte[] Output, int OutOffset)
         {
-            // align to upper divisible of block size
-            Int32 algSize = (Size % _blockSize == 0 ? Size : Size + _blockSize - (Size % _blockSize));
-            Int32 lstBlock = algSize - _blockSize;
-            byte[] outputBlock = new byte[_blockSize];
-            byte[] outputData = new byte[Size];
+            int aln = Size - (Size % BlockSize);
+            int ctr = 0;
 
-            for (int i = 0; i < algSize; i += _blockSize)
+            while (ctr != aln)
             {
-                // encrypt counter1 (aes: data, output)
-                _blockCipher.EncryptBlock(Counter, outputBlock);
-
-                // copy to output
-                if (i != lstBlock)
-                {
-                    // copy transform to output
-                    Buffer.BlockCopy(outputBlock, 0, outputData, i, _blockSize);
-                }
-                else
-                {
-                    // copy last block
-                    int fnlSize = (Size % _blockSize) == 0 ? _blockSize : (Size % _blockSize);
-                    Buffer.BlockCopy(outputBlock, 0, outputData, i, fnlSize);
-                }
-
-                // increment counter
+                _blockCipher.EncryptBlock(Counter, 0, Output, OutOffset + ctr);
                 Increment(Counter);
+                ctr += BlockSize;
             }
 
-            return outputData;
+            if (ctr != Size)
+            {
+                byte[] outputBlock = new byte[BlockSize];
+                _blockCipher.EncryptBlock(Counter, outputBlock);
+                int fnlSize = Size % BlockSize;
+                Buffer.BlockCopy(outputBlock, 0, Output, OutOffset + (Size - fnlSize), fnlSize);
+                Increment(Counter);
+            }
         }
 
         private void ProcessBlock(byte[] Input, byte[] Output)
@@ -370,11 +359,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
             if (!IsParallel || Output.Length < _parallelBlockSize)
             {
                 // generate random
-                byte[] rand = Generate(Output.Length, _ctrVector);
+                Generate(Output.Length, _ctrVector, Output, 0);
 
                 // output is input xor with random
                 for (int i = 0; i < Output.Length; i++)
-                    Output[i] = (byte)(Input[i] ^ rand[i]);
+                    Output[i] ^= Input[i];
             }
             else
             {
@@ -385,27 +374,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 
                 // create jagged array of 'sub counters'
                 byte[][] vectors = new byte[ProcessorCount][];
-                
+
                 // create random, and xor to output in parallel
                 System.Threading.Tasks.Parallel.For(0, ProcessorCount, ParallelOption, i =>
                 {
                     // offset counter by chunk size / block size
                     vectors[i] = Increase(_ctrVector, subSize * i);
                     // create random with offset counter
-                    byte[] rand = Generate(cnkSize, vectors[i]);
+                    Generate(cnkSize, vectors[i], Output, i * cnkSize);
 
-                    // xor with input at offset
                     for (int j = 0; j < cnkSize; j++)
-                        Output[j + (i * cnkSize)] = (byte)(Input[j + (i * cnkSize)] ^ rand[j]);
+                        Output[j + (i * cnkSize)] ^= Input[j + (i * cnkSize)];
                 });
+
                 // last block processing
                 if (rndSize < Output.Length)
                 {
                     int fnlSize = Output.Length % rndSize;
-                    byte[] rand = Generate(fnlSize, vectors[ProcessorCount - 1]);
+                    Generate(fnlSize, vectors[ProcessorCount - 1], Output, rndSize);
 
                     for (int i = 0; i < fnlSize; i++)
-                        Output[i + rndSize] = (byte)(Input[i + rndSize] ^ rand[i]);
+                        Output[i + rndSize] ^= Input[i + rndSize];
                 }
 
                 // copy the last counter position to class variable
@@ -417,24 +406,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         {
             int blkSize = (Output.Length - OutOffset);
 
-            if (!_isParallel)
+            if (!_isParallel || blkSize < ParallelBlockSize)
             {
-                blkSize = blkSize < _blockSize ? blkSize : _blockSize;
                 // generate random
-                byte[] rand = Generate(blkSize, _ctrVector);
+                Generate(blkSize, _ctrVector, Output, OutOffset);
 
                 // output is input xor with random
                 for (int i = 0; i < blkSize; i++)
-                    Output[i + OutOffset] = (byte)(Input[i + InOffset] ^ rand[i]);
-            }
-            else if (blkSize < ParallelBlockSize)
-            {
-                // generate random
-                byte[] rand = Generate(blkSize, _ctrVector);
-
-                // output is input xor with random
-                for (int i = 0; i < blkSize; i++)
-                    Output[i + OutOffset] = (byte)(Input[i + InOffset] ^ rand[i]);
+                    Output[i + OutOffset] ^= Input[i + InOffset];
             }
             else
             {
@@ -450,23 +429,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
                 System.Threading.Tasks.Parallel.For(0, ProcessorCount, ParallelOption, i =>
                 {
                     // offset counter by chunk size / block size
-                    vectors[i] = Increase(_ctrVector, subSize * i);
+                    vectors[i] = Increase(_ctrVector, subSize * i);//sub=16 0,16,32,48
                     // create random with offset counter
-                    byte[] rand = Generate(cnkSize, vectors[i]);
+                    Generate(cnkSize, vectors[i], Output, (i * cnkSize));
 
-                    // xor with input at offset
                     for (int j = 0; j < cnkSize; j++)
-                        Output[j + OutOffset + (i * cnkSize)] = (byte)(Input[j + InOffset + (i * cnkSize)] ^ rand[j]);
+                        Output[j + OutOffset + (i * cnkSize)] ^= Input[j + InOffset + (i * cnkSize)];
                 });
 
                 // last block processing
-                if (rndSize < _parallelBlockSize)
+                if (rndSize != blkSize)
                 {
-                    int fnlSize = ParallelBlockSize % rndSize;
-                    byte[] rand = Generate(fnlSize, vectors[ProcessorCount - 1]);
+                    int fnlSize = blkSize % rndSize;
+                    Generate(fnlSize, vectors[ProcessorCount - 1], Output, rndSize);
 
                     for (int i = 0; i < fnlSize; i++)
-                        Output[i + OutOffset + rndSize] = (byte)(Input[i + InOffset + rndSize] ^ rand[i]);
+                        Output[i + OutOffset + rndSize] ^= Input[i + InOffset + rndSize];
                 }
 
                 // copy the last counter position to class variable

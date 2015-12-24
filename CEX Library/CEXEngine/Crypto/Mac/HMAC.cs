@@ -110,7 +110,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 
         #region Properties
         /// <summary>
-        /// Get: The Digests internal blocksize in bytes
+        /// Get: The Macs internal blocksize in bytes
         /// </summary>
         public int BlockSize
         {
@@ -118,9 +118,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         }
 
         /// <summary>
-        /// Get: Size of returned digest in bytes
+        /// Get: Size of returned mac in bytes
         /// </summary>
-        public int DigestSize
+        public int MacSize
         {
             get { return _msgDigest.DigestSize; }
         }
@@ -187,9 +187,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
             _inputPad = new byte[_blockSize];
             _outputPad = new byte[_blockSize];
 
-            KeyParams keyParam = new KeyParams(Key);
-            Initialize(keyParam);
-            keyParam.Dispose();
+            Initialize(Key);
         }
 
         private HMAC()
@@ -232,6 +230,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <returns>HMAC hash value</returns>
         public byte[] ComputeMac(byte[] Input)
         {
+            if (!_isInitialized)
+                throw new CryptoGeneratorException("HMAC:ComputeMac", "The Mac is not initialized!", new InvalidOperationException());
+
             byte[] hash = new byte[_msgDigest.DigestSize];
 
             BlockUpdate(Input, 0, Input.Length);
@@ -257,13 +258,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 
             byte[] temp = new byte[_digestSize];
             _msgDigest.DoFinal(temp, 0);
-
             _msgDigest.BlockUpdate(_outputPad, 0, _outputPad.Length);
             _msgDigest.BlockUpdate(temp, 0, temp.Length);
-
             int msgLen = _msgDigest.DoFinal(Output, OutOffset);
-
-            // reinitialise the digest
             _msgDigest.BlockUpdate(_inputPad, 0, _inputPad.Length);
 
             Reset();
@@ -272,34 +269,43 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         }
 
         /// <summary>
-        /// Initialize the HMAC.
-        /// <para>Uses the Key field of the KeyParams class.</para>
+        /// Initialize the HMAC
         /// </summary>
         /// 
-        /// <param name="KeyParam">The HMAC Key. 
-        /// <para>Uses the Key field of the <see cref="KeyParams"/> class.
-        /// Key should be equal in size to the <see cref="DigestSize"/> value.</para>
+        /// <param name="MacKey">The HMAC Key. 
+        /// <para>Key should be equal in size to the <see cref="MacSize"/> value.</para>
+        /// </param>
+        /// <param name="IV">The optional HMAC Initialization Vector. 
+        /// <para>If the IV is non null, the Key and IV are concatenated and passed through the hash function to produce the HMAC Key.</para>
         /// </param>
         /// 
         /// <exception cref="CryptoMacException">Thrown if the Key is null or less than digest size</exception>
-        public void Initialize(KeyParams KeyParam)
+        public void Initialize(byte[] MacKey, byte[] IV = null)
         {
-            if (KeyParam.Key == null)
-                throw new CryptoMacException("HMAC:Initialize", "Key can not be null!", new ArgumentNullException());
+            if (MacKey == null)
+                throw new CryptoMacException("HMAC:Initialize", "HmacKey can not be null!", new ArgumentNullException());
 
             _msgDigest.Reset();
-            int keyLength = KeyParam.Key.Length;
 
-            // compress to digest size
-            if (KeyParam.Key.Length > _blockSize)
+            byte[] tmpKey = (byte[])MacKey.Clone();
+            int keyLength = tmpKey.Length;
+
+            if (IV != null) // combine and compress
             {
-                _msgDigest.BlockUpdate(KeyParam.Key, 0, KeyParam.Key.Length);
+                tmpKey = VTDev.Libraries.CEXEngine.Utility.ArrayUtils.Concat(MacKey, IV);
+                _msgDigest.BlockUpdate(tmpKey, 0, tmpKey.Length);
+                _msgDigest.DoFinal(_inputPad, 0);
+                keyLength = _digestSize;
+            }
+            else if (keyLength > _blockSize) // compress to digest size
+            {
+                _msgDigest.BlockUpdate(tmpKey, 0, tmpKey.Length);
                 _msgDigest.DoFinal(_inputPad, 0);
                 keyLength = _digestSize;
             }
             else
             {
-                Array.Copy(KeyParam.Key, 0, _inputPad, 0, keyLength);
+                Array.Copy(tmpKey, 0, _inputPad, 0, keyLength);
             }
 
             Array.Clear(_inputPad, keyLength, _blockSize - keyLength);

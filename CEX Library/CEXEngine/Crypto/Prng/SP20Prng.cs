@@ -84,16 +84,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// 
         /// <param name="SeedEngine">The Seed engine used to create keyng material (default is CSPRsg)</param>
         /// <param name="BufferSize">The size of the cache of random bytes (must be more than 1024 to enable parallel processing)</param>
-        /// <param name="SeedSize">The size of the seed to generate in bytes; can be 32 for a 128 bit key or 48 for a 256 bit key</param>
+        /// <param name="SeedSize">The size of the seed to generate in bytes; can be 24 for a 128 bit key or 40 for a 256 bit key</param>
         /// <param name="Rounds">The number of diffusion rounds to use when generating the key stream</param>
         /// 
         /// <exception cref="CryptoRandomException">Thrown if the seed is null or invalid, or rounds count is out of range</exception>
-        public SP20Prng(SeedGenerators SeedEngine = SeedGenerators.CSPRsg, int BufferSize = 4096, int SeedSize = 48, int Rounds = 20)
+        public SP20Prng(SeedGenerators SeedEngine = SeedGenerators.CSPRsg, int BufferSize = 4096, int SeedSize = 40, int Rounds = 20)
         {
             if (BufferSize < 64)
                 throw new CryptoRandomException("SP20Prng:CTor", "Buffer size must be at least 64 bytes!", new ArgumentNullException());
-            if (SeedSize != 32 && SeedSize != 48)
-                throw new CryptoRandomException("SP20Prng:CTor", "Seed size must be 32 or 48 bytes (key + iv)!", new ArgumentException());
+            if (SeedSize != 24 && SeedSize != 40)
+                throw new CryptoRandomException("SP20Prng:CTor", "Seed size must be 24 or 40 bytes (key + iv)!", new ArgumentException());
             if (Rounds < 10 || Rounds > 30 || Rounds % 2 > 0)
                 throw new CryptoRandomException("SP20Prng:CTor", "Rounds must be an even number between 10 and 30!", new ArgumentOutOfRangeException());
 
@@ -121,8 +121,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
                 throw new CryptoRandomException("SP20Prng:CTor", "The Seed can not be null!", new ArgumentNullException());
             if (BufferSize < 64)
                 throw new CryptoRandomException("SP20Prng:CTor", "Buffer size must be at least 64 bytes!", new ArgumentNullException());
-            if (Seed.Length != 32 && Seed.Length != 48)
-                throw new CryptoRandomException("SP20Prng:CTor", "Seed size must be 32 or 48 bytes (key + iv)!", new ArgumentException());
+            if (Seed.Length != 24 && Seed.Length != 40)
+                throw new CryptoRandomException("SP20Prng:CTor", "Seed size must be 24 or 40 bytes (key + iv)!", new ArgumentException());
             if (Rounds < 10 || Rounds > 30 || Rounds % 2 > 0)
                 throw new CryptoRandomException("SP20Prng:CTor", "Rounds must be an even number between 10 and 30!", new ArgumentOutOfRangeException());
 
@@ -155,9 +155,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         public byte[] GetBytes(int Size)
         {
             byte[] data = new byte[Size];
-
             GetBytes(data);
-
             return data;
         }
 
@@ -370,7 +368,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
         private int GetKeySize()
         {
-            return 48;
+            return _keySize;
         }
 
         private ISeed GetSeedGenerator(SeedGenerators SeedEngine)

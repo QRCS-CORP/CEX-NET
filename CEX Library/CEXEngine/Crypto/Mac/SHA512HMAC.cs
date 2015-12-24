@@ -105,7 +105,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 
         #region Properties
         /// <summary>
-        /// Get: The Digests internal blocksize in bytes
+        /// Get: The Macs internal blocksize in bytes
         /// </summary>
         public int BlockSize
         {
@@ -113,9 +113,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         }
 
         /// <summary>
-        /// Get: Size of returned digest in bytes
+        /// Get: Size of returned mac in bytes
         /// </summary>
-        public int DigestSize
+        public int MacSize
         {
             get { return DIGEST_SIZE; }
         }
@@ -191,9 +191,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <exception cref="CryptoMacException">Thrown if an invalid Input size is chosen</exception>
         public void BlockUpdate(byte[] Input, int InOffset, int Length)
         {
-            if ((InOffset + Length) > Input.Length)
-                throw new CryptoMacException("SHA512HMAC:BlockUpdate", "The Input buffer is too short!", new ArgumentOutOfRangeException());
-
             _shaHmac.BlockUpdate(Input, InOffset, Length);
         }
 
@@ -221,9 +218,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <exception cref="CryptoMacException">Thrown if Output array is too small</exception>
         public int DoFinal(byte[] Output, int OutOffset)
         {
-            if (Output.Length - OutOffset < DIGEST_SIZE)
-                throw new CryptoMacException("SHA512HMAC:DoFinal", "The Output buffer is too short!", new ArgumentOutOfRangeException());
-
             return _shaHmac.DoFinal(Output, OutOffset);
         }
 
@@ -232,13 +226,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <para>Uses the Key field of the KeyParams class.</para>
         /// </summary>
         /// 
-        /// <param name="KeyParam">KeyParams containing HMAC Key. 
-        /// <para>Uses the Key field of the <see cref="KeyParams"/> class.
-        /// Key should be equal in size to the <see cref="DigestSize"/></para>
+        /// <param name="MacKey">The HMAC Key. 
+        /// <para>Key should be equal in size to the <see cref="MacSize"/> value.</para>
+        /// <param name="IV">The optional HMAC Initialization Vector. 
+        /// <para>If the IV is non null, the Key and IV are combined and passed through the hash function to produce the HMAC Key.</para>
         /// </param>
-        public void Initialize(KeyParams KeyParam)
+        /// </param>
+        public void Initialize(byte[] MacKey, byte[] IV = null)
         {
-            _shaHmac.Initialize(KeyParam);
+            _shaHmac.Initialize(MacKey, IV);
             _isInitialized = true;
         }
 

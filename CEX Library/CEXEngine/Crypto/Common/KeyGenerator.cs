@@ -5,21 +5,26 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Mac;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Crypto.Processing.Structure;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Common
 {
     /// <summary>
     /// <h3>A helper class for generating cryptographically strong keying material.</h3>
-    /// <para>Generates an array or a populated KeyParams class, using a definable Digest(Prng) dual stage generator.</para>
-    /// 
+    /// <para>Generates an array or a populated KeyParams class, using a definable Digest(Prng) dual stage generator.
+    /// The first stage of the generator gets seed material from the selected Prng, the second hashes the seed and adds the result to the state array.
+    /// An optional (prng generated random) counter array can be prepended to the seed array, sized between 4 and 16 bytes. 
+    /// The counter is incremented and prepended to the seed value before each hash call. 
+    /// If the CounterSize parameter is set to <c>0</c> in the constructor, or the default constructor is used, 
+    /// the entire (2* block size) seed is generated with the prng, and the counter is not used.</para>
     /// </summary>
     /// 
     /// <example>
     /// <description>Create an array of pseudo random keying material:</description>
     /// <code>
     /// byte[] rand;
-    /// using (KeyGenerator gen = new KeyGenerator([Prng], [Digest]))
+    /// using (KeyGenerator gen = new KeyGenerator([Prng], [Digest], [Counter Size]))
     ///     // generate pseudo random bytes
     ///     rand = gen.Generate(Size);
     /// </code>
@@ -49,26 +54,68 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
     /// </remarks>
     public sealed class KeyGenerator : IDisposable
     {
+        #region Constants
+        /// <summary>
+        /// The default size of the counter variable in bytes
+        /// </summary>
+        private const int DEFAULT_COUNTER_SIZE = 8;
+
+        /// <summary>
+        /// This size disables the 2nd stage digest counter, i.e. no counter is added to the digest seed
+        /// </summary>
+        private const int DISABLED_COUNTER_SIZE = 0;
+        #endregion
+
         #region Fields
         private bool _isDisposed = false;
         private IDigest _hashEngine;
         private IRandom _seedEngine;
+        private Digests _dgtType;
+        private Prngs _rndType;
+        private byte[] _ctrVector = null;
+        private int _ctrLength = DISABLED_COUNTER_SIZE;
         #endregion
 
         #region Properties
-        private Prngs SeedEngine { get; set; }
-        private Digests HashEngine { get; set; }
+        /// <summary>
+        /// Get: Returns the length of the digest counter in bytes
+        /// </summary>
+        public int CounterLength 
+        {
+            get { return _ctrLength; }
+            private set { _ctrLength = value; }
+        }
+
+        /// <summary>
+        /// Get: Returns the Digests enumeration member
+        /// </summary>
+        public Digests HashEngine 
+        {
+            get { return _dgtType; }
+            private set { _dgtType = value; } 
+        }
+
+        /// <summary>
+        /// Get: Returns the Prng enumeration member
+        /// </summary>
+        public Prngs SeedEngine 
+        {
+            get { return _rndType; }
+            private set { _rndType = value; }
+        }
         #endregion
 
         #region Constructor
         /// <summary>
-        /// <para>Initializes the class with default generators; SHA-2 512, and RNGCryptoServiceProvider</para>
+        /// Initialize this class.
+        /// <para>Initializes the class with default generators; SHA-2 512, and RNGCryptoServiceProvider.
+        /// The digest counter mechanism is set to <c>O</c> (disabled) by default.</para>
         /// </summary>
         public KeyGenerator()
         {
             // default engines
-            SeedEngine = Prngs.CSPRng;
-            HashEngine = Digests.SHA512;
+            _rndType = Prngs.CSPRng;
+            _dgtType = Digests.SHA512;
 
             // initialize the generators
             Reset();
@@ -77,12 +124,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <summary>
         /// Initialize the class and generators
         /// </summary>
+        /// 
         /// <param name="SeedEngine">The <see cref="Prngs">Prng</see> that supplies the key and seed material to the hash function</param>
         /// <param name="HashEngine">The <see cref="Digests">Digest</see> type used to create the pseudo random keying material</param>
-        public KeyGenerator(Prngs SeedEngine, Digests HashEngine)
+        /// <param name="CounterSize">The size of the counter variable in bytes; setting to a <c>0</c> value, inactivates the digest counter; valid values are <c>0</c>, or <c>4-16</c></param>
+        /// 
+        /// <exception cref="CryptoGeneratorException">Thrown if the counter is not <c>0</c>, or a value between <c>4</c> and <c>16</c></exception>
+        public KeyGenerator(Prngs SeedEngine, Digests HashEngine, int CounterSize = 0)
         {
-            this.SeedEngine = SeedEngine;
-            this.HashEngine = HashEngine;
+            if (CounterSize > 16 || CounterSize < 4 && CounterSize != 0)
+                throw new CryptoGeneratorException("KeyGenerator:Ctor", "The counter size must be either 0, or between 4 and 16", new ArgumentException());
+
+            _rndType = SeedEngine;
+            _dgtType = HashEngine;
+            _ctrLength = CounterSize;
 
             // initialize the generators
             Reset();
@@ -141,7 +196,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         {
             return Generate(Size);
         }
-
+        
         /// <summary>
         /// Reset the seed <see cref="Prngs">PRNG</see> and the <see cref="Digests">Digest</see> engines
         /// </summary>
@@ -157,6 +212,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
             // select the prng
             switch (SeedEngine)
             {
+                case Prngs.CSPRng:
+                    _seedEngine = new CSPRng();
+                    break;
+                case Prngs.CTRPrng:
+                    _seedEngine = new CTRPrng();
+                    break;
+                case Prngs.SP20Prng:
+                    _seedEngine = new SP20Prng();
+                    break;
+                case Prngs.DGCPrng:
+                    _seedEngine = new DGCPrng();
+                    break;
                 case Prngs.BBSG:
                     _seedEngine = new BBSG();
                     break;
@@ -173,10 +240,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
                     _seedEngine = new QCG2();
                     break;
                 default:
-                    _seedEngine = new CSPRng();
-                    break;
+                    throw new InvalidOperationException("The specified PRNG type is unrecognized!");
             }
 
+            // create the initial counter value
+            if (CounterLength > 0)
+                _ctrVector = _seedEngine.GetBytes(CounterLength);
+
+            // reset hash engine
             if (_hashEngine != null)
             {
                 _hashEngine.Dispose();
@@ -201,6 +272,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
                 case Digests.SHA256:
                     _hashEngine = new SHA256();
                     break;
+                case Digests.SHA512:
+                    _hashEngine = new SHA512();
+                    break;
                 case Digests.Skein256:
                     _hashEngine = new Skein256();
                     break;
@@ -211,8 +285,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
                     _hashEngine = new Skein1024();
                     break;
                 default:
-                    _hashEngine = new SHA512();
-                    break;
+                    throw new InvalidOperationException("The specified Digest type is unrecognized!");
             }
         }
         #endregion
@@ -254,12 +327,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         }
 
         /// <remarks>
-        /// Create keying material using a two stage generator
+        /// Create keying material using a two stage generator Increment
         /// </remarks>
         private byte[] GetBlock()
         {
-            // generate seed; 2x input block per NIST sp800-90b
-            byte[] seed = _seedEngine.GetBytes((_hashEngine.BlockSize * 2));
+            // generate seed; 2x input block size per NIST sp800-90b
+            byte[] seed = _seedEngine.GetBytes((_hashEngine.BlockSize * 2) - DISABLED_COUNTER_SIZE);
+
+            // counter is optional
+            if (CounterLength > 0)
+            {
+                // increment the counter
+                Increment(_ctrVector);
+                // prepend the counter
+                seed = VTDev.Libraries.CEXEngine.Utility.ArrayUtils.Concat(_ctrVector, seed);
+            }
 
             if (_hashEngine.GetType().Equals(typeof(SHA512)) || _hashEngine.GetType().Equals(typeof(SHA256)))
             {
@@ -275,6 +357,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
                 // other implemented digests do not require hmac
                 return _hashEngine.ComputeHash(seed);
             }
+        }
+
+        private void Increment(byte[] Counter)
+        {
+            int i = Counter.Length;
+            while (--i >= 0 && ++Counter[i] == 0) { }
         }
         #endregion
 
@@ -294,6 +382,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
             {
                 try
                 {
+                    if (_ctrVector != null)
+                    {
+                        Array.Clear(_ctrVector, 0, _ctrVector.Length);
+                        _ctrVector = null;
+                    }
                     if (_hashEngine != null)
                     {
                         _hashEngine.Dispose();

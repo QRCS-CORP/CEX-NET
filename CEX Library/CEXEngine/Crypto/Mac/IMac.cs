@@ -11,14 +11,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
     public interface IMac : IDisposable
     {
         /// <summary>
-        /// Get: The Digests internal blocksize in bytes
+        /// Get: The Macs internal blocksize in bytes
         /// </summary>
         int BlockSize { get; }
 
         /// <summary>
-        /// Get: Size of returned digest in bytes
+        /// Get: Size of returned mac in bytes
         /// </summary>
-        int DigestSize { get; }
+        int MacSize { get; }
 
         /// <summary>
         /// Get: Mac is ready to digest data
@@ -64,8 +64,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// Initialize the MAC
         /// </summary>
         /// 
-        /// <param name="KeyParam">MAC key</param>
-        void Initialize(KeyParams KeyParam);
+        /// <param name="MacKey">The MAC key</param>
+        /// <param name="IV">The MAC initialization Vector</param>
+        void Initialize(byte[] MacKey, byte[] IV);
 
         /// <summary>
         /// Reset the internal state

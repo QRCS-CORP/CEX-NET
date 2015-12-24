@@ -9,14 +9,14 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 {
     /// <summary>
-    /// <h3>PKCS5 V2: An implementation of an Hash based Key Derivation Function.</h3>
-    /// <para>PKCS5 Version 2, as outlined in RFC 2898<cite>RFC 2898</cite></para>
+    /// <h3>PBKDF2 V2: An implementation of an Hash based Key Derivation Function.</h3>
+    /// <para>PBKDF2 Version 2, as outlined in RFC 2898<cite>RFC 2898</cite></para>
     /// </summary> 
     /// 
     /// <example>
     /// <description>Example using an <c>IGenerator</c> interface:</description>
     /// <code>
-    /// using (IGenerator rnd = new PKCS5(new SHA512(), 10000))
+    /// using (IGenerator rnd = new PBKDF2(new SHA512(), 10000))
     /// {
     ///     // initialize
     ///     rnd.Initialize(Salt, Ikm, [Nonce]);
@@ -39,7 +39,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// <description><h4>Implementation Notes:</h4></description>
     /// <list type="bullet">
     /// <item><description>Can be initialized with a <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> or a <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Macs">Mac</see>.</description></item>
-    /// <item><description>The <see cref="PKCS5(IDigest, int, bool)">Constructors</see> DisposeEngine parameter determines if Digest engine is destroyed when <see cref="Dispose()"/> is called on this class; default is <c>true</c>.</description></item>
+    /// <item><description>The <see cref="PBKDF2(IDigest, int, bool)">Constructors</see> DisposeEngine parameter determines if Digest engine is destroyed when <see cref="Dispose()"/> is called on this class; default is <c>true</c>.</description></item>
     /// <item><description>Salt size should be multiple of Digest block size.</description></item>
     /// <item><description>Ikm size should be Digest hash return size.</description></item>
     /// <item><description>Nonce and Ikm are optional, (but recommended).</description></item>
@@ -55,22 +55,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
     /// </list> 
     /// </remarks>
-    public class PKCS5 : IGenerator
+    public class PBKDF2 : IGenerator
     {
         #region Constants
-        private const string ALG_NAME = "PKCS5";
+        private const string ALG_NAME = "PBKDF2";
         #endregion
 
         #region Fields
         private IMac _digestMac;
-        private byte[] _Salt;
         private int _Iterations = 1;
         private bool _disposeEngine = true;
         private int _hashLength;
         private bool _isInitialized = false;
         private int _keySize = 64;
         private bool _isDisposed = false;
-        private KeyParams _macKey;
+        private byte[] _macKey = null;
+        private byte[] _macSalt = null;
         #endregion
 
         #region Properties
@@ -104,26 +104,26 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
         #region Constructors
         /// <summary>
-        /// Creates a PKCS5 Bytes Generator using the default SHA512 HMAC engine
+        /// Creates a PBKDF2 Bytes Generator using the default SHA512 HMAC engine
         /// </summary>
         /// 
         /// <param name="Iterations">The number of cycles used to produce output</param>
         /// 
         /// <exception cref="CryptoGeneratorException">Thrown if an invalid Iterations count is used</exception>
-        public PKCS5(int Iterations)
+        public PBKDF2(int Iterations)
         {
             if (Iterations < 1)
-                throw new CryptoGeneratorException("PKCS5:Ctor", "Iterations count can not be less than 1!", new ArgumentException());
+                throw new CryptoGeneratorException("PBKDF2:Ctor", "Iterations count can not be less than 1!", new ArgumentException());
 
             _Iterations = Iterations;
             _disposeEngine = true;
             _digestMac = new SHA512HMAC();
-            _hashLength = _digestMac.DigestSize;
+            _hashLength = _digestMac.MacSize;
             _keySize = _digestMac.BlockSize;
         }
 
         /// <summary>
-        /// Creates a PKCS5 Bytes Generator based on the given hash function
+        /// Creates a PBKDF2 Bytes Generator based on the given hash function
         /// </summary>
         /// 
         /// <param name="Digest">The digest used</param>
@@ -131,12 +131,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
         /// 
         /// <exception cref="CryptoGeneratorException">Thrown if a null Digest or Iterations count is used</exception>
-        public PKCS5(IDigest Digest, int Iterations, bool DisposeEngine = true)
+        public PBKDF2(IDigest Digest, int Iterations, bool DisposeEngine = true)
         {
             if (Digest == null)
-                throw new CryptoGeneratorException("PKCS5:Ctor", "Digest can not be null!", new ArgumentNullException());
+                throw new CryptoGeneratorException("PBKDF2:Ctor", "Digest can not be null!", new ArgumentNullException());
             if (Iterations < 1)
-                throw new CryptoGeneratorException("PKCS5:Ctor", "Iterations count can not be less than 1!", new ArgumentException());
+                throw new CryptoGeneratorException("PBKDF2:Ctor", "Iterations count can not be less than 1!", new ArgumentException());
 
             _Iterations = Iterations;
             _disposeEngine = DisposeEngine;
@@ -146,7 +146,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         }
 
         /// <summary>
-        /// Creates a PKCS5 Bytes Generator based on the given HMAC function
+        /// Creates a PBKDF2 Bytes Generator based on the given HMAC function
         /// </summary>
         /// 
         /// <param name="Hmac">The HMAC digest used</param>
@@ -154,28 +154,28 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
         /// 
         /// <exception cref="CryptoGeneratorException">Thrown if a null Hmac or invalid Iterations count is used</exception>
-        public PKCS5(IMac Hmac, int Iterations, bool DisposeEngine = true)
+        public PBKDF2(IMac Hmac, int Iterations, bool DisposeEngine = true)
         {
             if (Hmac == null)
-                throw new CryptoGeneratorException("PKCS5:Ctor", "Hmac can not be null!", new ArgumentNullException());
+                throw new CryptoGeneratorException("PBKDF2:Ctor", "Hmac can not be null!", new ArgumentNullException());
             if (Iterations < 1)
-                throw new CryptoGeneratorException("PKCS5:Ctor", "Iterations count can not be less than 1!", new ArgumentException());
+                throw new CryptoGeneratorException("PBKDF2:Ctor", "Iterations count can not be less than 1!", new ArgumentException());
 
             _Iterations = Iterations;
             _disposeEngine = DisposeEngine;
             _digestMac = Hmac;
-            _hashLength = Hmac.DigestSize;
+            _hashLength = Hmac.MacSize;
             _keySize = Hmac.BlockSize;
         }
 
-        private PKCS5()
+        private PBKDF2()
         {
         }
 
         /// <summary>
         /// Finalize objects
         /// </summary>
-        ~PKCS5()
+        ~PBKDF2()
         {
             Dispose(false);
         }
@@ -186,19 +186,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// Initialize the generator
         /// </summary>
         /// 
-        /// <param name="Salt">Salt value</param>
+        /// <param name="Salt">Mac Key and Salt value combined.
+        /// <para>Mac Key must be at least digest size, recommended salt size is 64 bytes or greater.</para></param>
         /// 
         /// <exception cref="CryptoGeneratorException">Thrown if a null Salt is used</exception>
         public void Initialize(byte[] Salt)
         {
             if (Salt == null)
-                throw new CryptoGeneratorException("PKCS5:Initialize", "Salt can not be null!", new ArgumentNullException());
+                throw new CryptoGeneratorException("PBKDF2:Initialize", "Salt can not be null!", new ArgumentNullException());
 
-            byte[] keyBytes = new byte[_digestMac.DigestSize];
-            Buffer.BlockCopy(Salt, 0, _Salt, 0, Salt.Length - _digestMac.DigestSize);
-            Buffer.BlockCopy(Salt, _Salt.Length, keyBytes, 0, _digestMac.DigestSize);
+            // Note: small standard test vectors prevent this from being enforced
+            //if (Salt.Length < _digestMac.DigestSize)
+            //    throw new CryptoGeneratorException("PBKDF2:Initialize", "Salt value is too small!", new ArgumentException());
 
-            _macKey = new KeyParams(keyBytes);
+            _macKey = new byte[_digestMac.MacSize];
+            Buffer.BlockCopy(Salt, 0, _macKey, 0, _digestMac.MacSize);
+
+            if (Salt.Length > _digestMac.MacSize)
+            {
+                _macSalt =  new byte[Salt.Length - _digestMac.MacSize];
+                Buffer.BlockCopy(Salt, _digestMac.MacSize, _macSalt, 0, Salt.Length - _digestMac.MacSize);
+            }
 
             _isInitialized = true;
         }
@@ -207,19 +215,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// Initialize the generator
         /// </summary>
         /// 
-        /// <param name="Salt">Salt value</param>
-        /// <param name="Ikm">Key material</param>
+        /// <param name="Salt">Salt value.
+        /// <para>Recommended salt size is 64 bytes or greater.</para></param>
+        /// <param name="Ikm">Key material.
+        /// <para>Mac Key must be at least digest size in length.</para></param>
         /// 
         /// <exception cref="CryptoGeneratorException">Thrown if a null Salt or Ikm is used</exception>
         public void Initialize(byte[] Salt, byte[] Ikm)
         {
             if (Salt == null)
-                throw new CryptoGeneratorException("PKCS5:Initialize", "Salt can not be null!", new ArgumentNullException());
+                throw new CryptoGeneratorException("PBKDF2:Initialize", "Salt can not be null!", new ArgumentNullException());
             if (Ikm == null)
-                throw new CryptoGeneratorException("PKCS5:Initialize", "IKM can not be null!", new ArgumentNullException());
+                throw new CryptoGeneratorException("PBKDF2:Initialize", "IKM can not be null!", new ArgumentNullException());
+            //if (Ikm.Length < _digestMac.DigestSize)
+            //    throw new CryptoGeneratorException("PBKDF2:Initialize", "IKM value is too small!", new ArgumentException());
 
-            _Salt = (byte[])Salt.Clone();
-            _macKey = new KeyParams(Ikm);
+            _macSalt = (byte[])Salt.Clone();
+            _macKey = (byte[])Ikm.Clone();
 
             _isInitialized = true;
         }
@@ -228,23 +240,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// Initialize the generator
         /// </summary>
         /// 
-        /// <param name="Salt">Salt value</param>
-        /// <param name="Ikm">Key material</param>
+        /// <param name="Salt">Salt value.
+        /// <para>Recommended salt size is 64 bytes or greater.</para></param>
+        /// <param name="Ikm">Key material.
+        /// <para>Mac Key must be at least digest size in length.</para></param>
         /// <param name="Nonce">Nonce value</param>
         /// 
         /// <exception cref="CryptoGeneratorException">Thrown if a null Salt or Ikm is used</exception>
         public void Initialize(byte[] Salt, byte[] Ikm, byte[] Nonce)
         {
             if (Salt == null)
-                throw new CryptoGeneratorException("PKCS5:Initialize", "Salt can not be null!", new ArgumentNullException());
+                throw new CryptoGeneratorException("PBKDF2:Initialize", "Salt can not be null!", new ArgumentNullException());
             if (Ikm == null)
-                throw new CryptoGeneratorException("PKCS5:Initialize", "IKM can not be null!", new ArgumentNullException());
+                throw new CryptoGeneratorException("PBKDF2:Initialize", "IKM can not be null!", new ArgumentNullException());
+            //if (Ikm.Length < _digestMac.DigestSize)
+            //    throw new CryptoGeneratorException("PBKDF2:Initialize", "IKM value is too small!", new ArgumentException());
 
-            _macKey = new KeyParams(Ikm);
-            _Salt = new byte[Salt.Length + Nonce.Length];
+            _macKey = (byte[])Ikm.Clone();
+            _macSalt = new byte[Salt.Length + Nonce.Length];
 
-            Buffer.BlockCopy(Salt, 0, _Salt, 0, Salt.Length);
-            Buffer.BlockCopy(Nonce, 0, _Salt, Salt.Length, Nonce.Length);
+            Buffer.BlockCopy(Salt, 0, _macSalt, 0, Salt.Length);
+            Buffer.BlockCopy(Nonce, 0, _macSalt, Salt.Length, Nonce.Length);
 
             _isInitialized = true;
         }
@@ -258,6 +274,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <returns>Number of bytes generated</returns>
         public int Generate(byte[] Output)
         {
+            if (!_isInitialized)
+                throw new CryptoGeneratorException("PBKDF2:Generate", "The Generator is not initialized!", new InvalidOperationException());
+
             return GenerateKey(Output, 0, Output.Length);
         }
 
@@ -275,7 +294,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         public int Generate(byte[] Output, int OutOffset, int Size)
         {
             if ((Output.Length - Size) < OutOffset)
-                throw new CryptoGeneratorException("PKCS5:Generate", "Output buffer too small!", new Exception());
+                throw new CryptoGeneratorException("PBKDF2:Generate", "Output buffer too small!", new ArgumentException());
+            if (!_isInitialized)
+                throw new CryptoGeneratorException("PBKDF2:Generate", "The Generator is not initialized!", new InvalidOperationException());
 
             return GenerateKey(Output, OutOffset, Size);
         }
@@ -290,7 +311,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         public void Update(byte[] Seed)
         {
             if (Seed == null)
-                throw new CryptoGeneratorException("PKCS5:Update", "Seed can not be null!", new ArgumentNullException());
+                throw new CryptoGeneratorException("PBKDF2:Update", "Seed can not be null!", new ArgumentNullException());
+            if (!_isInitialized)
+                throw new CryptoGeneratorException("PBKDF2:Generate", "The Generator is not initialized!", new InvalidOperationException());
 
             Initialize(Seed);
         }
@@ -299,7 +322,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         #region Private Methods
         private int GenerateKey(byte[] Output, int OutOffset, int Size)
         {
-            int hashLen = _digestMac.DigestSize;
+            int hashLen = _digestMac.MacSize;
             int diff = Size % hashLen;
             int max = Size / hashLen;
             int ctr = 0;
@@ -334,12 +357,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
         private void Process(byte[] Input, byte[] Output, int OutOffset)
         {
-            byte[] state = new byte[_digestMac.DigestSize];
+            byte[] state = new byte[_digestMac.MacSize];
 
-            _digestMac.Initialize(_macKey);
+            _digestMac.Initialize(_macKey, null);
 
-            if (_Salt != null)
-                _digestMac.BlockUpdate(_Salt, 0, _Salt.Length);
+            if (_macSalt != null)
+                _digestMac.BlockUpdate(_macSalt, 0, _macSalt.Length);
 
             _digestMac.BlockUpdate(Input, 0, Input.Length);
             _digestMac.DoFinal(state, 0);
@@ -348,7 +371,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
             for (int count = 1; count != _Iterations; count++)
             {
-                _digestMac.Initialize(_macKey);
+                _digestMac.Initialize(_macKey, null);
                 _digestMac.BlockUpdate(state, 0, state.Length);
                 _digestMac.DoFinal(state, 0);
 
@@ -381,13 +404,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
                     }
                     if (_macKey != null)
                     {
-                        _macKey.Dispose();
+                        Array.Clear(_macKey, 0, _macKey.Length);
                         _macKey = null;
                     }
-                    if (_Salt != null)
+                    if (_macSalt != null)
                     {
-                        Array.Clear(_Salt, 0, _Salt.Length);
-                        _Salt = null;
+                        Array.Clear(_macSalt, 0, _macSalt.Length);
+                        _macSalt = null;
                     }
                 }
                 finally

@@ -10,14 +10,14 @@ using VTDev.Libraries.CEXEngine.Tools;
 namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
 {
     /// <summary>
-    /// Tests PKCS5 V2 with SHA-2 
+    /// Tests PBKDF2 with SHA-2 
     /// </summary>
     public class Pkcs5Test : ITest
     {
         #region Constants
-        private const string DESCRIPTION = "PKCS5 VER2 SHA-2 test vectors.";
+        private const string DESCRIPTION = "PBKDF2 VER2 SHA-2 test vectors.";
         private const string FAILURE = "FAILURE! ";
-        private const string SUCCESS = "SUCCESS! All PKCS5 tests have executed succesfully.";
+        private const string SUCCESS = "SUCCESS! All PBKDF2 tests have executed succesfully.";
         #endregion
 
         #region Events
@@ -70,7 +70,7 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
                 PKCSTest(32, 2, _salt[0], _ikm[0], _output[1]);
                 PKCSTest(32, 4096, _salt[0], _ikm[0], _output[2]);
                 PKCSTest(40, 4096, _salt[1], _ikm[1], _output[3]);
-                OnProgress(new TestEventArgs("Passed PKCS5 vector tests.."));
+                OnProgress(new TestEventArgs("Passed PBKDF2 vector tests.."));
 
                 return SUCCESS;
             }
@@ -87,23 +87,23 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
         {
             byte[] outBytes = new byte[Size];
 
-            using (PKCS5 gen = new PKCS5(new SHA256(), Iterations))
+            using (PBKDF2 gen = new PBKDF2(new SHA256(), Iterations))
             {
                 gen.Initialize(Salt, Key);
                 gen.Generate(outBytes, 0, Size);
             }
 
             if (Evaluate.AreEqual(outBytes, Output) == false)
-                throw new Exception("PKCS5: Values are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
+                throw new Exception("PBKDF2: Values are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
 
-            using (PKCS5 gen = new PKCS5(new SHA256HMAC(), Iterations))
+            using (PBKDF2 gen = new PBKDF2(new SHA256HMAC(), Iterations))
             {
                 gen.Initialize(Salt, Key);
                 gen.Generate(outBytes, 0, Size);
             }
 
             if (Evaluate.AreEqual(outBytes, Output) == false)
-                throw new Exception("PKCS5: Values are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
+                throw new Exception("PBKDF2: Values are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
         }
         #endregion
     }

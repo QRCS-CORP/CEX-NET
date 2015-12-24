@@ -21,5 +21,9 @@
         /// The payload contains a public signing key
         /// </summary>
         Signing = 8,
+        /// <summary>
+        /// The payload contains an image file
+        /// </summary>
+        Image = 16
     }
 }

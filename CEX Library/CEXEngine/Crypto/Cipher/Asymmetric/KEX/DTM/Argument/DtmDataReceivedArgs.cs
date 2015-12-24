@@ -30,7 +30,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Argument
         /// The DTM error event args constructor; contains the current error state
         /// </summary>
         /// 
-        /// <param name="Message">The <see cref="Exception"/></param>
+        /// <param name="Message">The message data stream</param>
         /// <param name="OptionFlag">The option flag containing optional state information</param>
         public DtmDataReceivedArgs(MemoryStream Message, long OptionFlag)
         {

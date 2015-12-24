@@ -91,20 +91,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         private const int BLOCK_SIZE = 128;
         private const int DIGEST_SIZE = 128;
         private const int STATE_SIZE = 1024;
+        private const int STATE_BYTES = STATE_SIZE / 8;
+        private const int STATE_WORDS = STATE_SIZE / 64;
+        private const int STATE_OUTPUT = (STATE_SIZE + 7) / 8;
         #endregion
 
         #region Fields
         private int _bytesFilled; 
         private Threefish1024 _blockCipher;
         private UInt64[] _cipherInput;
-        private int _cipherStateBits;
-        private int _cipherStateBytes;
-        private int _cipherStateWords;
+        private UInt64[] _configString;
+        private UInt64[] _configValue;
+        private SkeinInitializationType _initializationType;
         private byte[] _inputBuffer;
         private bool _isDisposed = false;
-        private int _outputBytes;
         private UInt64[] _digestState;
         private int _stateSize;
+        private UbiTweak _ubiParameters;
         #endregion
 
         #region Properties
@@ -117,16 +120,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         }
 
         /// <summary>
-        /// The post-chain configuration value ToDo: change these and threefish cipher to int type
+        /// The post-chain configuration value
         /// </summary>
         [CLSCompliant(false)]
-        public UInt64[] ConfigValue { get; private set; }
+        public UInt64[] ConfigValue
+        {
+            get { return _configValue; }
+            private set { _configValue = value; }
+        }
 
         /// <summary>
         /// The pre-chain configuration string
         /// </summary>
         [CLSCompliant(false)]
-        public UInt64[] ConfigString { get; private set; }
+        public UInt64[] ConfigString
+        {
+            get { return _configString; }
+            private set { _configString = value; }
+        }
 
         /// <summary>
         /// Get: Size of returned digest in bytes
@@ -139,7 +150,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <summary>
         /// The initialization type
         /// </summary>
-        public SkeinInitializationType InitializationType { get; private set; }
+        public SkeinInitializationType InitializationType
+        {
+            get { return _initializationType; }
+            private set { _initializationType = value; }
+        }
 
         /// <summary>
         /// Get: The Digest name
@@ -154,13 +169,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// </summary>
         public int StateSize
         {
-            get { return _cipherStateBits; }
+            get { return STATE_SIZE; }
         }
 
         /// <summary>
         /// Ubi Tweak parameters
         /// </summary>
-        public UbiTweak UbiParameters { get; private set; }
+        public UbiTweak UbiParameters
+        {
+            get { return _ubiParameters; }
+            private set { _ubiParameters = value; }
+        }
         #endregion
 
         #region Constructor
@@ -171,24 +190,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="InitializationType">Digest initialization type <see cref="SkeinInitializationType"/></param>
         public Skein1024(SkeinInitializationType InitializationType = SkeinInitializationType.Normal)
         {
-            this.InitializationType = InitializationType;
-
-            _cipherStateBits = STATE_SIZE;
-            _cipherStateBytes = STATE_SIZE / 8;
-            _cipherStateWords = STATE_SIZE / 64;
-            _outputBytes = (STATE_SIZE + 7) / 8;
+            _initializationType = InitializationType;
             _blockCipher = new Threefish1024();
+            // allocate buffers
+            _inputBuffer = new byte[STATE_BYTES];
+            _cipherInput = new UInt64[STATE_WORDS];
+            _digestState = new UInt64[STATE_WORDS];
+            // allocate tweak
+            _ubiParameters = new UbiTweak();
+            // allocate config value
+            _configValue = new UInt64[STATE_BYTES];
+            // set the state size for the configuration
+            _configString = new UInt64[STATE_BYTES];
+            _configString[1] = (UInt64)DigestSize * 8;
 
-            // Allocate buffers
-            _inputBuffer = new byte[_cipherStateBytes];
-            _cipherInput = new UInt64[_cipherStateWords];
-            _digestState = new UInt64[_cipherStateWords];
-
-            // Allocate tweak
-            UbiParameters = new UbiTweak();
-
-            // Generate the configuration string
-            SkeinConfig();
             SetSchema(83, 72, 65, 51); // "SHA3"
             SetVersion(1);
             GenerateConfiguration();
@@ -222,23 +237,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             int bytesDone = 0;
             int offset = InOffset;
 
-            // Fill input buffer
+            // fill input buffer
             while (bytesDone < Length && offset < Input.Length)
             {
-                // Do a transform if the input buffer is filled
-                if (_bytesFilled == _cipherStateBytes)
+                // do a transform if the input buffer is filled
+                if (_bytesFilled == STATE_BYTES)
                 {
-                    // Copy input buffer to cipher input buffer
-                    InputBufferToCipherInput();
+                    // copy input buffer to cipher input buffer
+                    for (int i = 0; i < STATE_WORDS; i++)
+                        _cipherInput[i] = BytesToUInt64(_inputBuffer, i * 8);
 
-                    // Process the block
-                    ProcessBlock(_cipherStateBytes);
-
-                    // Clear first flag, which will be set
-                    // by Initialize() if this is the first transform
-                    UbiParameters.IsFirstBlock = false;
-
-                    // Reset buffer fill count
+                    // process the block
+                    ProcessBlock(STATE_BYTES);
+                    // clear first flag, which will be setby Initialize() if this is the first transform
+                    _ubiParameters.IsFirstBlock = false;
+                    // reset buffer fill count
                     _bytesFilled = 0;
                 }
 
@@ -261,7 +274,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
             BlockUpdate(Input, 0, Input.Length);
             DoFinal(hash, 0);
-
             Reset();
 
             return hash;
@@ -284,51 +296,39 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             if (Output.Length - OutOffset < DigestSize)
                 throw new CryptoHashException("Skein1024:DoFinal", "The Output buffer is too short!", new ArgumentOutOfRangeException());
 
-            int i;
-
-            // Pad left over space in input buffer with zeros
-            // and copy to cipher input buffer
-            for (i = _bytesFilled; i < _inputBuffer.Length; i++)
+            // pad left over space in input buffer with zeros and copy to cipher input buffer
+            for (int i = _bytesFilled; i < _inputBuffer.Length; i++)
                 _inputBuffer[i] = 0;
+            // copy input buffer to cipher input buffer
+            for (int i = 0; i < STATE_WORDS; i++)
+                _cipherInput[i] = BytesToUInt64(_inputBuffer, i * 8);
 
-            InputBufferToCipherInput();
-
-            // Do final message block
-            UbiParameters.IsFinalBlock = true;
+            // do final message block
+            _ubiParameters.IsFinalBlock = true;
             ProcessBlock(_bytesFilled);
+            // clear cipher input
+            Array.Clear(_cipherInput, 0, _cipherInput.Length);
+            // do output block counter mode output
+            byte[] hash = new byte[STATE_OUTPUT];
+            UInt64[] oldState = new UInt64[STATE_WORDS];
+            // save old state
+            Array.Copy(_digestState, oldState, _digestState.Length);
 
-            // Clear cipher input
-            for (i = 0; i < _cipherInput.Length; i++)
-                _cipherInput[i] = 0;
-
-            // Do output block counter mode output
-            int j;
-
-            var hash = new byte[_outputBytes];
-            var oldState = new UInt64[_cipherStateWords];
-
-            // Save old state
-            for (j = 0; j < _digestState.Length; j++)
-                oldState[j] = _digestState[j];
-
-            for (i = 0; i < _outputBytes; i += _cipherStateBytes)
+            for (int i = 0; i < STATE_OUTPUT; i += STATE_BYTES)
             {
-                UbiParameters.StartNewBlockType(UbiType.Out);
-                UbiParameters.IsFinalBlock = true;
+                _ubiParameters.StartNewBlockType(UbiType.Out);
+                _ubiParameters.IsFinalBlock = true;
                 ProcessBlock(8);
 
-                // Output a chunk of the hash
-                int outputSize = _outputBytes - i;
-                if (outputSize > _cipherStateBytes)
-                    outputSize = _cipherStateBytes;
+                // output a chunk of the hash
+                int outputSize = STATE_OUTPUT - i;
+                if (outputSize > STATE_BYTES)
+                    outputSize = STATE_BYTES;
 
                 PutBytes(_digestState, hash, i, outputSize);
-
-                // Restore old state
-                for (j = 0; j < _digestState.Length; j++)
-                    _digestState[j] = oldState[j];
-
-                // Increment counter
+                // restore old state
+                Array.Copy(oldState, _digestState, oldState.Length);
+                // increment counter
                 _cipherInput[0]++;
             }
 
@@ -346,34 +346,37 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="InitializationType">Initialization parameters</param>
         public void Initialize(SkeinInitializationType InitializationType)
         {
-            this.InitializationType = InitializationType;
+            _initializationType = InitializationType;
 
             switch (InitializationType)
             {
                 case SkeinInitializationType.Normal:
-                    // Normal initialization
-                    Initialize();
-                    return;
-
+                    {
+                        // normal initialization
+                        Initialize();
+                        return;
+                    }
                 case SkeinInitializationType.ZeroedState:
-                    // Copy the configuration value to the state
-                    for (int i = 0; i < _digestState.Length; i++)
-                        _digestState[i] = 0;
-                    break;
-
-                case SkeinInitializationType.ChainedState:
-                    // Keep the state as it is and do nothing
-                    break;
-
+                    {
+                        // copy the configuration value to the state
+                        for (int i = 0; i < _digestState.Length; i++)
+                            _digestState[i] = 0;
+                        break;
+                    }
                 case SkeinInitializationType.ChainedConfig:
-                    // Generate a chained configuration
-                    GenerateConfiguration(_digestState);
-                    // Continue initialization
-                    Initialize();
-                    return;
+                    {
+                        // generate a chained configuration
+                        GenerateConfiguration(_digestState);
+                        // continue initialization
+                        Initialize();
+                        return;
+                    }
+                case SkeinInitializationType.ChainedState:
+                    // keep the state as it is and do nothing
+                    break;
             }
 
-            // Reset bytes filled
+            // reset bytes filled
             _bytesFilled = 0;
         }
 
@@ -398,19 +401,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
         #region SkeinConfig
         /// <remarks>
-        /// Default configuration
-        /// </remarks>
-        private void SkeinConfig()
-        {
-            _stateSize = StateSize;
-            // Allocate config value
-            ConfigValue = new UInt64[StateSize / 8];
-            // Set the state size for the configuration
-            ConfigString = new UInt64[ConfigValue.Length];
-            ConfigString[1] = (UInt64)DigestSize * 8;
-        }
-
-        /// <remarks>
         /// Default generation function
         /// </remarks>
         private void GenerateConfiguration()
@@ -418,17 +408,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             var cipher = new Threefish1024();
             var tweak = new UbiTweak();
 
-            // Initialize the tweak value
+            // initialize the tweak value
             tweak.StartNewBlockType(UbiType.Config);
             tweak.IsFinalBlock = true;
             tweak.BitsProcessed = 32;
 
             cipher.SetTweak(tweak.Tweak);
-            cipher.Encrypt(ConfigString, ConfigValue);
+            cipher.Encrypt(_configString, _configValue);
 
-            ConfigValue[0] ^= ConfigString[0];
-            ConfigValue[1] ^= ConfigString[1];
-            ConfigValue[2] ^= ConfigString[2];
+            _configValue[0] ^= _configString[0];
+            _configValue[1] ^= _configString[1];
+            _configValue[2] ^= _configString[2];
         }
 
         /// <summary>
@@ -442,18 +432,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             var cipher = new Threefish1024();
             var tweak = new UbiTweak();
 
-            // Initialize the tweak value
+            // initialize the tweak value
             tweak.StartNewBlockType(UbiType.Config);
             tweak.IsFinalBlock = true;
             tweak.BitsProcessed = 32;
 
             cipher.SetKey(InitialState);
             cipher.SetTweak(tweak.Tweak);
-            cipher.Encrypt(ConfigString, ConfigValue);
+            cipher.Encrypt(_configString, _configValue);
 
-            ConfigValue[0] ^= ConfigString[0];
-            ConfigValue[1] ^= ConfigString[1];
-            ConfigValue[2] ^= ConfigString[2];
+            _configValue[0] ^= _configString[0];
+            _configValue[1] ^= _configString[1];
+            _configValue[2] ^= _configString[2];
         }
 
         /// <summary>
@@ -468,17 +458,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             if (Schema.Length != 4)
                 throw new CryptoHashException("Skein1024:SetSchema", "Schema must be 4 bytes.", new Exception());
 
-            UInt64 n = ConfigString[0];
+            UInt64 n = _configString[0];
 
-            // Clear the schema bytes
+            // clear the schema bytes
             n &= ~(UInt64)0xfffffffful;
-            // Set schema bytes
+            // set schema bytes
             n |= (UInt64)Schema[3] << 24;
             n |= (UInt64)Schema[2] << 16;
             n |= (UInt64)Schema[1] << 8;
             n |= (UInt64)Schema[0];
 
-            ConfigString[0] = n;
+            _configString[0] = n;
         }
 
         /// <summary>
@@ -493,8 +483,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             if (Version < 0 || Version > 3)
                 throw new CryptoHashException("Skein1024:SetVersion", "Version must be between 0 and 3, inclusive.", new Exception());
 
-            ConfigString[0] &= ~((UInt64)0x03 << 32);
-            ConfigString[0] |= (UInt64)Version << 32;
+            _configString[0] &= ~((UInt64)0x03 << 32);
+            _configString[0] |= (UInt64)Version << 32;
         }
 
         /// <summary>
@@ -504,8 +494,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="Size">Leaf size</param>
         public void SetTreeLeafSize(byte Size)
         {
-            ConfigString[2] &= ~(UInt64)0xff;
-            ConfigString[2] |= (UInt64)Size;
+            _configString[2] &= ~(UInt64)0xff;
+            _configString[2] |= (UInt64)Size;
         }
 
         /// <summary>
@@ -515,8 +505,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="Size">Fan out size</param>
         public void SetTreeFanOutSize(byte Size)
         {
-            ConfigString[2] &= ~((UInt64)0xff << 8);
-            ConfigString[2] |= (UInt64)Size << 8;
+            _configString[2] &= ~((UInt64)0xff << 8);
+            _configString[2] |= (UInt64)Size << 8;
         }
 
         /// <summary>
@@ -531,8 +521,61 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             if (Height == 1)
                 throw new CryptoHashException("Skein1024:SetMaxTreeHeight", "Tree height must be zero or greater than 1.", new Exception());
 
-            ConfigString[2] &= ~((UInt64)0xff << 16);
-            ConfigString[2] |= (UInt64)Height << 16;
+            _configString[2] &= ~((UInt64)0xff << 16);
+            _configString[2] |= (UInt64)Height << 16;
+        }
+        #endregion
+
+        #region Private Methods
+        private void Initialize()
+        {
+            // copy the configuration value to the state
+            for (int i = 0; i < _digestState.Length; i++)
+                _digestState[i] = _configValue[i];
+
+            // set up tweak for message block
+            _ubiParameters.StartNewBlockType(UbiType.Message);
+            // reset bytes filled
+            _bytesFilled = 0;
+        }
+
+        private void ProcessBlock(int bytes)
+        {
+            // set the key to the current state
+            _blockCipher.SetKey(_digestState);
+            // update tweak
+            _ubiParameters.BitsProcessed += (Int64)bytes;
+            _blockCipher.SetTweak(_ubiParameters.Tweak);
+            // encrypt block
+            _blockCipher.Encrypt(_cipherInput, _digestState);
+
+            // feed-forward input with state
+            for (int i = 0; i < _cipherInput.Length; i++)
+                _digestState[i] ^= _cipherInput[i];
+        }
+
+        private static UInt64 BytesToUInt64(byte[] Input, int InOffset)
+        {
+            UInt64 n = Input[InOffset];
+            n |= (UInt64)Input[InOffset + 1] << 8;
+            n |= (UInt64)Input[InOffset + 2] << 16;
+            n |= (UInt64)Input[InOffset + 3] << 24;
+            n |= (UInt64)Input[InOffset + 4] << 32;
+            n |= (UInt64)Input[InOffset + 5] << 40;
+            n |= (UInt64)Input[InOffset + 6] << 48;
+            n |= (UInt64)Input[InOffset + 7] << 56;
+
+            return n;
+        }
+
+        private static void PutBytes(UInt64[] Input, byte[] Output, int Offset, int ByteCount)
+        {
+            int j = 0;
+            for (int i = 0; i < ByteCount; i++)
+            {
+                Output[Offset + i] = (byte)((Input[i / 8] >> j) & 0xff);
+                j = (j + 8) % 64;
+            }
         }
         #endregion
 
@@ -555,7 +598,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             #region Constructor
             internal Threefish1024()
             {
-                // Create the expanded key array
+                // create the expanded key array
                 _expandedTweak = new UInt64[ExpandedTweakSize];
                 _expandedKey = new UInt64[ExpandedKeySize];
                 _expandedKey[ExpandedKeySize - 1] = KeyScheduleConst;
@@ -579,27 +622,43 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
             internal void Encrypt(UInt64[] Input, UInt64[] Output)
             {
-                // Cache the block, key, and tweak
-                UInt64 B0 = Input[0], B1 = Input[1],
-                      B2 = Input[2], B3 = Input[3],
-                      B4 = Input[4], B5 = Input[5],
-                      B6 = Input[6], B7 = Input[7],
-                      B8 = Input[8], B9 = Input[9],
-                      B10 = Input[10], B11 = Input[11],
-                      B12 = Input[12], B13 = Input[13],
-                      B14 = Input[14], B15 = Input[15];
-                UInt64 K0 = _expandedKey[0], K1 = _expandedKey[1],
-                      K2 = _expandedKey[2], K3 = _expandedKey[3],
-                      K4 = _expandedKey[4], K5 = _expandedKey[5],
-                      K6 = _expandedKey[6], K7 = _expandedKey[7],
-                      K8 = _expandedKey[8], K9 = _expandedKey[9],
-                      K10 = _expandedKey[10], K11 = _expandedKey[11],
-                      K12 = _expandedKey[12], K13 = _expandedKey[13],
-                      K14 = _expandedKey[14], K15 = _expandedKey[15],
-                      K16 = _expandedKey[16];
-                UInt64 T0 = _expandedTweak[0], T1 = _expandedTweak[1],
-                      T2 = _expandedTweak[2];
-
+                // cache the block, key, and tweak
+                UInt64 B0 = Input[0]; 
+                UInt64 B1 = Input[1];
+                UInt64 B2 = Input[2]; 
+                UInt64 B3 = Input[3];
+                UInt64 B4 = Input[4]; 
+                UInt64 B5 = Input[5];
+                UInt64 B6 = Input[6];
+                UInt64 B7 = Input[7];
+                UInt64 B8 = Input[8]; 
+                UInt64 B9 = Input[9];
+                UInt64 B10 = Input[10];
+                UInt64 B11 = Input[11];
+                UInt64 B12 = Input[12];
+                UInt64 B13 = Input[13];
+                UInt64 B14 = Input[14]; 
+                UInt64 B15 = Input[15];
+                UInt64 K0 = _expandedKey[0]; 
+                UInt64 K1 = _expandedKey[1];
+                UInt64 K2 = _expandedKey[2]; 
+                UInt64 K3 = _expandedKey[3];
+                UInt64 K4 = _expandedKey[4]; 
+                UInt64 K5 = _expandedKey[5];
+                UInt64 K6 = _expandedKey[6]; 
+                UInt64 K7 = _expandedKey[7];
+                UInt64 K8 = _expandedKey[8];
+                UInt64 K9 = _expandedKey[9];
+                UInt64 K10 = _expandedKey[10];
+                UInt64 K11 = _expandedKey[11];
+                UInt64 K12 = _expandedKey[12]; 
+                UInt64 K13 = _expandedKey[13];
+                UInt64 K14 = _expandedKey[14];
+                UInt64 K15 = _expandedKey[15];
+                UInt64 K16 = _expandedKey[16];
+                UInt64 T0 = _expandedTweak[0];
+                UInt64 T1 = _expandedTweak[1];
+                UInt64 T2 = _expandedTweak[2];
 
                 Mix(ref B0, ref B1, 24, K0, K1);
                 Mix(ref B2, ref B3, 13, K2, K3);
@@ -1242,7 +1301,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
                 Mix(ref B10, ref B3, 37);
                 Mix(ref B12, ref B7, 20);
 
-                // Final key schedule
+                // final key schedule
                 Output[0] = B0 + K3;
                 Output[1] = B1 + K4;
                 Output[2] = B2 + K5;
@@ -1259,704 +1318,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
                 Output[13] = B13 + K16 + T2;
                 Output[14] = B14 + K0 + T0;
                 Output[15] = B15 + K1 + 20;
-            }
-
-            internal void Decrypt(UInt64[] Input, UInt64[] Output)
-            {
-                // Cache the block, key, and tweak
-                UInt64 B0 = Input[0], B1 = Input[1],
-                      B2 = Input[2], B3 = Input[3],
-                      B4 = Input[4], B5 = Input[5],
-                      B6 = Input[6], B7 = Input[7],
-                      B8 = Input[8], B9 = Input[9],
-                      B10 = Input[10], B11 = Input[11],
-                      B12 = Input[12], B13 = Input[13],
-                      B14 = Input[14], B15 = Input[15];
-                UInt64 K0 = _expandedKey[0], K1 = _expandedKey[1],
-                      K2 = _expandedKey[2], K3 = _expandedKey[3],
-                      K4 = _expandedKey[4], K5 = _expandedKey[5],
-                      K6 = _expandedKey[6], K7 = _expandedKey[7],
-                      K8 = _expandedKey[8], K9 = _expandedKey[9],
-                      K10 = _expandedKey[10], K11 = _expandedKey[11],
-                      K12 = _expandedKey[12], K13 = _expandedKey[13],
-                      K14 = _expandedKey[14], K15 = _expandedKey[15],
-                      K16 = _expandedKey[16];
-                UInt64 T0 = _expandedTweak[0], T1 = _expandedTweak[1],
-                      T2 = _expandedTweak[2];
-
-                B0 -= K3;
-                B1 -= K4;
-                B2 -= K5;
-                B3 -= K6;
-                B4 -= K7;
-                B5 -= K8;
-                B6 -= K9;
-                B7 -= K10;
-                B8 -= K11;
-                B9 -= K12;
-                B10 -= K13;
-                B11 -= K14;
-                B12 -= K15;
-                B13 -= K16 + T2;
-                B14 -= K0 + T0;
-                B15 -= K1 + 20;
-                UnMix(ref B12, ref B7, 20);
-                UnMix(ref B10, ref B3, 37);
-                UnMix(ref B8, ref B5, 31);
-                UnMix(ref B14, ref B1, 23);
-                UnMix(ref B4, ref B9, 52);
-                UnMix(ref B6, ref B13, 35);
-                UnMix(ref B2, ref B11, 48);
-                UnMix(ref B0, ref B15, 9);
-                UnMix(ref B10, ref B9, 25);
-                UnMix(ref B8, ref B11, 44);
-                UnMix(ref B14, ref B13, 42);
-                UnMix(ref B12, ref B15, 19);
-                UnMix(ref B6, ref B1, 46);
-                UnMix(ref B4, ref B3, 47);
-                UnMix(ref B2, ref B5, 44);
-                UnMix(ref B0, ref B7, 31);
-                UnMix(ref B8, ref B1, 41);
-                UnMix(ref B14, ref B5, 42);
-                UnMix(ref B12, ref B3, 53);
-                UnMix(ref B10, ref B7, 4);
-                UnMix(ref B4, ref B15, 51);
-                UnMix(ref B6, ref B11, 56);
-                UnMix(ref B2, ref B13, 34);
-                UnMix(ref B0, ref B9, 16);
-                UnMix(ref B14, ref B15, 30, K16 + T2, K0 + 19);
-                UnMix(ref B12, ref B13, 44, K14, K15 + T1);
-                UnMix(ref B10, ref B11, 47, K12, K13);
-                UnMix(ref B8, ref B9, 12, K10, K11);
-                UnMix(ref B6, ref B7, 31, K8, K9);
-                UnMix(ref B4, ref B5, 37, K6, K7);
-                UnMix(ref B2, ref B3, 9, K4, K5);
-                UnMix(ref B0, ref B1, 41, K2, K3);
-                UnMix(ref B12, ref B7, 25);
-                UnMix(ref B10, ref B3, 16);
-                UnMix(ref B8, ref B5, 28);
-                UnMix(ref B14, ref B1, 47);
-                UnMix(ref B4, ref B9, 41);
-                UnMix(ref B6, ref B13, 48);
-                UnMix(ref B2, ref B11, 20);
-                UnMix(ref B0, ref B15, 5);
-                UnMix(ref B10, ref B9, 17);
-                UnMix(ref B8, ref B11, 59);
-                UnMix(ref B14, ref B13, 41);
-                UnMix(ref B12, ref B15, 34);
-                UnMix(ref B6, ref B1, 13);
-                UnMix(ref B4, ref B3, 51);
-                UnMix(ref B2, ref B5, 4);
-                UnMix(ref B0, ref B7, 33);
-                UnMix(ref B8, ref B1, 52);
-                UnMix(ref B14, ref B5, 23);
-                UnMix(ref B12, ref B3, 18);
-                UnMix(ref B10, ref B7, 49);
-                UnMix(ref B4, ref B15, 55);
-                UnMix(ref B6, ref B11, 10);
-                UnMix(ref B2, ref B13, 19);
-                UnMix(ref B0, ref B9, 38);
-                UnMix(ref B14, ref B15, 37, K15 + T1, K16 + 18);
-                UnMix(ref B12, ref B13, 22, K13, K14 + T0);
-                UnMix(ref B10, ref B11, 17, K11, K12);
-                UnMix(ref B8, ref B9, 8, K9, K10);
-                UnMix(ref B6, ref B7, 47, K7, K8);
-                UnMix(ref B4, ref B5, 8, K5, K6);
-                UnMix(ref B2, ref B3, 13, K3, K4);
-                UnMix(ref B0, ref B1, 24, K1, K2);
-                UnMix(ref B12, ref B7, 20);
-                UnMix(ref B10, ref B3, 37);
-                UnMix(ref B8, ref B5, 31);
-                UnMix(ref B14, ref B1, 23);
-                UnMix(ref B4, ref B9, 52);
-                UnMix(ref B6, ref B13, 35);
-                UnMix(ref B2, ref B11, 48);
-                UnMix(ref B0, ref B15, 9);
-                UnMix(ref B10, ref B9, 25);
-                UnMix(ref B8, ref B11, 44);
-                UnMix(ref B14, ref B13, 42);
-                UnMix(ref B12, ref B15, 19);
-                UnMix(ref B6, ref B1, 46);
-                UnMix(ref B4, ref B3, 47);
-                UnMix(ref B2, ref B5, 44);
-                UnMix(ref B0, ref B7, 31);
-                UnMix(ref B8, ref B1, 41);
-                UnMix(ref B14, ref B5, 42);
-                UnMix(ref B12, ref B3, 53);
-                UnMix(ref B10, ref B7, 4);
-                UnMix(ref B4, ref B15, 51);
-                UnMix(ref B6, ref B11, 56);
-                UnMix(ref B2, ref B13, 34);
-                UnMix(ref B0, ref B9, 16);
-                UnMix(ref B14, ref B15, 30, K14 + T0, K15 + 17);
-                UnMix(ref B12, ref B13, 44, K12, K13 + T2);
-                UnMix(ref B10, ref B11, 47, K10, K11);
-                UnMix(ref B8, ref B9, 12, K8, K9);
-                UnMix(ref B6, ref B7, 31, K6, K7);
-                UnMix(ref B4, ref B5, 37, K4, K5);
-                UnMix(ref B2, ref B3, 9, K2, K3);
-                UnMix(ref B0, ref B1, 41, K0, K1);
-                UnMix(ref B12, ref B7, 25);
-                UnMix(ref B10, ref B3, 16);
-                UnMix(ref B8, ref B5, 28);
-                UnMix(ref B14, ref B1, 47);
-                UnMix(ref B4, ref B9, 41);
-                UnMix(ref B6, ref B13, 48);
-                UnMix(ref B2, ref B11, 20);
-                UnMix(ref B0, ref B15, 5);
-                UnMix(ref B10, ref B9, 17);
-                UnMix(ref B8, ref B11, 59);
-                UnMix(ref B14, ref B13, 41);
-                UnMix(ref B12, ref B15, 34);
-                UnMix(ref B6, ref B1, 13);
-                UnMix(ref B4, ref B3, 51);
-                UnMix(ref B2, ref B5, 4);
-                UnMix(ref B0, ref B7, 33);
-                UnMix(ref B8, ref B1, 52);
-                UnMix(ref B14, ref B5, 23);
-                UnMix(ref B12, ref B3, 18);
-                UnMix(ref B10, ref B7, 49);
-                UnMix(ref B4, ref B15, 55);
-                UnMix(ref B6, ref B11, 10);
-                UnMix(ref B2, ref B13, 19);
-                UnMix(ref B0, ref B9, 38);
-                UnMix(ref B14, ref B15, 37, K13 + T2, K14 + 16);
-                UnMix(ref B12, ref B13, 22, K11, K12 + T1);
-                UnMix(ref B10, ref B11, 17, K9, K10);
-                UnMix(ref B8, ref B9, 8, K7, K8);
-                UnMix(ref B6, ref B7, 47, K5, K6);
-                UnMix(ref B4, ref B5, 8, K3, K4);
-                UnMix(ref B2, ref B3, 13, K1, K2);
-                UnMix(ref B0, ref B1, 24, K16, K0);
-                UnMix(ref B12, ref B7, 20);
-                UnMix(ref B10, ref B3, 37);
-                UnMix(ref B8, ref B5, 31);
-                UnMix(ref B14, ref B1, 23);
-                UnMix(ref B4, ref B9, 52);
-                UnMix(ref B6, ref B13, 35);
-                UnMix(ref B2, ref B11, 48);
-                UnMix(ref B0, ref B15, 9);
-                UnMix(ref B10, ref B9, 25);
-                UnMix(ref B8, ref B11, 44);
-                UnMix(ref B14, ref B13, 42);
-                UnMix(ref B12, ref B15, 19);
-                UnMix(ref B6, ref B1, 46);
-                UnMix(ref B4, ref B3, 47);
-                UnMix(ref B2, ref B5, 44);
-                UnMix(ref B0, ref B7, 31);
-                UnMix(ref B8, ref B1, 41);
-                UnMix(ref B14, ref B5, 42);
-                UnMix(ref B12, ref B3, 53);
-                UnMix(ref B10, ref B7, 4);
-                UnMix(ref B4, ref B15, 51);
-                UnMix(ref B6, ref B11, 56);
-                UnMix(ref B2, ref B13, 34);
-                UnMix(ref B0, ref B9, 16);
-                UnMix(ref B14, ref B15, 30, K12 + T1, K13 + 15);
-                UnMix(ref B12, ref B13, 44, K10, K11 + T0);
-                UnMix(ref B10, ref B11, 47, K8, K9);
-                UnMix(ref B8, ref B9, 12, K6, K7);
-                UnMix(ref B6, ref B7, 31, K4, K5);
-                UnMix(ref B4, ref B5, 37, K2, K3);
-                UnMix(ref B2, ref B3, 9, K0, K1);
-                UnMix(ref B0, ref B1, 41, K15, K16);
-                UnMix(ref B12, ref B7, 25);
-                UnMix(ref B10, ref B3, 16);
-                UnMix(ref B8, ref B5, 28);
-                UnMix(ref B14, ref B1, 47);
-                UnMix(ref B4, ref B9, 41);
-                UnMix(ref B6, ref B13, 48);
-                UnMix(ref B2, ref B11, 20);
-                UnMix(ref B0, ref B15, 5);
-                UnMix(ref B10, ref B9, 17);
-                UnMix(ref B8, ref B11, 59);
-                UnMix(ref B14, ref B13, 41);
-                UnMix(ref B12, ref B15, 34);
-                UnMix(ref B6, ref B1, 13);
-                UnMix(ref B4, ref B3, 51);
-                UnMix(ref B2, ref B5, 4);
-                UnMix(ref B0, ref B7, 33);
-                UnMix(ref B8, ref B1, 52);
-                UnMix(ref B14, ref B5, 23);
-                UnMix(ref B12, ref B3, 18);
-                UnMix(ref B10, ref B7, 49);
-                UnMix(ref B4, ref B15, 55);
-                UnMix(ref B6, ref B11, 10);
-                UnMix(ref B2, ref B13, 19);
-                UnMix(ref B0, ref B9, 38);
-                UnMix(ref B14, ref B15, 37, K11 + T0, K12 + 14);
-                UnMix(ref B12, ref B13, 22, K9, K10 + T2);
-                UnMix(ref B10, ref B11, 17, K7, K8);
-                UnMix(ref B8, ref B9, 8, K5, K6);
-                UnMix(ref B6, ref B7, 47, K3, K4);
-                UnMix(ref B4, ref B5, 8, K1, K2);
-                UnMix(ref B2, ref B3, 13, K16, K0);
-                UnMix(ref B0, ref B1, 24, K14, K15);
-                UnMix(ref B12, ref B7, 20);
-                UnMix(ref B10, ref B3, 37);
-                UnMix(ref B8, ref B5, 31);
-                UnMix(ref B14, ref B1, 23);
-                UnMix(ref B4, ref B9, 52);
-                UnMix(ref B6, ref B13, 35);
-                UnMix(ref B2, ref B11, 48);
-                UnMix(ref B0, ref B15, 9);
-                UnMix(ref B10, ref B9, 25);
-                UnMix(ref B8, ref B11, 44);
-                UnMix(ref B14, ref B13, 42);
-                UnMix(ref B12, ref B15, 19);
-                UnMix(ref B6, ref B1, 46);
-                UnMix(ref B4, ref B3, 47);
-                UnMix(ref B2, ref B5, 44);
-                UnMix(ref B0, ref B7, 31);
-                UnMix(ref B8, ref B1, 41);
-                UnMix(ref B14, ref B5, 42);
-                UnMix(ref B12, ref B3, 53);
-                UnMix(ref B10, ref B7, 4);
-                UnMix(ref B4, ref B15, 51);
-                UnMix(ref B6, ref B11, 56);
-                UnMix(ref B2, ref B13, 34);
-                UnMix(ref B0, ref B9, 16);
-                UnMix(ref B14, ref B15, 30, K10 + T2, K11 + 13);
-                UnMix(ref B12, ref B13, 44, K8, K9 + T1);
-                UnMix(ref B10, ref B11, 47, K6, K7);
-                UnMix(ref B8, ref B9, 12, K4, K5);
-                UnMix(ref B6, ref B7, 31, K2, K3);
-                UnMix(ref B4, ref B5, 37, K0, K1);
-                UnMix(ref B2, ref B3, 9, K15, K16);
-                UnMix(ref B0, ref B1, 41, K13, K14);
-                UnMix(ref B12, ref B7, 25);
-                UnMix(ref B10, ref B3, 16);
-                UnMix(ref B8, ref B5, 28);
-                UnMix(ref B14, ref B1, 47);
-                UnMix(ref B4, ref B9, 41);
-                UnMix(ref B6, ref B13, 48);
-                UnMix(ref B2, ref B11, 20);
-                UnMix(ref B0, ref B15, 5);
-                UnMix(ref B10, ref B9, 17);
-                UnMix(ref B8, ref B11, 59);
-                UnMix(ref B14, ref B13, 41);
-                UnMix(ref B12, ref B15, 34);
-                UnMix(ref B6, ref B1, 13);
-                UnMix(ref B4, ref B3, 51);
-                UnMix(ref B2, ref B5, 4);
-                UnMix(ref B0, ref B7, 33);
-                UnMix(ref B8, ref B1, 52);
-                UnMix(ref B14, ref B5, 23);
-                UnMix(ref B12, ref B3, 18);
-                UnMix(ref B10, ref B7, 49);
-                UnMix(ref B4, ref B15, 55);
-                UnMix(ref B6, ref B11, 10);
-                UnMix(ref B2, ref B13, 19);
-                UnMix(ref B0, ref B9, 38);
-                UnMix(ref B14, ref B15, 37, K9 + T1, K10 + 12);
-                UnMix(ref B12, ref B13, 22, K7, K8 + T0);
-                UnMix(ref B10, ref B11, 17, K5, K6);
-                UnMix(ref B8, ref B9, 8, K3, K4);
-                UnMix(ref B6, ref B7, 47, K1, K2);
-                UnMix(ref B4, ref B5, 8, K16, K0);
-                UnMix(ref B2, ref B3, 13, K14, K15);
-                UnMix(ref B0, ref B1, 24, K12, K13);
-                UnMix(ref B12, ref B7, 20);
-                UnMix(ref B10, ref B3, 37);
-                UnMix(ref B8, ref B5, 31);
-                UnMix(ref B14, ref B1, 23);
-                UnMix(ref B4, ref B9, 52);
-                UnMix(ref B6, ref B13, 35);
-                UnMix(ref B2, ref B11, 48);
-                UnMix(ref B0, ref B15, 9);
-                UnMix(ref B10, ref B9, 25);
-                UnMix(ref B8, ref B11, 44);
-                UnMix(ref B14, ref B13, 42);
-                UnMix(ref B12, ref B15, 19);
-                UnMix(ref B6, ref B1, 46);
-                UnMix(ref B4, ref B3, 47);
-                UnMix(ref B2, ref B5, 44);
-                UnMix(ref B0, ref B7, 31);
-                UnMix(ref B8, ref B1, 41);
-                UnMix(ref B14, ref B5, 42);
-                UnMix(ref B12, ref B3, 53);
-                UnMix(ref B10, ref B7, 4);
-                UnMix(ref B4, ref B15, 51);
-                UnMix(ref B6, ref B11, 56);
-                UnMix(ref B2, ref B13, 34);
-                UnMix(ref B0, ref B9, 16);
-                UnMix(ref B14, ref B15, 30, K8 + T0, K9 + 11);
-                UnMix(ref B12, ref B13, 44, K6, K7 + T2);
-                UnMix(ref B10, ref B11, 47, K4, K5);
-                UnMix(ref B8, ref B9, 12, K2, K3);
-                UnMix(ref B6, ref B7, 31, K0, K1);
-                UnMix(ref B4, ref B5, 37, K15, K16);
-                UnMix(ref B2, ref B3, 9, K13, K14);
-                UnMix(ref B0, ref B1, 41, K11, K12);
-                UnMix(ref B12, ref B7, 25);
-                UnMix(ref B10, ref B3, 16);
-                UnMix(ref B8, ref B5, 28);
-                UnMix(ref B14, ref B1, 47);
-                UnMix(ref B4, ref B9, 41);
-                UnMix(ref B6, ref B13, 48);
-                UnMix(ref B2, ref B11, 20);
-                UnMix(ref B0, ref B15, 5);
-                UnMix(ref B10, ref B9, 17);
-                UnMix(ref B8, ref B11, 59);
-                UnMix(ref B14, ref B13, 41);
-                UnMix(ref B12, ref B15, 34);
-                UnMix(ref B6, ref B1, 13);
-                UnMix(ref B4, ref B3, 51);
-                UnMix(ref B2, ref B5, 4);
-                UnMix(ref B0, ref B7, 33);
-                UnMix(ref B8, ref B1, 52);
-                UnMix(ref B14, ref B5, 23);
-                UnMix(ref B12, ref B3, 18);
-                UnMix(ref B10, ref B7, 49);
-                UnMix(ref B4, ref B15, 55);
-                UnMix(ref B6, ref B11, 10);
-                UnMix(ref B2, ref B13, 19);
-                UnMix(ref B0, ref B9, 38);
-                UnMix(ref B14, ref B15, 37, K7 + T2, K8 + 10);
-                UnMix(ref B12, ref B13, 22, K5, K6 + T1);
-                UnMix(ref B10, ref B11, 17, K3, K4);
-                UnMix(ref B8, ref B9, 8, K1, K2);
-                UnMix(ref B6, ref B7, 47, K16, K0);
-                UnMix(ref B4, ref B5, 8, K14, K15);
-                UnMix(ref B2, ref B3, 13, K12, K13);
-                UnMix(ref B0, ref B1, 24, K10, K11);
-                UnMix(ref B12, ref B7, 20);
-                UnMix(ref B10, ref B3, 37);
-                UnMix(ref B8, ref B5, 31);
-                UnMix(ref B14, ref B1, 23);
-                UnMix(ref B4, ref B9, 52);
-                UnMix(ref B6, ref B13, 35);
-                UnMix(ref B2, ref B11, 48);
-                UnMix(ref B0, ref B15, 9);
-                UnMix(ref B10, ref B9, 25);
-                UnMix(ref B8, ref B11, 44);
-                UnMix(ref B14, ref B13, 42);
-                UnMix(ref B12, ref B15, 19);
-                UnMix(ref B6, ref B1, 46);
-                UnMix(ref B4, ref B3, 47);
-                UnMix(ref B2, ref B5, 44);
-                UnMix(ref B0, ref B7, 31);
-                UnMix(ref B8, ref B1, 41);
-                UnMix(ref B14, ref B5, 42);
-                UnMix(ref B12, ref B3, 53);
-                UnMix(ref B10, ref B7, 4);
-                UnMix(ref B4, ref B15, 51);
-                UnMix(ref B6, ref B11, 56);
-                UnMix(ref B2, ref B13, 34);
-                UnMix(ref B0, ref B9, 16);
-                UnMix(ref B14, ref B15, 30, K6 + T1, K7 + 9);
-                UnMix(ref B12, ref B13, 44, K4, K5 + T0);
-                UnMix(ref B10, ref B11, 47, K2, K3);
-                UnMix(ref B8, ref B9, 12, K0, K1);
-                UnMix(ref B6, ref B7, 31, K15, K16);
-                UnMix(ref B4, ref B5, 37, K13, K14);
-                UnMix(ref B2, ref B3, 9, K11, K12);
-                UnMix(ref B0, ref B1, 41, K9, K10);
-                UnMix(ref B12, ref B7, 25);
-                UnMix(ref B10, ref B3, 16);
-                UnMix(ref B8, ref B5, 28);
-                UnMix(ref B14, ref B1, 47);
-                UnMix(ref B4, ref B9, 41);
-                UnMix(ref B6, ref B13, 48);
-                UnMix(ref B2, ref B11, 20);
-                UnMix(ref B0, ref B15, 5);
-                UnMix(ref B10, ref B9, 17);
-                UnMix(ref B8, ref B11, 59);
-                UnMix(ref B14, ref B13, 41);
-                UnMix(ref B12, ref B15, 34);
-                UnMix(ref B6, ref B1, 13);
-                UnMix(ref B4, ref B3, 51);
-                UnMix(ref B2, ref B5, 4);
-                UnMix(ref B0, ref B7, 33);
-                UnMix(ref B8, ref B1, 52);
-                UnMix(ref B14, ref B5, 23);
-                UnMix(ref B12, ref B3, 18);
-                UnMix(ref B10, ref B7, 49);
-                UnMix(ref B4, ref B15, 55);
-                UnMix(ref B6, ref B11, 10);
-                UnMix(ref B2, ref B13, 19);
-                UnMix(ref B0, ref B9, 38);
-                UnMix(ref B14, ref B15, 37, K5 + T0, K6 + 8);
-                UnMix(ref B12, ref B13, 22, K3, K4 + T2);
-                UnMix(ref B10, ref B11, 17, K1, K2);
-                UnMix(ref B8, ref B9, 8, K16, K0);
-                UnMix(ref B6, ref B7, 47, K14, K15);
-                UnMix(ref B4, ref B5, 8, K12, K13);
-                UnMix(ref B2, ref B3, 13, K10, K11);
-                UnMix(ref B0, ref B1, 24, K8, K9);
-                UnMix(ref B12, ref B7, 20);
-                UnMix(ref B10, ref B3, 37);
-                UnMix(ref B8, ref B5, 31);
-                UnMix(ref B14, ref B1, 23);
-                UnMix(ref B4, ref B9, 52);
-                UnMix(ref B6, ref B13, 35);
-                UnMix(ref B2, ref B11, 48);
-                UnMix(ref B0, ref B15, 9);
-                UnMix(ref B10, ref B9, 25);
-                UnMix(ref B8, ref B11, 44);
-                UnMix(ref B14, ref B13, 42);
-                UnMix(ref B12, ref B15, 19);
-                UnMix(ref B6, ref B1, 46);
-                UnMix(ref B4, ref B3, 47);
-                UnMix(ref B2, ref B5, 44);
-                UnMix(ref B0, ref B7, 31);
-                UnMix(ref B8, ref B1, 41);
-                UnMix(ref B14, ref B5, 42);
-                UnMix(ref B12, ref B3, 53);
-                UnMix(ref B10, ref B7, 4);
-                UnMix(ref B4, ref B15, 51);
-                UnMix(ref B6, ref B11, 56);
-                UnMix(ref B2, ref B13, 34);
-                UnMix(ref B0, ref B9, 16);
-                UnMix(ref B14, ref B15, 30, K4 + T2, K5 + 7);
-                UnMix(ref B12, ref B13, 44, K2, K3 + T1);
-                UnMix(ref B10, ref B11, 47, K0, K1);
-                UnMix(ref B8, ref B9, 12, K15, K16);
-                UnMix(ref B6, ref B7, 31, K13, K14);
-                UnMix(ref B4, ref B5, 37, K11, K12);
-                UnMix(ref B2, ref B3, 9, K9, K10);
-                UnMix(ref B0, ref B1, 41, K7, K8);
-                UnMix(ref B12, ref B7, 25);
-                UnMix(ref B10, ref B3, 16);
-                UnMix(ref B8, ref B5, 28);
-                UnMix(ref B14, ref B1, 47);
-                UnMix(ref B4, ref B9, 41);
-                UnMix(ref B6, ref B13, 48);
-                UnMix(ref B2, ref B11, 20);
-                UnMix(ref B0, ref B15, 5);
-                UnMix(ref B10, ref B9, 17);
-                UnMix(ref B8, ref B11, 59);
-                UnMix(ref B14, ref B13, 41);
-                UnMix(ref B12, ref B15, 34);
-                UnMix(ref B6, ref B1, 13);
-                UnMix(ref B4, ref B3, 51);
-                UnMix(ref B2, ref B5, 4);
-                UnMix(ref B0, ref B7, 33);
-                UnMix(ref B8, ref B1, 52);
-                UnMix(ref B14, ref B5, 23);
-                UnMix(ref B12, ref B3, 18);
-                UnMix(ref B10, ref B7, 49);
-                UnMix(ref B4, ref B15, 55);
-                UnMix(ref B6, ref B11, 10);
-                UnMix(ref B2, ref B13, 19);
-                UnMix(ref B0, ref B9, 38);
-                UnMix(ref B14, ref B15, 37, K3 + T1, K4 + 6);
-                UnMix(ref B12, ref B13, 22, K1, K2 + T0);
-                UnMix(ref B10, ref B11, 17, K16, K0);
-                UnMix(ref B8, ref B9, 8, K14, K15);
-                UnMix(ref B6, ref B7, 47, K12, K13);
-                UnMix(ref B4, ref B5, 8, K10, K11);
-                UnMix(ref B2, ref B3, 13, K8, K9);
-                UnMix(ref B0, ref B1, 24, K6, K7);
-                UnMix(ref B12, ref B7, 20);
-                UnMix(ref B10, ref B3, 37);
-                UnMix(ref B8, ref B5, 31);
-                UnMix(ref B14, ref B1, 23);
-                UnMix(ref B4, ref B9, 52);
-                UnMix(ref B6, ref B13, 35);
-                UnMix(ref B2, ref B11, 48);
-                UnMix(ref B0, ref B15, 9);
-                UnMix(ref B10, ref B9, 25);
-                UnMix(ref B8, ref B11, 44);
-                UnMix(ref B14, ref B13, 42);
-                UnMix(ref B12, ref B15, 19);
-                UnMix(ref B6, ref B1, 46);
-                UnMix(ref B4, ref B3, 47);
-                UnMix(ref B2, ref B5, 44);
-                UnMix(ref B0, ref B7, 31);
-                UnMix(ref B8, ref B1, 41);
-                UnMix(ref B14, ref B5, 42);
-                UnMix(ref B12, ref B3, 53);
-                UnMix(ref B10, ref B7, 4);
-                UnMix(ref B4, ref B15, 51);
-                UnMix(ref B6, ref B11, 56);
-                UnMix(ref B2, ref B13, 34);
-                UnMix(ref B0, ref B9, 16);
-                UnMix(ref B14, ref B15, 30, K2 + T0, K3 + 5);
-                UnMix(ref B12, ref B13, 44, K0, K1 + T2);
-                UnMix(ref B10, ref B11, 47, K15, K16);
-                UnMix(ref B8, ref B9, 12, K13, K14);
-                UnMix(ref B6, ref B7, 31, K11, K12);
-                UnMix(ref B4, ref B5, 37, K9, K10);
-                UnMix(ref B2, ref B3, 9, K7, K8);
-                UnMix(ref B0, ref B1, 41, K5, K6);
-                UnMix(ref B12, ref B7, 25);
-                UnMix(ref B10, ref B3, 16);
-                UnMix(ref B8, ref B5, 28);
-                UnMix(ref B14, ref B1, 47);
-                UnMix(ref B4, ref B9, 41);
-                UnMix(ref B6, ref B13, 48);
-                UnMix(ref B2, ref B11, 20);
-                UnMix(ref B0, ref B15, 5);
-                UnMix(ref B10, ref B9, 17);
-                UnMix(ref B8, ref B11, 59);
-                UnMix(ref B14, ref B13, 41);
-                UnMix(ref B12, ref B15, 34);
-                UnMix(ref B6, ref B1, 13);
-                UnMix(ref B4, ref B3, 51);
-                UnMix(ref B2, ref B5, 4);
-                UnMix(ref B0, ref B7, 33);
-                UnMix(ref B8, ref B1, 52);
-                UnMix(ref B14, ref B5, 23);
-                UnMix(ref B12, ref B3, 18);
-                UnMix(ref B10, ref B7, 49);
-                UnMix(ref B4, ref B15, 55);
-                UnMix(ref B6, ref B11, 10);
-                UnMix(ref B2, ref B13, 19);
-                UnMix(ref B0, ref B9, 38);
-                UnMix(ref B14, ref B15, 37, K1 + T2, K2 + 4);
-                UnMix(ref B12, ref B13, 22, K16, K0 + T1);
-                UnMix(ref B10, ref B11, 17, K14, K15);
-                UnMix(ref B8, ref B9, 8, K12, K13);
-                UnMix(ref B6, ref B7, 47, K10, K11);
-                UnMix(ref B4, ref B5, 8, K8, K9);
-                UnMix(ref B2, ref B3, 13, K6, K7);
-                UnMix(ref B0, ref B1, 24, K4, K5);
-                UnMix(ref B12, ref B7, 20);
-                UnMix(ref B10, ref B3, 37);
-                UnMix(ref B8, ref B5, 31);
-                UnMix(ref B14, ref B1, 23);
-                UnMix(ref B4, ref B9, 52);
-                UnMix(ref B6, ref B13, 35);
-                UnMix(ref B2, ref B11, 48);
-                UnMix(ref B0, ref B15, 9);
-                UnMix(ref B10, ref B9, 25);
-                UnMix(ref B8, ref B11, 44);
-                UnMix(ref B14, ref B13, 42);
-                UnMix(ref B12, ref B15, 19);
-                UnMix(ref B6, ref B1, 46);
-                UnMix(ref B4, ref B3, 47);
-                UnMix(ref B2, ref B5, 44);
-                UnMix(ref B0, ref B7, 31);
-                UnMix(ref B8, ref B1, 41);
-                UnMix(ref B14, ref B5, 42);
-                UnMix(ref B12, ref B3, 53);
-                UnMix(ref B10, ref B7, 4);
-                UnMix(ref B4, ref B15, 51);
-                UnMix(ref B6, ref B11, 56);
-                UnMix(ref B2, ref B13, 34);
-                UnMix(ref B0, ref B9, 16);
-                UnMix(ref B14, ref B15, 30, K0 + T1, K1 + 3);
-                UnMix(ref B12, ref B13, 44, K15, K16 + T0);
-                UnMix(ref B10, ref B11, 47, K13, K14);
-                UnMix(ref B8, ref B9, 12, K11, K12);
-                UnMix(ref B6, ref B7, 31, K9, K10);
-                UnMix(ref B4, ref B5, 37, K7, K8);
-                UnMix(ref B2, ref B3, 9, K5, K6);
-                UnMix(ref B0, ref B1, 41, K3, K4);
-                UnMix(ref B12, ref B7, 25);
-                UnMix(ref B10, ref B3, 16);
-                UnMix(ref B8, ref B5, 28);
-                UnMix(ref B14, ref B1, 47);
-                UnMix(ref B4, ref B9, 41);
-                UnMix(ref B6, ref B13, 48);
-                UnMix(ref B2, ref B11, 20);
-                UnMix(ref B0, ref B15, 5);
-                UnMix(ref B10, ref B9, 17);
-                UnMix(ref B8, ref B11, 59);
-                UnMix(ref B14, ref B13, 41);
-                UnMix(ref B12, ref B15, 34);
-                UnMix(ref B6, ref B1, 13);
-                UnMix(ref B4, ref B3, 51);
-                UnMix(ref B2, ref B5, 4);
-                UnMix(ref B0, ref B7, 33);
-                UnMix(ref B8, ref B1, 52);
-                UnMix(ref B14, ref B5, 23);
-                UnMix(ref B12, ref B3, 18);
-                UnMix(ref B10, ref B7, 49);
-                UnMix(ref B4, ref B15, 55);
-                UnMix(ref B6, ref B11, 10);
-                UnMix(ref B2, ref B13, 19);
-                UnMix(ref B0, ref B9, 38);
-                UnMix(ref B14, ref B15, 37, K16 + T0, K0 + 2);
-                UnMix(ref B12, ref B13, 22, K14, K15 + T2);
-                UnMix(ref B10, ref B11, 17, K12, K13);
-                UnMix(ref B8, ref B9, 8, K10, K11);
-                UnMix(ref B6, ref B7, 47, K8, K9);
-                UnMix(ref B4, ref B5, 8, K6, K7);
-                UnMix(ref B2, ref B3, 13, K4, K5);
-                UnMix(ref B0, ref B1, 24, K2, K3);
-                UnMix(ref B12, ref B7, 20);
-                UnMix(ref B10, ref B3, 37);
-                UnMix(ref B8, ref B5, 31);
-                UnMix(ref B14, ref B1, 23);
-                UnMix(ref B4, ref B9, 52);
-                UnMix(ref B6, ref B13, 35);
-                UnMix(ref B2, ref B11, 48);
-                UnMix(ref B0, ref B15, 9);
-                UnMix(ref B10, ref B9, 25);
-                UnMix(ref B8, ref B11, 44);
-                UnMix(ref B14, ref B13, 42);
-                UnMix(ref B12, ref B15, 19);
-                UnMix(ref B6, ref B1, 46);
-                UnMix(ref B4, ref B3, 47);
-                UnMix(ref B2, ref B5, 44);
-                UnMix(ref B0, ref B7, 31);
-                UnMix(ref B8, ref B1, 41);
-                UnMix(ref B14, ref B5, 42);
-                UnMix(ref B12, ref B3, 53);
-                UnMix(ref B10, ref B7, 4);
-                UnMix(ref B4, ref B15, 51);
-                UnMix(ref B6, ref B11, 56);
-                UnMix(ref B2, ref B13, 34);
-                UnMix(ref B0, ref B9, 16);
-                UnMix(ref B14, ref B15, 30, K15 + T2, K16 + 1);
-                UnMix(ref B12, ref B13, 44, K13, K14 + T1);
-                UnMix(ref B10, ref B11, 47, K11, K12);
-                UnMix(ref B8, ref B9, 12, K9, K10);
-                UnMix(ref B6, ref B7, 31, K7, K8);
-                UnMix(ref B4, ref B5, 37, K5, K6);
-                UnMix(ref B2, ref B3, 9, K3, K4);
-                UnMix(ref B0, ref B1, 41, K1, K2);
-                UnMix(ref B12, ref B7, 25);
-                UnMix(ref B10, ref B3, 16);
-                UnMix(ref B8, ref B5, 28);
-                UnMix(ref B14, ref B1, 47);
-                UnMix(ref B4, ref B9, 41);
-                UnMix(ref B6, ref B13, 48);
-                UnMix(ref B2, ref B11, 20);
-                UnMix(ref B0, ref B15, 5);
-                UnMix(ref B10, ref B9, 17);
-                UnMix(ref B8, ref B11, 59);
-                UnMix(ref B14, ref B13, 41);
-                UnMix(ref B12, ref B15, 34);
-                UnMix(ref B6, ref B1, 13);
-                UnMix(ref B4, ref B3, 51);
-                UnMix(ref B2, ref B5, 4);
-                UnMix(ref B0, ref B7, 33);
-                UnMix(ref B8, ref B1, 52);
-                UnMix(ref B14, ref B5, 23);
-                UnMix(ref B12, ref B3, 18);
-                UnMix(ref B10, ref B7, 49);
-                UnMix(ref B4, ref B15, 55);
-                UnMix(ref B6, ref B11, 10);
-                UnMix(ref B2, ref B13, 19);
-                UnMix(ref B0, ref B9, 38);
-                UnMix(ref B14, ref B15, 37, K14 + T1, K15);
-                UnMix(ref B12, ref B13, 22, K12, K13 + T0);
-                UnMix(ref B10, ref B11, 17, K10, K11);
-                UnMix(ref B8, ref B9, 8, K8, K9);
-                UnMix(ref B6, ref B7, 47, K6, K7);
-                UnMix(ref B4, ref B5, 8, K4, K5);
-                UnMix(ref B2, ref B3, 13, K2, K3);
-                UnMix(ref B0, ref B1, 24, K0, K1);
-
-                Output[15] = B15;
-                Output[14] = B14;
-                Output[13] = B13;
-                Output[12] = B12;
-                Output[11] = B11;
-                Output[10] = B10;
-                Output[9] = B9;
-                Output[8] = B8;
-                Output[7] = B7;
-                Output[6] = B6;
-                Output[5] = B5;
-                Output[4] = B4;
-                Output[3] = B3;
-                Output[2] = B2;
-                Output[1] = B1;
-                Output[0] = B0;
             }
             #endregion
 
@@ -2018,68 +1379,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
                 _expandedKey[i] = parity;
             }
             #endregion
-        }
-        #endregion
-
-        #region Private Methods
-        private void Initialize()
-        {
-            // Copy the configuration value to the state
-            for (int i = 0; i < _digestState.Length; i++)
-                _digestState[i] = ConfigValue[i];
-
-            // Set up tweak for message block
-            UbiParameters.StartNewBlockType(UbiType.Message);
-
-            // Reset bytes filled
-            _bytesFilled = 0;
-        }
-
-        // Moves the byte input buffer to the UInt64 cipher input
-        private void InputBufferToCipherInput()
-        {
-            for (int i = 0; i < _cipherStateWords; i++)
-                _cipherInput[i] = BytesToUInt64(_inputBuffer, i * 8);
-        }
-
-        private void ProcessBlock(int bytes)
-        {
-            // Set the key to the current state
-            _blockCipher.SetKey(_digestState);
-
-            // Update tweak
-            UbiParameters.BitsProcessed += (Int64)bytes;
-            _blockCipher.SetTweak(UbiParameters.Tweak);
-
-            // Encrypt block
-            _blockCipher.Encrypt(_cipherInput, _digestState);
-
-            // Feed-forward input with state
-            for (int i = 0; i < _cipherInput.Length; i++)
-                _digestState[i] ^= _cipherInput[i];
-        }
-
-        private static UInt64 BytesToUInt64(byte[] Input, int InOffset)
-        {
-            UInt64 n = Input[InOffset];
-            n |= (UInt64)Input[InOffset + 1] << 8;
-            n |= (UInt64)Input[InOffset + 2] << 16;
-            n |= (UInt64)Input[InOffset + 3] << 24;
-            n |= (UInt64)Input[InOffset + 4] << 32;
-            n |= (UInt64)Input[InOffset + 5] << 40;
-            n |= (UInt64)Input[InOffset + 6] << 48;
-            n |= (UInt64)Input[InOffset + 7] << 56;
-            return n;
-        }
-
-        private static void PutBytes(UInt64[] Input, byte[] Output, int Offset, int ByteCount)
-        {
-            int j = 0;
-            for (int i = 0; i < ByteCount; i++)
-            {
-                Output[Offset + i] = (byte)((Input[i / 8] >> j) & 0xff);
-                j = (j + 8) % 64;
-            }
         }
         #endregion
 

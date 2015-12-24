@@ -64,7 +64,7 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
         #region Public Methods
         /// <summary>
         /// Tests SHA-2 256/512 with NIST provided KAT vectors.
-        /// Throws on all failures.
+        /// Throws on all failures. 616263  
         /// </summary>
         /// 
         /// <returns>Success [bool]</returns>

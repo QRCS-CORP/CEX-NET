@@ -11,6 +11,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
     {
         #region Constants
         private const string ALG_NAME = "TBC";
+        private const byte ZBCODE = (byte)0x00;
+        private const byte MKCODE = (byte)0xff;
         #endregion
 
         #region Properties
@@ -34,21 +36,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         /// <returns>Length of padding</returns>
         public int AddPadding(byte[] Input, int Offset)
         {
-            int len = Input.Length - Offset;
-            byte code;
+            int olen = (Offset > 0) ? Offset - 1 : 0;
+	        int plen = Input.Length - Offset;
+	        byte code;
 
-            if (Offset > 0)
-                code = (byte)((Input[Offset - 1] & 0x01) == 0 ? 0xff : 0x00);
-            else
-                code = (byte)((Input[Input.Length - 1] & 0x01) == 0 ? 0xff : 0x00);
+	        if ((Input[olen] & 0x01) == 0)
+		        code = MKCODE;
+	        else
+		        code = ZBCODE;
 
             while (Offset < Input.Length)
-            {
-                Input[Offset] = code;
-                Offset++;
-            }
+		        Input[Offset++] = code;
 
-            return len;
+	        return plen;
         }
 
         /// <summary>
@@ -60,16 +60,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         /// <returns>Length of padding</returns>
         public int GetPaddingLength(byte[] Input)
         {
-            byte code = Input[Input.Length - 1];
-            int len = Input.Length - 1;
+            int plen = Input.Length;
+	        byte code = Input[plen - 1];
 
-            for (int i = len; i > 0; i--)
-            {
-                if (Input[i] != code)
-                    return (len - i);
-            }
+	        while (plen != 0 && Input[plen - 1] == code)
+		        plen--;
 
-            return 0;
+            return Input.Length - plen;
         }
 
         /// <summary>
@@ -82,16 +79,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         /// <returns>Length of padding</returns>
         public int GetPaddingLength(byte[] Input, int Offset)
         {
-            int len = Input.Length - (Offset + 1);
+            int plen = Input.Length - Offset;
             byte code = Input[Input.Length - 1];
 
-            for (int i = len; i > 0; i--)
-            {
-                if (Input[Offset + i] != code)
-                    return (len - i);
-            }
+	        while (plen != 0 && Input[Offset + (plen - 1)] == code)
+		        plen--;
 
-            return 0;
+            return (Input.Length - Offset) - plen;
         }
         #endregion
     }
