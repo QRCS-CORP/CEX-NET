@@ -6,12 +6,16 @@
     public enum SeedGenerators : int
     {
         /// <summary>
-        /// A Secure Seed Generator using RNGCryptoServiceProvider
+        /// A Secure Seed Generator using the RNGCryptoServiceProvider api
         /// </summary>
-        CSPRsg,
+        CSPRsg = 1,
         /// <summary>
-        /// A Secure Seed Generator using an Xor+ generator
+        /// A Secure Seed Generator using the ISAAC generator
         /// </summary>
-        XSPRsg
+        ISCRsg = 2,
+        /// <summary>
+        /// A Seed Generator using the XorShift+ generator
+        /// </summary>
+        XSPRsg = 4
     }
 }

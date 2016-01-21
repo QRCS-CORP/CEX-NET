@@ -69,7 +69,7 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
         /// </summary>
         /// 
         /// <returns>Status</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -102,7 +102,7 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
             if (Evaluate.AreEqual(outBytes, Output) == false)
                 throw new Exception("HKDF: Values are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
 
-            using (HKDF gen = new HKDF(new SHA256HMAC()))
+            using (HKDF gen = new HKDF(new HMAC(new SHA256())))
             {
                 gen.Initialize(Salt, Key, Info);
                 gen.Generate(outBytes, 0, Size);

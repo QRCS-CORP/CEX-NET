@@ -12,7 +12,7 @@ using VTDev.Libraries.CEXEngine.Tools;
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -41,7 +41,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 {
     /// <summary>
     /// <h3>Compression cipher helper class.</h3>
-    /// <para>Extends the StreamCipher class for encrypting a compressed directory of files.
+    /// <para>Extends the CipherStream class for encrypting a compressed directory of files.
     /// If the cipher is for encryption, files are compressed and encrypted to the output stream.
     /// If the cipher is for decryption, the input stream contains the compressed and encrypted directory, 
     /// and the directory path is the destination path for the decrypted and inflated files.</para>
@@ -117,141 +117,178 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     /// <item><description>Cipher Engine can be Disposed when this class is Disposed, set the DisposeEngine parameter in the class Constructor to true to dispose automatically.</description></item>
     /// <item><description>Streams can be Disposed when the class is Disposed, set the DisposeStream parameter in the Initialize(Stream, Stream, bool) call to true to dispose automatically.</description></item>
     /// <item><description>Implementation has a Progress counter that returns total sum of bytes processed per any of the <see cref="Write()">Write()</see> calls.</description></item>
-    /// <item><description>Changes to the Cipher or StreamCipher ParallelBlockSize must be set after initialization.</description></item>
+    /// <item><description>Changes to the Cipher or CipherStream ParallelBlockSize must be set after initialization.</description></item>
     /// </list>
     /// </remarks>
-    public class CompressionCipher : StreamCipher
+    public class CompressionCipher : CipherStream
     {
         #region Fields
-        private Compress _cmpEngine;
-        private string _dirPath;
-        private bool _isCompression = true;
+        private Compressor _cmpEngine;
+        private Compressor.CompressionFormats _cmpFormat = Compressor.CompressionFormats.Deflate;
+        private bool _isInitialized =  false;
+        #endregion
+
+        #region Properties
+        /// <summary>
+        /// GetSet: The compression algorithm used to compress a file
+        /// </summary>
+        public Compressor.CompressionFormats CompressionFormat 
+        {
+            get { return _cmpFormat; }
+            set { _cmpFormat = value; }
+        }
         #endregion
 
         #region Constructor
         /// <summary>
-        /// Initialize the class with a CipherDescription Structure; containing the cipher implementation details, and a <see cref="KeyParams"/> class containing the Key material.
+        /// Initialize the class with a CipherDescription Structure; containing the cipher implementation details.
         /// <para>This constructor creates and configures cryptographic instances based on the cipher description contained in a CipherDescription. 
         /// Cipher modes, padding, and engine classes are destroyed automatically through this classes Dispose() method.</para>
         /// </summary>
         /// 
-        /// <param name="Encryption">Cipher is an encryptor</param>
         /// <param name="Header">A <see cref="CipherDescription"/> containing the cipher description</param>
-        /// <param name="KeyParam">A <see cref="KeyParams"/> class containing the encryption Key material</param>
         /// 
         /// <exception cref="System.ArgumentException">Thrown if an invalid <see cref="CipherDescription">CipherDescription</see> is used</exception>
         /// <exception cref="System.ArgumentNullException">Thrown if a null <see cref="KeyParams">KeyParams</see> is used</exception>
-        public CompressionCipher(bool Encryption, CipherDescription Header, KeyParams KeyParam)
-            : base(Encryption, Header, KeyParam)
+        public CompressionCipher(CipherDescription Header)
+            : base(Header)
         {
-            _isCompression = Encryption;
         }
 
         /// <summary>
-        /// Initialize the class with a Block <see cref="ICipherMode">Cipher</see> and optional <see cref="IPadding">Padding</see> instances.
+        /// Initialize the class with a Block Cipher wrapped in a <see cref="ICipherMode">Cipher Mode</see>, and optional <see cref="IPadding">Padding</see> instances.
         /// <para>This constructor requires a fully initialized <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.CipherModes">CipherMode</see> instance.
         /// If the <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.PaddingModes">PaddingMode</see> parameter is null, X9.23 padding will be used if required.</para>
         /// </summary>
         /// 
-        /// <param name="Compress">The volume cipher is in compression mode (encrypt)</param>
         /// <param name="Cipher">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">Block Cipher</see> wrapped in a <see cref="ICipherMode">Cipher</see> mode</param>
         /// <param name="Padding">The <see cref="IPadding">Padding</see> instance</param>
-        /// <param name="DisposeEngine">Dispose of cipher engine when Dispose() on this class is called</param>
         /// 
         /// <exception cref="System.ArgumentNullException">Thrown if a null <see cref="ICipherMode">Cipher</see> is used</exception>
         /// <exception cref="System.ArgumentException">Thrown if an uninitialized Cipher is used</exception>
-        public CompressionCipher(bool Compress, ICipherMode Cipher, IPadding Padding = null, bool DisposeEngine = false) :
-            base(Cipher, Padding, DisposeEngine)
+        public CompressionCipher(ICipherMode Cipher, IPadding Padding = null) :
+            base(Cipher, Padding)
         {
-            _isCompression = Compress;
         }
 
         /// <summary>
         /// Initialize the class with a <see cref="IStreamCipher">Stream Cipher</see> instance.
-        /// <para>This constructor requires a fully initialized <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">StreamCipher</see> instance.</para>
+        /// <para>This constructor requires a fully initialized <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">CipherStream</see> instance.</para>
         /// </summary>
         /// 
-        /// <param name="Compress">The volume cipher is in compression mode (encrypt)</param>
         /// <param name="Cipher">The initialized <see cref="IStreamCipher">Stream Cipher</see> instance</param>
-        /// <param name="DisposeEngine">Dispose of cipher engine when Dispose() on this class is called</param>
         /// 
         /// <exception cref="System.ArgumentNullException">Thrown if a null <see cref="IStreamCipher">Stream Cipher</see> is used</exception>
         /// <exception cref="System.ArgumentException">Thrown if an uninitialized Cipher is used</exception>
-        public CompressionCipher(bool Compress, IStreamCipher Cipher, bool DisposeEngine = true) :
-            base(Cipher, DisposeEngine)
+        public CompressionCipher(IStreamCipher Cipher) :
+            base(Cipher)
         {
-            _isCompression = Compress;
         }
         #endregion
 
         #region Public Methods
         /// <summary>
-        /// Initialize internal state
+        /// Initialize the compression cipher
         /// </summary>
         /// 
-        /// <param name="DirectoryPath">The Source directory, or destination path</param>
-        /// <param name="DataStream">The input or output stream</param>
-        /// <param name="CompressionFormat">The type of compression to apply to the stream stream</param>
-        /// <param name="DisposeStream">Dispose of streams when Dispose() on this class is called</param>
-        /// 
-        /// <exception cref="CryptoProcessingException">Thrown if the directory path has no files, does not exist, or is not writeable</exception>
-        public void Initialize(string DirectoryPath, Stream DataStream, Compress.CompressionFormats CompressionFormat = Compress.CompressionFormats.Deflate, bool DisposeStream = false)
+        /// <param name="Encryption">Archive encryption or decryption</param>
+        /// <param name="KeyParam">The class containing the cipher keying material</param>
+        public void Initialize(bool Encryption, KeyParams KeyParam)
         {
-            _dirPath = DirectoryPath;
-            _cmpEngine = new Compress(CompressionFormat);
-
-            if (_isCompression)
-            {
-                if (!DirectoryTools.Exists(DirectoryPath))
-                    throw new CryptoProcessingException("CompressionCipher:Initialize", "The directory does not exist!", new ArgumentException());
-                if (DirectoryTools.FileCount(DirectoryPath) < 1)
-                    throw new CryptoProcessingException("CompressionCipher:Initialize", "There are no files in this directory!", new ArgumentException());
-
-                MemoryStream inStream = _cmpEngine.CompressArchive(DirectoryPath);
-                inStream.Seek(0, SeekOrigin.Begin);
-                base.Initialize(inStream, DataStream, DisposeStream);
-            }
-            else
-            {
-                if (!DirectoryTools.Exists(DirectoryPath))
-                    Directory.CreateDirectory(DirectoryPath);
-                if (!DirectoryTools.IsWritable(DirectoryPath))
-                    throw new CryptoProcessingException("CompressionCipher:Initialize", "Directory path is not writable! Check permissions.", new AccessViolationException());
-
-                MemoryStream outStream = new MemoryStream();
-                base.Initialize(DataStream, outStream, DisposeStream);
-            }
+            base.Initialize(Encryption, KeyParam);
+            _isInitialized = true;
         }
 
         /// <summary>
-        /// Process the entire length of the Input Stream (fastest)
+        /// Compress a stream
         /// </summary>
-        ///
-        /// <param name="InOffset">The Input Stream positional offset</param>
-        /// <param name="OutOffset">The Output Stream positional offset</param>
         /// 
-        /// <exception cref="System.InvalidOperationException">Thrown if Write is called before Initialize()</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if Size + Offset is longer than Input stream</exception>
-        public new void Write(long InOffset = 0, long OutOffset = 0)
+        /// <param name="InStream">The stream to be processed</param>
+        /// 
+        /// <returns>The encrypted and compressed stream</returns>
+        public Stream Compress(Stream InStream)
         {
-            base.Write(InOffset, OutOffset);
+            if (!_isInitialized)
+                throw new CryptoProcessingException("CompressionCipher:Compress", "The class is not be Initialized!", new ArgumentException());
 
-            if (!_isCompression)
-                _cmpEngine.DeCompressArchive(base._outStream, _dirPath);
+            // compress
+            MemoryStream inStream = _cmpEngine.CompressStream(InStream);
+            inStream.Seek(0, SeekOrigin.Begin);
+            MemoryStream outStream =  new MemoryStream();
+            // encrypt
+            base.Write(inStream, outStream);
+            outStream.Seek(0, SeekOrigin.Begin);
+
+            return outStream;
         }
 
         /// <summary>
-        /// Process a length within the Input stream using Offsets
+        /// Decompress a stream
         /// </summary>
         /// 
-        /// <exception cref="System.InvalidOperationException">Thrown if Write is called before Initialize()</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if Size + Offset is longer than Input stream</exception>
-        public new void Write()
+        /// <param name="InStream">The stream to be processed</param>
+        /// 
+        /// <returns>The decrypted and decompressed stream</returns>
+        public Stream DeCompress(Stream InStream)
         {
-            base.Write();
+            if (!_isInitialized)
+                throw new CryptoProcessingException("CompressionCipher:Compress", "The class is not be Initialized!", new ArgumentException());
 
-            if (!_isCompression)
-                _cmpEngine.DeCompressArchive(base._outStream, _dirPath);
+            // decrypt
+            MemoryStream outStream = new MemoryStream();
+            base.Write(InStream, outStream);
+            outStream.Seek(0, SeekOrigin.Begin);
+            // decompress
+            MemoryStream retStream = _cmpEngine.DeCompressStream(outStream);
+            retStream.Seek(0, SeekOrigin.Begin);
+
+            return retStream;
+        }
+
+        /// <summary>
+        /// Deflate (compress) an archive
+        /// </summary>
+        /// 
+        /// <param name="DirectoryPath">The directory path to the files to be processed</param>
+        /// <param name="OutStream">The stream receiving the compressed and encrypted archive</param>
+        public void Deflate(string DirectoryPath, Stream OutStream)
+        {
+            if (!_isInitialized)
+                throw new CryptoProcessingException("CompressionCipher:Compress", "The class is not be Initialized!", new ArgumentException());
+            if (!DirectoryTools.Exists(DirectoryPath))
+                throw new CryptoProcessingException("CompressionCipher:Deflate", "The directory does not exist!", new ArgumentException());
+            if (DirectoryTools.FileCount(DirectoryPath) < 1)
+                throw new CryptoProcessingException("CompressionCipher:Deflate", "There are no files in this directory!", new ArgumentException());
+
+            // compress
+            MemoryStream inStream = _cmpEngine.CompressArchive(DirectoryPath);
+            inStream.Seek(0, SeekOrigin.Begin);
+            // encrypt output
+            base.Write(inStream, OutStream);
+            OutStream.Seek(0, SeekOrigin.Begin);
+        }
+
+        /// <summary>
+        /// Inflate (decompress) an archive
+        /// </summary>
+        /// 
+        /// <param name="DirectoryPath">The directory path where files will be written</param>
+        /// <param name="InStream">The stream containing the compressed archive</param>
+        public void Inflate(string DirectoryPath, Stream InStream)
+        {
+            if (!_isInitialized)
+                throw new CryptoProcessingException("CompressionCipher:Compress", "The class is not be Initialized!", new ArgumentException());
+            if (!DirectoryTools.Exists(DirectoryPath))
+                Directory.CreateDirectory(DirectoryPath);
+            if (!DirectoryTools.IsWritable(DirectoryPath))
+                throw new CryptoProcessingException("CompressionCipher:InFlate", "Directory path is not writable! Check permissions.", new AccessViolationException());
+
+            // decrypt stream
+            MemoryStream outStream = new MemoryStream();
+            base.Write(InStream, outStream);
+            outStream.Seek(0, SeekOrigin.Begin);
+            // decompress
+            _cmpEngine.DeCompressArchive(outStream, DirectoryPath);
         }
         #endregion
     }

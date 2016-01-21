@@ -4,6 +4,8 @@ using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Utility;
+using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Crypto.Helper;
 #endregion
 
 #region License Information
@@ -292,35 +294,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Encode
         /// Get the digest engine
         /// </summary>
         /// 
-        /// <param name="Engine">Engine type</param>
+        /// <param name="DigestType">Engine type</param>
         /// 
         /// <returns>Instance of digest</returns>
-        private IDigest GetDigest(Digests Engine)
+        private IDigest GetDigest(Digests DigestType)
         {
-            switch (Engine)
+            try
             {
-                case Digests.Blake256:
-                    return new Blake256();
-                case Digests.Blake512:
-                    return new Blake512();
-                case Digests.Keccak256:
-                    return new Keccak256();
-                case Digests.Keccak512:
-                    return new Keccak512();
-                case Digests.Keccak1024:
-                    return new Keccak1024();
-                case Digests.SHA256:
-                    return new SHA256();
-                case Digests.SHA512:
-                    return new SHA512();
-                case Digests.Skein256:
-                    return new Skein256();
-                case Digests.Skein512:
-                    return new Skein512();
-                case Digests.Skein1024:
-                    return new Skein1024();
-                default:
-                    throw new ArgumentException("The digest type is not supported!");
+                return DigestFromName.GetInstance(DigestType);
+            }
+            catch
+            {
+                throw new CryptoRandomException("IndexGenerator:GetDigest", "The digest type is not recognized!", new ArgumentException());
             }
         }
         #endregion

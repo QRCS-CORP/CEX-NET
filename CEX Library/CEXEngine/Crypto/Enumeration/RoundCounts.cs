@@ -11,7 +11,7 @@
         /// </summary>
         R8 = 8,
         /// <summary>
-        /// 10 Rounds: ChaCha, RHX, RSM
+        /// 10 Rounds: ChaCha, RHX
         /// </summary>
         R10 = 10,
         /// <summary>
@@ -23,43 +23,43 @@
         /// </summary>
         R14 = 14,
         /// <summary>
-        /// 16 Rounds: ChaCha, Fusion, TFX, THX, TSM
+        /// 16 Rounds: ChaCha, THX
         /// </summary>
         R16 = 16,
         /// <summary>
-        /// 18 Rounds: ChaCha, Fusion, RSM, TFX, THX, TSM
+        /// 18 Rounds: ChaCha, THX
         /// </summary>
         R18 = 18,
         /// <summary>
-        /// 20 Rounds: ChaCha, Fusion, TFX, THX, TSM
+        /// 20 Rounds: ChaCha, THX
         /// </summary>
         R20 = 20,
         /// <summary>
-        /// 22 Rounds: ChaCha, Fusion, RHX, TFX, THX, TSM
+        /// 22 Rounds: ChaCha, RHX, THX
         /// </summary>
         R22 = 22,
         /// <summary>
-        /// 24 Rounds: ChaCha, Fusion, TFX, THX, TSM
+        /// 24 Rounds: ChaCha, THX
         /// </summary>
         R24 = 24,
         /// <summary>
-        /// 26 Rounds: ChaCha, Fusion, RSM, TFX, THX, TSM
+        /// 26 Rounds: ChaCha, THX
         /// </summary>
         R26 = 26,
         /// <summary>
-        /// 28 Rounds: ChaCha, Fusion, TFX, THX, TSM
+        /// 28 Rounds: ChaCha, THX
         /// </summary>
         R28 = 28,
         /// <summary>
-        /// 30 Rounds: ChaCha, Fusion, TFX, THX, TSM
+        /// 30 Rounds: ChaCha, THX
         /// </summary>
         R30 = 30,
         /// <summary>
-        /// 32 Rounds: Fusion, SHX, SPX, TFX, THX, TSM
+        /// 32 Rounds: SHX, THX
         /// </summary>
         R32 = 32,
         /// <summary>
-        /// 34 Rounds, RSM
+        /// 34 Rounds
         /// </summary>
         R34 = 34,
         /// <summary>
@@ -67,23 +67,19 @@
         /// </summary>
         R38 = 38,
         /// <summary>
-        /// 40 Rounds: SHX, SPX
+        /// 40 Rounds: SHX
         /// </summary>
         R40 = 40,
         /// <summary>
-        /// 42 Rounds: RSM
-        /// </summary>
-        R42 = 42,
-        /// <summary>
-        /// 48 Rounds: SHX, SPX
+        /// 48 Rounds: SHX
         /// </summary>
         R48 = 48,
         /// <summary>
-        /// 56 Rounds: SHX, SPX
+        /// 56 Rounds: SHX
         /// </summary>
         R56 = 56,
         /// <summary>
-        /// 64 Rounds: SHX, SPX
+        /// 64 Rounds: SHX
         /// </summary>
         R64 = 64,
         /// <summary>

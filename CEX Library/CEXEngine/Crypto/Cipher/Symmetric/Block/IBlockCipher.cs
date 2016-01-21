@@ -1,6 +1,7 @@
 ﻿#region Directives
 using System;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
@@ -16,6 +17,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         int BlockSize { get; }
 
         /// <summary>
+        /// Get: The block ciphers type name
+        /// </summary>
+        BlockCiphers Enumeral { get; }
+
+        /// <summary>
         /// Get: Initialized for encryption, false for decryption
         /// </summary>
         bool IsEncryption { get; }
@@ -24,6 +30,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// Get: Cipher is ready to transform data
         /// </summary>
         bool IsInitialized { get; }
+
+        /// <summary>
+        /// Get: Available block sizes for this cipher
+        /// </summary>
+        int[] LegalBlockSizes { get; }
+
+        /// <summary>
+        /// Get: Available Encryption Key Sizes in bytes
+        /// </summary>
+        int[] LegalKeySizes { get; }
+
+        /// <summary>
+        /// Get: Available diffusion round assignments
+        /// </summary>
+        int[] LegalRounds { get; }
 
         /// <summary>
         /// Get: Cipher name

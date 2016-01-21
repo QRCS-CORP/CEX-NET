@@ -38,7 +38,7 @@ namespace Test.Tests
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {

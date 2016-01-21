@@ -37,6 +37,14 @@ namespace VTDev.Libraries.CEXEngine.Utility
         {
             get { return Environment.ProcessorCount > 1 && _frcLinear == false; }
         }
+
+        /// <summary>
+        /// Get: The system processor count
+        /// </summary>
+        public static int ProcessorCount
+        {
+            get { return Environment.ProcessorCount; }
+        }
         #endregion
 
         #region internal Methods

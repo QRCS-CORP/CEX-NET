@@ -7,7 +7,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -244,19 +244,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
             switch (ParamName)
             {
                 case RNBWParamNames.N33L5:
-                    return new byte[] { 4, 1, 1, 1 };
+                    return new byte[] { (byte)AsymmetricEngines.Rainbow, 1, 1, 1 };
                 case RNBWParamNames.N49L5:
-                    return new byte[] { 4, 1, 2, 1 };
+                    return new byte[] { (byte)AsymmetricEngines.Rainbow, 1, 2, 1 };
                 case RNBWParamNames.N54L5:
-                    return new byte[] { 4, 1, 3, 1 };
+                    return new byte[] { (byte)AsymmetricEngines.Rainbow, 1, 3, 1 };
                 case RNBWParamNames.N58L5:
-                    return new byte[] { 4, 1, 4, 1 };
+                    return new byte[] { (byte)AsymmetricEngines.Rainbow, 1, 4, 1 };
                 case RNBWParamNames.N60L5:
-                    return new byte[] { 4, 1, 5, 1 };
+                    return new byte[] { (byte)AsymmetricEngines.Rainbow, 1, 5, 1 };
                 case RNBWParamNames.N63L5:
-                    return new byte[] { 4, 1, 6, 1 };
+                    return new byte[] { (byte)AsymmetricEngines.Rainbow, 1, 6, 1 };
                 case RNBWParamNames.N66L5:
-                    return new byte[] { 4, 1, 7, 1 };
+                    return new byte[] { (byte)AsymmetricEngines.Rainbow, 1, 7, 1 };
                 default:
                     throw new CryptoAsymmetricException("RNBWParamSets:GetID", "The Parameter Name is not recognized!", new ArgumentException());
             }

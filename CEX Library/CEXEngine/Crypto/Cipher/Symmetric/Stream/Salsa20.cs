@@ -3,12 +3,14 @@ using System;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.CryptoException;
 using System.Threading.Tasks;
+using VTDev.Libraries.CEXEngine.Utility;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #endregion
 
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -107,21 +109,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         private const int PARALLEL_DEFBLOCK = 64000;
         private static readonly byte[] SIGMA = System.Text.Encoding.ASCII.GetBytes("expand 32-byte k");
         private static readonly byte[] TAU = System.Text.Encoding.ASCII.GetBytes("expand 16-byte k");
-        private ParallelOptions _parallelOption = null;
         #endregion
 
         #region Fields
-        private int[] _ctrVector = new int[2];
+        private UInt32[] _ctrVector = new UInt32[2];
         private byte[] _dstCode = null;
         private bool _isDisposed = false;
         private bool _isInitialized = false;
         private bool _isParallel = false;
         private int _parallelBlockSize = PARALLEL_DEFBLOCK;
         private int _rndCount = ROUNDS20;
-        private int[] _wrkState = new int[14];
+        private UInt32[] _wrkState = new UInt32[14];
+        private ParallelOptions _parallelOption = null;
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Get: Unit block size of internal cipher in bytes.
+        /// <para>Block size is 64 bytes wide.</para>
+        /// </summary>
+        public int BlockSize { get { return BLOCK_SIZE; } }
+
         /// <summary>
         /// Get the current counter value
         /// </summary>
@@ -157,6 +165,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         }
 
         /// <summary>
+        /// Get: The stream ciphers type name
+        /// </summary>
+        public StreamCiphers Enumeral
+        {
+            get { return StreamCiphers.Salsa; }
+        }
+
+        /// <summary>
         /// Get: Cipher is ready to transform data
         /// </summary>
         public bool IsInitialized
@@ -183,7 +199,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// <summary>
         /// Get: Available Encryption Key Sizes in bytes
         /// </summary>
-        public static int[] LegalKeySizes
+        public int[] LegalKeySizes
         {
             get { return new int[] { 16, 32 }; }
         }
@@ -191,7 +207,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// <summary>
         /// Get: Available diffusion round assignments
         /// </summary>
-        public static int[] LegalRounds
+        public int[] LegalRounds
         {
             get { return new int[] { 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30 }; }
         }
@@ -374,20 +390,25 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         }
 
         /// <summary>
-        /// Encrypt/Decrypt an array of bytes.
-        /// <para><see cref="Initialize(KeyParams)"/> must be called before this method can be used.</para>
+        /// Process an array of bytes. 
+        /// <para>This method processes the entire array; used when processing small data or buffers from a larger source.
+        /// Parallel capable function if Output array length is at least equal to <see cref="ParallelMinimumSize"/>. 
+        /// <see cref="Initialize(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
         /// 
-        /// <param name="Input">Input bytes, plain text for encryption, cipher text for decryption</param>
-        /// <param name="Output">Output bytes, array of at least equal size of input that receives processed bytes</param>
+        /// <param name="Input">Bytes to Encrypt/Decrypt</param>
+        /// <param name="Output">Encrypted or Decrypted bytes</param>
         public void Transform(byte[] Input, byte[] Output)
         {
             ProcessBlock(Input, Output);
         }
 
         /// <summary>
-        /// Encrypt/Decrypt an array of bytes with offset parameters.
-        /// <para><see cref="Initialize(KeyParams)"/> must be called before this method can be used.</para>
+        /// Process a block of bytes using offset parameters.  
+        /// <para>Parallel capable function if Output array length is at least equal to <see cref="ParallelMinimumSize"/>. 
+        /// This method will process a single block from the source array of either ParallelBlockSize or Blocksize depending on IsParallel property setting.
+        /// Partial blocks are permitted with both parallel and linear operation modes.
+        /// <see cref="Initialize(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
         /// 
         /// <param name="Input">Bytes to Encrypt</param>
@@ -396,22 +417,25 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// <param name="OutOffset">Offset in the Output array</param>
         public void Transform(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
-            ProcessBlock(Input, 0, Output, 0);
+            ProcessBlock(Input, InOffset, Output, OutOffset);
         }
 
         /// <summary>
-        /// Encrypt/Decrypt an array of bytes with offset and length parameters.
-        /// <para><see cref="Initialize(KeyParams)"/> must be called before this method can be used.</para>
+        /// Process an array of bytes using offset and length parameters.
+        /// <para>This method processes a specified length of the array; used when processing segments of a large source array.
+        /// Parallel capable function if Output array length is at least equal to <see cref="ParallelMinimumSize"/>.
+        /// This method automatically assigns the ParallelBlockSize as the Length divided by the number of processors.
+        /// <see cref="Initialize(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
         /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="InOffset">Offset in the Input array</param>
-        /// <param name="Length">Number of bytes to process</param>
         /// <param name="Output">Encrypted bytes</param>
         /// <param name="OutOffset">Offset in the Output array</param>
-        public void Transform(byte[] Input, int InOffset, int Length, byte[] Output, int OutOffset)
+        /// <param name="Length">Number of bytes to process</param>
+        public void Transform(byte[] Input, int InOffset, byte[] Output, int OutOffset, int Length)
         {
-            ProcessBlock(Input, 0, Length, Output, 0);
+            ProcessBlock(Input, InOffset, Output, OutOffset, Length);
         }
         #endregion
 
@@ -422,155 +446,140 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
             {
                 if (Key.Length == 32)
                 {
-                    _wrkState[0] = Convert8To32(_dstCode, 0);
-                    _wrkState[1] = Convert8To32(Key, 0);
-                    _wrkState[2] = Convert8To32(Key, 4);
-                    _wrkState[3] = Convert8To32(Key, 8);
-                    _wrkState[4] = Convert8To32(Key, 12);
-                    _wrkState[5] = Convert8To32(_dstCode, 4);
-                    _wrkState[6] = Convert8To32(Iv, 0);
-                    _wrkState[7] = Convert8To32(Iv, 4);
-                    _wrkState[8] = Convert8To32(_dstCode, 8);
-                    _wrkState[9] = Convert8To32(Key, 16);
-                    _wrkState[10] = Convert8To32(Key, 20);
-                    _wrkState[11] = Convert8To32(Key, 24);
-                    _wrkState[12] = Convert8To32(Key, 28);
-                    _wrkState[13] = Convert8To32(_dstCode, 12);
+                    _wrkState[0] = IntUtils.BytesToLe32(_dstCode, 0);
+                    _wrkState[1] = IntUtils.BytesToLe32(Key, 0);
+                    _wrkState[2] = IntUtils.BytesToLe32(Key, 4);
+                    _wrkState[3] = IntUtils.BytesToLe32(Key, 8);
+                    _wrkState[4] = IntUtils.BytesToLe32(Key, 12);
+                    _wrkState[5] = IntUtils.BytesToLe32(_dstCode, 4);
+                    _wrkState[6] = IntUtils.BytesToLe32(Iv, 0);
+                    _wrkState[7] = IntUtils.BytesToLe32(Iv, 4);
+                    _wrkState[8] = IntUtils.BytesToLe32(_dstCode, 8);
+                    _wrkState[9] = IntUtils.BytesToLe32(Key, 16);
+                    _wrkState[10] = IntUtils.BytesToLe32(Key, 20);
+                    _wrkState[11] = IntUtils.BytesToLe32(Key, 24);
+                    _wrkState[12] = IntUtils.BytesToLe32(Key, 28);
+                    _wrkState[13] = IntUtils.BytesToLe32(_dstCode, 12);
                 }
                 else
                 {
-                    _wrkState[0] = Convert8To32(_dstCode, 0);
-                    _wrkState[1] = Convert8To32(Key, 0);
-                    _wrkState[2] = Convert8To32(Key, 4);
-                    _wrkState[3] = Convert8To32(Key, 8);
-                    _wrkState[4] = Convert8To32(Key, 12);
-                    _wrkState[5] = Convert8To32(_dstCode, 4);
-                    _wrkState[6] = Convert8To32(Iv, 0);
-                    _wrkState[7] = Convert8To32(Iv, 4);
-                    _wrkState[8] = Convert8To32(_dstCode, 8);
-                    _wrkState[9] = Convert8To32(Key, 0);
-                    _wrkState[10] = Convert8To32(Key, 4);
-                    _wrkState[11] = Convert8To32(Key, 8);
-                    _wrkState[12] = Convert8To32(Key, 12);
-                    _wrkState[13] = Convert8To32(_dstCode, 12);
+                    _wrkState[0] = IntUtils.BytesToLe32(_dstCode, 0);
+                    _wrkState[1] = IntUtils.BytesToLe32(Key, 0);
+                    _wrkState[2] = IntUtils.BytesToLe32(Key, 4);
+                    _wrkState[3] = IntUtils.BytesToLe32(Key, 8);
+                    _wrkState[4] = IntUtils.BytesToLe32(Key, 12);
+                    _wrkState[5] = IntUtils.BytesToLe32(_dstCode, 4);
+                    _wrkState[6] = IntUtils.BytesToLe32(Iv, 0);
+                    _wrkState[7] = IntUtils.BytesToLe32(Iv, 4);
+                    _wrkState[8] = IntUtils.BytesToLe32(_dstCode, 8);
+                    _wrkState[9] = IntUtils.BytesToLe32(Key, 0);
+                    _wrkState[10] = IntUtils.BytesToLe32(Key, 4);
+                    _wrkState[11] = IntUtils.BytesToLe32(Key, 8);
+                    _wrkState[12] = IntUtils.BytesToLe32(Key, 12);
+                    _wrkState[13] = IntUtils.BytesToLe32(_dstCode, 12);
                 }
             }
         }
         #endregion
 
         #region Transform
-        private void SalsaCore(int[] Output, int[] Counter)
+        private void SalsaCore(byte[] Output, int OutOffset, uint[] Counter)
         {
             int ctr = 0;
-
-            int X0 = _wrkState[ctr++];
-            int X1 = _wrkState[ctr++];
-            int X2 = _wrkState[ctr++];
-            int X3 = _wrkState[ctr++];
-            int X4 = _wrkState[ctr++];
-            int X5 = _wrkState[ctr++];
-            int X6 = _wrkState[ctr++];
-            int X7 = _wrkState[ctr++];
-            int X8 = Counter[0];
-            int X9 = Counter[1];
-            int X10 = _wrkState[ctr++];
-            int X11 = _wrkState[ctr++];
-            int X12 = _wrkState[ctr++];
-            int X13 = _wrkState[ctr++];
-            int X14 = _wrkState[ctr++];
-            int X15 = _wrkState[ctr];
+            uint X0 = _wrkState[ctr];
+            uint X1 = _wrkState[++ctr];
+            uint X2 = _wrkState[++ctr];
+            uint X3 = _wrkState[++ctr];
+            uint X4 = _wrkState[++ctr];
+            uint X5 = _wrkState[++ctr];
+            uint X6 = _wrkState[++ctr];
+            uint X7 = _wrkState[++ctr];
+            uint X8 = Counter[0];
+            uint X9 = Counter[1];
+            uint X10 = _wrkState[++ctr];
+            uint X11 = _wrkState[++ctr];
+            uint X12 = _wrkState[++ctr];
+            uint X13 = _wrkState[++ctr];
+            uint X14 = _wrkState[++ctr];
+            uint X15 = _wrkState[++ctr];
 
             ctr = Rounds;
 
-            while (ctr > 0)
+            while (ctr != 0)
             {
-                // round 1
-                X4 ^= Rtl(X0 + X12, 7);
-                X8 ^= Rtl(X4 + X0, 9);
-                X12 ^= Rtl(X8 + X4, 13);
-                X0 ^= Rtl(X12 + X8, 18);
-                X9 ^= Rtl(X5 + X1, 7);
-                X13 ^= Rtl(X9 + X5, 9);
-                X1 ^= Rtl(X13 + X9, 13);
-                X5 ^= Rtl(X1 + X13, 18);
-                X14 ^= Rtl(X10 + X6, 7);
-                X2 ^= Rtl(X14 + X10, 9);
-                X6 ^= Rtl(X2 + X14, 13);
-                X10 ^= Rtl(X6 + X2, 18);
-                X3 ^= Rtl(X15 + X11, 7);
-                X7 ^= Rtl(X3 + X15, 9);
-                X11 ^= Rtl(X7 + X3, 13);
-                X15 ^= Rtl(X11 + X7, 18);
-                // round 2
-                X1 ^= Rtl(X0 + X3, 7);
-                X2 ^= Rtl(X1 + X0, 9);
-                X3 ^= Rtl(X2 + X1, 13);
-                X0 ^= Rtl(X3 + X2, 18);
-                X6 ^= Rtl(X5 + X4, 7);
-                X7 ^= Rtl(X6 + X5, 9);
-                X4 ^= Rtl(X7 + X6, 13);
-                X5 ^= Rtl(X4 + X7, 18);
-                X11 ^= Rtl(X10 + X9, 7);
-                X8 ^= Rtl(X11 + X10, 9);
-                X9 ^= Rtl(X8 + X11, 13);
-                X10 ^= Rtl(X9 + X8, 18);
-                X12 ^= Rtl(X15 + X14, 7);
-                X13 ^= Rtl(X12 + X15, 9);
-                X14 ^= Rtl(X13 + X12, 13);
-                X15 ^= Rtl(X14 + X13, 18);
-
+                X4 ^= IntUtils.RotateLeft(X0 + X12, 7);
+                X8 ^= IntUtils.RotateLeft(X4 + X0, 9);
+                X12 ^= IntUtils.RotateLeft(X8 + X4, 13);
+                X0 ^= IntUtils.RotateLeft(X12 + X8, 18);
+                X9 ^= IntUtils.RotateLeft(X5 + X1, 7);
+                X13 ^= IntUtils.RotateLeft(X9 + X5, 9);
+                X1 ^= IntUtils.RotateLeft(X13 + X9, 13);
+                X5 ^= IntUtils.RotateLeft(X1 + X13, 18);
+                X14 ^= IntUtils.RotateLeft(X10 + X6, 7);
+                X2 ^= IntUtils.RotateLeft(X14 + X10, 9);
+                X6 ^= IntUtils.RotateLeft(X2 + X14, 13);
+                X10 ^= IntUtils.RotateLeft(X6 + X2, 18);
+                X3 ^= IntUtils.RotateLeft(X15 + X11, 7);
+                X7 ^= IntUtils.RotateLeft(X3 + X15, 9);
+                X11 ^= IntUtils.RotateLeft(X7 + X3, 13);
+                X15 ^= IntUtils.RotateLeft(X11 + X7, 18);
+                X1 ^= IntUtils.RotateLeft(X0 + X3, 7);
+                X2 ^= IntUtils.RotateLeft(X1 + X0, 9);
+                X3 ^= IntUtils.RotateLeft(X2 + X1, 13);
+                X0 ^= IntUtils.RotateLeft(X3 + X2, 18);
+                X6 ^= IntUtils.RotateLeft(X5 + X4, 7);
+                X7 ^= IntUtils.RotateLeft(X6 + X5, 9);
+                X4 ^= IntUtils.RotateLeft(X7 + X6, 13);
+                X5 ^= IntUtils.RotateLeft(X4 + X7, 18);
+                X11 ^= IntUtils.RotateLeft(X10 + X9, 7);
+                X8 ^= IntUtils.RotateLeft(X11 + X10, 9);
+                X9 ^= IntUtils.RotateLeft(X8 + X11, 13);
+                X10 ^= IntUtils.RotateLeft(X9 + X8, 18);
+                X12 ^= IntUtils.RotateLeft(X15 + X14, 7);
+                X13 ^= IntUtils.RotateLeft(X12 + X15, 9);
+                X14 ^= IntUtils.RotateLeft(X13 + X12, 13);
+                X15 ^= IntUtils.RotateLeft(X14 + X13, 18);
                 ctr -= 2;
             }
 
-            ctr = 0;
-            Output[ctr] = X0 + _wrkState[ctr++];
-            Output[ctr] = X1 + _wrkState[ctr++];
-            Output[ctr] = X2 + _wrkState[ctr++];
-            Output[ctr] = X3 + _wrkState[ctr++];
-            Output[ctr] = X4 + _wrkState[ctr++];
-            Output[ctr] = X5 + _wrkState[ctr++];
-            Output[ctr] = X6 + _wrkState[ctr++];
-            Output[ctr] = X7 + _wrkState[ctr++];
-            Output[ctr] = X8 + Counter[0];
-            Output[ctr + 1] = X9 + Counter[1];
-            Output[ctr + 2] = X10 + _wrkState[ctr++];
-            Output[ctr + 2] = X11 + _wrkState[ctr++];
-            Output[ctr + 2] = X12 + _wrkState[ctr++];
-            Output[ctr + 2] = X13 + _wrkState[ctr++];
-            Output[ctr + 2] = X14 + _wrkState[ctr++];
-            Output[ctr + 2] = X15 + _wrkState[ctr];
+            IntUtils.Le32ToBytes(X0 + _wrkState[ctr], Output, OutOffset); OutOffset += 4;
+            IntUtils.Le32ToBytes(X1 + _wrkState[++ctr], Output, OutOffset); OutOffset += 4;
+            IntUtils.Le32ToBytes(X2 + _wrkState[++ctr], Output, OutOffset); OutOffset += 4;
+            IntUtils.Le32ToBytes(X3 + _wrkState[++ctr], Output, OutOffset); OutOffset += 4;
+            IntUtils.Le32ToBytes(X4 + _wrkState[++ctr], Output, OutOffset); OutOffset += 4;
+            IntUtils.Le32ToBytes(X5 + _wrkState[++ctr], Output, OutOffset); OutOffset += 4;
+            IntUtils.Le32ToBytes(X6 + _wrkState[++ctr], Output, OutOffset); OutOffset += 4;
+            IntUtils.Le32ToBytes(X7 + _wrkState[++ctr], Output, OutOffset); OutOffset += 4;
+            IntUtils.Le32ToBytes(X8 + Counter[0], Output, OutOffset); OutOffset += 4;
+            IntUtils.Le32ToBytes(X9 + Counter[1], Output, OutOffset); OutOffset += 4;
+            IntUtils.Le32ToBytes(X10 + _wrkState[++ctr], Output, OutOffset); OutOffset += 4;
+            IntUtils.Le32ToBytes(X11 + _wrkState[++ctr], Output, OutOffset); OutOffset += 4;
+            IntUtils.Le32ToBytes(X12 + _wrkState[++ctr], Output, OutOffset); OutOffset += 4;
+            IntUtils.Le32ToBytes(X13 + _wrkState[++ctr], Output, OutOffset); OutOffset += 4;
+            IntUtils.Le32ToBytes(X14 + _wrkState[++ctr], Output, OutOffset); OutOffset += 4;
+            IntUtils.Le32ToBytes(X15 + _wrkState[++ctr], Output, OutOffset);
         }
 
-        private byte[] Generate(int Size, int[] Counter)
+        private void Generate(int Size, UInt32[] Counter, byte[] Output, int OutOffset)
         {
-            // align to upper divisible of block size
-            int algSize = (Size % BLOCK_SIZE == 0 ? Size : Size + BLOCK_SIZE - (Size % BLOCK_SIZE));
-            int lstBlock = algSize - BLOCK_SIZE;
-            int[] outputBlock = new int[STATE_SIZE];
-            byte[] outputData = new byte[Size];
+            int aln = Size - (Size % BLOCK_SIZE);
+            int ctr = 0;
 
-            for (int i = 0; i < algSize; i += BLOCK_SIZE)
+            while (ctr != aln)
             {
-                SalsaCore(outputBlock, Counter);
-
-                // copy to output
-                if (i != lstBlock)
-                {
-                    // copy transform to output
-                    Buffer.BlockCopy(outputBlock, 0, outputData, i, BLOCK_SIZE);
-                }
-                else
-                {
-                    // copy last block
-                    int fnlSize = (Size % BLOCK_SIZE) == 0 ? BLOCK_SIZE : (Size % BLOCK_SIZE);
-                    Buffer.BlockCopy(outputBlock, 0, outputData, i, fnlSize);
-                }
-
-                // increment counter
+                SalsaCore(Output, OutOffset + ctr, Counter);
                 Increment(Counter);
+                ctr += BLOCK_SIZE;
             }
 
-            return outputData;
+            if (ctr != Size)
+            {
+                byte[] outputBlock = new byte[BLOCK_SIZE];
+                SalsaCore(outputBlock, 0, Counter);
+                int fnlSize = Size % BLOCK_SIZE;
+                Buffer.BlockCopy(outputBlock, 0, Output, OutOffset + (Size - fnlSize), fnlSize);
+                Increment(Counter);
+            }
         }
 
         private void ProcessBlock(byte[] Input, byte[] Output)
@@ -578,11 +587,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
             if (!IsParallel || Output.Length < ParallelBlockSize)
             {
                 // generate random
-                byte[] rand = Generate(Output.Length, _ctrVector);
-
+                Generate(Output.Length, _ctrVector, Output, 0);
                 // output is input xor with random
-                for (int i = 0; i < Output.Length; i++)
-                    Output[i] = (byte)(Input[i] ^ rand[i]);
+                int sze = Output.Length - (Output.Length % BLOCK_SIZE);
+
+                if (sze != 0)
+                    IntUtils.XORBLK(Input, 0, Output, 0, sze);
+
+                // get the remaining bytes
+                if (sze != Output.Length)
+                {
+                    for (int i = sze; i < Output.Length; i++)
+                        Output[i] ^= Input[i];
+                }
             }
             else
             {
@@ -590,31 +607,28 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
                 int cnkSize = (Output.Length / BLOCK_SIZE / ProcessorCount) * BLOCK_SIZE;
                 int rndSize = cnkSize * ProcessorCount;
                 int subSize = (cnkSize / BLOCK_SIZE);
-
                 // create jagged array of 'sub counters'
-                int[][] vectors = new int[ProcessorCount][];
+                uint[][] vectors = new uint[ProcessorCount][];
 
                 // create random, and xor to output in parallel
-                System.Threading.Tasks.Parallel.For(0, ProcessorCount, ParallelOption, i =>
+                System.Threading.Tasks.Parallel.For(0, ProcessorCount, i =>
                 {
                     // offset counter by chunk size / block size
                     vectors[i] = Increase(_ctrVector, subSize * i);
-                    // create random with offset counter
-                    byte[] rand = Generate(cnkSize, vectors[i]);
-
+                    // create random at offset position
+                    this.Generate(cnkSize, vectors[i], Output, (i * cnkSize));
                     // xor with input at offset
-                    for (int j = 0; j < cnkSize; j++)
-                        Output[j + (i * cnkSize)] = (byte)(Input[j + (i * cnkSize)] ^ rand[j]);
+                    IntUtils.XORBLK(Input, i * cnkSize, Output, i * cnkSize, cnkSize);
                 });
 
                 // last block processing
                 if (rndSize < Output.Length)
                 {
                     int fnlSize = Output.Length % rndSize;
-                    byte[] rand = Generate(fnlSize, vectors[ProcessorCount - 1]);
+                    Generate(fnlSize, vectors[ProcessorCount - 1], Output, rndSize);
 
-                    for (int i = 0; i < fnlSize; i++)
-                        Output[i + rndSize] = (byte)(Input[i + rndSize] ^ rand[i]);
+                    for (int i = rndSize; i < Output.Length; ++i)
+                        Output[i] ^= Input[i];
                 }
 
                 // copy the last counter position to class variable
@@ -624,119 +638,99 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
 
         private void ProcessBlock(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
-            int blkSize = (Output.Length - OutOffset);
+            int outSize = _isParallel ? (Output.Length - OutOffset) : BLOCK_SIZE;
 
-            if (!IsParallel)
-            {
-                blkSize = blkSize < BLOCK_SIZE ? blkSize : BLOCK_SIZE;
-                // generate random
-                byte[] rand = Generate(blkSize, _ctrVector);
-
-                // output is input xor with random
-                for (int i = 0; i < blkSize; i++)
-                    Output[i + OutOffset] = (byte)(Input[i + InOffset] ^ rand[i]);
-            }
-            else if (blkSize < ParallelBlockSize)
+            if (outSize < _parallelBlockSize)
             {
                 // generate random
-                byte[] rand = Generate(blkSize, _ctrVector);
-
+                Generate(outSize, _ctrVector, Output, OutOffset);
                 // output is input xor with random
-                for (int i = 0; i < blkSize; i++)
-                    Output[i + OutOffset] = (byte)(Input[i + InOffset] ^ rand[i]);
+                int sze = outSize - (outSize % BLOCK_SIZE);
+
+                if (sze != 0)
+                    IntUtils.XORBLK(Input, InOffset, Output, OutOffset, sze);
+
+                // get the remaining bytes
+                if (sze != outSize)
+                {
+                    for (int i = sze; i < outSize; ++i)
+                        Output[i + OutOffset] ^= Input[i + InOffset];
+                }
             }
             else
             {
                 // parallel CTR processing //
-                int cnkSize = (ParallelBlockSize / BLOCK_SIZE / ProcessorCount) * BLOCK_SIZE;
+                int cnkSize = _parallelBlockSize / ProcessorCount;
                 int rndSize = cnkSize * ProcessorCount;
                 int subSize = (cnkSize / BLOCK_SIZE);
-
                 // create jagged array of 'sub counters'
-                int[][] vectors = new int[ProcessorCount][];
+                uint[][] vectors = new uint[ProcessorCount][];
 
                 // create random, and xor to output in parallel
-                System.Threading.Tasks.Parallel.For(0, ProcessorCount, ParallelOption, i =>
+                System.Threading.Tasks.Parallel.For(0, ProcessorCount, i =>
                 {
                     // offset counter by chunk size / block size
                     vectors[i] = Increase(_ctrVector, subSize * i);
-                    // create random with offset counter
-                    byte[] rand = Generate(cnkSize, vectors[i]);
-
+                    // create random at offset position
+                    this.Generate(cnkSize, vectors[i], Output, (i * cnkSize));
                     // xor with input at offset
-                    for (int j = 0; j < cnkSize; j++)
-                        Output[j + OutOffset + (i * cnkSize)] = (byte)(Input[j + InOffset + (i * cnkSize)] ^ rand[j]);
+                    IntUtils.XORBLK(Input, InOffset + (i * cnkSize), Output, OutOffset + (i * cnkSize), cnkSize);
                 });
-
-                // last block processing
-                if (rndSize < Output.Length)
-                {
-                    int fnlSize = _parallelBlockSize % rndSize;
-                    byte[] rand = Generate(fnlSize, vectors[ProcessorCount - 1]);
-
-                    for (int i = 0; i < fnlSize; i++)
-                        Output[i + OutOffset + rndSize] = (byte)(Input[i + InOffset + rndSize] ^ rand[i]);
-                }
 
                 // copy the last counter position to class variable
                 Buffer.BlockCopy(vectors[ProcessorCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
             }
         }
 
-        private void ProcessBlock(byte[] Input, int InOffset, int Length, byte[] Output, int OutOffset)
+        private void ProcessBlock(byte[] Input, int InOffset, byte[] Output, int OutOffset, int Length)
         {
             int blkSize = Length;
 
-            if (!IsParallel)
-            {
-                blkSize = blkSize < BLOCK_SIZE ? blkSize : BLOCK_SIZE;
-                // generate random
-                byte[] rand = Generate(blkSize, _ctrVector);
-
-                // output is input xor with random
-                for (int i = 0; i < blkSize; i++)
-                    Output[i + OutOffset] = (byte)(Input[i + InOffset] ^ rand[i]);
-            }
-            else if (blkSize < ParallelBlockSize)
+            if (!_isParallel || blkSize < _parallelBlockSize)
             {
                 // generate random
-                byte[] rand = Generate(blkSize, _ctrVector);
-
+                Generate(blkSize, _ctrVector, Output, OutOffset);
                 // output is input xor with random
-                for (int i = 0; i < blkSize; i++)
-                    Output[i + OutOffset] = (byte)(Input[i + InOffset] ^ rand[i]);
+                int sze = Length - (Length % BLOCK_SIZE);
+
+                if (sze != 0)
+                    IntUtils.XORBLK(Input, InOffset, Output, OutOffset, sze);
+
+                // get the remaining bytes
+                if (sze != Length)
+                {
+                    for (int i = sze; i < Length; i++)
+                        Output[i + OutOffset] ^= Input[i + InOffset];
+                }
             }
             else
             {
                 // parallel CTR processing //
-                int cnkSize = (ParallelBlockSize / BLOCK_SIZE / ProcessorCount) * BLOCK_SIZE;
+                int cnkSize = (Length / BLOCK_SIZE / ProcessorCount) * BLOCK_SIZE;
                 int rndSize = cnkSize * ProcessorCount;
                 int subSize = (cnkSize / BLOCK_SIZE);
-
                 // create jagged array of 'sub counters'
-                int[][] vectors = new int[ProcessorCount][];
+                uint[][] vectors = new uint[ProcessorCount][];
 
                 // create random, and xor to output in parallel
-                System.Threading.Tasks.Parallel.For(0, ProcessorCount, ParallelOption, i =>
+                System.Threading.Tasks.Parallel.For(0, ProcessorCount, i =>
                 {
                     // offset counter by chunk size / block size
                     vectors[i] = Increase(_ctrVector, subSize * i);
-                    // create random with offset counter
-                    byte[] rand = Generate(cnkSize, vectors[i]);
-
+                    // create random at offset position
+                    this.Generate(cnkSize, vectors[i], Output, (i * cnkSize));
                     // xor with input at offset
-                    for (int j = 0; j < cnkSize; j++)
-                        Output[j + OutOffset + (i * cnkSize)] = (byte)(Input[j + InOffset + (i * cnkSize)] ^ rand[j]);
+                    IntUtils.XORBLK(Input, InOffset + (i * cnkSize), Output, OutOffset + (i * cnkSize), cnkSize);
                 });
 
                 // last block processing
                 if (rndSize < Length)
                 {
-                    int fnlSize = _parallelBlockSize % rndSize;
-                    byte[] rand = Generate(fnlSize, vectors[ProcessorCount - 1]);
+                    int fnlSize = Length % rndSize;
+                    Generate(fnlSize, vectors[ProcessorCount - 1], Output, rndSize);
 
-                    for (int i = 0; i < fnlSize; i++)
-                        Output[i + OutOffset + rndSize] = (byte)(Input[i + InOffset + rndSize] ^ rand[i]);
+                    for (int i = 0; i < fnlSize; ++i)
+                        Output[i + OutOffset + rndSize] ^= (byte)(Input[i + InOffset + rndSize]);
                 }
 
                 // copy the last counter position to class variable
@@ -746,53 +740,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         #endregion
 
         #region Helpers
-        private byte[] Convert32ToBytes(int Input, byte[] Output, int OutOffset)
-        {
-            Output[OutOffset] = (byte)Input;
-            Output[OutOffset + 1] = (byte)(Input >> 8);
-            Output[OutOffset + 2] = (byte)(Input >> 16);
-            Output[OutOffset + 3] = (byte)(Input >> 24);
-            return Output;
-        }
-
-        private void Convert32ToBytes(int[] Input, byte[] Output, int OutOffset)
-        {
-            for (int i = 0; i < Input.Length; ++i)
-            {
-                Convert32ToBytes(Input[i], Output, OutOffset);
-                OutOffset += 4;
-            }
-        }
-
-        private int Convert8To32(byte[] Input, int InOffset)
-        {
-            return ((Input[InOffset] & 255)) |
-                   ((Input[InOffset + 1] & 255) << 8) |
-                   ((Input[InOffset + 2] & 255) << 16) |
-                   (Input[InOffset + 3] << 24);
-        }
-
-        private void Increment(int[] Counter)
+        private void Increment(UInt32[] Counter)
         {
             if (++Counter[0] == 0)
                 ++Counter[1];
         }
 
-        private int[] Increase(int[] Counter, int Size)
+        private UInt32[] Increase(UInt32[] Counter, int Size)
         {
-            int[] copy = new int[Counter.Length];
+            uint[] copy = new uint[Counter.Length];
             Array.Copy(Counter, 0, copy, 0, Counter.Length);
 
             for (int i = 0; i < Size; i++)
                 Increment(copy);
 
             return copy;
-        }
-
-        private int Rtl(int X, int Y)
-        {
-            // rotate left
-            return (X << Y) | ((int)((uint)X >> -Y));
         }
 
         private bool ValidCode(byte[] Code)
@@ -859,6 +821,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
                         Array.Clear(_dstCode, 0, _dstCode.Length);
                         _dstCode = null;
                     }
+                    _isInitialized = false;
+                    _isParallel = false;
+                    _parallelBlockSize = 0;
+                    _rndCount = 0;
                 }
                 finally
                 {

@@ -10,43 +10,36 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 /// Speed tests on an AMD ASD-3600 Quad-Core, 4GB RAM, compiled Release/Any CPU.
 /// Test is a transform of a byte array in a Monte Carlo method.
 /// Sizes are in MBs (1000000 bytes). Time format sec.ms, key sizes in bits. Rate is MB per minute.
-/// HX series will have similar times, as they use the same diffusion engines.
 /// CTR mode and CBC decrypt are run in parallel mode. CBC encrypt is in single processor mode.
 /// Highest rate so far is RDX with a 128 bit key: 7.85 GB per minute!
 /// 
+/// Tip: Compile as release/any cpu, and run the executable bin\release\speed.exe; times are much faster without the ide..
+/// 
 /// **Block Ciphers**
 /// 
-/// RDX (Rijndael): 256 Key, 14 Rounds, 100 MB
+/// RHX (Rijndael): 256 Key, 14 Rounds, 100 MB
 /// Mode    State   Size    Time    Rate
 /// ----    -----   ----    ----    ----
-/// CTR     ENC     100     0.88    6818
-/// CTR     DEC     100     0.89    6741
-/// CBC     ENC     100     2.95    2033
-/// CBC     DEC     100     1.39    4316 
+/// CTR     ENC     100     0.99    6060
+/// CTR     DEC     100     1.00    6000
+/// CBC     ENC     100     4.06    1477
+/// CBC     DEC     100     1.49    4026 
 /// 
-/// RSM (Rijndael/Serpent Merged): 1536 Key, 18 Rounds, 100 MB
+/// SHX (Serpent): 256 Key, 32 Rounds, 100 MB
 /// Mode    State   Size    Time    Rate
 /// ----    -----   ----    ----    ----
-/// CTR     ENC     100     2.20    2727  
-/// CTR     DEC     100     2.22    2702
-/// CBC     ENC     100     7.99    750
-/// CBC     DEC     100     2.62    2290
+/// CTR     ENC     100     2.32    2586
+/// CTR     DEC     100     2.33    2575
+/// CBC     ENC     100     9.06    662
+/// CBC     DEC     100     2.72    2205
 /// 
-/// SPX (Serpent): 256 Key, 32 Rounds, 100 MB
+/// THX (Twofish): 256 Key, 16 Rounds, 100 MB
 /// Mode    State   Size    Time    Rate
 /// ----    -----   ----    ----    ----
-/// CTR     ENC     100     1.77    3389
-/// CTR     DEC     100     1.75    3428
-/// CBC     ENC     100     6.16    974
-/// CBC     DEC     100     1.98    3030
-/// 
-/// TFX (Twofish): 256 Key, 16 Rounds, 100 MB
-/// Mode    State   Size    Time    Rate
-/// ----    -----   ----    ----    ----
-/// CTR     ENC     100     1.00    6000
-/// CTR     DEC     100     0.99    6060
-/// CBC     ENC     100     3.43    1749
-/// CBC     DEC     100     1.45    4137
+/// CTR     ENC     100     0.73    8219
+/// CTR     DEC     100     0.72    8333
+/// CBC     ENC     100     3.08    1948
+/// CBC     DEC     100     1.19    5042
 /// 
 /// 
 /// **Stream Ciphers**
@@ -54,23 +47,12 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 /// ChaCha: 256 Key, 20 Rounds, 100 MB
 /// Size    Time    Rate
 /// ----    ----    ----
-/// 100     2.63    2281
-/// 
-/// DCS: 768 Key
-/// Size    Time    Rate
-/// ----    ----    ----
-/// 100     2.12    2830
-/// 
-/// Fusion: 2560 Key, 18 Rounds, 100 MB
-/// Size    Time    Rate
-/// ----    ----    ----
-/// 100     1.75    3428   
+/// 100     0.40    15000
 /// 
 /// Salsa20: 256 Key, 20 Rounds, 100 MB
 /// Size    Time    Rate
 /// ----    ----    ----
-/// 100     2.68    2238
-
+/// 100     0.36    16666
 #endregion
 
 namespace Speed
@@ -93,17 +75,11 @@ namespace Speed
         private EngineSpeedTest.TestTypes _testType;
         private static readonly Dictionary<string, SymmetricEngines> _engineDescriptions = new Dictionary<string, SymmetricEngines>() 
         {  
-            {"ChaCha+: The ChaCha stream cipher", SymmetricEngines.ChaCha},
-            {"Fusion: The Twofish and Rijndael Merged ciphers", SymmetricEngines.Fusion},
-            {"RDX: An extended implementation of Rijndael", SymmetricEngines.RDX},
-            {"RHX: Rijndael with an HKDF Key Schedule", SymmetricEngines.RHX},
-            {"RSM: Rijndael and Serpent Merged block ciphers", SymmetricEngines.RSM},
-            {"Salsa20+: The Salsa20 stream cipher", SymmetricEngines.Salsa},
-            {"SHX: Serpent extended with an HKDF Key Schedule", SymmetricEngines.SHX},
-            {"SPX: An extended implementation of Serpent", SymmetricEngines.SPX},
-            {"TFX: An extended implementation of Twofish", SymmetricEngines.TFX},
-            {"THX: Twofish extended with an HKDF Key Schedule", SymmetricEngines.THX},
-            {"TSM: Twofish and Serpent Merged ciphers", SymmetricEngines.TSM}
+            {"RHX: An extended implementation of the Rijndael cipher", SymmetricEngines.RHX},
+            {"SHX: An extended implementation of the Serpent cipher", SymmetricEngines.SHX},
+            {"THX: An extended implementation of the Twofish cipher", SymmetricEngines.THX},
+            {"ChaCha: The ChaCha stream cipher", SymmetricEngines.ChaCha},
+            {"Salsa20: The Salsa20 stream cipher", SymmetricEngines.Salsa}
         };
         #endregion
 
@@ -145,6 +121,9 @@ namespace Speed
             KeySizes ksize = KeySizes.K256;
             Enum.TryParse<KeySizes>(((ComboBox)sender).Text, out ksize);
             _keySize = ksize;
+            int bsze = (int)ksize;
+            cbRounds.Enabled = (bsze > 64);
+            SetRounds();
         }
 
         private void OnModeChanged(object sender, EventArgs e)
@@ -288,7 +267,7 @@ namespace Speed
                 cbEngines.Items.Add(desc);
 
             ComboHelper.LoadEnumValues(cbCipherMode, typeof(CipherModes));
-            cbCipherMode.SelectedIndex = 2;
+            cbCipherMode.SelectedIndex = 3;
             SetComboParams(SymmetricEngines.RHX);
         }
 
@@ -307,48 +286,32 @@ namespace Speed
                     cbCipherMode.Enabled = false;
                     cbKeySize.Items.Add(KeySizes.K128);
                     cbKeySize.Items.Add(KeySizes.K256);
-                    cbKeySize.Items.Add(KeySizes.K384);
-                    cbKeySize.Items.Add(KeySizes.K448);
                     ComboHelper.SetSelectedIndex(cbKeySize, 1);
                     ComboHelper.AddEnumRange(cbRounds, typeof(RoundCounts), 8, 30);
                     ComboHelper.SetSelectedIndex(cbRounds, 6);
                     break;
-                case SymmetricEngines.RDX:
-                    cbRounds.Enabled = false;
+                case SymmetricEngines.RHX:
+                    ComboHelper.SetSelectedIndex(cbEngines, 0);
+                    cbKeySize.Items.Clear();
                     cbKeySize.Items.Add(KeySizes.K128);
+                    cbKeySize.Items.Add(KeySizes.K192);
                     cbKeySize.Items.Add(KeySizes.K256);
                     cbKeySize.Items.Add(KeySizes.K512);
-                    ComboHelper.SetSelectedIndex(cbKeySize, 1);
-                    break;
-                case SymmetricEngines.RHX:
-                    ComboHelper.SetSelectedIndex(cbEngines, 3);
-                    ComboHelper.AddEnumRange(cbKeySize, typeof(KeySizes), 192, 576);
-                    ComboHelper.SetSelectedIndex(cbKeySize, 0);
+                    cbKeySize.Items.Add(KeySizes.K1536);
+                    cbKeySize.Items.Add(KeySizes.K2560);
+                    cbKeySize.Items.Add(KeySizes.K3584);
+                    ComboHelper.SetSelectedIndex(cbKeySize, 2);
                     ComboHelper.AddEnumRange(cbRounds, typeof(RoundCounts), 10, 38);
                     ComboHelper.SetSelectedIndex(cbRounds, 2);
                     break;
-                case SymmetricEngines.RSM:
-                    ComboHelper.AddEnumRange(cbKeySize, typeof(KeySizes), 192, 576);
-                    ComboHelper.SetSelectedIndex(cbKeySize, 0);
-                    cbRounds.Items.Add(RoundCounts.R10);
-                    cbRounds.Items.Add(RoundCounts.R18);
-                    cbRounds.Items.Add(RoundCounts.R26);
-                    cbRounds.Items.Add(RoundCounts.R34);
-                    cbRounds.Items.Add(RoundCounts.R42);
-                    ComboHelper.SetSelectedIndex(cbRounds, 1);
-                    break;
                 case SymmetricEngines.SHX:
-                    ComboHelper.AddEnumRange(cbKeySize, typeof(KeySizes), 192, 576);
-                    ComboHelper.SetSelectedIndex(cbKeySize, 0);
-                    cbRounds.Items.Add(RoundCounts.R32);
-                    cbRounds.Items.Add(RoundCounts.R40);
-                    cbRounds.Items.Add(RoundCounts.R48);
-                    cbRounds.Items.Add(RoundCounts.R56);
-                    cbRounds.Items.Add(RoundCounts.R64);
-                    ComboHelper.SetSelectedIndex(cbRounds, 0);
-                    break;
-                case SymmetricEngines.SPX:
-                    ComboHelper.AddEnumRange(cbKeySize, typeof(KeySizes), 16, 64);
+                    cbKeySize.Items.Add(KeySizes.K128);
+                    cbKeySize.Items.Add(KeySizes.K192);
+                    cbKeySize.Items.Add(KeySizes.K256);
+                    cbKeySize.Items.Add(KeySizes.K512);
+                    cbKeySize.Items.Add(KeySizes.K1536);
+                    cbKeySize.Items.Add(KeySizes.K2560);
+                    cbKeySize.Items.Add(KeySizes.K3584);
                     ComboHelper.SetSelectedIndex(cbKeySize, 2);
                     cbRounds.Items.Add(RoundCounts.R32);
                     cbRounds.Items.Add(RoundCounts.R40);
@@ -357,20 +320,45 @@ namespace Speed
                     cbRounds.Items.Add(RoundCounts.R64);
                     ComboHelper.SetSelectedIndex(cbRounds, 0);
                     break;
-                case SymmetricEngines.TFX:
+                case SymmetricEngines.THX:
                     cbKeySize.Items.Add(KeySizes.K128);
+                    cbKeySize.Items.Add(KeySizes.K192);
                     cbKeySize.Items.Add(KeySizes.K256);
                     cbKeySize.Items.Add(KeySizes.K512);
-                    ComboHelper.SetSelectedIndex(cbKeySize, 1);
+                    cbKeySize.Items.Add(KeySizes.K1536);
+                    cbKeySize.Items.Add(KeySizes.K2560);
+                    cbKeySize.Items.Add(KeySizes.K3584);
+                    ComboHelper.SetSelectedIndex(cbKeySize, 2);
                     ComboHelper.AddEnumRange(cbRounds, typeof(RoundCounts), 16, 32);
                     ComboHelper.SetSelectedIndex(cbRounds, 0);
                     break;
                 default:
-                    ComboHelper.AddEnumRange(cbKeySize, typeof(KeySizes), 192, 576);
-                    ComboHelper.SetSelectedIndex(cbKeySize, 0);
-                    ComboHelper.AddEnumRange(cbRounds, typeof(RoundCounts), 16, 32);
-                    ComboHelper.SetSelectedIndex(cbRounds, 0);
-                    break;
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            SetRounds();
+        }
+
+        private void SetRounds()
+        {
+            KeySizes ksize = KeySizes.K256;
+            Enum.TryParse<KeySizes>(((ComboBox)cbKeySize).Text, out ksize);
+            int bsze = (int)ksize;
+
+            if (cbEngines.SelectedIndex == 0)
+            {
+                if (bsze == 16)
+                    cbRounds.SelectedIndex = 0;
+                else if (bsze == 24)
+                    cbRounds.SelectedIndex = 1;
+                else if (bsze == 32)
+                    cbRounds.SelectedIndex = 2;
+                else
+                    cbRounds.SelectedIndex = 6;
+            }
+            else
+            {
+                cbRounds.SelectedIndex = 0;
             }
         }
         #endregion

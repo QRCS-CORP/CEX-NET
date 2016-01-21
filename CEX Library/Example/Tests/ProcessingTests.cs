@@ -14,7 +14,7 @@ using VTDev.Libraries.CEXEngine.Tools;
 namespace VTDev.Projects.CEX.Tests
 {
     /// <summary>
-    /// Examples of the CompressionCipher, PacketCipher, StreamCipher, StreamDigest, StreamMac, and VolumeCipher classes
+    /// Examples of the CompressionCipher, PacketCipher, CipherStream, DigestStream, MacStream, and VolumeCipher classes
     /// </summary>
     static class ProcessingTests
     {
@@ -30,42 +30,36 @@ namespace VTDev.Projects.CEX.Tests
             KeyParams kp = new KeyGenerator().GetKeyParams(32, 16);
             // Create an archive //
             // create the cipher
-            using (ICipherMode cipher = new CTR(new RDX()))
+            using (ICipherMode cipher = new CTR(new RHX()))
             {
-                // initialize the cipher for encryption
-                cipher.Initialize(true, kp);
-
                 // create the archive file
                 using (FileStream fs = new FileStream(CompressedFilePath, FileMode.Create))
                 {
                     // compress and encrypt directory
-                    using (CompressionCipher cc = new CompressionCipher(true, cipher))
+                    using (CompressionCipher cc = new CompressionCipher(cipher))
                     {
                         // set the input folder path and archive output stream
-                        cc.Initialize(InputDirectory, fs);
+                        cc.Initialize(true, kp);
                         // write the compressed and encrypted archive to file
-                        cc.Write();
+                        cc.Deflate(InputDirectory, fs);
                     }
                 }
             }
 
             // Inflate an archive //
             // create the cipher
-            using (ICipherMode cipher = new CTR(new RDX()))
+            using (ICipherMode cipher = new CTR(new RHX()))
             {
-                // initialize the cipher for decryption
-                cipher.Initialize(false, kp);
-
                 // open the archive
                 using (FileStream decmp = new FileStream(CompressedFilePath, FileMode.Open))
                 {
                     // decrypt and inflate to output directory
-                    using (CompressionCipher cc = new CompressionCipher(false, cipher))
+                    using (CompressionCipher cc = new CompressionCipher(cipher))
                     {
                         // set the output folder path and archive path
-                        cc.Initialize(OutputDirectory, decmp);
+                        cc.Initialize(false, kp);
                         // decrypt and inflate the directory
-                        cc.Write();
+                        cc.Inflate(OutputDirectory, decmp);
                     }
                 }
             }
@@ -96,7 +90,7 @@ namespace VTDev.Projects.CEX.Tests
 
             // Encrypt a stream //
             // create the outbound cipher
-            using (ICipherMode cipher = new CTR(new RDX()))
+            using (ICipherMode cipher = new CTR(new RHX()))
             {
                 // initialize the cipher for encryption
                 cipher.Initialize(true, key);
@@ -126,7 +120,7 @@ namespace VTDev.Projects.CEX.Tests
 
             // Decrypt a stream //
             // create the inbound cipher
-            using (ICipherMode cipher = new CTR(new RDX()))
+            using (ICipherMode cipher = new CTR(new RHX()))
             {
                 // initialize the cipher for decryption
                 cipher.Initialize(false, key);
@@ -156,7 +150,7 @@ namespace VTDev.Projects.CEX.Tests
         }
 
         /// <summary>
-        /// Test the StreamCipher class implementation
+        /// Test the CipherStream class implementation
         /// <para>Throws an Exception on failure</</para>
         /// </summary>
         public static void StreamCipherTest()
@@ -179,19 +173,17 @@ namespace VTDev.Projects.CEX.Tests
 
             // Encrypt a stream //
             // create the outbound cipher
-            using (ICipherMode cipher = new CTR(new RDX()))
+            using (ICipherMode cipher = new CTR(new RHX()))
             {
-                // initialize the cipher for encryption
-                cipher.Initialize(true, key);
                 // set block size
                 ((CTR)cipher).ParallelBlockSize = BLSZ;
 
                 // encrypt the stream
-                using (StreamCipher sc = new StreamCipher(cipher))
+                using (CipherStream sc = new CipherStream(cipher))
                 {
-                    sc.Initialize(instrm, outstrm);
+                    sc.Initialize(true, key);
                     // encrypt the buffer
-                    sc.Write();
+                    sc.Write(instrm, outstrm);
                 }
             }
 
@@ -201,19 +193,17 @@ namespace VTDev.Projects.CEX.Tests
 
             // Decrypt a stream //
             // create the decryption cipher
-            using (ICipherMode cipher = new CTR(new RDX()))
+            using (ICipherMode cipher = new CTR(new RHX()))
             {
-                // initialize the cipher for decryption
-                cipher.Initialize(false, key);
                 // set block size
                 ((CTR)cipher).ParallelBlockSize = BLSZ;
 
                 // decrypt the stream
-                using (StreamCipher sc = new StreamCipher(cipher))
+                using (CipherStream sc = new CipherStream(cipher))
                 {
-                    sc.Initialize(outstrm, tmpstrm);
+                    sc.Initialize(false, key);
                     // process the encrypted bytes
-                    sc.Write();
+                    sc.Write(outstrm, tmpstrm);
                 }
             }
 
@@ -223,7 +213,7 @@ namespace VTDev.Projects.CEX.Tests
         }
 
         /// <summary>
-        /// Test the StreamDigest class implementation
+        /// Test the DigestStream class implementation
         /// <para>Throws an Exception on failure</</para>
         /// </summary>
         public static void StreamDigestTest()
@@ -240,7 +230,7 @@ namespace VTDev.Projects.CEX.Tests
             byte[] code1;
             byte[] code2;
 
-            using (StreamDigest sd = new StreamDigest(Digests.Keccak512))
+            using (DigestStream sd = new DigestStream(Digests.Keccak512))
             {
                 sd.Initialize(instrm);
                 code1 = sd.ComputeHash();
@@ -255,7 +245,7 @@ namespace VTDev.Projects.CEX.Tests
         }
 
         /// <summary>
-        /// Test the StreamMac class implementation
+        /// Test the MacStream class implementation
         /// <para>Throws an Exception on failure</</para>
         /// </summary>
         public static void StreamMacTest()
@@ -276,7 +266,7 @@ namespace VTDev.Projects.CEX.Tests
             byte[] code1;
             byte[] code2;
 
-            using (StreamMac sm = new StreamMac(new SHA512HMAC(key)))
+            using (MacStream sm = new MacStream(new HMAC(new SHA512(), key)))
             {
                 sm.Initialize(instrm);
                 code1 = sm.ComputeMac();
@@ -302,7 +292,7 @@ namespace VTDev.Projects.CEX.Tests
 
             // set cipher paramaters
             CipherDescription desc = new CipherDescription(
-                SymmetricEngines.RDX, 32,
+                SymmetricEngines.RHX, 32,
                 IVSizes.V128,
                 CipherModes.CTR,
                 PaddingModes.X923,

@@ -101,7 +101,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -125,7 +125,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             byte[] outBytes = new byte[Input.Length];
             byte[] outBytes2 = new byte[Input.Length];
 
-            using (RDX engine = new RDX(Input.Length))
+            using (RHX engine = new RHX(Input.Length))
             {
                 engine.Initialize(true, new KeyParams(Key));
                 engine.Transform(Input, outBytes);

@@ -1,5 +1,6 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
@@ -16,6 +17,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Get: The padding modes type name
+        /// </summary>
+        public PaddingModes Enumeral
+        {
+            get { return PaddingModes.TBC; }
+        }
+
         /// <summary>
         /// Get: Padding name
         /// </summary>
@@ -60,13 +69,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         /// <returns>Length of padding</returns>
         public int GetPaddingLength(byte[] Input)
         {
-            int plen = Input.Length;
-	        byte code = Input[plen - 1];
+            int len = Input.Length;
+	        byte code = Input[len - 1];
 
-	        while (plen != 0 && Input[plen - 1] == code)
-		        plen--;
+            if (code != MKCODE && code != ZBCODE)
+                return 0;
 
-            return Input.Length - plen;
+	        while (len != 0 && Input[len - 1] == code)
+		        len--;
+
+            return Input.Length - len;
         }
 
         /// <summary>
@@ -79,13 +91,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         /// <returns>Length of padding</returns>
         public int GetPaddingLength(byte[] Input, int Offset)
         {
-            int plen = Input.Length - Offset;
+            int len = Input.Length - Offset;
             byte code = Input[Input.Length - 1];
 
-	        while (plen != 0 && Input[Offset + (plen - 1)] == code)
-		        plen--;
+            if (code != MKCODE && code != ZBCODE)
+                return 0;
 
-            return (Input.Length - Offset) - plen;
+	        while (len != 0 && Input[Offset + (len - 1)] == code)
+		        len--;
+
+            return (Input.Length - Offset) - len;
         }
         #endregion
     }

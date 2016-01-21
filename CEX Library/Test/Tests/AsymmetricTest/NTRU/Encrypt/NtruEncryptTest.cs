@@ -42,7 +42,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -72,7 +72,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
         #region Private Methods
         private void DigestTest()
         {
-            CSPRng rng = new CSPRng();
+            CSPPrng rng = new CSPPrng();
             NTRUParameters param = (NTRUParameters)NTRUParamSets.EES1087EP2.DeepCopy();
 
             for (int i = 0; i < 3; i++)
@@ -157,11 +157,6 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
             param.Digest = Digests.Keccak512;
             EncryptDecrypt(param);
             OnProgress(new TestEventArgs("Passed the EES1087EP2/Keccak512 encryption test"));
-
-            // keccak 1024
-            param.Digest = Digests.Keccak1024;
-            EncryptDecrypt(param);
-            OnProgress(new TestEventArgs("Passed the EES1087EP2/Keccak1024 encryption test"));
 
             // skein 256 
             param.Digest = Digests.Skein256;
@@ -319,7 +314,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
         {
             NTRUParameters param = (NTRUParameters)NTRUParamSets.EES1087EP2FAST.DeepCopy();
             byte[] passphrase = Encoding.Unicode.GetBytes("password123");
-            byte[] salt = new CSPRng().GetBytes(16);
+            byte[] salt = new CSPPrng().GetBytes(16);
 
             NTRUKeyPair kp1;
             using (NTRUKeyGenerator kg = new NTRUKeyGenerator(param, false)) // note: parallel must be turned off with passphrase prng

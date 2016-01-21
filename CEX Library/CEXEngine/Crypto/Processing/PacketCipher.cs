@@ -7,13 +7,14 @@ using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Crypto.Helper;
 
 #endregion
 
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -147,7 +148,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     /// <item><description>This instance does not use padding; input and output arrays must be block aligned.</description></item>
     /// <item><description>Uses any of the implemented <see cref="ICipherMode">Cipher Mode</see> wrapped <see cref="SymmetricEngines">Block Ciphers</see>, or any of the implemented <see cref="IStreamCipher">Stream Ciphers</see>.</description></item>
     /// <item><description>Cipher Engine can be Disposed when this class is <see cref="Dispose()">Disposed</see>, set the DisposeEngine parameter in the class Constructor to true to dispose automatically.</description></item>
-    /// <item><description>Changes to the Cipher or StreamCipher <see cref="ParallelBlockSize">ParallelBlockSize</see> must be set after initialization.</description></item>
+    /// <item><description>Changes to the Cipher or CipherStream <see cref="ParallelBlockSize">ParallelBlockSize</see> must be set after initialization.</description></item>
     /// </list>
     /// </remarks>
     public class PacketCipher : IDisposable
@@ -237,10 +238,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             {
                 if (_isStreamCipher)
                 {
-                    if (_streamCipher.GetType().Equals(typeof(Fusion)))
-                        return ((Fusion)_streamCipher).ParallelMinimumSize;
+                    if (_streamCipher.GetType().Equals(typeof(ChaCha)))
+                        return ((ChaCha)_streamCipher).ParallelMinimumSize;
                     else
-                        return 0;
+                        return ((Salsa20)_streamCipher).ParallelMinimumSize;
                 }
                 else
                 {
@@ -292,18 +293,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
             if (_isStreamCipher = IsStreamCipher((SymmetricEngines)Description.EngineType))
             {
-                _streamCipher = GetStreamEngine((SymmetricEngines)Description.EngineType, Description.RoundCount, (Digests)Description.KdfEngine);
+                _streamCipher = GetStreamCipher((StreamCiphers)Description.EngineType, Description.RoundCount);
                 _streamCipher.Initialize(KeyParam);
 
-                if (_streamCipher.GetType().Equals(typeof(Fusion)))
+                if (_streamCipher.GetType().Equals(typeof(ChaCha)))
                 {
-                    if (_isParallel = ((Fusion)_streamCipher).IsParallel)
-                        _blockSize = ((Fusion)_streamCipher).ParallelBlockSize;
+                    if (_isParallel = ((ChaCha)_streamCipher).IsParallel)
+                        _blockSize = ((ChaCha)_streamCipher).ParallelBlockSize;
+                }
+                else
+                {
+                    if (_isParallel = ((Salsa20)_streamCipher).IsParallel)
+                        _blockSize = ((Salsa20)_streamCipher).ParallelBlockSize;
                 }
             }
             else
             {
-                _cipherEngine = GetCipher((CipherModes)Description.CipherType, (SymmetricEngines)Description.EngineType, Description.RoundCount, Description.BlockSize, (Digests)Description.KdfEngine);
+                _cipherEngine = GetCipherMode((CipherModes)Description.CipherType, (BlockCiphers)Description.EngineType, Description.BlockSize, Description.RoundCount, (Digests)Description.KdfEngine);
                 _cipherEngine.Initialize(_isEncryption, KeyParam);
 
                 if (_isCounterMode = _cipherEngine.GetType().Equals(typeof(CTR)))
@@ -366,7 +372,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         /// <summary>
         /// Initialize the class with a <see cref="IStreamCipher">Stream Cipher</see> instance.
-        /// <para>This constructor requires a fully initialized <see cref="SymmetricEngines">StreamCipher</see> instance.</para>
+        /// <para>This constructor requires a fully initialized <see cref="SymmetricEngines">CipherStream</see> instance.</para>
         /// </summary>
         /// 
         /// <param name="Cipher">The initialized <see cref="IStreamCipher">Stream Cipher</see> instance</param>
@@ -387,14 +393,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             _isCounterMode = false;
 
             // set defaults
-            if (_streamCipher.GetType().Equals(typeof(Fusion)))
+            if (_streamCipher.GetType().Equals(typeof(ChaCha)))
             {
-                if (_isParallel = ((Fusion)_streamCipher).IsParallel)
-                    _blockSize = ((Fusion)_streamCipher).ParallelBlockSize;
+                if (_isParallel = ((ChaCha)_streamCipher).IsParallel)
+                    _blockSize = ((ChaCha)_streamCipher).ParallelBlockSize;
             }
             else
             {
-                _isParallel = false;
+                if (_isParallel = ((Salsa20)_streamCipher).IsParallel)
+                    _blockSize = ((Salsa20)_streamCipher).ParallelBlockSize;
             }
         }
 
@@ -464,71 +471,60 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             }
         }
 
-        private IBlockCipher GetBlockEngine(SymmetricEngines EngineType, int RoundCount, int BlockSize, Digests KdfEngine)
+        private IBlockCipher GetBlockCipher(BlockCiphers EngineType, int BlockSize, int RoundCount, Digests KdfEngine)
         {
-            if (EngineType == SymmetricEngines.RDX)
-                return new RDX(BlockSize);
-            else if (EngineType == SymmetricEngines.RHX)
-                return new RHX(RoundCount, BlockSize, KdfEngine);
-            else if (EngineType == SymmetricEngines.RSM)
-                return new RSM(RoundCount, BlockSize, KdfEngine);
-            else if (EngineType == SymmetricEngines.SHX)
-                return new SHX(RoundCount, KdfEngine);
-            else if (EngineType == SymmetricEngines.SPX)
-                return new SPX(RoundCount);
-            else if (EngineType == SymmetricEngines.TFX)
-                return new TFX(RoundCount);
-            else if (EngineType == SymmetricEngines.THX)
-                return new THX(RoundCount, KdfEngine);
-            else if (EngineType == SymmetricEngines.TSM)
-                return new TSM(RoundCount, KdfEngine);
-            else
-                return new RHX(RoundCount, BlockSize, KdfEngine);
+            try
+            {
+                return BlockCipherFromName.GetInstance(EngineType, BlockSize, RoundCount, KdfEngine);
+            }
+            catch (Exception Ex)
+            {
+                throw new CryptoRandomException("CTRPrng:GetCipher", "The cipher could not be initialized!", Ex);
+            }
         }
 
-        private ICipherMode GetCipher(CipherModes CipherType, SymmetricEngines EngineType, int RoundCount, int BlockSize, Digests KdfEngine)
+        private ICipherMode GetCipherMode(CipherModes CipherType, BlockCiphers EngineType, int BlockSize, int RoundCount, Digests KdfEngine)
         {
-            if (CipherType == CipherModes.CBC)
-                return new CBC(GetBlockEngine(EngineType, RoundCount, BlockSize, KdfEngine));
-            else if (CipherType == CipherModes.CFB)
-                return new CFB(GetBlockEngine(EngineType, RoundCount, BlockSize, KdfEngine), BlockSize * 8);
-            else if (CipherType == CipherModes.OFB)
-                return new OFB(GetBlockEngine(EngineType, RoundCount, BlockSize, KdfEngine));
-            else
-                return new CTR(GetBlockEngine(EngineType, RoundCount, BlockSize, KdfEngine));
+            IBlockCipher engine = GetBlockCipher(EngineType, BlockSize, RoundCount, KdfEngine);
+
+            try
+            {
+                return CipherModeFromName.GetInstance(CipherType, engine);
+            }
+            catch (Exception ex)
+            {
+                throw new CryptoProcessingException("CipherStream:GetCipherMode", ex);
+            }
         }
 
-        private IPadding GetPadding(PaddingModes PaddingType)
+        private IPadding GetPaddingMode(PaddingModes PaddingType)
         {
-            if (PaddingType == PaddingModes.ISO7816)
-                return new ISO7816();
-            else if (PaddingType == PaddingModes.PKCS7)
-                return new PKCS7();
-            else if (PaddingType == PaddingModes.TBC)
-                return new TBC();
-            else if (PaddingType == PaddingModes.X923)
-                return new X923();
-            else
-                return new PKCS7();
+            try
+            {
+                return PaddingFromName.GetInstance(PaddingType);
+            }
+            catch (Exception ex)
+            {
+                throw new CryptoProcessingException("CipherStream:GetPaddingMode", ex);
+            }
         }
 
-        private IStreamCipher GetStreamEngine(SymmetricEngines EngineType, int RoundCount, Digests KdfEngine)
+        private IStreamCipher GetStreamCipher(StreamCiphers EngineType, int RoundCount)
         {
-            if (EngineType == SymmetricEngines.ChaCha)
-                return new ChaCha(RoundCount);
-            else if (EngineType == SymmetricEngines.Fusion)
-                return new Fusion(RoundCount, KdfEngine);
-            else if (EngineType == SymmetricEngines.Salsa)
-                return new Salsa20(RoundCount);
-            else
-                return null;
+            try
+            {
+                return StreamCipherFromName.GetInstance(EngineType, RoundCount);
+            }
+            catch (Exception ex)
+            {
+                throw new CryptoProcessingException("CipherStream:GetStreamEngine", ex);
+            }
         }
 
         private bool IsStreamCipher(SymmetricEngines EngineType)
         {
             return EngineType == SymmetricEngines.ChaCha ||
-                EngineType == SymmetricEngines.Salsa ||
-                EngineType == SymmetricEngines.Fusion;
+                EngineType == SymmetricEngines.Salsa;
         }
 
         private void ProcessStream(byte[] Input, int InOffset, byte[] Output, int OutOffset, int Length)

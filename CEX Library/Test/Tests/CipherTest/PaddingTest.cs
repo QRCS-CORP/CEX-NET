@@ -39,7 +39,7 @@ namespace VTDev.Projects.CEX.Test.Tests
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -65,7 +65,7 @@ namespace VTDev.Projects.CEX.Test.Tests
         #region Private
         void CompareOutput(IPadding Padding)
 		{
-			CSPRng rng = new CSPRng();
+			CSPPrng rng = new CSPPrng();
 			byte[] fill =  new byte[16];
 			rng.GetBytes(fill);
 			const int BLOCK = 16;
@@ -76,21 +76,26 @@ namespace VTDev.Projects.CEX.Test.Tests
 				// fill with rand
 				if (i > 0)
                     Array.Copy(fill, data, BLOCK - i);
+
 				// pad array
 				Padding.AddPadding(data, i);
 				// verify length
-				int plen = Padding.GetPaddingLength(data);
+				int len = Padding.GetPaddingLength(data);
 
-				if (plen != BLOCK - i)
+                if (len == 0 && i != 0)
+					throw new Exception("PaddingTest: Failed the padding value return check!");
+				else if (i != 0 && len != BLOCK - i)
                     throw new Exception("PaddingTest: Failed the padding value return check!");
 
 				// test offset method
 				if (i > 0 && i < 15)
 				{
-					plen = Padding.GetPaddingLength(data, i);
+					len = Padding.GetPaddingLength(data, i);
 
-					if (plen != BLOCK - i)
-                        throw new Exception("PaddingTest: Failed the offset padding value return check!");
+                    if (len == 0 && i != 0)
+                        throw new Exception("PaddingTest: Failed the padding value return check!");
+                    else if (i != 0 && len != BLOCK - i)
+                        throw new Exception("PaddingTest: Failed the padding value return check!");
 				}
 			}
 

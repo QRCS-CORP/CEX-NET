@@ -44,7 +44,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -149,7 +149,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             byte[] outBytes = new byte[Input.Length];
             Array.Copy(Input, 0, outBytes, 0, outBytes.Length);
 
-            using (TFX engine = new TFX())
+            using (THX engine = new THX())
             {
                 engine.Initialize(Encrypt, new KeyParams(Key));
 
@@ -165,7 +165,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         {
             byte[] outBytes = new byte[Input.Length];
 
-            using (TFX tfx = new TFX())
+            using (THX tfx = new THX())
             {
                 tfx.Initialize(true, new KeyParams(Key));
                 tfx.EncryptBlock(Input, outBytes);
@@ -174,7 +174,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             if (Evaluate.AreEqual(outBytes, Output) == false)
                 throw new Exception("Twofish Vector: Encrypted arrays are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
 
-            using (TFX tfx = new TFX())
+            using (THX tfx = new THX())
             {
                 tfx.Initialize(false, new KeyParams(Key));
                 tfx.Transform(Output, outBytes);

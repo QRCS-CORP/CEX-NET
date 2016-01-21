@@ -42,7 +42,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             byte[] plainText = HexConverter.Decode("00000000000000000000000000000000");
             byte[] key;
@@ -132,7 +132,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         #region Private
         private void VectorTest(byte[] Key, byte[] Input, byte[] Output)
         {
-            using (RDX engine = new RDX())
+            using (RHX engine = new RHX())
             {
                 byte[] outBytes = new byte[Input.Length];
 

@@ -1,6 +1,7 @@
 ﻿#region Directives
 using System;
 using System.IO;
+using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Mac;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Crypto.Processing;
@@ -10,14 +11,14 @@ using VTDev.Libraries.CEXEngine.Tools;
 namespace VTDev.Projects.CEX.Test.Tests.MacTest
 {
     /// <summary>
-    /// Compares the normal mode of StreamMac with the Concurrent mode for equality
+    /// Compares the normal mode of MacStream with the Concurrent mode for equality
     /// </summary>
     public class StreamMacTest : ITest
     {
         #region Constants
-        private const string DESCRIPTION = "Compares the normal mode of StreamMac with the Concurrent mode for equality.";
+        private const string DESCRIPTION = "Compares the normal mode of MacStream with the Concurrent mode for equality.";
         private const string FAILURE = "FAILURE! ";
-        private const string SUCCESS = "SUCCESS! All StreamMac tests have executed succesfully.";
+        private const string SUCCESS = "SUCCESS! All MacStream tests have executed succesfully.";
         #endregion
 
         #region Events
@@ -38,12 +39,12 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
 
         #region Public Methods
         /// <summary>
-        /// Tests for correctness of parallel processing mode in the StreamMac implementation
+        /// Tests for correctness of parallel processing mode in the MacStream implementation
         /// by comparing digest output between both modes performed on random temp files
         /// </summary>
         /// 
         /// <returns>Status</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -63,7 +64,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
         private string CreateTempFile(int Size)
         {
             string path = Path.GetTempFileName();
-            byte[] data = new CSPRng().GetBytes(Size);
+            byte[] data = new CSPPrng().GetBytes(Size);
 
             File.WriteAllBytes(path, data);
 
@@ -73,7 +74,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
         private void MacTests()
         {
             string path = CreateTempFile(117674);
-            byte[] Ikm = new CSPRng().GetBytes(32);
+            byte[] Ikm = new CSPPrng().GetBytes(32);
             byte[] x1 = MacTest1(path, Ikm);
             byte[] y1 = MacTest2(path, Ikm);
 
@@ -119,7 +120,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
         {
             using (FileStream inStream = new FileStream(FileName, FileMode.Open))
             {
-                using (StreamMac mac = new StreamMac(new SHA512HMAC(IKm)))
+                using (MacStream mac = new MacStream(new HMAC(new SHA512(),IKm)))
                 {
                     mac.Initialize(inStream);
                     mac.IsConcurrent = true;
@@ -132,7 +133,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
         {
             using (FileStream inStream = new FileStream(FileName, FileMode.Open))
             {
-                using (StreamMac mac = new StreamMac(new SHA512HMAC(IKm)))
+                using (MacStream mac = new MacStream(new HMAC(new SHA512(), IKm)))
                 {
                     mac.Initialize(inStream);
                     mac.IsConcurrent = false;
@@ -143,18 +144,18 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
 
         private bool MacTest3(byte[] IKm)
         {
-            byte[] data = new CSPRng().GetBytes(33033);
+            byte[] data = new CSPPrng().GetBytes(33033);
             byte[] hash1;
             byte[] hash2;
 
-            using (StreamMac mac1 = new StreamMac(new SHA512HMAC(IKm)))
+            using (MacStream mac1 = new MacStream(new HMAC(new SHA512(), IKm)))
             {
                 mac1.Initialize(new MemoryStream(data));
                 mac1.IsConcurrent = false;
                 hash1 =  mac1.ComputeMac();
             }
 
-            using (SHA512HMAC mac2 = new SHA512HMAC(IKm))
+            using (HMAC mac2 = new HMAC(new SHA512(), IKm))
                 hash2 = mac2.ComputeMac(data);
 
             return Evaluate.AreEqual(hash1, hash2);

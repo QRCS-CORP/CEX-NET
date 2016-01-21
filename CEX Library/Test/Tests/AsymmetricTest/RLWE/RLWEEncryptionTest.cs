@@ -40,7 +40,7 @@ namespace Test.Tests
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -71,7 +71,7 @@ namespace Test.Tests
             {
                 cipher.Initialize(keyPair.PublicKey);
                 data = new byte[cipher.MaxPlainText];
-                new CSPRng().GetBytes(data);
+                new CSPPrng().GetBytes(data);
                 enc = cipher.Encrypt(data);
             }
             
@@ -99,7 +99,7 @@ namespace Test.Tests
 
                 int sz = mpe.MaxPlainText;
                 byte[] data = new byte[sz];
-                new CSPRng().GetBytes(data);
+                new CSPPrng().GetBytes(data);
 
                 enc = mpe.Encrypt(data);
 

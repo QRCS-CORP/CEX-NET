@@ -1,5 +1,6 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
@@ -15,6 +16,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Get: The padding modes type name
+        /// </summary>
+        public PaddingModes Enumeral
+        {
+            get { return PaddingModes.PKCS7; }
+        }
+
         /// <summary>
         /// Get: Padding name
         /// </summary>
@@ -52,13 +61,30 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         /// <returns>Length of padding</returns>
         public int GetPaddingLength(byte[] Input)
         {
-            int plen = Input.Length - 1;
-	        byte code = Input[plen];
+            // note: even with the check, if the last decrypted byte is equal to 1,
+            // pkcs will see this last data byte as indicating a single byte of padding and return 1..
+            // If an input does not need padding, mark the corresponding padding flag (in ex. CipherDescription) to None
+            int len = Input.Length - 1;
+	        byte code = Input[len];
 
-	        if ((int)code > plen)
-		        return (code > plen + 1) ? 0 : plen + 1;
-	        else
-		        return code;
+            if ((int)code > len)
+            {
+                return (code > len + 1) ? 0 : len + 1;
+            }
+            else
+            {
+                // double check
+                for (int i = Input.Length - 1; i >= Input.Length - code; --i)
+                {
+                    if (Input[i] != code)
+                    {
+                        code = 0;
+                        break;
+                    }
+                }
+
+                return code;
+            }
         }
 
         /// <summary>
@@ -71,13 +97,26 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         /// <returns>Length of padding</returns>
         public int GetPaddingLength(byte[] Input, int Offset)
         {
-            int plen = Input.Length - (Offset + 1);
+            int len = Input.Length - (Offset + 1);
 	        byte code = Input[Input.Length - 1];
 
-	        if ((int)code > plen)
-		        return (code > plen + 1) ? 0 : plen + 1;
-	        else
-		        return code;
+            if ((int)code > len)
+            {
+                return (code > len + 1) ? 0 : len + 1;
+            }
+            else
+            {
+                for (int i = Input.Length - 1; i >= Input.Length - code; --i)
+                {
+                    if (Input[i] != code)
+                    {
+                        code = 0;
+                        break;
+                    }
+                }
+
+                return code;
+            }
         }
         #endregion
     }

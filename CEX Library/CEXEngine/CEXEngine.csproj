@@ -102,6 +102,15 @@
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Support\DtmBufferSizes.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Support\DtmFileTransfer.cs" />
     <Compile Include="Crypto\Common\Compare.cs" />
+    <Compile Include="Crypto\Helper\BlockCipherFromName.cs" />
+    <Compile Include="Crypto\Helper\CipherModeFromName.cs" />
+    <Compile Include="Crypto\Helper\DigestFromName.cs" />
+    <Compile Include="Crypto\Helper\PaddingFromName.cs" />
+    <Compile Include="Crypto\Helper\PrngFromName.cs" />
+    <Compile Include="Crypto\Helper\SeedGeneratorFromName.cs" />
+    <Compile Include="Crypto\Helper\StreamCipherFromName.cs" />
+    <Compile Include="Crypto\Seed\EntropyPool.cs" />
+    <Compile Include="Crypto\Seed\ISCRsg.cs" />
     <Compile Include="Networking\PacketBuffer.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmerticGenerator.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmetricCipher.cs" />
@@ -223,22 +232,15 @@
     <Compile Include="Crypto\Cipher\Asymmetric\Sign\RNBW\RNBWPublicKey.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Sign\RNBW\RNBWSign.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Stream\ChaCha.cs" />
-    <Compile Include="Crypto\Cipher\Symmetric\Stream\Fusion.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Block\IBlockCipher.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Stream\IStreamCipher.cs" />
-    <Compile Include="Crypto\Cipher\Symmetric\Block\RDX.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Block\RHX.cs" />
-    <Compile Include="Crypto\Cipher\Symmetric\Block\RSM.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Stream\Salsa20.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Block\SHX.cs" />
-    <Compile Include="Crypto\Cipher\Symmetric\Block\SPX.cs" />
-    <Compile Include="Crypto\Cipher\Symmetric\Block\TFX.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Block\THX.cs" />
-    <Compile Include="Crypto\Cipher\Symmetric\Block\TSM.cs" />
     <Compile Include="Crypto\Digest\Blake256.cs" />
     <Compile Include="Crypto\Digest\Blake512.cs" />
     <Compile Include="Crypto\Digest\IDigest.cs" />
-    <Compile Include="Crypto\Digest\Keccak1024.cs" />
     <Compile Include="Crypto\Digest\Keccak256.cs" />
     <Compile Include="Crypto\Digest\Keccak512.cs" />
     <Compile Include="Crypto\Digest\SHA256.cs" />
@@ -300,14 +302,14 @@
     <Compile Include="Crypto\Processing\Structure\VolumeKey.cs" />
     <Compile Include="Crypto\Processing\Structure\MessageHeader.cs" />
     <Compile Include="Crypto\Mac\CMAC.cs" />
-    <Compile Include="Crypto\Mac\VMPCMAC.cs" />
+    <Compile Include="Crypto\Mac\VMAC.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Block\Padding\ISO7816.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Block\Padding\TBC.cs" />
     <Compile Include="Crypto\Prng\BBSG.cs" />
     <Compile Include="Crypto\Generator\DGCDrbg.cs" />
     <Compile Include="Crypto\Prng\CCG.cs" />
     <Compile Include="Crypto\Prng\IRandom.cs" />
-    <Compile Include="Crypto\Prng\CSPRng.cs" />
+    <Compile Include="Crypto\Prng\CSPPrng.cs" />
     <Compile Include="Crypto\Prng\MODEXPG.cs" />
     <Compile Include="Crypto\Prng\PBPRng.cs" />
     <Compile Include="Crypto\Prng\QCG1.cs" />
@@ -318,9 +320,9 @@
     <Compile Include="Crypto\Generator\IGenerator.cs" />
     <Compile Include="Crypto\Common\KeyGenerator.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Block\Mode\OFB.cs" />
-    <Compile Include="Crypto\Processing\StreamCipher.cs" />
-    <Compile Include="Crypto\Processing\StreamDigest.cs" />
-    <Compile Include="Crypto\Processing\StreamMac.cs" />
+    <Compile Include="Crypto\Processing\CipherStream.cs" />
+    <Compile Include="Crypto\Processing\DigestStream.cs" />
+    <Compile Include="Crypto\Processing\MacStream.cs" />
     <Compile Include="Crypto\Processing\Structure\PackageInfo.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Structure\DtmSessionStruct.cs" />
     <Compile Include="CryptoException\CryptoSocketException.cs" />
@@ -344,8 +346,6 @@
     <Compile Include="Queue\WaitQueue.cs" />
     <Compile Include="Crypto\Mac\HMAC.cs" />
     <Compile Include="Crypto\Mac\IMac.cs" />
-    <Compile Include="Crypto\Mac\SHA256HMAC.cs" />
-    <Compile Include="Crypto\Mac\SHA512HMAC.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Block\Mode\CBC.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Block\Mode\CFB.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Block\Mode\CTR.cs" />
@@ -360,7 +360,7 @@
     <Compile Include="Tools\Evaluate.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Tools\Compress.cs" />
+    <Compile Include="Tools\Compressor.cs" />
     <Compile Include="Tools\Ent.cs" />
     <Compile Include="Tools\NetworkTools.cs" />
     <Compile Include="Crypto\Common\ArrayEx.cs">
@@ -377,6 +377,7 @@
     <Compile Include="Utility\IntUtils.cs" />
     <Compile Include="Utility\NetworkUtils.cs" />
     <Compile Include="Utility\ParallelUtils.cs" />
+    <Compile Include="Utility\RegistryUtils.cs" />
     <Compile Include="Utility\SystemUtils.cs" />
   </ItemGroup>
   <ItemGroup>

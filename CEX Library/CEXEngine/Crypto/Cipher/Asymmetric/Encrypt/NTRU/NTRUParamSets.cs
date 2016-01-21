@@ -141,7 +141,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
                 throw new CryptoAsymmetricException("NTRUParameters:FromId", "OId can not be null!", new ArgumentNullException());
             if (OId.Length != 4)
                 throw new CryptoAsymmetricException("NTRUParameters:FromId", "OId must be 4 bytes in length!", new ArgumentOutOfRangeException());
-            if (OId[0] != 2)
+            if (OId[0] != (byte)AsymmetricEngines.NTRU)
                 throw new CryptoAsymmetricException("NTRUParameters:FromId", "OId is not a valid NTRU parameter id!", new ArgumentException());
 
             if (OId[2] == 2)
@@ -261,7 +261,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
             else
             {
                 NTRUParameters param = FromName(ParamName);
-                var prng = new Prng.CSPRng();
+                var prng = new Prng.CSPPrng();
                 int diff;
 
                 if (DbMaxReductionFactor > 0.0)
@@ -313,29 +313,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
             switch (ParamName)
             {
                 case NTRUParamNames.A2011439:
-                    return new byte[] { 2, 2, 1, 101 };
+                    return new byte[] { (byte)AsymmetricEngines.NTRU, 2, 1, 101 };
                 case NTRUParamNames.A2011743:
-                    return new byte[] { 2, 2, 1, 105 };
+                    return new byte[] { (byte)AsymmetricEngines.NTRU, 2, 1, 105 };
                 case NTRUParamNames.E1087EP2:
-                    return new byte[] { 2, 1, 1, 63 };
+                    return new byte[] { (byte)AsymmetricEngines.NTRU, 1, 1, 63 };
                 case NTRUParamNames.E1171EP1:
-                    return new byte[] { 2, 1, 1, 64 };
+                    return new byte[] { (byte)AsymmetricEngines.NTRU, 1, 1, 64 };
                 case NTRUParamNames.E1499EP1:
-                    return new byte[] { 2, 1, 1, 65 };
+                    return new byte[] { (byte)AsymmetricEngines.NTRU, 1, 1, 65 };
                 case NTRUParamNames.FA2011439:
-                    return new byte[] { 2, 2, 2, 101 };
+                    return new byte[] { (byte)AsymmetricEngines.NTRU, 2, 2, 101 };
                 case NTRUParamNames.FA2011743:
-                    return new byte[] { 2, 2, 2, 105 };
+                    return new byte[] { (byte)AsymmetricEngines.NTRU, 2, 2, 105 };
                 case NTRUParamNames.FE1087EP2:
-                    return new byte[] { 2, 1, 2, 63 };
+                    return new byte[] { (byte)AsymmetricEngines.NTRU, 1, 2, 63 };
                 case NTRUParamNames.FE1171EP1:
-                    return new byte[] { 2, 1, 2, 64 };
+                    return new byte[] { (byte)AsymmetricEngines.NTRU, 1, 2, 64 };
                 case NTRUParamNames.FE1499EP1:
-                    return new byte[] { 2, 1, 2, 65 };
+                    return new byte[] { (byte)AsymmetricEngines.NTRU, 1, 2, 65 };
                 case NTRUParamNames.CX1861:
-                    return new byte[] { 2, 3, 1, 7 };
+                    return new byte[] { (byte)AsymmetricEngines.NTRU, 3, 1, 7 };
                 case NTRUParamNames.CX1931:
-                    return new byte[] { 2, 3, 1, 8 };
+                    return new byte[] { (byte)AsymmetricEngines.NTRU, 3, 1, 8 };
                 default:
                     throw new CryptoAsymmetricException("NTRUParameters:FromName", "The enumeration name is unknown!", new ArgumentException());
             }
@@ -350,62 +350,62 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// Experimental, use with caution. Uses a larger ring and Skein512.
         /// <para>MaxText: 233, N:1931 Q:2048, Df:380, PublicKey Size: 2660, PrivateKey Size: 388</para>
         /// </summary>
-        public static readonly NTRUParameters CX1931SK512 = new NTRUParameters(new byte[] { 2, 3, 1, 8 }, 1931, 2048, 380, 380, 0, 1024, 20, 30, 11, true, true, false, Digests.Skein512, Prngs.CTRPrng);
+        public static readonly NTRUParameters CX1931SK512 = new NTRUParameters(new byte[] { (byte)AsymmetricEngines.NTRU, 3, 1, 8 }, 1931, 2048, 380, 380, 0, 1024, 20, 30, 11, true, true, false, Digests.Skein512, Prngs.CTRPrng);
         /// <summary>
         /// Experimental, use with caution. Uses a larger ring and Skein512.
         /// <para>MaxText: 219, N:1861 Q:2048, Df:290, PublicKey Size: 2563, PrivateKey Size: 374</para>
         /// </summary>
-        public static readonly NTRUParameters CX1861SK512 = new NTRUParameters(new byte[] { 2, 3, 1, 7 }, 1861, 2048, 290, 290, 0, 960, 14, 22, 10, true, true, false, Digests.Skein512, Prngs.CTRPrng);
+        public static readonly NTRUParameters CX1861SK512 = new NTRUParameters(new byte[] { (byte)AsymmetricEngines.NTRU, 3, 1, 7 }, 1861, 2048, 290, 290, 0, 960, 14, 22, 10, true, true, false, Digests.Skein512, Prngs.CTRPrng);
         /// <summary>
         /// A conservative parameter set that gives 256 bits of security and is optimized for key size.
         /// <para>MaxText: 170, N:1087 Q:2048, Df:120, PublicKey Size: 1499, PrivateKey Size: 221</para>
         /// </summary>
-        public static readonly NTRUParameters EES1087EP2 = new NTRUParameters(new byte[] { 2, 1, 1, 63 }, 1087, 2048, 120, 120, 0, 256, 13, 25, 14, true, true, false, Digests.SHA512, Prngs.CTRPrng);
+        public static readonly NTRUParameters EES1087EP2 = new NTRUParameters(new byte[] { (byte)AsymmetricEngines.NTRU, 1, 1, 63 }, 1087, 2048, 120, 120, 0, 256, 13, 25, 14, true, true, false, Digests.SHA512, Prngs.CTRPrng);
         /// <summary>
         /// A product-form version of <c>EES1087EP2</c>
         /// <para>MaxText: 170, N:1087 Q:2048, Df:120, PublicKey Size: 1499, PrivateKey Size: 93</para>
         /// </summary>
-        public static readonly NTRUParameters EES1087EP2FAST = new NTRUParameters(new byte[] { 2, 1, 2, 63 }, 1087, 2048, 8, 8, 11, 120, 0, 256, 13, 25, 14, true, true, true, Digests.SHA512, Prngs.CTRPrng);
+        public static readonly NTRUParameters EES1087EP2FAST = new NTRUParameters(new byte[] { (byte)AsymmetricEngines.NTRU, 1, 2, 63 }, 1087, 2048, 8, 8, 11, 120, 0, 256, 13, 25, 14, true, true, true, Digests.SHA512, Prngs.CTRPrng);
         /// <summary>
         /// A conservative parameter set that gives 256 bits of security and is a tradeoff between key size and encryption/decryption speed.
         /// <para>MaxText: 186, N:1171 Q:2048, Df:106, PublicKey Size: 1615, PrivateKey Size: 237</para>
         /// </summary>
-        public static readonly NTRUParameters EES1171EP1 = new NTRUParameters(new byte[] { 2, 1, 1, 64 }, 1171, 2048, 106, 106, 0, 256, 13, 20, 15, true, true, false, Digests.SHA512, Prngs.CTRPrng);
+        public static readonly NTRUParameters EES1171EP1 = new NTRUParameters(new byte[] { (byte)AsymmetricEngines.NTRU, 1, 1, 64 }, 1171, 2048, 106, 106, 0, 256, 13, 20, 15, true, true, false, Digests.SHA512, Prngs.CTRPrng);
         /// <summary>
         /// A product-form version of <c>EES1171EP1</c>
         /// <para>MaxText: 186, N:1171 Q:2048, Df:106, PublicKey Size: 1615, PrivateKey Size: 237</para>
         /// </summary>
-        public static readonly NTRUParameters EES1171EP1FAST = new NTRUParameters(new byte[] { 2, 1, 2, 64 }, 1171, 2048, 8, 7, 11, 106, 0, 256, 13, 20, 15, true, true, true, Digests.SHA512, Prngs.CTRPrng);
+        public static readonly NTRUParameters EES1171EP1FAST = new NTRUParameters(new byte[] { (byte)AsymmetricEngines.NTRU, 1, 2, 64 }, 1171, 2048, 8, 7, 11, 106, 0, 256, 13, 20, 15, true, true, true, Digests.SHA512, Prngs.CTRPrng);
         /// <summary>
         /// A conservative parameter set that gives 256 bits of security and is optimized for encryption/decryption speed.
         /// <para>MaxText: 248, N:1499 Q:2048, Df:79, PublicKey Size: 2066, PrivateKey Size: 302</para>
         /// </summary>
-        public static readonly NTRUParameters EES1499EP1 = new NTRUParameters(new byte[] { 2, 1, 1, 65 }, 1499, 2048, 79, 79, 0, 256, 13, 17, 19, true, true, false, Digests.SHA512, Prngs.CTRPrng);
+        public static readonly NTRUParameters EES1499EP1 = new NTRUParameters(new byte[] { (byte)AsymmetricEngines.NTRU, 1, 1, 65 }, 1499, 2048, 79, 79, 0, 256, 13, 17, 19, true, true, false, Digests.SHA512, Prngs.CTRPrng);
         /// <summary>
         /// A product-form version of <c>EES1499EP1</c>
         /// <para>MaxText: 248, N:1499 Q:2048, Df:79, PublicKey Size: 2066, PrivateKey Size: 302</para>
         /// </summary>
-        public static readonly NTRUParameters EES1499EP1FAST = new NTRUParameters(new byte[] { 2, 1, 2, 65 }, 1499, 2048, 7, 6, 11, 79, 0, 256, 13, 17, 19, true, true, true, Digests.SHA512, Prngs.CTRPrng);
+        public static readonly NTRUParameters EES1499EP1FAST = new NTRUParameters(new byte[] { (byte)AsymmetricEngines.NTRU, 1, 2, 65 }, 1499, 2048, 7, 6, 11, 79, 0, 256, 13, 17, 19, true, true, true, Digests.SHA512, Prngs.CTRPrng);
         /// <summary>
         /// A parameter set that gives 256 bits of security and uses simple ternary polynomials.
         /// <para>MaxText: 106, N:743 Q:2048, Df:248, PublicKey Size: 1026, PrivateKey Size: 153</para>
         /// </summary>
-        public static readonly NTRUParameters APR2011743 = new NTRUParameters(new byte[] { 2, 2, 1, 105 }, 743, 2048, 248, 220, 60, 256, 12, 27, 14, true, false, false, Digests.SHA512, Prngs.CTRPrng);
+        public static readonly NTRUParameters APR2011743 = new NTRUParameters(new byte[] { (byte)AsymmetricEngines.NTRU, 2, 1, 105 }, 743, 2048, 248, 220, 60, 256, 12, 27, 14, true, false, false, Digests.SHA512, Prngs.CTRPrng);
         /// <summary>
         /// Like <c>APR2011_743</c>, this parameter set gives 256 bits of security but uses product-form polynomials and <c>f=1+pF</c>. 
         /// <para>MaxText: 106, N:743 Q:2048, Df:248, PublicKey Size: 1026, PrivateKey Size: 123</para>
         /// </summary>
-        public static readonly NTRUParameters APR2011743FAST = new NTRUParameters(new byte[] { 2, 2, 2, 105 }, 743, 2048, 11, 11, 15, 220, 60, 256, 12, 27, 14, true, false, true, Digests.SHA512, Prngs.CTRPrng);
+        public static readonly NTRUParameters APR2011743FAST = new NTRUParameters(new byte[] { (byte)AsymmetricEngines.NTRU, 2, 2, 105 }, 743, 2048, 11, 11, 15, 220, 60, 256, 12, 27, 14, true, false, true, Digests.SHA512, Prngs.CTRPrng);
         /// <summary>
         /// A parameter set that gives 128 bits of security and uses simple ternary polynomials.
         /// <para>MaxText: 65, N:439 Q:2048, Df:146, PublicKey Size: 608, PrivateKey Size: 92</para>
         /// </summary>
-        public static readonly NTRUParameters APR2011439 = new NTRUParameters(new byte[] { 2, 2, 1, 101 }, 439, 2048, 146, 130, 126, 128, 12, 32, 9, true, true, false, Digests.SHA256, Prngs.CTRPrng);
+        public static readonly NTRUParameters APR2011439 = new NTRUParameters(new byte[] { (byte)AsymmetricEngines.NTRU, 2, 1, 101 }, 439, 2048, 146, 130, 126, 128, 12, 32, 9, true, true, false, Digests.SHA256, Prngs.CTRPrng);
         /// <summary>
         /// Like <c>APR2011_439</c>, this parameter set gives 128 bits of security but uses product-form polynomials and <c>f=1+pF</c>.
         /// <para>MaxText: 65, N:439 Q:2048, Df:146, PublicKey Size: 608, PrivateKey Size: 79</para>
         /// </summary>
-        public static readonly NTRUParameters APR2011439FAST = new NTRUParameters(new byte[] { 2, 2, 2, 101 }, 439, 2048, 9, 8, 5, 130, 126, 128, 12, 32, 9, true, true, true, Digests.SHA256, Prngs.CTRPrng);
+        public static readonly NTRUParameters APR2011439FAST = new NTRUParameters(new byte[] { (byte)AsymmetricEngines.NTRU, 2, 2, 101 }, 439, 2048, 9, 8, 5, 130, 126, 128, 12, 32, 9, true, true, true, Digests.SHA256, Prngs.CTRPrng);
         #endregion
     }
 }

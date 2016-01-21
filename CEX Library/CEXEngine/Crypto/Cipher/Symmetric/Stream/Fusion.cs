@@ -453,7 +453,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
                 {
                     // offset counter by chunk size / block size
                     vectors[i] = Increase(_ctrVector, subSize * i);
-                    // create random with offset counter
+                    // create random at offset position
                     byte[] rand = Generate(cnkSize, vectors[i]);
 
                     // xor with input at offset
@@ -522,7 +522,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
                 {
                     // offset counter by chunk size / block size
                     vectors[i] = Increase(_ctrVector, subSize * i);
-                    // create random with offset counter
+                    // create random at offset position
                     byte[] rand = Generate(cnkSize, vectors[i]);
 
                     // xor with input at offset
@@ -552,10 +552,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// 
         /// <param name="Input">Bytes to Encrypt</param>
         /// <param name="InOffset">Offset in the Input array</param>
-        /// <param name="Length">Number of bytes to process</param>
         /// <param name="Output">Encrypted bytes</param>
         /// <param name="OutOffset">Offset in the Output array</param>
-        public void Transform(byte[] Input, int InOffset, int Length, byte[] Output, int OutOffset)
+        /// <param name="Length">Number of bytes to process</param>
+        public void Transform(byte[] Input, int InOffset, byte[] Output, int OutOffset, int Length)
         {
             int blkSize = Length;
 
@@ -593,7 +593,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
                 {
                     // offset counter by chunk size / block size
                     vectors[i] = Increase(_ctrVector, subSize * i);
-                    // create random with offset counter
+                    // create random at offset position
                     byte[] rand = Generate(cnkSize, vectors[i]);
 
                     // xor with input at offset

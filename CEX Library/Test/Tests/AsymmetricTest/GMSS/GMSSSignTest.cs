@@ -38,13 +38,14 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.GMSS
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
-                TestSign(GMSSParamSets.GMSSN2P10);
+                TestSign(GMSSParamSets.FromName(GMSSParamSets.GMSSParamNames.N2P10));
                 OnProgress(new TestEventArgs("N33L5 params Passed Key Generation, Sign, and Verify Tests.."));
 
+                // too slow on debug..
                 if (!System.Diagnostics.Debugger.IsAttached)
                 {
                     TestSign(GMSSParamSets.FromName(GMSSParamSets.GMSSParamNames.N2P20));
@@ -69,7 +70,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.GMSS
             GMSSKeyGenerator mkgen = new GMSSKeyGenerator(CipherParam);
             IAsymmetricKeyPair akp = mkgen.GenerateKeyPair();
             byte[] data = new byte[200];
-            new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPRng().GetBytes(data);
+            new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPPrng().GetBytes(data);
 
             using (GMSSSign sgn = new GMSSSign(CipherParam))
             {
@@ -81,8 +82,9 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.GMSS
                 if (!sgn.Verify(data, 0, data.Length, code))
                     throw new Exception("RLWESignTest: Sign operation failed!");
 
-                // sign and test stream ctor
-                sgn.Initialize(akp.PrivateKey);
+                // get the next available key (private sub-key is used only once)
+                GMSSPrivateKey nk = ((GMSSPrivateKey)akp.PrivateKey).NextKey();
+                sgn.Initialize(nk);
                 code = sgn.Sign(new MemoryStream(data));
                 // verify the signature
                 sgn.Initialize(akp.PublicKey);

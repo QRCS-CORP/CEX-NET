@@ -43,7 +43,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         private int GetKeySize(IBlockCipher Engine)
         {
             if (Engine.Name == "RHX")
-                return ((RHX)Engine).LegalKeySizes[0];
+                return ((RHX)Engine).LegalKeySizes[4];
             else if (Engine.Name == "SHX")
                 return ((SHX)Engine).LegalKeySizes[0];
             else if (Engine.Name == "THX")
@@ -57,7 +57,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             switch (EngineType)
             {
                 case BlockCiphers.RHX:
-                    return new RHX((int)Rounds, 16, DigestType);
+                    return new RHX(16, (int)Rounds, DigestType);
                 case BlockCiphers.SHX:
                     return new SHX((int)Rounds, DigestType);
                 case BlockCiphers.THX:
@@ -69,9 +69,13 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         private string MonteCarloTest(ICipherMode Engine)
         {
             byte[] outBytes = new byte[Engine.BlockSize];
+            byte[] inBytes = new byte[Engine.BlockSize];
 
             for (int i = 0; i < 100; i++)
-                Engine.Transform(outBytes, outBytes);
+            {
+                Engine.Transform(inBytes, outBytes);
+                inBytes = (byte[])outBytes.Clone();
+            }
 
             return HexConverter.ToString(outBytes);
         }

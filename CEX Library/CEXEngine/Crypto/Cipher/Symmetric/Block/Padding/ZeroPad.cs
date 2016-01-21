@@ -1,5 +1,6 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
@@ -14,6 +15,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Get: The padding modes type name
+        /// </summary>
+        public PaddingModes Enumeral
+        {
+            get { return PaddingModes.None; }
+        }
+
         /// <summary>
         /// Get: Padding name
         /// </summary>

@@ -131,12 +131,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// 
         /// <exception cref="System.IO.FileLoadException">A key file exists at the path specified</exception>
         /// <exception cref="System.UnauthorizedAccessException">The key file path is read only</exception>
-        public void Create(VolumeKey Key, Prngs SeedEngine = Prngs.CSPRng, Digests HashEngine = Digests.SHA512)
+        public void Create(VolumeKey Key, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, Digests HashEngine = Digests.SHA512)
         {
             int ksize = Key.Count * (Key.Description.KeySize + Key.Description.IvSize);
             byte[] kdata;
 
-            using (KeyGenerator keyGen = new KeyGenerator(SeedEngine, HashEngine))
+            using (KeyGenerator keyGen = new KeyGenerator(SeedEngine, HashEngine, null))
                 kdata = keyGen.GetBytes(ksize);
 
             if (_keyStream == null)

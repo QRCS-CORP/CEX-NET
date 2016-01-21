@@ -8,14 +8,14 @@
         /// <summary>
         /// The key pair is unassigned
         /// </summary>
-        Unassigned = 0,
+        Unassigned = 1,
         /// <summary>
         /// The key pair was used for encryption
         /// </summary>
-        Encrypted,
+        Encrypted = 2,
         /// <summary>
         /// The key pair was used for decryption
         /// </summary>
-        Decrypted
+        Decrypted = 4
     }
 }

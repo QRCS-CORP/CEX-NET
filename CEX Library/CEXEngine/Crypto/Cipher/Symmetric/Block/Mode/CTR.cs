@@ -1,14 +1,16 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Crypto.Common;
-using VTDev.Libraries.CEXEngine.CryptoException;
 using System.Threading.Tasks;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
+using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -119,6 +121,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         {
             get { return _blockCipher; }
             private set { _blockCipher = value; }
+        }
+
+        /// <summary>
+        /// Get: The cipher modes type name
+        /// </summary>
+        public CipherModes Enumeral
+        {
+            get { return CipherModes.CTR; }
         }
 
         /// <summary>
@@ -305,7 +315,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         }
 
         /// <summary>
-        /// <para>Transform a block of bytes. Parallel capable function if Output array length is at least equal to <see cref="ParallelMinimumSize"/>. 
+        /// Process an array of bytes. 
+        /// <para>This method processes the entire array; used when processing small data or buffers from a larger source.
+        /// Parallel capable function if Output array length is at least equal to <see cref="ParallelMinimumSize"/>. 
         /// <see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
         /// 
@@ -317,8 +329,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         }
 
         /// <summary>
-        /// <para>Transform a block of bytes with offset parameters.  Parallel capable function if Output array length is at least equal to <see cref="ParallelMinimumSize"/>. 
-        /// <see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
+        /// Process a block of bytes using offset parameters.  
+        /// <para>This method will process a single block from the source array of either ParallelBlockSize or Blocksize depending on IsParallel property setting.
+        /// Parallel capable function if Output array length is at least equal to <see cref="ParallelMinimumSize"/>. 
+        /// Partial blocks are permitted with both parallel and linear operation modes.
+        /// The <see cref="Initialize(bool, KeyParams)"/> method must be called before this method can be used.</para>
         /// </summary>
         /// 
         /// <param name="Input">Bytes to Encrypt</param>
@@ -332,7 +347,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         #endregion
 
         #region Parallel Methods
-        private void Generate(Int32 Size, byte[] Counter, byte[] Output, int OutOffset)
+        private void Generate(int Size, byte[] Counter, byte[] Output, int OutOffset)
         {
             int aln = Size - (Size % BlockSize);
             int ctr = 0;
@@ -360,10 +375,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
             {
                 // generate random
                 Generate(Output.Length, _ctrVector, Output, 0);
-
                 // output is input xor with random
-                for (int i = 0; i < Output.Length; i++)
-                    Output[i] ^= Input[i];
+		        int sze = Output.Length - (Output.Length % _blockSize);
+
+		        if (sze != 0)
+			        IntUtils.XORBLK(Input, 0, Output, 0, sze);
+
+		        // get the remaining bytes
+                if (sze != Output.Length)
+		        {
+                    for (int i = sze; i < Output.Length; ++i)
+				        Output[i] ^= Input[i];
+		        }
             }
             else
             {
@@ -371,7 +394,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
                 int cnkSize = (Output.Length / _blockSize / ProcessorCount) * _blockSize;
                 int rndSize = cnkSize * ProcessorCount;
                 int subSize = (cnkSize / _blockSize);
-
                 // create jagged array of 'sub counters'
                 byte[][] vectors = new byte[ProcessorCount][];
 
@@ -380,11 +402,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
                 {
                     // offset counter by chunk size / block size
                     vectors[i] = Increase(_ctrVector, subSize * i);
-                    // create random with offset counter
+                    // create random at offset position
                     Generate(cnkSize, vectors[i], Output, i * cnkSize);
-
-                    for (int j = 0; j < cnkSize; j++)
-                        Output[j + (i * cnkSize)] ^= Input[j + (i * cnkSize)];
+                    // xor the block
+			        IntUtils.XORBLK(Input, i * cnkSize, Output, i * cnkSize, cnkSize);
                 });
 
                 // last block processing
@@ -393,8 +414,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
                     int fnlSize = Output.Length % rndSize;
                     Generate(fnlSize, vectors[ProcessorCount - 1], Output, rndSize);
 
-                    for (int i = 0; i < fnlSize; i++)
-                        Output[i + rndSize] ^= Input[i + rndSize];
+                    for (int i = rndSize; i < Output.Length; ++i)
+                        Output[i] ^= Input[i];
                 }
 
                 // copy the last counter position to class variable
@@ -404,24 +425,31 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 
         private void ProcessBlock(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
-            int blkSize = (Output.Length - OutOffset);
+            int outSize = _isParallel ? (Output.Length - OutOffset) : _blockSize;
 
-            if (!_isParallel || blkSize < ParallelBlockSize)
-            {
-                // generate random
-                Generate(blkSize, _ctrVector, Output, OutOffset);
+            if (outSize < _parallelBlockSize)
+	        {
+		        // generate random
+                Generate(outSize, _ctrVector, Output, OutOffset);
+		        // process block aligned
+                int sze = outSize - (outSize % _blockSize);
 
-                // output is input xor with random
-                for (int i = 0; i < blkSize; i++)
-                    Output[i + OutOffset] ^= Input[i + InOffset];
+		        if (sze != 0)
+			        IntUtils.XORBLK(Input, InOffset, Output, OutOffset, sze);
+
+		        // get the remaining bytes
+                if (sze != outSize)
+		        {
+                    for (int i = sze; i < outSize; ++i)
+                        Output[OutOffset + i] ^= Input[InOffset + i];
+		        }
             }
             else
             {
                 // parallel CTR processing //
-                int cnkSize = ((Output.Length - OutOffset) / _blockSize / ProcessorCount) * _blockSize;
-                int rndSize = cnkSize * ProcessorCount;
-                int subSize = (cnkSize / _blockSize);
-
+                int cnkSize = _parallelBlockSize / ProcessorCount;
+		        int rndSize = cnkSize * ProcessorCount;
+		        int subSize = cnkSize / _blockSize;
                 // create jagged array of 'sub counters'
                 byte[][] vectors = new byte[ProcessorCount][];
 
@@ -429,23 +457,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
                 System.Threading.Tasks.Parallel.For(0, ProcessorCount, ParallelOption, i =>
                 {
                     // offset counter by chunk size / block size
-                    vectors[i] = Increase(_ctrVector, subSize * i);//sub=16 0,16,32,48
-                    // create random with offset counter
+                    vectors[i] = Increase(_ctrVector, subSize * i);
+                    // create random at offset position
                     Generate(cnkSize, vectors[i], Output, (i * cnkSize));
-
-                    for (int j = 0; j < cnkSize; j++)
-                        Output[j + OutOffset + (i * cnkSize)] ^= Input[j + InOffset + (i * cnkSize)];
+                    // xor with input at offset
+			        IntUtils.XORBLK(Input, InOffset + (i * cnkSize), Output, OutOffset + (i * cnkSize), cnkSize);
                 });
-
-                // last block processing
-                if (rndSize != blkSize)
-                {
-                    int fnlSize = blkSize % rndSize;
-                    Generate(fnlSize, vectors[ProcessorCount - 1], Output, rndSize);
-
-                    for (int i = 0; i < fnlSize; i++)
-                        Output[i + OutOffset + rndSize] ^= Input[i + InOffset + rndSize];
-                }
 
                 // copy the last counter position to class variable
                 Buffer.BlockCopy(vectors[ProcessorCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
@@ -467,7 +484,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
             int offset = buffer.Length - 1;
             byte[] cnt = BitConverter.GetBytes(Size);
             byte osrc, odst, ndst;
-
             Buffer.BlockCopy(Counter, 0, buffer, 0, Counter.Length);
 
             for (int i = offset; i > 0; i--)
@@ -507,6 +523,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
                         Array.Clear(_ctrVector, 0, _ctrVector.Length);
                         _ctrVector = null;
                     }
+
+                    _blockSize = 0;
+                    _parallelBlockSize = 0;
+                    _parallelOption = null;
+
                 }
                 finally
                 {

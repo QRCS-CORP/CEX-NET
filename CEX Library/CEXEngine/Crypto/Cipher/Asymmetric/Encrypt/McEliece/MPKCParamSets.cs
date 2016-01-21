@@ -114,7 +114,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
                 throw new CryptoAsymmetricException("MPKCParamSets:FromId", "OId can not be null!", new ArgumentException());
             if (OId.Length != 4)
                 throw new CryptoAsymmetricException("MPKCParamSets:FromId", "OId must be 4 bytes in length!", new ArgumentException());
-            if (OId[0] != 1)
+            if (OId[0] != (byte)AsymmetricEngines.McEliece)
                 throw new CryptoAsymmetricException("MPKCParamSets:FromId", "OId is not a valid MPKC parameter id!", new ArgumentException());
 
             if (OId[2] == 11)
@@ -221,27 +221,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             switch (ParamName)
             {
                 case MPKCParamNames.FM11T40S256:
-                    return new byte[] { 1, 1, 11, 1 };
+                    return new byte[] { (byte)AsymmetricEngines.McEliece, 1, 11, 1 };
                 case MPKCParamNames.FM11T48S256:
-                    return new byte[] { 1, 1, 11, 2 };
+                    return new byte[] { (byte)AsymmetricEngines.McEliece, 1, 11, 2 };
                 case MPKCParamNames.FM12T31S256:
-                    return new byte[] { 1, 1, 12, 1 };
+                    return new byte[] { (byte)AsymmetricEngines.McEliece, 1, 12, 1 };
                 case MPKCParamNames.FM12T41S256:
-                    return new byte[] { 1, 1, 12, 2 };
+                    return new byte[] { (byte)AsymmetricEngines.McEliece, 1, 12, 2 };
                 case MPKCParamNames.FM12T48S256:
-                    return new byte[] { 1, 1, 12, 3 };
+                    return new byte[] { (byte)AsymmetricEngines.McEliece, 1, 12, 3 };
                 case MPKCParamNames.FM12T54K256:
-                    return new byte[] { 1, 1, 12, 4 };
+                    return new byte[] { (byte)AsymmetricEngines.McEliece, 1, 12, 4 };
                 case MPKCParamNames.FM12T67S256:
-                    return new byte[] { 1, 1, 12, 5 };
+                    return new byte[] { (byte)AsymmetricEngines.McEliece, 1, 12, 5 };
                 case MPKCParamNames.FM13T29S256:
-                    return new byte[] { 1, 1, 13, 1 };
+                    return new byte[] { (byte)AsymmetricEngines.McEliece, 1, 13, 1 };
                 case MPKCParamNames.FM13T44K256:
-                    return new byte[] { 1, 1, 13, 2 };
+                    return new byte[] { (byte)AsymmetricEngines.McEliece, 1, 13, 2 };
                 case MPKCParamNames.FM13T95S256:
-                    return new byte[] { 1, 1, 13, 3 };
+                    return new byte[] { (byte)AsymmetricEngines.McEliece, 1, 13, 3 };
                 case MPKCParamNames.FM14T24K256:
-                    return new byte[] { 1, 1, 14, 1 };
+                    return new byte[] { (byte)AsymmetricEngines.McEliece, 1, 14, 1 };
                 default:
                     throw new CryptoAsymmetricException("MPKCParamSets:GetID", "The Parameter Name is not recognized!", new ArgumentException());
             }
@@ -254,67 +254,67 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// Low security; uses the Fujisaki cipher and SHA-256
         /// <para>Security:95, MaxText:201, K:1608 N:2048, PublicKey Size:88488, PrivateKey Size:119071, OId: 1, 1, 11, 1</para>
         /// </summary>
-        public static MPKCParameters MPKCFM11T40S256 = new MPKCParameters(new byte[] { 1, 1, 11, 1 }, 11, 40, CCA2Ciphers.Fujisaki, Digests.SHA256);
+        public static MPKCParameters MPKCFM11T40S256 = new MPKCParameters(new byte[] { (byte)AsymmetricEngines.McEliece, 1, 11, 1 }, 11, 40, CCA2Ciphers.Fujisaki, Digests.SHA256);
 
         /// <summary>
         /// Low security; uses the Fujisaki cipher and SHA-256
         /// <para>Security:98, MaxText:190, K:1520 N:2048, PublicKey Size:100368, PrivateKey Size:142531, OId: 1, 1, 11, 2</para>
         /// </summary>
-        public static MPKCParameters MPKCFM11T48S256 = new MPKCParameters(new byte[] { 1, 1, 11, 2 }, 11, 48, CCA2Ciphers.Fujisaki, Digests.SHA256);
+        public static MPKCParameters MPKCFM11T48S256 = new MPKCParameters(new byte[] { (byte)AsymmetricEngines.McEliece, 1, 11, 2 }, 11, 48, CCA2Ciphers.Fujisaki, Digests.SHA256);
 
         /// <summary>
         /// Low to Medium security; uses the Fujisaki cipher and SHA-256
         /// <para>Security:108, MaxText:465, K:3724, N:4096, PublicKey Size: 175076, PrivateKey Size:200119, OId: 1, 1, 12, 1</para>
         /// </summary>
-        public static MPKCParameters MPKCFM12T31S256 = new MPKCParameters(new byte[] { 1, 1, 12, 1 }, 12, 31, CCA2Ciphers.Fujisaki, Digests.SHA256);
+        public static MPKCParameters MPKCFM12T31S256 = new MPKCParameters(new byte[] { (byte)AsymmetricEngines.McEliece, 1, 12, 1 }, 12, 31, CCA2Ciphers.Fujisaki, Digests.SHA256);
 
         /// <summary>
         /// Medium security; uses the Fujisaki cipher and SHA-256
         /// <para>Security:129, MaxText:450, K:3604, N:4096, PublicKey Size: 223496, PrivateKey Size:262519, OId: 1, 1, 12, 2</para>
         /// </summary>
-        public static MPKCParameters MPKCFM12T41S256 = new MPKCParameters(new byte[] { 1, 1, 12, 2 }, 12, 41, CCA2Ciphers.Fujisaki, Digests.SHA256);
+        public static MPKCParameters MPKCFM12T41S256 = new MPKCParameters(new byte[] { (byte)AsymmetricEngines.McEliece, 1, 12, 2 }, 12, 41, CCA2Ciphers.Fujisaki, Digests.SHA256);
 
         /// <summary>
         /// Medium security; uses the Fujisaki cipher and SHA-256
         /// <para>Security:131?, MaxText:440, K:3520, N:4096, PublicKey Size: 253488, PrivateKey Size:306371, OId: 1, 1, 12, 3</para>
         /// </summary>
-        public static MPKCParameters MPKCFM12T48S256 = new MPKCParameters(new byte[] { 1, 1, 12, 3 }, 12, 48, CCA2Ciphers.Fujisaki, Digests.SHA256);
+        public static MPKCParameters MPKCFM12T48S256 = new MPKCParameters(new byte[] { (byte)AsymmetricEngines.McEliece, 1, 12, 3 }, 12, 48, CCA2Ciphers.Fujisaki, Digests.SHA256);
 
         /// <summary>
         /// Medium security; uses the Fujisaki cipher and Keccak 256
         /// <para>Security:133?, MaxText:431, K:3448, N:4096, PublicKey Size: 306371, PrivateKey Size:344039, OId: 1, 1, 12, 4</para>
         /// </summary>
-        public static MPKCParameters MPKCFM12T54K256 = new MPKCParameters(new byte[] { 1, 1, 12, 4 }, 12, 54, CCA2Ciphers.Fujisaki, Digests.Keccak256);
+        public static MPKCParameters MPKCFM12T54K256 = new MPKCParameters(new byte[] { (byte)AsymmetricEngines.McEliece, 1, 12, 4 }, 12, 54, CCA2Ciphers.Fujisaki, Digests.Keccak256);
 
         /// <summary>
         /// High security; uses the Fujisaki cipher and SHA-256
         /// <para>Security:148?, MaxText:431, K:3292, N:4096, PublicKey Size: 332540, PrivateKey Size:425928, OId: 1, 1, 12, 5</para>
         /// </summary>
-        public static MPKCParameters MPKCFM12T67S256 = new MPKCParameters(new byte[] { 1, 1, 12, 5 }, 12, 67, CCA2Ciphers.Fujisaki, Digests.SHA256);
+        public static MPKCParameters MPKCFM12T67S256 = new MPKCParameters(new byte[] { (byte)AsymmetricEngines.McEliece, 1, 12, 5 }, 12, 67, CCA2Ciphers.Fujisaki, Digests.SHA256);
 
         /// <summary>
         /// Medium security; uses the Fujisaki cipher and SHA-256
         /// <para>Security:128, MaxText:976, K:7815, N:8192, PublicKey Size: 375168, PrivateKey Size:403733, OId: 1, 1, 13, 1</para>
         /// </summary>
-        public static MPKCParameters MPKCFM13T29S256 = new MPKCParameters(new byte[] { 1, 1, 13, 1 }, 13, 29, CCA2Ciphers.Fujisaki, Digests.SHA256);
+        public static MPKCParameters MPKCFM13T29S256 = new MPKCParameters(new byte[] { (byte)AsymmetricEngines.McEliece, 1, 13, 1 }, 13, 29, CCA2Ciphers.Fujisaki, Digests.SHA256);
 
         /// <summary>
         /// Medium security; uses the Fujisaki cipher and Keccak 256
         /// <para>Security:136, MaxText:952, K:7620, N:8192, PublicKey Size: 548688, PrivateKey Size:604893, OId: 1, 1, 13, 2</para>
         /// </summary>
-        public static MPKCParameters MPKCFM13T44K256 = new MPKCParameters(new byte[] { 1, 1, 13, 2 }, 13, 44, CCA2Ciphers.Fujisaki, Digests.Keccak256);
+        public static MPKCParameters MPKCFM13T44K256 = new MPKCParameters(new byte[] { (byte)AsymmetricEngines.McEliece, 1, 13, 2 }, 13, 44, CCA2Ciphers.Fujisaki, Digests.Keccak256);
 
         /// <summary>
         /// High security; uses the Fujisaki cipher and SHA-256 (slow)
         /// <para>Security:190?, MaxText:431, K:3292, N:4096, PublicKey Size: 332540, PrivateKey Size:425928, OId: 1, 1, 13, 3</para>
         /// </summary>
-        public static MPKCParameters MPKCFM13T95S256 = new MPKCParameters(new byte[] { 1, 1, 13, 3 }, 13, 95, CCA2Ciphers.Fujisaki, Digests.SHA256);
+        public static MPKCParameters MPKCFM13T95S256 = new MPKCParameters(new byte[] { (byte)AsymmetricEngines.McEliece, 1, 13, 3 }, 13, 95, CCA2Ciphers.Fujisaki, Digests.SHA256);
 
         /// <summary>
         /// Low to Medium security; uses the Fujisaki cipher and Keccak 256
         /// <para>Security:115, MaxText:2006, K:16048, N:16384, PublicKey Size: 674064, PrivateKey Size:721847, OId: 1, 1, 14, 1</para>
         /// </summary>
-        public static MPKCParameters MPKCFM14T24K256 = new MPKCParameters(new byte[] { 1, 1, 14, 1 }, 14, 24, CCA2Ciphers.Fujisaki, Digests.Keccak256);
+        public static MPKCParameters MPKCFM14T24K256 = new MPKCParameters(new byte[] { (byte)AsymmetricEngines.McEliece, 1, 14, 1 }, 14, 24, CCA2Ciphers.Fujisaki, Digests.Keccak256);
         #endregion
     }
 }

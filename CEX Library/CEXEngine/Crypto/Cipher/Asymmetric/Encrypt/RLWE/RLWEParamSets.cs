@@ -1,12 +1,13 @@
 ﻿#region Directives
 using System;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #endregion
 
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -80,12 +81,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         public enum RLWEParamNames : int
         {
             /// <summary>
-            /// Low security; uses CSPRng as the default Prng.
+            /// Low security; uses CSPPrng as the default Prng.
             /// <para>Security:120, MaxText:32, N:256 Q:7681, S:11.31, PublicKey Size:1036, PrivateKey Size:520, OId: 3, 2, 2, 1</para>
             /// </summary>
             N256Q7681 = 1,
             /// <summary>
-            /// High security; uses CSPRng as the default Prng.
+            /// High security; uses CSPPrng as the default Prng.
             /// <para>Security:240, MaxText:64, N:512 Q:12289, S:12.18, PublicKey Size:2060, PrivateKey Size:1032, OId: 3, 2, 5, 2</para>
             /// </summary>
             N512Q12289 = 2,
@@ -108,7 +109,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
                 throw new CryptoAsymmetricException("RLWEParamSets:FromId", "OId can not be null!", new ArgumentNullException());
             if (OId.Length != 4)
                 throw new CryptoAsymmetricException("RLWEParamSets:FromId", "OId must be 4 bytes in length!", new ArgumentOutOfRangeException());
-            if (OId[0] != 3)
+            if (OId[0] != (byte)AsymmetricEngines.RingLWE)
                 throw new CryptoAsymmetricException("RLWEParamSets:FromId", "OId is not a valid RLWE parameter id!", new ArgumentException());
 
             if (OId[3] == 1)
@@ -167,9 +168,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             switch (ParamName)
             {
                 case RLWEParamNames.N256Q7681:
-                    return new byte[] { 3, 2, 2, 1 };
+                    return new byte[] { (byte)AsymmetricEngines.RingLWE, 2, 2, 1 };
                 case RLWEParamNames.N512Q12289:
-                    return new byte[] { 3, 2, 5, 2 };
+                    return new byte[] { (byte)AsymmetricEngines.RingLWE, 2, 5, 2 };
                 default:
                     throw new CryptoAsymmetricException("RLWEParamSets:GetID", "The enumeration name is unknown!", new ArgumentException());
             }
@@ -179,16 +180,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         #region Parameter Sets
         // Note: Oid = family, N-base, ordinal
         /// <summary>
-        /// Medium security; uses CSPRng as the default Prng.
+        /// Medium security; uses CSPPrng as the default Prng.
         /// <para>Security:120, MaxText:32, N:256 Q:7681, S:11.31, PublicKey Size:1036, PrivateKey Size:520, OId: 3, 2, 2, 1</para>
         /// </summary>
-        public static RLWEParameters RLWEN256Q7681 = new RLWEParameters(new byte[] { 3, 2, 2, 1 }, 256, 7681, 11.31);
+        public static RLWEParameters RLWEN256Q7681 = new RLWEParameters(new byte[] { (byte)AsymmetricEngines.RingLWE, 2, 2, 1 }, 256, 7681, 11.31);
 
         /// <summary>
-        /// High security; uses CSPRng as the default Prng.
+        /// High security; uses CSPPrng as the default Prng.
         /// <para>Security:240, MaxText:64, N:512 Q:12289, S:12.18, PublicKey Size:2060, PrivateKey Size:1032, OId: 3, 2, 5, 2</para>
         /// </summary>
-        public static RLWEParameters RLWEN512Q12289 = new RLWEParameters(new byte[] { 3, 2, 5, 2 }, 512, 12289, 12.18);
+        public static RLWEParameters RLWEN512Q12289 = new RLWEParameters(new byte[] { (byte)AsymmetricEngines.RingLWE, 2, 5, 2 }, 512, 12289, 12.18);
         #endregion
     }
 }

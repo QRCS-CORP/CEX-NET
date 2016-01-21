@@ -16,13 +16,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     /// <list type="bullet">
     /// <item><description>Constructors may use a fully qualified path to a key file, or the keys file stream.</description></item>
     /// <item><description>The <see cref="Create(CipherDescription, KeyParams)"/> method requires a populated KeyParams class.</description></item>
-    /// <item><description>The <see cref="Create(CipherDescription, Prngs, Digests)"/> method auto-generate keying material.</description></item>
+    /// <item><description>The <see cref="Create(CipherDescription, SeedGenerators, Digests)"/> method auto-generate keying material.</description></item>
     /// <item><description>The Extract() method retrieves a populated cipher key (CipherKey), and key material (KeyParams), from the key file.</description></item>
     /// </list>
     /// </summary>
     /// 
     /// <example>
-    /// <description>Example using the <see cref="Create(CipherDescription, Prngs, Digests)"/> overload:</description>
+    /// <description>Example using the <see cref="Create(CipherDescription, SeedGenerators, Digests)"/> overload:</description>
     /// <code>
     /// // create the key file
     /// new KeyFactory(KeyPath).Create(description);
@@ -49,7 +49,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.KeyGenerator">VTDev.Libraries.CEXEngine.Crypto.Processing.Factory KeyGenerator class</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.KeyParams">VTDev.Libraries.CEXEngine.Crypto.Processing.Structure KeyParams class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.StreamCipher">VTDev.Libraries.CEXEngine.Crypto.Processing StreamCipher class</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.CipherStream">VTDev.Libraries.CEXEngine.Crypto.Processing CipherStream class</seealso>
     public sealed class KeyFactory : IDisposable
     {
         #region Fields
@@ -114,16 +114,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// </summary>
         /// 
         /// <param name="Description">The <see cref="CipherDescription">Cipher Description</see> containing the cipher implementation details</param>
-        /// <param name="SeedEngine">The <see cref="Prngs">Random Generator</see> used to create the stage I seed material during key generation.</param>
+        /// <param name="SeedEngine">The <see cref="SeedGenerators">Random Generator</see> used to create the stage I seed material during key generation.</param>
         /// <param name="HashEngine">The <see cref="Digests">Digest Engine</see> used in the stage II phase of key generation.</param>
         /// 
         /// <exception cref="System.ArgumentNullException">Thrown if a KeyParams member is null, but specified in the Header</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">Thrown if a Header parameter does not match a KeyParams value</exception>
-        public void Create(CipherDescription Description, Prngs SeedEngine = Prngs.CSPRng, Digests HashEngine = VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests.SHA512)
+        public void Create(CipherDescription Description, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, Digests HashEngine = VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests.SHA512)
         {
             KeyParams keyParam;
 
-            using (KeyGenerator keyGen = new KeyGenerator(SeedEngine, HashEngine))
+            using (KeyGenerator keyGen = new KeyGenerator(SeedEngine, HashEngine, null))
                 keyParam = keyGen.GetKeyParams(Description.KeySize, Description.IvSize, Description.MacSize);
 
             Create(Description, keyParam);

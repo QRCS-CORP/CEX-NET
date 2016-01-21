@@ -7,7 +7,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -547,30 +547,30 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// Gets bytes of pseudo random
         /// </summary>
         /// 
-        /// <param name="Data">Array to fill with pseudo random</param>
-        public void GetBytes(byte[] Data)
+        /// <param name="Output">Array to fill with pseudo random</param>
+        public void GetBytes(byte[] Output)
         {
             lock (_objLock)
             {
-                if (_byteBuffer.Length - _bufferIndex < Data.Length)
+                if (_byteBuffer.Length - _bufferIndex < Output.Length)
                 {
                     int bufSize = _byteBuffer.Length - _bufferIndex;
                     // copy remaining bytes
-                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Data, 0, bufSize);
-                    int rem = Data.Length - bufSize;
+                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Output, 0, bufSize);
+                    int rem = Output.Length - bufSize;
 
                     while (rem > 0)
                     {
                         _rngEngine.GetBytes(_byteBuffer);
                         if (rem > _byteBuffer.Length)
                         {
-                            Buffer.BlockCopy(_byteBuffer, 0, Data, bufSize, _byteBuffer.Length);
+                            Buffer.BlockCopy(_byteBuffer, 0, Output, bufSize, _byteBuffer.Length);
                             bufSize += _byteBuffer.Length;
                             rem -= _byteBuffer.Length;
                         }
                         else
                         {
-                            Buffer.BlockCopy(_byteBuffer, 0, Data, bufSize, rem);
+                            Buffer.BlockCopy(_byteBuffer, 0, Output, bufSize, rem);
                             _bufferIndex = rem;
                             rem = 0;
                         }
@@ -578,8 +578,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
                 }
                 else
                 {
-                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Data, 0, Data.Length);
-                    _bufferIndex += Data.Length;
+                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Output, 0, Output.Length);
+                    _bufferIndex += Output.Length;
                 }
             }
         }

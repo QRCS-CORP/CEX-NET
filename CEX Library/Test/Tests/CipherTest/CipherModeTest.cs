@@ -436,7 +436,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -487,7 +487,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             else if (Key.Length == 32)
                 index = 4;
 
-            using (ECB mode = new ECB(new RDX()))
+            using (ECB mode = new ECB(new RHX()))
             {
                 mode.Initialize(true, new KeyParams(Key));
 
@@ -502,7 +502,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
 
             index++;
 
-            using (ECB mode = new ECB(new RDX()))
+            using (ECB mode = new ECB(new RHX()))
             {
                 mode.Initialize(false, new KeyParams(Key));
 
@@ -527,7 +527,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             else if (Key.Length == 32)
                 index = 10;
 
-            using (CBC mode = new CBC(new RDX()))
+            using (CBC mode = new CBC(new RHX()))
             {
                 mode.Initialize(true, new KeyParams(Key, iv));
 
@@ -541,7 +541,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             }
 
             index++;
-            using (CBC mode = new CBC(new RDX()))
+            using (CBC mode = new CBC(new RHX()))
             {
                 mode.Initialize(false, new KeyParams(Key, iv));
 
@@ -566,7 +566,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             else if (Key.Length == 32)
                 index = 16;
 
-            using (CFB mode1 = new CFB(new RDX()))
+            using (CFB mode1 = new CFB(new RHX()))
             {
                 mode1.Initialize(true, new KeyParams(Key, iv));
 
@@ -581,7 +581,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
 
             index++;
 
-            using (CFB mode2 = new CFB(new RDX()))
+            using (CFB mode2 = new CFB(new RHX()))
             {
                 mode2.Initialize(false, new KeyParams(Key, iv));
 
@@ -606,7 +606,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             else if (Key.Length == 32)
                 index = 22;
 
-            using (OFB mode = new OFB(new RDX()))
+            using (OFB mode = new OFB(new RHX()))
             {
                 mode.Initialize(true, new KeyParams(Key, iv));
 
@@ -621,7 +621,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
 
             index++;
 
-            using (OFB mode = new OFB(new RDX()))
+            using (OFB mode = new OFB(new RHX()))
             {
                 mode.Initialize(false, new KeyParams(Key, iv));
 
@@ -646,7 +646,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             else if (Key.Length == 32)
                 index = 28;
 
-            using (CTR mode = new CTR(new RDX()))
+            using (CTR mode = new CTR(new RHX()))
             {
                 mode.Initialize(true, new KeyParams(Key, iv));
 
@@ -660,7 +660,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             }
 
             index++;
-            using (CTR mode = new CTR(new RDX()))
+            using (CTR mode = new CTR(new RHX()))
             {
                 mode.Initialize(false, new KeyParams(Key, iv));
 

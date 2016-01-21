@@ -1,7 +1,7 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Mac;
 using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
@@ -94,6 +94,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         }
 
         /// <summary>
+        /// Get: The generators type name
+        /// </summary>
+        public Generators Enumeral
+        {
+            get { return Generators.PBKDF2; }
+        }
+
+        /// <summary>
         /// Get: Cipher name
         /// </summary>
         public string Name
@@ -117,7 +125,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
             _Iterations = Iterations;
             _disposeEngine = true;
-            _digestMac = new SHA512HMAC();
+            _digestMac = new HMAC(new SHA512());
             _hashLength = _digestMac.MacSize;
             _keySize = _digestMac.BlockSize;
         }

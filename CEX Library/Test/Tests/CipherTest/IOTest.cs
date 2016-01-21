@@ -56,7 +56,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         /// I/O and KAT tests run on the base engine accessors
         /// </summary>
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             byte[] key = new byte[32];
             byte[] iv = new byte[16];
@@ -66,8 +66,8 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
 
             try
             {
-                inCipher = new RDX();
-                outCipher = new RDX();
+                inCipher = new RHX();
+                outCipher = new RHX();
                 // run the AES I/O test vectors
                 for (int i = 0; i != _cipherTests.Length; i += 3)
                     TestIO(inCipher, outCipher, HexConverter.Decode(_cipherTests[i]), HexConverter.Decode(_cipherTests[i + 1]), HexConverter.Decode(_cipherTests[i + 2]));
@@ -84,9 +84,9 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 OnProgress(new TestEventArgs("Passed AES known vector method tests.."));
 
                 // test transforms
-                TestIO2(new RDX(), key, data);
-                TestIO2(new SPX(), key, data);
-                TestIO2(new TFX(), key, data);
+                TestIO2(new RHX(), key, data);
+                TestIO2(new SHX(), key, data);
+                TestIO2(new THX(), key, data);
 
                 OnProgress(new TestEventArgs("Passed I/O initialization and access tests.."));
 
@@ -210,13 +210,13 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         }
         #endregion
 
-        #region RDX
+        #region RHX
         private byte[] DecryptRDX(byte[] Key, byte[] Data)
         {
             int blocks = Data.Length / 16;
             byte[] outputData = new byte[Data.Length];
 
-            using (RDX transform = new RDX())
+            using (RHX transform = new RHX())
             {
                 transform.Initialize(false, new KeyParams(Key));
 
@@ -232,7 +232,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             int blocks = Data.Length / 16;
             byte[] outputData = new byte[Data.Length];
 
-            using (RDX transform = new RDX())
+            using (RHX transform = new RHX())
             {
                 transform.Initialize(true, new KeyParams(Key));
 

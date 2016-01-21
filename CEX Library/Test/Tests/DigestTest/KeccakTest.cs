@@ -183,7 +183,7 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
         /// </summary>
         /// 
         /// <returns>Status</returns>
-        public string Test()
+        public string Run()
         {
             try
             {

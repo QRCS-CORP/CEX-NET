@@ -1,5 +1,6 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
@@ -16,6 +17,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Get: The padding modes type name
+        /// </summary>
+        public PaddingModes Enumeral
+        {
+            get { return PaddingModes.ISO7816; }
+        }
+
         /// <summary>
         /// Get: Padding name
         /// </summary>
@@ -36,14 +45,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         /// <returns>Length of padding</returns>
         public int AddPadding(byte[] Input, int Offset)
         {
-            int plen = (Input.Length - Offset);
+            int len = (Input.Length - Offset);
 
 	        Input[Offset++] = MKCODE;
 
             while (Offset < Input.Length)
 		        Input[Offset++] = ZBCODE;
 
-	        return plen;
+	        return len;
         }
 
         /// <summary>
@@ -55,17 +64,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         /// <returns>Length of padding</returns>
         public int GetPaddingLength(byte[] Input)
         {
-            int plen = Input.Length - 1;
+            int len = Input.Length - 1;
 
-	        if (Input[plen] == MKCODE)
+	        if (Input[len] == MKCODE)
 		        return 1;
-	        else if (Input[plen] != ZBCODE)
+	        else if (Input[len] != ZBCODE)
 		        return 0;
 
-	        while (plen > 0 && Input[plen] == ZBCODE)
-		        plen--;
+	        while (len > 0 && Input[len] == ZBCODE)
+		        len--;
 
-            return Input.Length - plen;
+            return Input.Length - len;
         }
 
         /// <summary>
@@ -78,17 +87,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         /// <returns>Length of padding</returns>
         public int GetPaddingLength(byte[] Input, int Offset)
         {
-            int plen = Input.Length - (Offset + 1);
+            int len = Input.Length - (Offset + 1);
 
-	        if (Input[Offset + plen] == MKCODE)
+	        if (Input[Offset + len] == MKCODE)
 		        return 1;
-	        else if (Input[Offset + plen] != ZBCODE)
+	        else if (Input[Offset + len] != ZBCODE)
 		        return 0;
 
-	        while (plen > 0 && Input[Offset + plen] == ZBCODE)
-		        plen--;
+	        while (len > 0 && Input[Offset + len] == ZBCODE)
+		        len--;
 
-            return (Input.Length - Offset) - plen;
+            return (Input.Length - Offset) - len;
         }
         #endregion
     }

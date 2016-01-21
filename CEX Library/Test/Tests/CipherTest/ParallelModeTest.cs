@@ -42,7 +42,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -70,7 +70,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             KeyParams keyParam = new KeyParams(new byte[32], new byte[16]);
 
             // CTR mode
-            using (CTR cipher = new CTR(new RDX()))
+            using (CTR cipher = new CTR(new RHX()))
             {
                 data = GetBytes(1036);
 
@@ -160,7 +160,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             OnProgress(new TestEventArgs("Passed Parallel CTR encryption and decryption tests.."));
 
             // CBC mode
-            using (CBC cipher = new CBC(new RDX()))
+            using (CBC cipher = new CBC(new RHX()))
             {
                 // must be divisible by block size, add padding if required
                 data = GetBytes(2048);
@@ -221,7 +221,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             OnProgress(new TestEventArgs("Passed Parallel CBC decryption tests.."));
 
             // CFB mode
-            using (CFB cipher = new CFB(new RDX()))
+            using (CFB cipher = new CFB(new RHX()))
             {
                 // must be divisible by block size, add padding if required
                 data = GetBytes(2048);
@@ -297,26 +297,25 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         /// <summary>
         /// Uses Transform(in_data, in_offset, out_data, out_offset) method
         /// </summary>
-        private byte[] Transform1(ICipherMode Cipher, byte[] Data, int BlockSize)
+        private byte[] Transform1(ICipherMode Cipher, byte[] Input, int BlockSize)
         {
-            byte[] outData = new byte[Data.Length];
+            byte[] outData = new byte[Input.Length];
+			int blocks = Input.Length / BlockSize;
 
-            if (Cipher.Name == "CTR")
-            {
-                Cipher.Transform(Data, 0, outData, 0);
-            }
-            else
-            {
-                // best way, use the offsets
-                int blocks = Data.Length / BlockSize;
-
-                for (int i = 0; i < blocks; i++)
-                    Cipher.Transform(Data, i * BlockSize, outData, i * BlockSize);
-
-                // last partial in CTR
-                if (blocks * BlockSize < Data.Length)
-                    Cipher.Transform(Data, blocks * BlockSize, outData, blocks * BlockSize);
-            }
+			for (int i = 0; i < blocks; i++)
+				Cipher.Transform(Input, i * BlockSize, outData, i * BlockSize);
+            
+			if (blocks * BlockSize < Input.Length)
+			{
+                // ctr tests only
+				int diff = Input.Length - (blocks * BlockSize);
+				byte[] inpBuffer = new byte[diff];
+				int offset = Input.Length - diff;
+                Buffer.BlockCopy(Input, offset, inpBuffer, 0, diff);
+				byte[] outBuffer = new byte[diff];
+				Cipher.Transform(inpBuffer, outBuffer);
+                Buffer.BlockCopy(outBuffer, 0, outData, offset, diff);
+			}
 
             return outData;
         }
@@ -324,29 +323,29 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         /// <summary>
         /// Uses Transform(in_data, out_data) method
         /// </summary>
-        private byte[] Transform2(ICipherMode Cipher, byte[] Data, int BlockSize)
+        private byte[] Transform2(ICipherMode Cipher, byte[] Input, int BlockSize)
         {
             // slower, mem copy can be expensive on large data..
-            int blocks = Data.Length / BlockSize;
-            byte[] outData = new byte[Data.Length];
+            int blocks = Input.Length / BlockSize;
+            byte[] outData = new byte[Input.Length];
             byte[] inBlock = new byte[BlockSize];
             byte[] outBlock = new byte[BlockSize];
 
             if (Cipher.Name == "CTR")
             {
-                Cipher.Transform(Data, outData);
+                Cipher.Transform(Input, outData);
             }
             else
             {
                 for (int i = 0; i < blocks; i++)
                 {
-                    Buffer.BlockCopy(Data, i * BlockSize, inBlock, 0, BlockSize);
+                    Buffer.BlockCopy(Input, i * BlockSize, inBlock, 0, BlockSize);
                     Cipher.Transform(inBlock, outBlock);
                     Buffer.BlockCopy(outBlock, 0, outData, i * BlockSize, BlockSize);
                 }
 
-                if (blocks * BlockSize < Data.Length)
-                    Cipher.Transform(Data, blocks * BlockSize, outData, blocks * BlockSize);
+                if (blocks * BlockSize < Input.Length)
+                    Cipher.Transform(Input, blocks * BlockSize, outData, blocks * BlockSize);
             }
 
             return outData;

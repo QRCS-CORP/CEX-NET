@@ -62,7 +62,7 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
         /// </summary>
         /// 
         /// <returns>Status</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -96,7 +96,7 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
             if (Evaluate.AreEqual(outBytes, Output) == false)
                 throw new Exception("PBKDF2: Values are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
 
-            using (PBKDF2 gen = new PBKDF2(new SHA256HMAC(), Iterations))
+            using (PBKDF2 gen = new PBKDF2(new HMAC(new SHA256()), Iterations))
             {
                 gen.Initialize(Salt, Key);
                 gen.Generate(outBytes, 0, Size);

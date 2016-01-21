@@ -1,6 +1,7 @@
 ﻿#region Directives
 using System;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Mac
@@ -16,14 +17,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         int BlockSize { get; }
 
         /// <summary>
-        /// Get: Size of returned mac in bytes
+        /// Get: The macs type name
         /// </summary>
-        int MacSize { get; }
+        Macs Enumeral { get; }
 
         /// <summary>
         /// Get: Mac is ready to digest data
         /// </summary>
         bool IsInitialized { get; }
+
+        /// <summary>
+        /// Get: Size of returned mac in bytes
+        /// </summary>
+        int MacSize { get; }
 
         /// <summary>
         /// Get: Algorithm name

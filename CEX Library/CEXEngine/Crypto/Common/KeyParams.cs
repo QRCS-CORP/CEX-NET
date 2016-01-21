@@ -6,15 +6,15 @@ using System.IO;
 namespace VTDev.Libraries.CEXEngine.Crypto.Common
 {
     /// <summary>
-    /// A Cipher Key and Vector Container class
+    /// A Symmetric Cipher Key and Vector Container class
     /// </summary>
     public class KeyParams : IDisposable, ICloneable
     {
         #region Fields
         private bool _isDisposed = false;
         private byte[] _Key = null;
-        private byte[] _IV = null;
-        private byte[] _IKM = null;
+        private byte[] _Iv = null;
+        private byte[] _Ikm = null;
         #endregion
 
         #region Properties
@@ -23,8 +23,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// </summary>
         public byte[] IKM
         {
-            get { return _IKM == null ? null : (byte[])_IKM.Clone(); }
-            private set { _IKM = value; }
+            get { return _Ikm == null ? null : (byte[])_Ikm.Clone(); }
+            set { _Ikm = value; }
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         public byte[] Key 
         {
             get { return _Key == null ? null : (byte[])_Key.Clone(); } 
-            private set { _Key = value; } 
+            set { _Key = value; } 
         }
 
         /// <summary>
@@ -41,12 +41,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// </summary>
         public byte[] IV 
         {
-            get { return _IV == null ? null : (byte[])_IV.Clone(); }
-            private set { _IV = value; } 
+            get { return _Iv == null ? null : (byte[])_Iv.Clone(); }
+            set { _Iv = value; } 
         }
         #endregion
 
         #region Constructor
+        /// <summary>
+        /// Initialize an empty container
+        /// </summary>
+        public KeyParams()
+        {
+        }
+
         /// <summary>
         /// Initialize the class with a Cipher Key
         /// </summary>
@@ -57,7 +64,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
             if (Key != null)
             {
                 _Key = new byte[Key.Length];
-                Buffer.BlockCopy(Key, 0, _Key, 0, Key.Length);
+                Buffer.BlockCopy(Key, 0, _Key, 0, _Key.Length);
             }
         }
 
@@ -72,12 +79,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
             if (Key != null)
             {
                 _Key = new byte[Key.Length];
-                Buffer.BlockCopy(Key, 0, _Key, 0, Key.Length);
+                Buffer.BlockCopy(Key, 0, _Key, 0, _Key.Length);
             }
             if (IV != null)
             {
-                _IV = new byte[IV.Length];
-                Buffer.BlockCopy(IV, 0, _IV, 0, IV.Length);
+                _Iv = new byte[IV.Length];
+                Buffer.BlockCopy(IV, 0, _Iv, 0, _Iv.Length);
             }
         }
 
@@ -93,17 +100,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
             if (Key != null)
             {
                 _Key = new byte[Key.Length];
-                Buffer.BlockCopy(Key, 0, _Key, 0, Key.Length);
+                Buffer.BlockCopy(Key, 0, _Key, 0, _Key.Length);
             }
             if (IV != null)
             {
-                _IV = new byte[IV.Length];
-                Buffer.BlockCopy(IV, 0, _IV, 0, IV.Length);
+                _Iv = new byte[IV.Length];
+                Buffer.BlockCopy(IV, 0, _Iv, 0, _Iv.Length);
             }
             if (IKM != null)
             {
-                _IKM = new byte[IKM.Length];
-                Buffer.BlockCopy(IKM, 0, _IKM, 0, IKM.Length);
+                _Ikm = new byte[IKM.Length];
+                Buffer.BlockCopy(IKM, 0, _Ikm, 0, _Ikm.Length);
             }
         }
 
@@ -181,7 +188,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <returns>The KeyParams copy</returns>
         public object Clone()
         {
-            return new KeyParams(_Key, _IV, _IKM);
+            return new KeyParams(_Key, _Iv, _Ikm);
         }
 
         /// <summary>
@@ -192,6 +199,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         public object DeepCopy()
         {
             return DeSerialize(Serialize(this));
+        }
+        #endregion
+
+        #region Equals
+        /// <summary>
+        /// Compare this KeyParams instance with another
+        /// </summary>
+        /// 
+        /// <param name="Obj">KeyParams to compare</param>
+        /// 
+        /// <returns>Returns true if equal</returns>
+        bool Equals(KeyParams Obj)
+        {
+            if (Obj.Key != _Key)
+                return false;
+            if (Obj.IV != _Iv)
+                return false;
+            if (Obj.IKM != _Ikm)
+                return false;
+
+            return true;
         }
         #endregion
 
@@ -217,15 +245,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
                         _Key = null;
                     }
 
-                    if (_IV != null)
+                    if (_Iv != null)
                     {
-                        Array.Clear(_IV, 0, _IV.Length);
-                        _IV = null;
+                        Array.Clear(_Iv, 0, _Iv.Length);
+                        _Iv = null;
                     }
-                    if (_IKM != null)
+                    if (_Ikm != null)
                     {
-                        Array.Clear(_IKM, 0, _IKM.Length);
-                        _IKM = null;
+                        Array.Clear(_Ikm, 0, _Ikm.Length);
+                        _Ikm = null;
                     }
                 }
                 finally

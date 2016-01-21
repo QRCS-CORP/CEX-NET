@@ -95,7 +95,11 @@ namespace VTDev.Libraries.CEXEngine.Tools
             {
                 --i;
                 if (A[i] != B[i])
+                {
+                    //int x = A[i];
+                    //int y = B[i];
                     return false;
+                }
             }
 
             return true;

@@ -1,5 +1,6 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Prng
@@ -10,6 +11,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
     public interface IRandom : IDisposable
     {
         /// <summary>
+        /// Get: The prngs type name
+        /// </summary>
+        Prngs Enumeral { get; }
+
+        /// <summary>
         /// Get: Algorithm name
         /// </summary>
         string Name { get; }
@@ -19,7 +25,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// </summary>
         /// 
         /// <param name="Data">Array to fill with random bytes</param>
-        void GetBytes(byte[] Data);
+        void GetBytes(byte[] Output);
 
         /// <summary>
         /// Fill an array with pseudo random bytes

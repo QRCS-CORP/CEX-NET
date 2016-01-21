@@ -1,14 +1,15 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Crypto.Common;
-using VTDev.Libraries.CEXEngine.CryptoException;
 using System.Threading.Tasks;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
+using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -118,6 +119,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         {
             get { return _blockCipher; }
             private set { _blockCipher = value; }
+        }
+
+        /// <summary>
+        /// Get: The cipher modes type name
+        /// </summary>
+        public CipherModes Enumeral
+        {
+            get { return CipherModes.CFB; }
         }
 
         /// <summary>

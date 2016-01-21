@@ -14,10 +14,10 @@
         /// <summary>
         /// Key recipient; decrypt only access
         /// </summary>
-        Operator,
+        Operator = 2,
         /// <summary>
         /// The operator is denied access to this key
         /// </summary>
-        NoAccess
+        NoAccess = 4
     }
 }

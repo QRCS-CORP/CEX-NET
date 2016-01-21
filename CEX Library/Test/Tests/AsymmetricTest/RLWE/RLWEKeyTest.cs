@@ -40,7 +40,7 @@ namespace Test.Tests
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -106,7 +106,7 @@ namespace Test.Tests
 
                 int sz = mpe.MaxPlainText;
                 byte[] data = new byte[sz];
-                new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPRng().GetBytes(data);
+                new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPPrng().GetBytes(data);
 
                 enc = mpe.Encrypt(data);
 

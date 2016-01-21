@@ -47,7 +47,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -203,7 +203,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             for (int i = 0; i < 64; i++)
                 key[i] = (byte)i;
 
-            using (SPX engine = new SPX())
+            using (SHX engine = new SHX())
             {
                 engine.Initialize(true, new KeyParams(key));
                 engine.EncryptBlock(inBytes, outBytes);
@@ -221,7 +221,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             byte[] outBytes = new byte[Input.Length];
             Array.Copy(Input, 0, outBytes, 0, outBytes.Length);
 
-            using (SPX engine = new SPX())
+            using (SHX engine = new SHX())
             {
                 engine.Initialize(true, new KeyParams(Key));
 
@@ -237,7 +237,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         {
             byte[] outBytes = new byte[Output.Length];
 
-            using (SPX enc = new SPX())
+            using (SHX enc = new SHX())
             {
                 enc.Initialize(true, new KeyParams(Key));
                 enc.EncryptBlock(Input, outBytes);
@@ -246,7 +246,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             if (Evaluate.AreEqual(Output, outBytes) == false)
                 throw new Exception("SerpentVector: Encrypted arrays are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
 
-            using (SPX dec = new SPX())
+            using (SHX dec = new SHX())
             {
                 dec.Initialize(false, new KeyParams(Key));
                 dec.DecryptBlock(Output, outBytes);

@@ -39,7 +39,7 @@ namespace Test.Tests
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -68,7 +68,7 @@ namespace Test.Tests
 
                 int sz = sgn.MaxPlainText;
                 byte[] data = new byte[200];
-                new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPRng().GetBytes(data);
+                new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPPrng().GetBytes(data);
 
                 byte[] code = sgn.Sign(data, 0, data.Length);
 

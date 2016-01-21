@@ -3,12 +3,13 @@ using System;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #endregion
 
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -95,7 +96,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
         #region Fields
         private int _blockSize = BLOCK_SIZE;
-        private IBlockCipher _Cipher;
+        private IBlockCipher _blockCipher;
         private byte[] _ctrVector;
         private bool _disposeEngine = true;
         private bool _isDisposed = false;
@@ -136,6 +137,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         {
             get { return _keySize; }
             private set { _keySize = value; }
+        }
+
+        /// <summary>
+        /// Get: The generators type name
+        /// </summary>
+        public Generators Enumeral 
+        {
+            get { return Generators.CTRDrbg; }
         }
 
         /// <summary>
@@ -184,14 +193,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
                 throw new CryptoGeneratorException("CTRDrbg:Ctor", "Cipher can not be null!", new ArgumentNullException());
 
             _disposeEngine = DisposeEngine;
-            _Cipher = Cipher;
+            _blockCipher = Cipher;
 
-            if (KeySize > 0)
-                _keySize = KeySize;
+            if (KeySize == 0)
+            {
+                // default the 256 bit key size
+                _keySize = 32;
+            }
             else
-                _keySize = GetKeySize();
+            {
+                if (!IsValidKeySize(KeySize))
+                    throw new CryptoGeneratorException("CTRDrbg:CTor", "The key size must be a ciphers legal key size!");
+                else
+                    _keySize = KeySize;
+            }
 
-            _blockSize = _Cipher.BlockSize;
+            _blockSize = _blockCipher.BlockSize;
 
             ProcessorCount = Environment.ProcessorCount;
             if (ProcessorCount % 2 != 0)
@@ -234,7 +251,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
             byte[] key = new byte[keyLen];
             Buffer.BlockCopy(Salt, _blockSize, key, 0, keyLen);
 
-            _Cipher.Initialize(true, new KeyParams(key));
+            _blockCipher.Initialize(true, new KeyParams(key));
             _isInitialized = true;
         }
 
@@ -338,84 +355,65 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         #endregion
 
         #region Random Generator
-        private void ParallelTransform(byte[] Output, int OutOffset)
+        private void Generate(int Size, byte[] Counter, byte[] Output, int OutOffset)
         {
-            if (!IsParallel || Output.Length < MIN_PARALLEL)
+            int aln = Size - (Size % _blockSize);
+            int ctr = 0;
+
+            while (ctr != aln)
             {
-                // generate random
-                byte[] rand = Transform(Output.Length, _ctrVector);
-                // copy to output array
-                Buffer.BlockCopy(rand, 0, Output, OutOffset, rand.Length);
+                _blockCipher.EncryptBlock(Counter, 0, Output, OutOffset + ctr);
+                Increment(Counter);
+                ctr += _blockSize;
             }
-            else
+
+            if (ctr != Size)
             {
-                // parallel CTR processing //
-                int prcCount = ProcessorCount;
-                int algSize = Output.Length / _blockSize;
-                int cnkSize = (algSize / prcCount) * _blockSize;
-                int rndSize = cnkSize * prcCount;
-                int subSize = (cnkSize / _blockSize);
-
-                // create jagged array of 'sub counters'
-                byte[][] vectors = new byte[prcCount][];
-
-                // create random, and xor to output in parallel
-                System.Threading.Tasks.Parallel.For(0, prcCount, i =>
-                {
-                    // offset counter by chunk size / block size
-                    vectors[i] = Increase(_ctrVector, subSize * i);
-                    // create random with offset counter
-                    byte[] prand = Transform(cnkSize, vectors[i]);
-                    // copy to output array
-                    Buffer.BlockCopy(prand, 0, Output, OutOffset + (i * cnkSize), cnkSize);
-                });
-
-                // last block processing
-                if (rndSize < Output.Length)
-                {
-                    int fnlSize = Output.Length % rndSize;
-                    byte[] prand = Transform(fnlSize, vectors[prcCount - 1]);
-
-                    // copy to output array
-                    Buffer.BlockCopy(prand, 0, Output, OutOffset + rndSize, fnlSize);
-                }
-
-                // copy the last counter position to class variable
-                Buffer.BlockCopy(vectors[prcCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
+                byte[] outputBlock = new byte[_blockSize];
+                _blockCipher.EncryptBlock(Counter, outputBlock);
+                int fnlSize = Size % _blockSize;
+                Buffer.BlockCopy(outputBlock, 0, Output, OutOffset + (Size - fnlSize), fnlSize);
+                Increment(Counter);
             }
         }
 
-        private byte[] Transform(Int32 Size, byte[] Counter)
+        private void ParallelTransform(byte[] Output, int OutOffset)
         {
-            // align to upper divisible of block size
-            int algSize = (Size % _blockSize == 0 ? Size : Size + _blockSize - (Size % _blockSize));
-            int lstBlock = algSize - _blockSize;
-            byte[] randBlock = new byte[_blockSize];
-            byte[] outputData = new byte[Size];
+            int blklen = Output.Length - OutOffset;
 
-            for (int i = 0; i < algSize; i += _blockSize)
-            {
-                // encrypt counter
-                _Cipher.EncryptBlock(Counter, randBlock);
+            if (!_isParallel || blklen < MIN_PARALLEL)
+	        {
+		        // generate random
+                Generate(blklen, _ctrVector, Output, OutOffset);
+	        }
+	        else
+	        {
+		        // parallel CTR processing //
+                int cnksize = (blklen / _blockSize / ProcessorCount) * _blockSize;
+		        int rndsize = cnksize * ProcessorCount;
+		        int subsize = (cnksize / _blockSize);
+		        // create jagged array of 'sub counters'
+                byte[][] vectors = new byte[ProcessorCount][];
 
-                // copy to output
-                if (i != lstBlock)
+                // create random, and xor to output in parallel
+                System.Threading.Tasks.Parallel.For(0, ProcessorCount, i =>
                 {
-                    // copy transform to output
-                    Buffer.BlockCopy(randBlock, 0, outputData, i, _blockSize);
-                }
-                else
-                {
-                    // copy last block
-                    int fnlSize = (Size % _blockSize) == 0 ? _blockSize : (Size % _blockSize);
-                    Buffer.BlockCopy(randBlock, 0, outputData, i, fnlSize);
-                }
+                    // offset counter by chunk size / block size
+                    vectors[i] = Increase(_ctrVector, subsize * i);
+                    // create random at offset position
+                    Generate(cnksize, vectors[i], Output, (i * cnksize));
+                });
 
-                // increment counters
-                Increment(Counter);
-            }
+		        // last block processing
+                if (rndsize < blklen)
+		        {
+                    int fnlsize = blklen % rndsize;
+                    Generate(fnlsize, vectors[ProcessorCount - 1], Output, rndsize);
+		        }
 
-            return outputData;
+                // copy the last counter position to class variable
+                Buffer.BlockCopy(vectors[ProcessorCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
+	        }
         }
 
         private static void Increment(byte[] Counter)
@@ -431,7 +429,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
             int offset = buffer.Length - 1;
             byte[] cnt = BitConverter.GetBytes(Size);
             byte osrc, odst, ndst;
-
             Buffer.BlockCopy(Counter, 0, buffer, 0, Counter.Length);
 
             for (int i = offset; i > 0; i--)
@@ -445,23 +442,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
             return buffer;
         }
-        #endregion
 
-        #region Helpers
-        private int GetKeySize()
-        {
-            switch (_Cipher.Name)
-            {
-                case "RHX":
-                case "RSM":
-                case "SHX":
-                case "THX":
-                case "TSM":
-                    return 320;
-                default:
-                    return 32;
-            }
-        }
+        private bool IsValidKeySize(int KeySize = 0)
+	    {
+		    for (int i = 0; i < _blockCipher.LegalKeySizes.Length; ++i)
+		    {
+			    if (KeySize == _blockCipher.LegalKeySizes[i])
+				    break;
+			    if (i == _blockCipher.LegalKeySizes.Length - 1)
+				    return false;
+		    }
+		    return true;
+	    }
         #endregion
 
         #region IDispose
@@ -480,10 +472,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
             {
                 try
                 {
-                    if (_Cipher != null && _disposeEngine)
+                    if (_blockCipher != null && _disposeEngine)
                     {
-                        _Cipher.Dispose();
-                        _Cipher = null;
+                        _blockCipher.Dispose();
+                        _blockCipher = null;
                     }
                     if (_ctrVector != null)
                     {

@@ -34,7 +34,7 @@ namespace VTDev.Projects.CEX.Test.Helper
         #region Private
         private static void CreateLog()
         {
-            const string HEADER = "########################## RDX ANALYSIS RESULTS ##########################";
+            const string HEADER = "########################## RHX ANALYSIS RESULTS ##########################";
 
             WriteFile(HEADER);
         }

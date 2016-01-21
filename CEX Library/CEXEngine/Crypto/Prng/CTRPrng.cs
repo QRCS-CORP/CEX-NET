@@ -3,6 +3,7 @@ using System;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Generator;
+using VTDev.Libraries.CEXEngine.Crypto.Helper;
 using VTDev.Libraries.CEXEngine.Crypto.Seed;
 using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
@@ -75,6 +76,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
         #region Properties
         /// <summary>
+        /// Get: The prngs type name
+        /// </summary>
+        public Prngs Enumeral
+        {
+            get { return Prngs.CTRPrng; }
+        }
+
+        /// <summary>
         /// Algorithm name
         /// </summary>
         public string Name
@@ -92,7 +101,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="SeedEngine">The Seed engine used to create keyng material (default is CSPRsg)</param>
         /// <param name="BufferSize">The size of the cache of random bytes (must be more than 1024 to enable parallel processing)</param>
         /// <param name="KeySize">The key size (in bytes) of the symmetric cipher; a <c>0</c> value will auto size the key</param>
-        public CTRPrng(BlockCiphers BlockEngine = BlockCiphers.RDX, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, int BufferSize = 4096, int KeySize = 0)
+        public CTRPrng(BlockCiphers BlockEngine = BlockCiphers.RHX, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, int BufferSize = 4096, int KeySize = 0)
         {
             if (BufferSize < 64)
                 throw new CryptoRandomException("CTRPrng:Ctor", "Buffer size must be at least 64 bytes!", new ArgumentNullException());
@@ -118,7 +127,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="BufferSize">The size of the cache of random bytes (must be more than 1024 to enable parallel processing)</param>
         /// 
         /// <exception cref="CryptoRandomException">Thrown if the seed is null or too small</exception>
-        public CTRPrng(byte[] Seed, BlockCiphers BlockEngine = BlockCiphers.RDX, int BufferSize = 4096)
+        public CTRPrng(byte[] Seed, BlockCiphers BlockEngine = BlockCiphers.RHX, int BufferSize = 4096)
         {
             if (BufferSize < 64)
                 throw new CryptoRandomException("CTRPrng:Ctor", "Buffer size must be at least 64 bytes!", new ArgumentNullException());
@@ -164,17 +173,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// Fill an array with pseudo random bytes
         /// </summary>
         /// 
-        /// <param name="Data">Array to fill with random bytes</param>
-        public void GetBytes(byte[] Data)
+        /// <param name="Output">Array to fill with random bytes</param>
+        public void GetBytes(byte[] Output)
         {
             lock (_objLock)
             {
-                if (_byteBuffer.Length - _bufferIndex < Data.Length)
+                if (_byteBuffer.Length - _bufferIndex < Output.Length)
                 {
                     int bufSize = _byteBuffer.Length - _bufferIndex;
                     // copy remaining bytes
-                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Data, 0, bufSize);
-                    int rem = Data.Length - bufSize;
+                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Output, 0, bufSize);
+                    int rem = Output.Length - bufSize;
 
                     while (rem > 0)
                     {
@@ -183,13 +192,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
                         if (rem > _byteBuffer.Length)
                         {
-                            Buffer.BlockCopy(_byteBuffer, 0, Data, bufSize, _byteBuffer.Length);
+                            Buffer.BlockCopy(_byteBuffer, 0, Output, bufSize, _byteBuffer.Length);
                             bufSize += _byteBuffer.Length;
                             rem -= _byteBuffer.Length;
                         }
                         else
                         {
-                            Buffer.BlockCopy(_byteBuffer, 0, Data, bufSize, rem);
+                            Buffer.BlockCopy(_byteBuffer, 0, Output, bufSize, rem);
                             _bufferIndex = rem;
                             rem = 0;
                         }
@@ -197,8 +206,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
                 }
                 else
                 {
-                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Data, 0, Data.Length);
-                    _bufferIndex += Data.Length;
+                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Output, 0, Output.Length);
+                    _bufferIndex += Output.Length;
                 }
             }
         }
@@ -321,7 +330,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
             _rngGenerator = new CTRDrbg(_rngEngine, true, _keySize);
 
             if (_seedGenerator != null)
-                _rngGenerator.Initialize(_seedGenerator.GetSeed(_rngEngine.BlockSize + _keySize));
+                _rngGenerator.Initialize(_seedGenerator.GetBytes(_rngEngine.BlockSize + _keySize));
             else
                 _rngGenerator.Initialize(_stateSeed);
 
@@ -375,26 +384,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
         private IBlockCipher GetCipher(BlockCiphers RngEngine)
         {
-            switch (RngEngine)
+            try
             {
-                case BlockCiphers.RDX:
-                    return new RDX();
-                case BlockCiphers.RHX:
-                    return new RHX();
-                case BlockCiphers.RSM:
-                    return new RSM();
-                case BlockCiphers.SHX:
-                    return new SHX();
-                case BlockCiphers.SPX:
-                    return new SPX();
-                case BlockCiphers.TFX:
-                    return new TFX();
-                case BlockCiphers.THX:
-                    return new THX();
-                case BlockCiphers.TSM:
-                    return new TSM();
-                default:
-                    return new RDX();
+                return BlockCipherFromName.GetInstance(RngEngine);
+            }
+            catch (Exception Ex)
+            {
+                throw new CryptoRandomException("CTRPrng:GetCipher", "The cipher could not be initialized!", Ex);
             }
         }
 
@@ -403,10 +399,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
             switch (CipherEngine)
             {
                 case BlockCiphers.RHX:
-                case BlockCiphers.RSM:
                 case BlockCiphers.SHX:
                 case BlockCiphers.THX:
-                case BlockCiphers.TSM:
                     return 320;
                 default:
                     return 32;
@@ -415,12 +409,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
         private ISeed GetSeedGenerator(SeedGenerators SeedEngine)
         {
-            switch (SeedEngine)
+            try
             {
-                case SeedGenerators.XSPRsg:
-                    return new XSPRsg();
-                default:
-                    return new CSPRsg();
+                return SeedGeneratorFromName.GetInstance(SeedEngine);
+            }
+            catch (Exception Ex)
+            {
+                throw new CryptoRandomException("CTRPrng:GetSeedGenerator", "The seed generator could not be initialized!", Ex);
             }
         }
         #endregion

@@ -38,7 +38,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.RNBW
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {

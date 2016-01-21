@@ -38,7 +38,7 @@ namespace VTDev.Projects.CEX.Test.Tests.PrngTest
         /// Tests the SecureRandom access methods and return ranges
         /// </summary>
         /// <returns>Status</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -48,8 +48,8 @@ namespace VTDev.Projects.CEX.Test.Tests.PrngTest
                 OnProgress(new TestEventArgs("Passed BBSG threshhold tests.."));
                 RandRangeTest(new CCG(), 10);
                 OnProgress(new TestEventArgs("Passed CCG threshhold tests.."));
-                RandRangeTest(new CSPRng());
-                OnProgress(new TestEventArgs("Passed CSPRng threshhold tests.."));
+                RandRangeTest(new CSPPrng());
+                OnProgress(new TestEventArgs("Passed CSPPrng threshhold tests.."));
                 RandRangeTest(new CTRPrng());
                 OnProgress(new TestEventArgs("Passed CTRPrng threshhold tests.."));
                 RandRangeTest(new DGCPrng());
@@ -65,7 +65,7 @@ namespace VTDev.Projects.CEX.Test.Tests.PrngTest
 
 
                 byte[] pass, salt;
-                CSPRng rand = new CSPRng();
+                CSPPrng rand = new CSPPrng();
                 pass = rand.GetBytes(23);
                 salt = rand.GetBytes(256);
                 rand.Dispose();

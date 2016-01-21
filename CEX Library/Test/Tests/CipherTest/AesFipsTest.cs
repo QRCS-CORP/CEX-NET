@@ -134,7 +134,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -161,7 +161,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         {
             byte[] outBytes = new byte[Input.Length];
 
-            using (RDX engine = new RDX())
+            using (RHX engine = new RHX())
             {
                 engine.Initialize(true, new KeyParams(Key));
                 engine.Transform(Input, outBytes);
@@ -182,7 +182,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             byte[] outBytes = new byte[Input.Length];
             Array.Copy(Input, 0, outBytes, 0, outBytes.Length);
 
-            using (RDX engine = new RDX())
+            using (RHX engine = new RHX())
             {
                 engine.Initialize(true, new KeyParams(Key));
 
@@ -193,7 +193,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             if (Evaluate.AreEqual(outBytes, Output) == false)
                 throw new Exception("AES MonteCarlo: Arrays are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
 
-            using (RDX engine = new RDX())
+            using (RHX engine = new RHX())
             {
                 engine.Initialize(false, new KeyParams(Key));
 

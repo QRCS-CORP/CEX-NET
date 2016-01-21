@@ -24,6 +24,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 using VTDev.Libraries.CEXEngine.Networking;
 using VTDev.Libraries.CEXEngine.Utility;
 using System.Timers;
+using VTDev.Libraries.CEXEngine.Crypto.Helper;
 #endregion
 
 #region License Information
@@ -3434,103 +3435,52 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             }
         }
 
-        /// <summary>
-        /// Get the digest instance
-        /// </summary>
-        /// 
-        /// <param name="Digest">The Digests enumeration member</param>
-        /// 
-        /// <returns>The hash digest instance</returns>
-        private IDigest GetDigest(Digests Digest)
+        private IBlockCipher GetBlockCipher(BlockCiphers EngineType, int BlockSize, int RoundCount, Digests KdfEngine)
         {
-            switch (Digest)
+            try
             {
-                case Digests.Blake256:
-                    return new Blake256();
-                case Digests.Blake512:
-                    return new Blake512();
-                case Digests.Keccak256:
-                    return new Keccak256();
-                case Digests.Keccak512:
-                    return new Keccak512();
-                case Digests.Keccak1024:
-                    return new Keccak1024();
-                case Digests.SHA256:
-                    return new SHA256();
-                case Digests.SHA512:
-                    return new SHA512();
-                case Digests.Skein256:
-                    return new Skein256();
-                case Digests.Skein512:
-                    return new Skein512();
-                case Digests.Skein1024:
-                    return new Skein1024();
-                default:
-                    throw new CryptoKeyExchangeException("DtmKex:GetDigest", "The digest type is unknown!", new ArgumentException());
+                return BlockCipherFromName.GetInstance(EngineType, BlockSize, RoundCount, KdfEngine);
+            }
+            catch (Exception ex)
+            {
+                throw new CryptoKeyExchangeException("DtmKex:GetBlockCipher", ex);
             }
         }
 
-        /// <summary>
-        /// Get the Prng instance
-        /// </summary>
-        /// 
-        /// <param name="Prng">The Prngs enumeration member</param>
-        /// 
-        /// <returns>The Prng instance</returns>
-        private IRandom GetPrng(Prngs Prng)
+        private IDigest GetDigest(Digests DigestType)
         {
-            switch (Prng)
+            try
             {
-                case Prngs.CTRPrng:
-                    return new CTRPrng();
-                case Prngs.DGCPrng:
-                    return new DGCPrng();
-                case Prngs.CSPRng:
-                    return new CSPRng();
-                case Prngs.BBSG:
-                    return new BBSG();
-                case Prngs.CCG:
-                    return new CCG();
-                case Prngs.MODEXPG:
-                    return new MODEXPG();
-                case Prngs.QCG1:
-                    return new QCG1();
-                case Prngs.QCG2:
-                    return new QCG2();
-                default:
-                    throw new CryptoKeyExchangeException("DtmKex:GetPrng", "The Prng type is unknown!", new ArgumentException());
+                return DigestFromName.GetInstance(DigestType);
+            }
+            catch
+            {
+                throw new CryptoKeyExchangeException("DtmKex:GetDigest", "The digest type is not supported!", new ArgumentException());
             }
         }
 
-        /// <summary>
-        /// Get the symmetric cipher instance
-        /// </summary>
-        /// 
-        /// <param name="Session">The session parameters</param>
-        /// 
-        /// <returns>The initialized cipher instance</returns>
+        private IRandom GetPrng(Prngs PrngType)
+        {
+            try
+            {
+                return PrngFromName.GetInstance(PrngType);
+            }
+            catch
+            {
+                throw new CryptoKeyExchangeException("DtmKex:GetPrng", "The Prng type is unknown!", new ArgumentException());
+            }
+        }
+
         private ICipherMode GetSymmetricCipher(DtmSessionStruct Session)
         {
-            switch ((BlockCiphers)Session.EngineType)
+            try
             {
-                case BlockCiphers.RDX:
-                    return new CTR(new RDX());
-                case BlockCiphers.RHX:
-                    return new CTR(new RHX((int)Session.RoundCount, (int)Session.IvSize, (Digests)Session.KdfEngine));
-                case BlockCiphers.RSM:
-                    return new CTR(new RSM((int)Session.RoundCount, (int)Session.IvSize, (Digests)Session.KdfEngine));
-                case BlockCiphers.SHX:
-                    return new CTR(new SHX((int)Session.RoundCount, (Digests)Session.KdfEngine));
-                case BlockCiphers.SPX:
-                    return new CTR(new SPX((int)Session.RoundCount));
-                case BlockCiphers.TFX:
-                    return new CTR(new TFX((int)Session.RoundCount));
-                case BlockCiphers.THX:
-                    return new CTR(new THX((int)Session.RoundCount, (Digests)Session.KdfEngine));
-                case BlockCiphers.TSM:
-                    return new CTR(new TSM((int)Session.RoundCount, (Digests)Session.KdfEngine));
-                default:
-                    throw new CryptoKeyExchangeException("DtmKex:GetSymmetricCipher", "The symmetric cipher type is unknown!", new ArgumentException());
+                IBlockCipher engine = GetBlockCipher((BlockCiphers)Session.EngineType, (int)Session.IvSize, (int)Session.RoundCount, (Digests)Session.KdfEngine);
+                return new CTR(engine);
+            }
+            catch (Exception ex)
+            {
+                throw new CryptoKeyExchangeException("DtmKex:GetSymmetricCipher", "The symmetric cipher type is unknown!", ex);
             }
         }
 

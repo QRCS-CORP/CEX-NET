@@ -4,12 +4,13 @@ using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Mac;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #endregion
 
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -132,6 +133,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         {
             get { return _keySize; }
             private set { _keySize = value; }
+        }
+
+        /// <summary>
+        /// Get: The generators type name
+        /// </summary>
+        public Generators Enumeral
+        {
+            get { return Generators.HKDF; }
         }
 
         /// <summary>

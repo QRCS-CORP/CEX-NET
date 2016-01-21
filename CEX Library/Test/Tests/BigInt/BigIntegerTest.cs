@@ -70,7 +70,7 @@ namespace VTDev.Projects.CEX.Test.Tests.BigInt
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {

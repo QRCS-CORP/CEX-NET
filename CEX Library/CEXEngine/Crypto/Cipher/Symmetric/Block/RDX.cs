@@ -2,6 +2,7 @@
 using System;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 #region License Information
@@ -146,7 +147,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// <summary>
         /// Get: Available block sizes for this cipher
         /// </summary>
-        public static int[] LegalBlockSizes
+        public int[] LegalBlockSizes
         {
             get { return new int[] { 16, 32 }; }
         }
@@ -154,9 +155,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// <summary>
         /// Get: Available Encryption Key Sizes in bytes
         /// </summary>
-        public static Int32[] LegalKeySizes
+        public int[] LegalKeySizes
         {
-            get { return new Int32[] { 16, 24, 32, 64 }; }
+            get { return new int[] { 16, 24, 32, 64 }; }
+        }
+
+        /// <summary>
+        /// Get: Available diffusion round assignments
+        /// </summary>
+        public int[] LegalRounds
+        {
+            get { return new int[] { 10, 12, 14, 22 }; }
         }
 
         /// <summary>
@@ -431,282 +440,286 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         #endregion
 
         #region Rounds Processing
-        private void Encrypt16(byte[] Input, int InOffset, byte[] Output, int OutOffset)
-        {
-            int keyCtr = 0;
-
-            // round 0
-            UInt32 X0 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X1 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X2 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X3 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset]) ^ _expKey[keyCtr++];
-
-            // round 1
-            UInt32 Y0 = T0[X0 >> 24] ^ T1[(byte)(X1 >> 16)] ^ T2[(byte)(X2 >> 8)] ^ T3[(byte)X3] ^ _expKey[keyCtr++];
-            UInt32 Y1 = T0[X1 >> 24] ^ T1[(byte)(X2 >> 16)] ^ T2[(byte)(X3 >> 8)] ^ T3[(byte)X0] ^ _expKey[keyCtr++];
-            UInt32 Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[keyCtr++];
-            UInt32 Y3 = T0[X3 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[keyCtr++];
-
-            while (keyCtr < _expKey.Length - 4)
-            {
-                X0 = T0[Y0 >> 24] ^ T1[(byte)(Y1 >> 16)] ^ T2[(byte)(Y2 >> 8)] ^ T3[(byte)Y3] ^ _expKey[keyCtr++];
-                X1 = T0[Y1 >> 24] ^ T1[(byte)(Y2 >> 16)] ^ T2[(byte)(Y3 >> 8)] ^ T3[(byte)Y0] ^ _expKey[keyCtr++];
-                X2 = T0[Y2 >> 24] ^ T1[(byte)(Y3 >> 16)] ^ T2[(byte)(Y0 >> 8)] ^ T3[(byte)Y1] ^ _expKey[keyCtr++];
-                X3 = T0[Y3 >> 24] ^ T1[(byte)(Y0 >> 16)] ^ T2[(byte)(Y1 >> 8)] ^ T3[(byte)Y2] ^ _expKey[keyCtr++];
-                Y0 = T0[X0 >> 24] ^ T1[(byte)(X1 >> 16)] ^ T2[(byte)(X2 >> 8)] ^ T3[(byte)X3] ^ _expKey[keyCtr++];
-                Y1 = T0[X1 >> 24] ^ T1[(byte)(X2 >> 16)] ^ T2[(byte)(X3 >> 8)] ^ T3[(byte)X0] ^ _expKey[keyCtr++];
-                Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[keyCtr++];
-                Y3 = T0[X3 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[keyCtr++];
-            }
-
-            // final round
-            Output[OutOffset++] = (byte)(SBox[Y0 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y1 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y2 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y3] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y1 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y2 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y3 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y0] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y2 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y3 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y0 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y1] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y3 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y0 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y1 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset] = (byte)(SBox[(byte)Y2] ^ (byte)_expKey[keyCtr]);
-        }
-
-        private void Encrypt32(byte[] Input, int InOffset, byte[] Output, int OutOffset)
-        {
-            int keyCtr = 0;
-
-            // round 0
-            UInt32 X0 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X1 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X2 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X3 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X4 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X5 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X6 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X7 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset]) ^ _expKey[keyCtr++];
-
-            // round 1
-            UInt32 Y0 = T0[X0 >> 24] ^ T1[(byte)(X1 >> 16)] ^ T2[(byte)(X3 >> 8)] ^ T3[(byte)X4] ^ _expKey[keyCtr++];
-            UInt32 Y1 = T0[X1 >> 24] ^ T1[(byte)(X2 >> 16)] ^ T2[(byte)(X4 >> 8)] ^ T3[(byte)X5] ^ _expKey[keyCtr++];
-            UInt32 Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X5 >> 8)] ^ T3[(byte)X6] ^ _expKey[keyCtr++];
-            UInt32 Y3 = T0[X3 >> 24] ^ T1[(byte)(X4 >> 16)] ^ T2[(byte)(X6 >> 8)] ^ T3[(byte)X7] ^ _expKey[keyCtr++];
-            UInt32 Y4 = T0[X4 >> 24] ^ T1[(byte)(X5 >> 16)] ^ T2[(byte)(X7 >> 8)] ^ T3[(byte)X0] ^ _expKey[keyCtr++];
-            UInt32 Y5 = T0[X5 >> 24] ^ T1[(byte)(X6 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[keyCtr++];
-            UInt32 Y6 = T0[X6 >> 24] ^ T1[(byte)(X7 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[keyCtr++];
-            UInt32 Y7 = T0[X7 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X2 >> 8)] ^ T3[(byte)X3] ^ _expKey[keyCtr++];
-
-            // rounds loop
-            while (keyCtr < _expKey.Length - 8)
-            {
-                X0 = T0[Y0 >> 24] ^ T1[(byte)(Y1 >> 16)] ^ T2[(byte)(Y3 >> 8)] ^ T3[(byte)Y4] ^ _expKey[keyCtr++];
-                X1 = T0[Y1 >> 24] ^ T1[(byte)(Y2 >> 16)] ^ T2[(byte)(Y4 >> 8)] ^ T3[(byte)Y5] ^ _expKey[keyCtr++];
-                X2 = T0[Y2 >> 24] ^ T1[(byte)(Y3 >> 16)] ^ T2[(byte)(Y5 >> 8)] ^ T3[(byte)Y6] ^ _expKey[keyCtr++];
-                X3 = T0[Y3 >> 24] ^ T1[(byte)(Y4 >> 16)] ^ T2[(byte)(Y6 >> 8)] ^ T3[(byte)Y7] ^ _expKey[keyCtr++];
-                X4 = T0[Y4 >> 24] ^ T1[(byte)(Y5 >> 16)] ^ T2[(byte)(Y7 >> 8)] ^ T3[(byte)Y0] ^ _expKey[keyCtr++];
-                X5 = T0[Y5 >> 24] ^ T1[(byte)(Y6 >> 16)] ^ T2[(byte)(Y0 >> 8)] ^ T3[(byte)Y1] ^ _expKey[keyCtr++];
-                X6 = T0[Y6 >> 24] ^ T1[(byte)(Y7 >> 16)] ^ T2[(byte)(Y1 >> 8)] ^ T3[(byte)Y2] ^ _expKey[keyCtr++];
-                X7 = T0[Y7 >> 24] ^ T1[(byte)(Y0 >> 16)] ^ T2[(byte)(Y2 >> 8)] ^ T3[(byte)Y3] ^ _expKey[keyCtr++];
-
-                Y0 = T0[X0 >> 24] ^ T1[(byte)(X1 >> 16)] ^ T2[(byte)(X3 >> 8)] ^ T3[(byte)X4] ^ _expKey[keyCtr++];
-                Y1 = T0[X1 >> 24] ^ T1[(byte)(X2 >> 16)] ^ T2[(byte)(X4 >> 8)] ^ T3[(byte)X5] ^ _expKey[keyCtr++];
-                Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X5 >> 8)] ^ T3[(byte)X6] ^ _expKey[keyCtr++];
-                Y3 = T0[X3 >> 24] ^ T1[(byte)(X4 >> 16)] ^ T2[(byte)(X6 >> 8)] ^ T3[(byte)X7] ^ _expKey[keyCtr++];
-                Y4 = T0[X4 >> 24] ^ T1[(byte)(X5 >> 16)] ^ T2[(byte)(X7 >> 8)] ^ T3[(byte)X0] ^ _expKey[keyCtr++];
-                Y5 = T0[X5 >> 24] ^ T1[(byte)(X6 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[keyCtr++];
-                Y6 = T0[X6 >> 24] ^ T1[(byte)(X7 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[keyCtr++];
-                Y7 = T0[X7 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X2 >> 8)] ^ T3[(byte)X3] ^ _expKey[keyCtr++];
-            }
-
-            // final round
-            Output[OutOffset++] = (byte)(SBox[Y0 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y1 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y3 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y4] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y1 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y2 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y4 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y5] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y2 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y3 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y5 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y6] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y3 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y4 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y6 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y7] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y4 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y5 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y7 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y0] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y5 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y6 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y0 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y1] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y6 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y7 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y1 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y2] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y7 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y0 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y2 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset] = (byte)(SBox[(byte)Y3] ^ (byte)_expKey[keyCtr]);
-        }
-
         private void Decrypt16(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
+            int LRD = _expKey.Length - 5;
             int keyCtr = 0;
 
             // round 0
-            UInt32 X0 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X1 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X2 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X3 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset]) ^ _expKey[keyCtr++];
+	        uint X0 = IntUtils.BytesToBe32(Input, InOffset) ^ _expKey[keyCtr];
+	        uint X1 = IntUtils.BytesToBe32(Input, InOffset + 4) ^ _expKey[++keyCtr];
+	        uint X2 = IntUtils.BytesToBe32(Input, InOffset + 8) ^ _expKey[++keyCtr];
+	        uint X3 = IntUtils.BytesToBe32(Input, InOffset + 12) ^ _expKey[++keyCtr];
 
             // round 1
-            UInt32 Y0 = IT0[X0 >> 24] ^ IT1[(byte)(X3 >> 16)] ^ IT2[(byte)(X2 >> 8)] ^ IT3[(byte)X1] ^ _expKey[keyCtr++];
-            UInt32 Y1 = IT0[X1 >> 24] ^ IT1[(byte)(X0 >> 16)] ^ IT2[(byte)(X3 >> 8)] ^ IT3[(byte)X2] ^ _expKey[keyCtr++];
-            UInt32 Y2 = IT0[X2 >> 24] ^ IT1[(byte)(X1 >> 16)] ^ IT2[(byte)(X0 >> 8)] ^ IT3[(byte)X3] ^ _expKey[keyCtr++];
-            UInt32 Y3 = IT0[X3 >> 24] ^ IT1[(byte)(X2 >> 16)] ^ IT2[(byte)(X1 >> 8)] ^ IT3[(byte)X0] ^ _expKey[keyCtr++];
+            uint Y0 = IT0[X0 >> 24] ^ IT1[(byte)(X3 >> 16)] ^ IT2[(byte)(X2 >> 8)] ^ IT3[(byte)X1] ^ _expKey[++keyCtr];
+            uint Y1 = IT0[X1 >> 24] ^ IT1[(byte)(X0 >> 16)] ^ IT2[(byte)(X3 >> 8)] ^ IT3[(byte)X2] ^ _expKey[++keyCtr];
+            uint Y2 = IT0[X2 >> 24] ^ IT1[(byte)(X1 >> 16)] ^ IT2[(byte)(X0 >> 8)] ^ IT3[(byte)X3] ^ _expKey[++keyCtr];
+            uint Y3 = IT0[X3 >> 24] ^ IT1[(byte)(X2 >> 16)] ^ IT2[(byte)(X1 >> 8)] ^ IT3[(byte)X0] ^ _expKey[++keyCtr];
 
             // rounds loop
-            while (keyCtr < _expKey.Length - 4)
+            while (keyCtr != LRD)
             {
-                X0 = IT0[Y0 >> 24] ^ IT1[(byte)(Y3 >> 16)] ^ IT2[(byte)(Y2 >> 8)] ^ IT3[(byte)Y1] ^ _expKey[keyCtr++];
-                X1 = IT0[Y1 >> 24] ^ IT1[(byte)(Y0 >> 16)] ^ IT2[(byte)(Y3 >> 8)] ^ IT3[(byte)Y2] ^ _expKey[keyCtr++];
-                X2 = IT0[Y2 >> 24] ^ IT1[(byte)(Y1 >> 16)] ^ IT2[(byte)(Y0 >> 8)] ^ IT3[(byte)Y3] ^ _expKey[keyCtr++];
-                X3 = IT0[Y3 >> 24] ^ IT1[(byte)(Y2 >> 16)] ^ IT2[(byte)(Y1 >> 8)] ^ IT3[(byte)Y0] ^ _expKey[keyCtr++];
+                X0 = IT0[Y0 >> 24] ^ IT1[(byte)(Y3 >> 16)] ^ IT2[(byte)(Y2 >> 8)] ^ IT3[(byte)Y1] ^ _expKey[++keyCtr];
+                X1 = IT0[Y1 >> 24] ^ IT1[(byte)(Y0 >> 16)] ^ IT2[(byte)(Y3 >> 8)] ^ IT3[(byte)Y2] ^ _expKey[++keyCtr];
+                X2 = IT0[Y2 >> 24] ^ IT1[(byte)(Y1 >> 16)] ^ IT2[(byte)(Y0 >> 8)] ^ IT3[(byte)Y3] ^ _expKey[++keyCtr];
+                X3 = IT0[Y3 >> 24] ^ IT1[(byte)(Y2 >> 16)] ^ IT2[(byte)(Y1 >> 8)] ^ IT3[(byte)Y0] ^ _expKey[++keyCtr];
 
-                Y0 = IT0[X0 >> 24] ^ IT1[(byte)(X3 >> 16)] ^ IT2[(byte)(X2 >> 8)] ^ IT3[(byte)X1] ^ _expKey[keyCtr++];
-                Y1 = IT0[X1 >> 24] ^ IT1[(byte)(X0 >> 16)] ^ IT2[(byte)(X3 >> 8)] ^ IT3[(byte)X2] ^ _expKey[keyCtr++];
-                Y2 = IT0[X2 >> 24] ^ IT1[(byte)(X1 >> 16)] ^ IT2[(byte)(X0 >> 8)] ^ IT3[(byte)X3] ^ _expKey[keyCtr++];
-                Y3 = IT0[X3 >> 24] ^ IT1[(byte)(X2 >> 16)] ^ IT2[(byte)(X1 >> 8)] ^ IT3[(byte)X0] ^ _expKey[keyCtr++];
+                Y0 = IT0[X0 >> 24] ^ IT1[(byte)(X3 >> 16)] ^ IT2[(byte)(X2 >> 8)] ^ IT3[(byte)X1] ^ _expKey[++keyCtr];
+                Y1 = IT0[X1 >> 24] ^ IT1[(byte)(X0 >> 16)] ^ IT2[(byte)(X3 >> 8)] ^ IT3[(byte)X2] ^ _expKey[++keyCtr];
+                Y2 = IT0[X2 >> 24] ^ IT1[(byte)(X1 >> 16)] ^ IT2[(byte)(X0 >> 8)] ^ IT3[(byte)X3] ^ _expKey[++keyCtr];
+                Y3 = IT0[X3 >> 24] ^ IT1[(byte)(X2 >> 16)] ^ IT2[(byte)(X1 >> 8)] ^ IT3[(byte)X0] ^ _expKey[++keyCtr];
             }
 
             // final round
-            Output[OutOffset++] = (byte)(ISBox[Y0 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y3 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y2 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y1] ^ (byte)_expKey[keyCtr++]);
+            Output[OutOffset] = (byte)(ISBox[Y0 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y3 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y2 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y1] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y1 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y0 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y3 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y2] ^ (byte)_expKey[keyCtr++]);
+            Output[++OutOffset] = (byte)(ISBox[Y1 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y0 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y3 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y2] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y2 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y1 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y0 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y3] ^ (byte)_expKey[keyCtr++]);
+            Output[++OutOffset] = (byte)(ISBox[Y2 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y1 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y0 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y3] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y3 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y2 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y1 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset] = (byte)(ISBox[(byte)Y0] ^ (byte)_expKey[keyCtr]);
+            Output[++OutOffset] = (byte)(ISBox[Y3 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y2 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y1 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y0] ^ (byte)_expKey[keyCtr]);
         }
 
         private void Decrypt32(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
+            int LRD = _expKey.Length - 9;
             int keyCtr = 0;
 
             // round 0
-            UInt32 X0 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X1 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X2 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X3 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X4 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X5 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X6 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X7 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset]) ^ _expKey[keyCtr++];
+	        uint X0 = IntUtils.BytesToBe32(Input, InOffset) ^ _expKey[keyCtr];
+	        uint X1 = IntUtils.BytesToBe32(Input, InOffset + 4) ^ _expKey[++keyCtr];
+	        uint X2 = IntUtils.BytesToBe32(Input, InOffset + 8) ^ _expKey[++keyCtr];
+	        uint X3 = IntUtils.BytesToBe32(Input, InOffset + 12) ^ _expKey[++keyCtr];
+	        uint X4 = IntUtils.BytesToBe32(Input, InOffset + 16) ^ _expKey[++keyCtr];
+	        uint X5 = IntUtils.BytesToBe32(Input, InOffset + 20) ^ _expKey[++keyCtr];
+	        uint X6 = IntUtils.BytesToBe32(Input, InOffset + 24) ^ _expKey[++keyCtr];
+	        uint X7 = IntUtils.BytesToBe32(Input, InOffset + 28) ^ _expKey[++keyCtr];
 
             // round 1
-            UInt32 Y0 = IT0[X0 >> 24] ^ IT1[(byte)(X7 >> 16)] ^ IT2[(byte)(X5 >> 8)] ^ IT3[(byte)X4] ^ _expKey[keyCtr++];
-            UInt32 Y1 = IT0[X1 >> 24] ^ IT1[(byte)(X0 >> 16)] ^ IT2[(byte)(X6 >> 8)] ^ IT3[(byte)X5] ^ _expKey[keyCtr++];
-            UInt32 Y2 = IT0[X2 >> 24] ^ IT1[(byte)(X1 >> 16)] ^ IT2[(byte)(X7 >> 8)] ^ IT3[(byte)X6] ^ _expKey[keyCtr++];
-            UInt32 Y3 = IT0[X3 >> 24] ^ IT1[(byte)(X2 >> 16)] ^ IT2[(byte)(X0 >> 8)] ^ IT3[(byte)X7] ^ _expKey[keyCtr++];
-            UInt32 Y4 = IT0[X4 >> 24] ^ IT1[(byte)(X3 >> 16)] ^ IT2[(byte)(X1 >> 8)] ^ IT3[(byte)X0] ^ _expKey[keyCtr++];
-            UInt32 Y5 = IT0[X5 >> 24] ^ IT1[(byte)(X4 >> 16)] ^ IT2[(byte)(X2 >> 8)] ^ IT3[(byte)X1] ^ _expKey[keyCtr++];
-            UInt32 Y6 = IT0[X6 >> 24] ^ IT1[(byte)(X5 >> 16)] ^ IT2[(byte)(X3 >> 8)] ^ IT3[(byte)X2] ^ _expKey[keyCtr++];
-            UInt32 Y7 = IT0[X7 >> 24] ^ IT1[(byte)(X6 >> 16)] ^ IT2[(byte)(X4 >> 8)] ^ IT3[(byte)X3] ^ _expKey[keyCtr++];
+            uint Y0 = IT0[X0 >> 24] ^ IT1[(byte)(X7 >> 16)] ^ IT2[(byte)(X5 >> 8)] ^ IT3[(byte)X4] ^ _expKey[++keyCtr];
+            uint Y1 = IT0[X1 >> 24] ^ IT1[(byte)(X0 >> 16)] ^ IT2[(byte)(X6 >> 8)] ^ IT3[(byte)X5] ^ _expKey[++keyCtr];
+            uint Y2 = IT0[X2 >> 24] ^ IT1[(byte)(X1 >> 16)] ^ IT2[(byte)(X7 >> 8)] ^ IT3[(byte)X6] ^ _expKey[++keyCtr];
+            uint Y3 = IT0[X3 >> 24] ^ IT1[(byte)(X2 >> 16)] ^ IT2[(byte)(X0 >> 8)] ^ IT3[(byte)X7] ^ _expKey[++keyCtr];
+            uint Y4 = IT0[X4 >> 24] ^ IT1[(byte)(X3 >> 16)] ^ IT2[(byte)(X1 >> 8)] ^ IT3[(byte)X0] ^ _expKey[++keyCtr];
+            uint Y5 = IT0[X5 >> 24] ^ IT1[(byte)(X4 >> 16)] ^ IT2[(byte)(X2 >> 8)] ^ IT3[(byte)X1] ^ _expKey[++keyCtr];
+            uint Y6 = IT0[X6 >> 24] ^ IT1[(byte)(X5 >> 16)] ^ IT2[(byte)(X3 >> 8)] ^ IT3[(byte)X2] ^ _expKey[++keyCtr];
+            uint Y7 = IT0[X7 >> 24] ^ IT1[(byte)(X6 >> 16)] ^ IT2[(byte)(X4 >> 8)] ^ IT3[(byte)X3] ^ _expKey[++keyCtr];
 
             // rounds loop
-            while (keyCtr < _expKey.Length - 8)
+            while (keyCtr != LRD)
             {
-                X0 = IT0[Y0 >> 24] ^ IT1[(byte)(Y7 >> 16)] ^ IT2[(byte)(Y5 >> 8)] ^ IT3[(byte)Y4] ^ _expKey[keyCtr++];
-                X1 = IT0[Y1 >> 24] ^ IT1[(byte)(Y0 >> 16)] ^ IT2[(byte)(Y6 >> 8)] ^ IT3[(byte)Y5] ^ _expKey[keyCtr++];
-                X2 = IT0[Y2 >> 24] ^ IT1[(byte)(Y1 >> 16)] ^ IT2[(byte)(Y7 >> 8)] ^ IT3[(byte)Y6] ^ _expKey[keyCtr++];
-                X3 = IT0[Y3 >> 24] ^ IT1[(byte)(Y2 >> 16)] ^ IT2[(byte)(Y0 >> 8)] ^ IT3[(byte)Y7] ^ _expKey[keyCtr++];
-                X4 = IT0[Y4 >> 24] ^ IT1[(byte)(Y3 >> 16)] ^ IT2[(byte)(Y1 >> 8)] ^ IT3[(byte)Y0] ^ _expKey[keyCtr++];
-                X5 = IT0[Y5 >> 24] ^ IT1[(byte)(Y4 >> 16)] ^ IT2[(byte)(Y2 >> 8)] ^ IT3[(byte)Y1] ^ _expKey[keyCtr++];
-                X6 = IT0[Y6 >> 24] ^ IT1[(byte)(Y5 >> 16)] ^ IT2[(byte)(Y3 >> 8)] ^ IT3[(byte)Y2] ^ _expKey[keyCtr++];
-                X7 = IT0[Y7 >> 24] ^ IT1[(byte)(Y6 >> 16)] ^ IT2[(byte)(Y4 >> 8)] ^ IT3[(byte)Y3] ^ _expKey[keyCtr++];
+                X0 = IT0[Y0 >> 24] ^ IT1[(byte)(Y7 >> 16)] ^ IT2[(byte)(Y5 >> 8)] ^ IT3[(byte)Y4] ^ _expKey[++keyCtr];
+                X1 = IT0[Y1 >> 24] ^ IT1[(byte)(Y0 >> 16)] ^ IT2[(byte)(Y6 >> 8)] ^ IT3[(byte)Y5] ^ _expKey[++keyCtr];
+                X2 = IT0[Y2 >> 24] ^ IT1[(byte)(Y1 >> 16)] ^ IT2[(byte)(Y7 >> 8)] ^ IT3[(byte)Y6] ^ _expKey[++keyCtr];
+                X3 = IT0[Y3 >> 24] ^ IT1[(byte)(Y2 >> 16)] ^ IT2[(byte)(Y0 >> 8)] ^ IT3[(byte)Y7] ^ _expKey[++keyCtr];
+                X4 = IT0[Y4 >> 24] ^ IT1[(byte)(Y3 >> 16)] ^ IT2[(byte)(Y1 >> 8)] ^ IT3[(byte)Y0] ^ _expKey[++keyCtr];
+                X5 = IT0[Y5 >> 24] ^ IT1[(byte)(Y4 >> 16)] ^ IT2[(byte)(Y2 >> 8)] ^ IT3[(byte)Y1] ^ _expKey[++keyCtr];
+                X6 = IT0[Y6 >> 24] ^ IT1[(byte)(Y5 >> 16)] ^ IT2[(byte)(Y3 >> 8)] ^ IT3[(byte)Y2] ^ _expKey[++keyCtr];
+                X7 = IT0[Y7 >> 24] ^ IT1[(byte)(Y6 >> 16)] ^ IT2[(byte)(Y4 >> 8)] ^ IT3[(byte)Y3] ^ _expKey[++keyCtr];
 
-                Y0 = IT0[X0 >> 24] ^ IT1[(byte)(X7 >> 16)] ^ IT2[(byte)(X5 >> 8)] ^ IT3[(byte)X4] ^ _expKey[keyCtr++];
-                Y1 = IT0[X1 >> 24] ^ IT1[(byte)(X0 >> 16)] ^ IT2[(byte)(X6 >> 8)] ^ IT3[(byte)X5] ^ _expKey[keyCtr++];
-                Y2 = IT0[X2 >> 24] ^ IT1[(byte)(X1 >> 16)] ^ IT2[(byte)(X7 >> 8)] ^ IT3[(byte)X6] ^ _expKey[keyCtr++];
-                Y3 = IT0[X3 >> 24] ^ IT1[(byte)(X2 >> 16)] ^ IT2[(byte)(X0 >> 8)] ^ IT3[(byte)X7] ^ _expKey[keyCtr++];
-                Y4 = IT0[X4 >> 24] ^ IT1[(byte)(X3 >> 16)] ^ IT2[(byte)(X1 >> 8)] ^ IT3[(byte)X0] ^ _expKey[keyCtr++];
-                Y5 = IT0[X5 >> 24] ^ IT1[(byte)(X4 >> 16)] ^ IT2[(byte)(X2 >> 8)] ^ IT3[(byte)X1] ^ _expKey[keyCtr++];
-                Y6 = IT0[X6 >> 24] ^ IT1[(byte)(X5 >> 16)] ^ IT2[(byte)(X3 >> 8)] ^ IT3[(byte)X2] ^ _expKey[keyCtr++];
-                Y7 = IT0[X7 >> 24] ^ IT1[(byte)(X6 >> 16)] ^ IT2[(byte)(X4 >> 8)] ^ IT3[(byte)X3] ^ _expKey[keyCtr++];
+                Y0 = IT0[X0 >> 24] ^ IT1[(byte)(X7 >> 16)] ^ IT2[(byte)(X5 >> 8)] ^ IT3[(byte)X4] ^ _expKey[++keyCtr];
+                Y1 = IT0[X1 >> 24] ^ IT1[(byte)(X0 >> 16)] ^ IT2[(byte)(X6 >> 8)] ^ IT3[(byte)X5] ^ _expKey[++keyCtr];
+                Y2 = IT0[X2 >> 24] ^ IT1[(byte)(X1 >> 16)] ^ IT2[(byte)(X7 >> 8)] ^ IT3[(byte)X6] ^ _expKey[++keyCtr];
+                Y3 = IT0[X3 >> 24] ^ IT1[(byte)(X2 >> 16)] ^ IT2[(byte)(X0 >> 8)] ^ IT3[(byte)X7] ^ _expKey[++keyCtr];
+                Y4 = IT0[X4 >> 24] ^ IT1[(byte)(X3 >> 16)] ^ IT2[(byte)(X1 >> 8)] ^ IT3[(byte)X0] ^ _expKey[++keyCtr];
+                Y5 = IT0[X5 >> 24] ^ IT1[(byte)(X4 >> 16)] ^ IT2[(byte)(X2 >> 8)] ^ IT3[(byte)X1] ^ _expKey[++keyCtr];
+                Y6 = IT0[X6 >> 24] ^ IT1[(byte)(X5 >> 16)] ^ IT2[(byte)(X3 >> 8)] ^ IT3[(byte)X2] ^ _expKey[++keyCtr];
+                Y7 = IT0[X7 >> 24] ^ IT1[(byte)(X6 >> 16)] ^ IT2[(byte)(X4 >> 8)] ^ IT3[(byte)X3] ^ _expKey[++keyCtr];
             }
 
             // final round
-            Output[OutOffset++] = (byte)(ISBox[Y0 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y7 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y5 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y4] ^ (byte)_expKey[keyCtr++]);
+            Output[OutOffset] = (byte)(ISBox[Y0 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y7 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y5 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y4] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y1 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y0 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y6 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y5] ^ (byte)_expKey[keyCtr++]);
+            Output[++OutOffset] = (byte)(ISBox[Y1 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y0 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y6 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y5] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y2 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y1 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y7 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y6] ^ (byte)_expKey[keyCtr++]);
+            Output[++OutOffset] = (byte)(ISBox[Y2 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y1 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y7 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y6] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y3 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y2 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y0 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y7] ^ (byte)_expKey[keyCtr++]);
+            Output[++OutOffset] = (byte)(ISBox[Y3 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y2 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y0 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y7] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y4 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y3 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y1 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y0] ^ (byte)_expKey[keyCtr++]);
+            Output[++OutOffset] = (byte)(ISBox[Y4 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y3 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y1 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y0] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y5 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y4 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y2 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y1] ^ (byte)_expKey[keyCtr++]);
+            Output[++OutOffset] = (byte)(ISBox[Y5 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y4 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y2 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y1] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y6 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y5 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y3 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y2] ^ (byte)_expKey[keyCtr++]);
+            Output[++OutOffset] = (byte)(ISBox[Y6 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y5 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y3 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y2] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y7 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y6 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y4 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset] = (byte)(ISBox[(byte)Y3] ^ (byte)_expKey[keyCtr]);
+            Output[++OutOffset] = (byte)(ISBox[Y7 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y6 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y4 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y3] ^ (byte)_expKey[keyCtr]);
+        }
+
+        private void Encrypt16(byte[] Input, int InOffset, byte[] Output, int OutOffset)
+        {
+            int LRD = _expKey.Length - 5;
+            int keyCtr = 0;
+
+            // round 0
+	        uint X0 = IntUtils.BytesToBe32(Input, InOffset) ^ _expKey[keyCtr];
+	        uint X1 = IntUtils.BytesToBe32(Input, InOffset + 4) ^ _expKey[++keyCtr];
+	        uint X2 = IntUtils.BytesToBe32(Input, InOffset + 8) ^ _expKey[++keyCtr];
+	        uint X3 = IntUtils.BytesToBe32(Input, InOffset + 12) ^ _expKey[++keyCtr];
+
+            // round 1
+            uint Y0 = T0[X0 >> 24] ^ T1[(byte)(X1 >> 16)] ^ T2[(byte)(X2 >> 8)] ^ T3[(byte)X3] ^ _expKey[++keyCtr];
+            uint Y1 = T0[X1 >> 24] ^ T1[(byte)(X2 >> 16)] ^ T2[(byte)(X3 >> 8)] ^ T3[(byte)X0] ^ _expKey[++keyCtr];
+            uint Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[++keyCtr];
+            uint Y3 = T0[X3 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[++keyCtr];
+
+            while (keyCtr != LRD)
+            {
+                X0 = T0[Y0 >> 24] ^ T1[(byte)(Y1 >> 16)] ^ T2[(byte)(Y2 >> 8)] ^ T3[(byte)Y3] ^ _expKey[++keyCtr];
+                X1 = T0[Y1 >> 24] ^ T1[(byte)(Y2 >> 16)] ^ T2[(byte)(Y3 >> 8)] ^ T3[(byte)Y0] ^ _expKey[++keyCtr];
+                X2 = T0[Y2 >> 24] ^ T1[(byte)(Y3 >> 16)] ^ T2[(byte)(Y0 >> 8)] ^ T3[(byte)Y1] ^ _expKey[++keyCtr];
+                X3 = T0[Y3 >> 24] ^ T1[(byte)(Y0 >> 16)] ^ T2[(byte)(Y1 >> 8)] ^ T3[(byte)Y2] ^ _expKey[++keyCtr];
+                Y0 = T0[X0 >> 24] ^ T1[(byte)(X1 >> 16)] ^ T2[(byte)(X2 >> 8)] ^ T3[(byte)X3] ^ _expKey[++keyCtr];
+                Y1 = T0[X1 >> 24] ^ T1[(byte)(X2 >> 16)] ^ T2[(byte)(X3 >> 8)] ^ T3[(byte)X0] ^ _expKey[++keyCtr];
+                Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[++keyCtr];
+                Y3 = T0[X3 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[++keyCtr];
+            }
+
+            // final round
+            Output[OutOffset] = (byte)(SBox[Y0 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y1 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y2 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y3] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y1 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y2 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y3 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y0] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y2 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y3 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y0 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y1] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y3 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y0 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y1 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y2] ^ (byte)_expKey[keyCtr]);
+        }
+
+        private void Encrypt32(byte[] Input, int InOffset, byte[] Output, int OutOffset)
+        {
+            int LRD = _expKey.Length - 9;
+            int keyCtr = 0;
+
+            // round 0
+	        uint X0 = IntUtils.BytesToBe32(Input, InOffset) ^ _expKey[keyCtr];
+	        uint X1 = IntUtils.BytesToBe32(Input, InOffset + 4) ^ _expKey[++keyCtr];
+	        uint X2 = IntUtils.BytesToBe32(Input, InOffset + 8) ^ _expKey[++keyCtr];
+	        uint X3 = IntUtils.BytesToBe32(Input, InOffset + 12) ^ _expKey[++keyCtr];
+	        uint X4 = IntUtils.BytesToBe32(Input, InOffset + 16) ^ _expKey[++keyCtr];
+	        uint X5 = IntUtils.BytesToBe32(Input, InOffset + 20) ^ _expKey[++keyCtr];
+	        uint X6 = IntUtils.BytesToBe32(Input, InOffset + 24) ^ _expKey[++keyCtr];
+	        uint X7 = IntUtils.BytesToBe32(Input, InOffset + 28) ^ _expKey[++keyCtr];
+
+            // round 1
+            uint Y0 = T0[X0 >> 24] ^ T1[(byte)(X1 >> 16)] ^ T2[(byte)(X3 >> 8)] ^ T3[(byte)X4] ^ _expKey[++keyCtr];
+            uint Y1 = T0[X1 >> 24] ^ T1[(byte)(X2 >> 16)] ^ T2[(byte)(X4 >> 8)] ^ T3[(byte)X5] ^ _expKey[++keyCtr];
+            uint Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X5 >> 8)] ^ T3[(byte)X6] ^ _expKey[++keyCtr];
+            uint Y3 = T0[X3 >> 24] ^ T1[(byte)(X4 >> 16)] ^ T2[(byte)(X6 >> 8)] ^ T3[(byte)X7] ^ _expKey[++keyCtr];
+            uint Y4 = T0[X4 >> 24] ^ T1[(byte)(X5 >> 16)] ^ T2[(byte)(X7 >> 8)] ^ T3[(byte)X0] ^ _expKey[++keyCtr];
+            uint Y5 = T0[X5 >> 24] ^ T1[(byte)(X6 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[++keyCtr];
+            uint Y6 = T0[X6 >> 24] ^ T1[(byte)(X7 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[++keyCtr];
+            uint Y7 = T0[X7 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X2 >> 8)] ^ T3[(byte)X3] ^ _expKey[++keyCtr];
+
+            // rounds loop
+            while (keyCtr != LRD)
+            {
+                X0 = T0[Y0 >> 24] ^ T1[(byte)(Y1 >> 16)] ^ T2[(byte)(Y3 >> 8)] ^ T3[(byte)Y4] ^ _expKey[++keyCtr];
+                X1 = T0[Y1 >> 24] ^ T1[(byte)(Y2 >> 16)] ^ T2[(byte)(Y4 >> 8)] ^ T3[(byte)Y5] ^ _expKey[++keyCtr];
+                X2 = T0[Y2 >> 24] ^ T1[(byte)(Y3 >> 16)] ^ T2[(byte)(Y5 >> 8)] ^ T3[(byte)Y6] ^ _expKey[++keyCtr];
+                X3 = T0[Y3 >> 24] ^ T1[(byte)(Y4 >> 16)] ^ T2[(byte)(Y6 >> 8)] ^ T3[(byte)Y7] ^ _expKey[++keyCtr];
+                X4 = T0[Y4 >> 24] ^ T1[(byte)(Y5 >> 16)] ^ T2[(byte)(Y7 >> 8)] ^ T3[(byte)Y0] ^ _expKey[++keyCtr];
+                X5 = T0[Y5 >> 24] ^ T1[(byte)(Y6 >> 16)] ^ T2[(byte)(Y0 >> 8)] ^ T3[(byte)Y1] ^ _expKey[++keyCtr];
+                X6 = T0[Y6 >> 24] ^ T1[(byte)(Y7 >> 16)] ^ T2[(byte)(Y1 >> 8)] ^ T3[(byte)Y2] ^ _expKey[++keyCtr];
+                X7 = T0[Y7 >> 24] ^ T1[(byte)(Y0 >> 16)] ^ T2[(byte)(Y2 >> 8)] ^ T3[(byte)Y3] ^ _expKey[++keyCtr];
+
+                Y0 = T0[X0 >> 24] ^ T1[(byte)(X1 >> 16)] ^ T2[(byte)(X3 >> 8)] ^ T3[(byte)X4] ^ _expKey[++keyCtr];
+                Y1 = T0[X1 >> 24] ^ T1[(byte)(X2 >> 16)] ^ T2[(byte)(X4 >> 8)] ^ T3[(byte)X5] ^ _expKey[++keyCtr];
+                Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X5 >> 8)] ^ T3[(byte)X6] ^ _expKey[++keyCtr];
+                Y3 = T0[X3 >> 24] ^ T1[(byte)(X4 >> 16)] ^ T2[(byte)(X6 >> 8)] ^ T3[(byte)X7] ^ _expKey[++keyCtr];
+                Y4 = T0[X4 >> 24] ^ T1[(byte)(X5 >> 16)] ^ T2[(byte)(X7 >> 8)] ^ T3[(byte)X0] ^ _expKey[++keyCtr];
+                Y5 = T0[X5 >> 24] ^ T1[(byte)(X6 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[++keyCtr];
+                Y6 = T0[X6 >> 24] ^ T1[(byte)(X7 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[++keyCtr];
+                Y7 = T0[X7 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X2 >> 8)] ^ T3[(byte)X3] ^ _expKey[++keyCtr];
+            }
+
+            // final round
+            Output[OutOffset] = (byte)(SBox[Y0 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y1 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y3 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y4] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y1 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y2 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y4 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y5] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y2 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y3 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y5 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y6] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y3 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y4 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y6 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y7] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y4 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y5 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y7 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y0] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y5 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y6 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y0 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y1] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y6 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y7 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y1 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y2] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y7 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y0 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y2 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y3] ^ (byte)_expKey[keyCtr]);
         }
         #endregion
 

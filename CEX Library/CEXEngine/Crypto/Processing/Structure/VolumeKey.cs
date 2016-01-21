@@ -39,7 +39,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription">VTDev.Libraries.CEXEngine.Crypto.Processing.Structures CipherDescription structure</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies">VTDev.Libraries.CEXEngine.Crypto.Enumeration KeyPolicies Enumeration</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.PackageKeyStates">VTDev.Libraries.CEXEngine.Crypto KeyStates Enumeration</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.StreamCipher">VTDev.Libraries.CEXEngine.Crypto.Processing StreamCipher class</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.CipherStream">VTDev.Libraries.CEXEngine.Crypto.Processing CipherStream class</seealso>
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public struct VolumeKey
@@ -89,7 +89,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <param name="Count">The number of key/vector pairs</param>
         public VolumeKey(CipherDescription Description, int Count)
         {
-            this.Tag = new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPRng().GetBytes(32);
+            this.Tag = new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPPrng().GetBytes(32);
             this.Description = Description;
             this.Count = Count;
             this.FileId = new Int32[Count];

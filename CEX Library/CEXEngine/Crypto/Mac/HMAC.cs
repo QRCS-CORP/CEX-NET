@@ -2,13 +2,14 @@
 using System;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -118,11 +119,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         }
 
         /// <summary>
-        /// Get: Size of returned mac in bytes
+        /// Get: The generators type name
         /// </summary>
-        public int MacSize
+        public Macs Enumeral
         {
-            get { return _msgDigest.DigestSize; }
+            get { return Macs.HMAC; }
         }
 
         /// <summary>
@@ -132,6 +133,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         {
             get { return _isInitialized; }
             private set { _isInitialized = value; }
+        }
+
+        /// <summary>
+        /// Get: Size of returned mac in bytes
+        /// </summary>
+        public int MacSize
+        {
+            get { return _msgDigest.DigestSize; }
         }
 
         /// <summary>

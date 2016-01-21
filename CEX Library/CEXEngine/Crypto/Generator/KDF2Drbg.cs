@@ -2,6 +2,7 @@
 using System;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Generator
@@ -84,6 +85,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         {
             get { return _blockSize; }
             private set { _blockSize = value; }
+        }
+
+        /// <summary>
+        /// Get: The generators type name
+        /// </summary>
+        public Generators Enumeral
+        {
+            get { return Generators.KDF2Drbg; }
         }
 
         /// <summary>

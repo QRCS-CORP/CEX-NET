@@ -10,7 +10,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
     #region CipherDescription
     /// <summary>
     /// The CipherDescription structure.
-    /// <para>Used in conjunction with the <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.StreamCipher"/>, <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.CompressionCipher"/>, 
+    /// <para>Used in conjunction with the <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.CipherStream"/>, <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.CompressionCipher"/>, 
     /// <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.PacketCipher"/>, and <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.VolumeCipher"/> classes.
     /// Contains all the necessary settings required to recreate a cipher instance.</para>
     /// </summary>
@@ -32,7 +32,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
     /// </code>
     /// </example>
     /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.StreamCipher">VTDev.Libraries.CEXEngine.Crypto.Processing StreamCipher class</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.CipherStream">VTDev.Libraries.CEXEngine.Crypto.Processing CipherStream class</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.VolumeCipher">VTDev.Libraries.CEXEngine.Crypto.Processing VolumeCipher class</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.PackageKey">VTDev.Libraries.CEXEngine.Crypto.Processing.Structures PackageKey Structure</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies">VTDev.Libraries.CEXEngine.Crypto.Enumeration KeyPolicies Enumeration</seealso>
@@ -204,7 +204,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         public static bool IsValid(CipherDescription Description)
         {
             // not guaranteed, but should be ok
-            return (Description.EngineType < Enum.GetValues(typeof(SymmetricEngines)).Length);
+            return (Description.EngineType < Enum.GetValues(typeof(SymmetricEngines)).Length << 2);
         }
 
         /// <summary>

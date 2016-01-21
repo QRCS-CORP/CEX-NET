@@ -73,7 +73,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.KeyGenerator">VTDev.Libraries.CEXEngine.Crypto.KeyGenerator class</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.KeyParams">VTDev.Libraries.CEXEngine.Crypto.Processing.Structure KeyParams class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.StreamCipher">VTDev.Libraries.CEXEngine.Crypto.Processing StreamCipher class</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.CipherStream">VTDev.Libraries.CEXEngine.Crypto.Processing CipherStream class</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
@@ -294,12 +294,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// </summary>
         /// 
         /// <param name="Package">The <see cref="PackageKey">Key Header</see> containing the cipher description and operating ids and flags</param>
-        /// <param name="SeedEngine">The <see cref="Prngs">Random Generator</see> used to create the stage I seed material during key generation.</param>
+        /// <param name="SeedEngine">The <see cref="SeedGenerators">Random Generator</see> used to create the stage 1 seed material during key generation.</param>
         /// <param name="DigestEngine">The <see cref="Digests">Digest Engine</see> used in the stage II phase of key generation.</param>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if a key file exists at the path specified, the path is read only, the CipherDescription or KeyAuthority structures are invalid, or
         /// number of SubKeys specified is either less than 1 or more than the maximum allowed (100,000)</exception>
-        public void Create(PackageKey Package, Prngs SeedEngine = Prngs.CSPRng, Digests DigestEngine = Digests.SHA512)
+        public void Create(PackageKey Package, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, Digests DigestEngine = Digests.SHA512)
         {
             // if you are getting exceptions.. read the docs!
             if (File.Exists(_keyPath))
@@ -613,7 +613,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             byte[] buffer =  new byte[Length];
 
             // get p-rand buffer
-            using (CSPRng csp = new CSPRng())
+            using (CSPPrng csp = new CSPPrng())
                 csp.GetBytes(buffer);
 
             // rand
@@ -823,7 +823,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             using (KeyParams keyparam = new KeyParams(key, iv))
             {
                 // 40 rounds of serpent
-                using (CTR cipher = new CTR(new SPX(40)))
+                using (CTR cipher = new CTR(new SHX(40)))
                 {
                     cipher.Initialize(true, keyparam);
                     cipher.Transform(KeyData, KeyData);

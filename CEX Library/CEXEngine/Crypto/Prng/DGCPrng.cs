@@ -2,6 +2,7 @@
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Generator;
+using VTDev.Libraries.CEXEngine.Crypto.Helper;
 using VTDev.Libraries.CEXEngine.Crypto.Seed;
 using VTDev.Libraries.CEXEngine.CryptoException;
 
@@ -74,6 +75,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Get: The prngs type name
+        /// </summary>
+        public Prngs Enumeral
+        {
+            get { return Prngs.DGCPrng; }
+        }
+
         /// <summary>
         /// Algorithm name
         /// </summary>
@@ -164,17 +173,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// Fill an array with pseudo random bytes
         /// </summary>
         /// 
-        /// <param name="Data">Array to fill with random bytes</param>
-        public void GetBytes(byte[] Data)
+        /// <param name="Output">Array to fill with random bytes</param>
+        public void GetBytes(byte[] Output)
         {
             lock (_objLock)
             {
-                if (_byteBuffer.Length - _bufferIndex < Data.Length)
+                if (_byteBuffer.Length - _bufferIndex < Output.Length)
                 {
                     int bufSize = _byteBuffer.Length - _bufferIndex;
                     // copy remaining bytes
-                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Data, 0, bufSize);
-                    int rem = Data.Length - bufSize;
+                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Output, 0, bufSize);
+                    int rem = Output.Length - bufSize;
 
                     while (rem > 0)
                     {
@@ -183,13 +192,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
                         if (rem > _byteBuffer.Length)
                         {
-                            Buffer.BlockCopy(_byteBuffer, 0, Data, bufSize, _byteBuffer.Length);
+                            Buffer.BlockCopy(_byteBuffer, 0, Output, bufSize, _byteBuffer.Length);
                             bufSize += _byteBuffer.Length;
                             rem -= _byteBuffer.Length;
                         }
                         else
                         {
-                            Buffer.BlockCopy(_byteBuffer, 0, Data, bufSize, rem);
+                            Buffer.BlockCopy(_byteBuffer, 0, Output, bufSize, rem);
                             _bufferIndex = rem;
                             rem = 0;
                         }
@@ -197,8 +206,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
                 }
                 else
                 {
-                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Data, 0, Data.Length);
-                    _bufferIndex += Data.Length;
+                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Output, 0, Output.Length);
+                    _bufferIndex += Output.Length;
                 }
             }
         }
@@ -321,7 +330,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
             else
             {
                 _seedGenerator = GetSeedGenerator(_seedType);
-                _rngGenerator.Initialize(_seedGenerator.GetSeed((_digestEngine.BlockSize * 2) + 8));   // 2 * block + counter (2*bsz+8)
+                _rngGenerator.Initialize(_seedGenerator.GetBytes((_digestEngine.BlockSize * 2) + 8));   // 2 * block + counter (2*bsz+8)
             }
 
             _rngGenerator.Generate(_byteBuffer);
@@ -372,47 +381,28 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
             return ret;
         }
 
-        private IDigest GetDigest(Digests RngEngine)
+        private IDigest GetDigest(Digests DigestType)
         {
-            switch (RngEngine)
+            try
             {
-                case Digests.Blake256:
-                    return new Blake256();
-                case Digests.Blake512:
-                    return new Blake512();
-                case Digests.Keccak1024:
-                    return new Keccak1024();
-                case Digests.Keccak256:
-                    return new Keccak256();
-                case Digests.Keccak512:
-                    return new Keccak512();
-                case Digests.SHA256:
-                    return new SHA256();
-                case Digests.SHA512:
-                    return new SHA512();
-                case Digests.Skein1024:
-                    return new Skein1024();
-                case Digests.Skein256:
-                    return new Skein256();
-                case Digests.Skein512:
-                    return new Skein512();
-                default:
-                    return new SHA512();
+                return DigestFromName.GetInstance(DigestType);
+            }
+            catch
+            {
+                throw new CryptoRandomException("DGCPrng:GetDigest", "The digest type is not recognized!", new ArgumentException());
             }
         }
 
-        private int GetMinimumSeedSize(Digests RngEngine)
+        private int GetMinimumSeedSize(Digests DigestType)
         {
             int ctrLen = 8;
 
-            switch (RngEngine)
+            switch (DigestType)
             {
                 case Digests.Blake256:
                     return ctrLen + 32;
                 case Digests.Blake512:
                     return ctrLen + 64;
-                case Digests.Keccak1024:
-                    return ctrLen + 72;
                 case Digests.Keccak256:
                     return ctrLen + 136;
                 case Digests.Keccak512:
@@ -432,14 +422,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
             }
         }
 
-        private ISeed GetSeedGenerator(SeedGenerators SeedEngine)
+        private ISeed GetSeedGenerator(SeedGenerators SeedType)
         {
-            switch (SeedEngine)
+            try
             {
-                case SeedGenerators.XSPRsg:
-                    return new XSPRsg();
-                default:
-                    return new CSPRsg();
+                return SeedGeneratorFromName.GetInstance(SeedType);
+            }
+            catch
+            {
+                throw new CryptoRandomException("DGCPrng:GetSeedGenerator", "The seed generator is not recognized!", new ArgumentException());
             }
         }
         #endregion

@@ -300,7 +300,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <returns>An open port number</returns>
         public static int NextOpenPort(int From = 49152, int To = 65535)
         {
-            var rnd = new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPRng();
+            var rnd = new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPPrng();
 
             int port = -1;
 

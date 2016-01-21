@@ -1,13 +1,14 @@
 ﻿#region Directives
 using System;
 using System.Security.Cryptography;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -39,14 +40,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 {
     /// <summary>
     /// <h3>CSPRsg: An implementation of a Cryptographically Secure seed generator using the RNGCryptoServiceProvider class.</h3>
-    /// <para>Implements a random byte generator using the RNGCryptoServiceProvider<cite>RNGCryptoServiceProvider</cite> class</para>
+    /// <para>Implements a random byte generator using the RNGCryptoServiceProvider<cite>RNGCryptoServiceProvider</cite> class.</para>
     /// </summary>
     /// 
     /// <example>
     /// <code>
-    /// byte seed;
-    /// using (ISeed rnd = new CSPRng())
-    ///     seed = rnd.GetSeed(48);
+    /// using (CSPRsg gen = new CSPRsg())
+    ///     gen.GetSeed(Output);
     /// </code>
     /// </example>
     /// 
@@ -76,6 +76,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Get: The generators type name
+        /// </summary>
+        public SeedGenerators Enumeral
+        {
+            get { return SeedGenerators.CSPRsg; }
+        }
+
         /// <summary>
         /// Algorithm name
         /// </summary>
@@ -120,8 +128,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         /// 
         /// <param name="Size">Size of requested byte array</param>
         /// 
-        /// <returns>Random byte array</returns>
-        public byte[] GetSeed(int Size)
+        /// <returns>A pseudo random byte array</returns>
+        public byte[] GetBytes(int Size)
         {
             byte[] data = new byte[Size];
 
@@ -131,7 +139,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         }
 
         /// <summary>
-        /// Reset the RNGCryptoServiceProvider instance
+        /// Fill an array with pseudo random bytes
+        /// </summary>
+        /// 
+        /// <param name="Output">The destination array</param>
+        public void GetBytes(byte[] Output)
+        {
+            _rngCrypto.GetBytes(Output);
+        }
+
+        /// <summary>
+        /// Reinitialize the internal state
         /// </summary>
         public void Reset()
         {

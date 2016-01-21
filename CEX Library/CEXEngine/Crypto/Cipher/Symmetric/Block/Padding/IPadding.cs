@@ -1,10 +1,16 @@
-﻿namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
+﻿using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
+namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
 {
     /// <summary>
     /// Padding Mode Interface
     /// </summary>
     public interface IPadding
     {
+        /// <summary>
+        /// Get: The cipher modes type name
+        /// </summary>
+        PaddingModes Enumeral { get; }
+
         /// <summary>
         /// Get: Padding name
         /// </summary>

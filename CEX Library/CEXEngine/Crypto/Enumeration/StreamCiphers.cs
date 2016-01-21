@@ -8,14 +8,10 @@
         /// <summary>
         /// An implementation of the ChaCha Stream Cipher
         /// </summary>
-        ChaCha = 0,
-        /// <summary>
-        /// An implementation of the Twofish and Rijndael Merged Stream Cipher
-        /// </summary>
-        Fusion,
+        ChaCha = 8,
         /// <summary>
         /// A Salsa20 Stream Cipher
         /// </summary>
-        Salsa
+        Salsa = 16
     }
 }

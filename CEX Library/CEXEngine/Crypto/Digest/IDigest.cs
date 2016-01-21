@@ -1,5 +1,6 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Digest
@@ -18,6 +19,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// Get: Size of returned digest in bytes
         /// </summary>
         int DigestSize { get; }
+
+        /// <summary>
+        /// Get: The digests type name
+        /// </summary>
+        Digests Enumeral { get; }
 
         /// <summary>
         /// Get: The Digest name

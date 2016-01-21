@@ -69,7 +69,7 @@ namespace VTDev.Projects.CEX.Test.Tests
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -99,7 +99,7 @@ namespace VTDev.Projects.CEX.Test.Tests
         #region Private
         private void ParallelTest()
         {
-            CSPRng rng = new CSPRng();
+            CSPPrng rng = new CSPPrng();
             byte[] key = rng.GetBytes(32);
             byte[] iv = rng.GetBytes(8);
             byte[] data = rng.GetBytes(2048);
@@ -131,13 +131,13 @@ namespace VTDev.Projects.CEX.Test.Tests
             using (ChaCha chacha = new ChaCha(Rounds))
             {
                 chacha.Initialize(new KeyParams(Key, Vector));
-                chacha.Transform(Input, 0, Input.Length, outBytes, 0);
+                chacha.Transform(Input, 0, outBytes, 0, Input.Length);
 
                 if (Evaluate.AreEqual(outBytes, Output) == false)
                     throw new Exception("ChaChaVector: Encrypted arrays are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
 
                 chacha.Initialize(new KeyParams(Key, Vector));
-                chacha.Transform(Output, 0, Output.Length, outBytes, 0);
+                chacha.Transform(Output, 0, outBytes, 0, Output.Length);
             }
 
             if (Evaluate.AreEqual(outBytes, Input) == false)

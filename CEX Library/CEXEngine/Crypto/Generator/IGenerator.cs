@@ -1,5 +1,6 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Generator
@@ -19,6 +20,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// combined sizes of Salt, Ikm, and Nonce must be at least this size.</para>
         /// </summary>
         int KeySize { get; }
+
+        /// <summary>
+        /// Get: The generators type name
+        /// </summary>
+        Generators Enumeral { get; }
 
         /// <summary>
         /// Algorithm name

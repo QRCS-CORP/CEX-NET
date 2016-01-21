@@ -23,7 +23,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
     /// Dieter Schmidt: Rainbow, a New Multivariable Polynomial Signature Scheme.
     /// ACNS 2005: 164-175 <see href="http://dx.doi.org/10.1007/11496137_12"/></para>
     /// </remarks>
-    internal class MapLayer : IDisposable
+    public class MapLayer : IDisposable
     {
         #region Fields
         private short[][][] _coeffAlpha;

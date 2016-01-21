@@ -25,8 +25,6 @@ C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Example\obj\Rele
 C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Example\obj\Release\VTDev.Projects.CEX.Properties.Resources.resources
 C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\Example\obj\Release\Example.csproj.GenerateResource.Cache
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Example\bin\Release\CEXFree.exe.config
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Example\obj\Release\CEXFree.exe
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Example\obj\Release\CEXFree.pdb
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Example\bin\Release\CEXFree.exe
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Example\bin\Release\CEXFree.pdb
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Example\bin\Release\CEXEngine.dll
@@ -37,3 +35,5 @@ C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Example\obj\Release\VTDev.Projects.CEX.FormGenerate.resources
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Example\obj\Release\VTDev.Projects.CEX.Properties.Resources.resources
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Example\obj\Release\Example.csproj.GenerateResource.Cache
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Example\obj\Release\CEXFree.exe
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\Example\obj\Release\CEXFree.pdb

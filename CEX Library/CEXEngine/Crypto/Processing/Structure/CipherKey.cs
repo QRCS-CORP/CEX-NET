@@ -10,7 +10,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
 {
     /// <summary>
     /// The CipherKey structure.
-    /// <para>Used in conjunction with the <see cref="StreamCipher"/> class. 
+    /// <para>Used in conjunction with the <see cref="CipherStream"/> class. 
     /// This structure is used as the header for a single use key and vector set.</para>
     /// </summary>
     /// 
@@ -27,7 +27,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
     /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Factory.PackageFactory">VTDev.Libraries.CEXEngine.Crypto KeyFactory class</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription">VTDev.Libraries.CEXEngine.Crypto.Processing.Structures CipherDescription structure</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.StreamCipher">VTDev.Libraries.CEXEngine.Crypto.Processing StreamCipher class</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.CipherStream">VTDev.Libraries.CEXEngine.Crypto.Processing CipherStream class</seealso>
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public struct CipherKey

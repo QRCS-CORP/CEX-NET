@@ -135,6 +135,9 @@
     <Compile Include="Tests\MacTest\VmpcMacTest.cs" />
     <Compile Include="Tests\GeneratorTest\HkdfTest.cs" />
     <Compile Include="Tests\PrngTest\SecureRandomTest.cs" />
+    <Compile Include="Tests\ProcessingTest\CipherStreamTest.cs" />
+    <Compile Include="Tests\Seed\ISCRsgTest.cs" />
+    <Compile Include="Tests\Seed\XSPRsgTest.cs" />
     <Compile Include="Tests\TestEventArgs.cs" />
     <Compile Include="Tests\Tools\CompressionTest.cs" />
   </ItemGroup>

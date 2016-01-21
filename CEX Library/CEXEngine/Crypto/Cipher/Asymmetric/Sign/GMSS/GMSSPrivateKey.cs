@@ -10,12 +10,13 @@ using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.CryptoException;
 using VTDev.Libraries.CEXEngine.Utility;
+using VTDev.Libraries.CEXEngine.Crypto.Helper;
 #endregion
 
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -52,7 +53,9 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
 {
     /// <summary>
-    /// A Generalized Merkle Signature Scheme Private Key
+    /// A Generalized Merkle Signature Scheme Private Key.
+    /// <para>Each signing operation requires a unique sub-key.
+    /// Use the <see cref="NextKey()"/> method to extract each new key subsequent to the initial key return.</para>
     /// </summary>
     public sealed class GMSSPrivateKey : IAsymmetricKey
     {
@@ -112,22 +115,34 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             get { return ALG_NAME; }
         }
 
-        internal int[] Index
+        /// <summary>
+        /// Get: The current sub-key index
+        /// </summary>
+        public int[] Index
         {
             get { return _index; }
         }
 
-        internal byte[][] CurrentSeeds
+        /// <summary>
+        /// Get: The current seed values
+        /// </summary>
+        public byte[][] CurrentSeeds
         {
             get { return GMSSUtil.Clone(_currentSeeds); }
         }
 
-        internal byte[][][] CurrentAuthPaths
+        /// <summary>
+        /// Get: The current Auth paths arrays
+        /// </summary>
+        public byte[][][] CurrentAuthPaths
         {
             get { return GMSSUtil.Clone(_currentAuthPaths); }
         }
 
-        internal bool IsUsed
+        /// <summary>
+        /// Get: The key deployment state
+        /// </summary>
+        public bool IsUsed
         {
             get { return _isUsed; }
             set { _isUsed = value; }
@@ -370,7 +385,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// <param name="PrivateKey">The GMSSPrivateKey to copy</param>
         private GMSSPrivateKey(GMSSPrivateKey PrivateKey)
         {
-            _index = ArrayEx.Clone(PrivateKey._index); //N
+            _index = ArrayEx.Clone(PrivateKey._index);
             _currentSeeds = GMSSUtil.Clone(PrivateKey._currentSeeds);
             _nextNextSeeds = GMSSUtil.Clone(PrivateKey._nextNextSeeds);
             _currentAuthPaths = GMSSUtil.Clone(PrivateKey._currentAuthPaths);
@@ -392,7 +407,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             _nextRootSig = PrivateKey._nextRootSig; //N
             _gmssPS = PrivateKey._gmssPS;
             _msgDigestType = PrivateKey._msgDigestType;
-
             _heightOfTrees = PrivateKey._heightOfTrees;
             _otsIndex = PrivateKey._otsIndex;
             _K = PrivateKey._K;
@@ -668,6 +682,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         public static GMSSPrivateKey From(Stream KeyStream)
         {
             return new GMSSPrivateKey(KeyStream);
+        }
+
+        /// <summary>
+        /// Get the next unused GMSS private key.
+        /// <para>Use this call to get a new private key for each signing operation.</para>
+        /// </summary>
+        /// 
+        /// <returns>The next available private key</returns>
+        public GMSSPrivateKey NextKey()
+        {
+            GMSSPrivateKey nKey = new GMSSPrivateKey(this);
+            nKey.NextKey(_gmssPS.NumLayers - 1);
+
+            return nKey;
         }
 
         /// <summary>
@@ -1101,35 +1129,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// Get the digest engine
         /// </summary>
         /// 
-        /// <param name="Digest">Engine type</param>
+        /// <param name="DigestType">Engine type</param>
         /// 
         /// <returns>Instance of digest</returns>
-        private IDigest GetDigest(Digests Digest)
+        private IDigest GetDigest(Digests DigestType)
         {
-            switch (Digest)
+            try
             {
-                case Digests.Blake256:
-                    return new Blake256();
-                case Digests.Blake512:
-                    return new Blake512();
-                case Digests.Keccak256:
-                    return new Keccak256();
-                case Digests.Keccak512:
-                    return new Keccak512();
-                case Digests.Keccak1024:
-                    return new Keccak1024();
-                case Digests.SHA256:
-                    return new SHA256();
-                case Digests.SHA512:
-                    return new SHA512();
-                case Digests.Skein256:
-                    return new Skein256();
-                case Digests.Skein512:
-                    return new Skein512();
-                case Digests.Skein1024:
-                    return new Skein1024();
-                default:
-                    throw new CryptoAsymmetricException("GMSSPrivateKey:GetDigest", "The digest type is not supported!", new ArgumentException());
+                return DigestFromName.GetInstance(DigestType);
+            }
+            catch
+            {
+                throw new CryptoRandomException("GMSSPrivateKey:GetDigest", "The digest type is not recognized!", new ArgumentException());
             }
         }
 
@@ -1185,14 +1196,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             }
 
             return Tau - 1;
-        }
-
-        internal GMSSPrivateKey NextKey()
-        {
-            GMSSPrivateKey nKey = new GMSSPrivateKey(this);
-            nKey.NextKey(_gmssPS.NumLayers - 1);
-
-            return nKey;
         }
 
         /// <summary>

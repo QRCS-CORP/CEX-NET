@@ -22,17 +22,19 @@ namespace VTDev.Projects.CEX
             lstInfo.Items.Add("");
             lstInfo.Items.Add("Key Settings");
             lstInfo.Items.Add("Sub Keys:" + Info.SubKeyCount);
-            lstInfo.Items.Add("Cipher: " + MemberToString((SymmetricEngines)Info.Description.CipherType));
-            lstInfo.Items.Add("HMAC:" + (Info.Description.MacSize > 0 ? MemberToString((Digests)Info.Description.MacEngine) : "None"));
+            lstInfo.Items.Add("Cipher: " + MemberToString((SymmetricEngines)Info.Description.EngineType));
+            lstInfo.Items.Add("Mode: " + MemberToString((CipherModes)Info.Description.CipherType));
+            lstInfo.Items.Add("Rounds: " + MemberToString((RoundCounts)Info.Description.RoundCount));
+            lstInfo.Items.Add("KDF Engine: " + MemberToString((Digests)Info.Description.KdfEngine));
+            lstInfo.Items.Add("Padding: " + MemberToString((PaddingModes)Info.Description.PaddingType));
+            lstInfo.Items.Add("HMAC Digest:" + (Info.Description.MacSize > 0 ? MemberToString((Digests)Info.Description.MacEngine) : "None"));
             if (!string.IsNullOrEmpty(Info.Tag))
                 lstInfo.Items.Add("Description: " + Info.Tag);
+
             lstInfo.Items.Add("");
             lstInfo.Items.Add("Key Policies");
             foreach (var item in Info.Policies)
-            {
-                if (item != KeyPolicies.None)
                     lstInfo.Items.Add(MemberToString((KeyPolicies)item));
-            }
         }
 
         public static String MemberToString(Enum Field)

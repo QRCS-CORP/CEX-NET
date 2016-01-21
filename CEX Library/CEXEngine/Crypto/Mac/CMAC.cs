@@ -5,12 +5,13 @@ using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #endregion
 
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -121,11 +122,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         }
 
         /// <summary>
-        /// Get: Size of returned mac in bytes
+        /// Get: The macs type name
         /// </summary>
-        public int MacSize
+        public Macs Enumeral
         {
-            get { return _macSize; }
+            get { return Macs.CMAC; }
         }
 
         /// <summary>
@@ -135,6 +136,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         {
             get { return _isInitialized; }
             private set { _isInitialized = value; }
+        }
+
+        /// <summary>
+        /// Get: Size of returned mac in bytes
+        /// </summary>
+        public int MacSize
+        {
+            get { return _macSize; }
         }
 
         /// <summary>

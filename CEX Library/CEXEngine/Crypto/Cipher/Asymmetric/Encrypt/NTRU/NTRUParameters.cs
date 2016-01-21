@@ -365,7 +365,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         }
 
         /// <summary>
-        /// Get/Set: The pseudo random generator engine to use; default is CSPRng
+        /// Get/Set: The pseudo random generator engine to use; default is CSPPrng
         /// <para>Set can be readonly in distribution</para>
         /// </summary>
         public Prngs RandomEngine

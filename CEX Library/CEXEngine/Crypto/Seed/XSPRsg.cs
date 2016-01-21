@@ -1,15 +1,14 @@
 ﻿#region Directives
 using System;
-using System.Diagnostics;
-using System.Net.NetworkInformation;
-using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,7 +31,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 // 
 // Implementation Details:
 // An implementation of a pseudo random generator.
-// XSPRsg:  XorShift+random seed generator
+// XSPRsg:  XorShift+ pseudo random seed generator
 // Written by John Underhill, June 1, 2015
 // contact: develop@vtdev.com
 #endregion
@@ -40,56 +39,71 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 {
     /// <summary>
-    /// XSPRsg: Generates seed material for a CSPrng using various processed system counters passed through an XorShift+ generator.
-    /// <para>An original construct (experimental) meant to provide an alternative to the RNGCryptoServiceProvider as a source of pseudo random seeding material.
-    /// This class is suitable for generating seeds for a Prng or Drbg implementation.</para>
+    /// XSPRsg: Generates seed material using an XorShift+ generator.
+    /// <para>This generator is not generally considered a cryptographic quality generator. 
+    /// This generator is suitable as a quality high-speed number generator, but not to be used directly for tasks that require secrecy, ex. key generation.</para>
     /// </summary>
-    /// 
     /// 
     /// <example>
     /// <description>Example of getting a seed value:</description>
     /// <code>
-    /// byte[] seed;
-    /// using (XSPRsg rnd = new XSPRsg())
-    ///     seed = rnd.GetSeed(48);
+    /// using (XSPRsg gen = new XSPRsg(Seed))
+    ///     gen.GetSeed(Output);
     /// </code>
     /// </example>
     /// 
     /// <revisionHistory>
-    /// <revision date="2015/06/09" version="1.4.0.0">Initial release</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
+    /// <revision date="2016/01/09" version="1.5.0.0">Initial release</revision>
     /// </revisionHistory>
     /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Prng">VTDev.Libraries.CEXEngine.Crypto Prng Classes</seealso>
     /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
-    /// <para>The seed generator uses system counters and state information, that are pre-processed via modular arithmetic, 
-    /// converted to a byte array, and then processed with an XorShift+ random generator.
-    /// The maximum allocation size is 1024 bytes.</para>
-    /// 
-    /// <description>XSPGenerator uses the following state values as initial entropy sources:</description>
-    /// <list type="bullet">
-    /// <item><description>Network: Combined interface values for the BytesSent, UnicastPacketsSent, NonUnicastPacketsSent, BytesReceived, UnicastPacketsReceived and NonUnicastPacketsReceived values.</description></item>
-    /// <item><description>Current Process: Handle, StartTime ticks, PeakWorkingSet64, NonpagedSystemMemorySize64, PagedSystemMemorySize64, HandleCount, and Id.</description></item>
-    /// <item><description>Combined running processes and threads: WorkingSet64, VirtualMemorySize64, StartAddress, Id, and CurrentPriority.</description></item>
-    /// <item><description>Environment: Ticks since startup, the Time in Ticks.</description></item>
+    /// <description><h4>Guiding Publications:</h4></description>
+    /// <list type="number">
+    /// <item><description>Further scramblings of Marsaglia’s xorshift generators <see href="http://vigna.di.unimi.it/ftp/papers/xorshiftplus.pdf"/>.</description></item>
+    /// <item><description>Xorshift+ generators and the PRNG shootout: <see href="http://xorshift.di.unimi.it/"/>.</description></item>
     /// </list>
     /// </remarks>
     public sealed class XSPRsg : ISeed
     {
         #region Constants
         private const string ALG_NAME = "XSPRsg";
+        private const int SIZE32 = 4;
+        private const int SIZE64 = 8;
+        private const int SEED128 = 2;
+        private const int SEED1024 = 16;
+        private const ulong Z1 = 0x9E3779B97F4A7C15;
+        private const ulong Z2 = 0xBF58476D1CE4E5B9;
+        private const ulong Z3 = 0x94D049BB133111EB;
+        private const ulong Z4 = 1181783497276652981;
         #endregion
 
         #region Fields
         private bool _isDisposed = false;
-        private byte[] _stateSeed;
-        private int _stateOffset = 0;
-        private readonly int MAX_ALLOC = 1024;
+        private bool _isShift1024 = false;
+        private uint _stateOffset = 0;
+        private ulong[] _stateSeed;
+        private ulong[] _wrkBuffer;
+        private static readonly UInt64[] JMP128 = new UInt64[] { 0x8a5cd789635d2dffUL, 0x121fd2155c472f96UL };
+        private static readonly UInt64[] JMP1024 = new UInt64[] { 0x84242f96eca9c41dUL,
+		        0xa3c65b8776f96855UL, 0x5b34a39f070b5837UL, 0x4489affce4f31a1eUL,
+		        0x2ffeeb0a48316f40UL, 0xdc2d9891fe68c022UL, 0x3659132bb12fea70UL,
+		        0xaac17d8efa43cab8UL, 0xc4cb815590989b13UL, 0x5ee975283d71c93bUL,
+		        0x691548c86c1bd540UL, 0x7910c41d10a1e6a5UL, 0x0b5fc64563b3e2a8UL,
+		        0x047f7684e9fc949dUL, 0xb99181f2d8f685caUL, 0x284600e3f30e38c3UL
+                };
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Get: The generators type name
+        /// </summary>
+        public SeedGenerators Enumeral
+        {
+            get { return SeedGenerators.XSPRsg; }
+        }
+
         /// <summary>
         /// Algorithm name
         /// </summary>
@@ -101,22 +115,65 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 
         #region Constructor
         /// <summary>
-        /// Initialize this class
+        /// Initialize this class using the EntropyPool to provide a seed value.
+        /// <para>Seeds the 1024 generator with 128 bytes from the pool.</para>
         /// </summary>
         public XSPRsg()
         {
-            Initialize();
+            byte[] rnd = new byte[SEED1024 * 8];
+            _stateSeed = new ulong[SEED1024];
+            _wrkBuffer = new ulong[SEED1024];
+            new EntropyPool().GetBytes(rnd);
+            Buffer.BlockCopy(rnd, 0, _stateSeed, 0, rnd.Length);
+            _isShift1024 = true;
+            Reset();
+        }
+
+        /// <summary>
+        /// Initialize this class using a seed value.
+        /// <para>Initializing with 2 ulongs invokes the 128 bit function, initializing with 16 ulongs
+        /// invokes the 1024 bit function.</para>
+        /// </summary>
+        ///
+        /// <param name="Seed">The initial state values; can be either 2, or 16, (non-zero) 64bit values</param>
+        ///
+        /// <exception cref="CEX::Exception::CryptoRandomException">Thrown if an invalid seed array is used</exception>
+        public XSPRsg(ulong[] Seed)
+        {
+            if (Seed.Length != SEED128 && Seed.Length != SEED1024)
+                throw new CryptoRandomException("XSPRsg:CTor", "The seed array length must be either 2 or 16 long values!");
+
+            for (int i = 0; i < Seed.Length; ++i)
+            {
+                if (Seed[i] == 0)
+                    throw new CryptoRandomException("XSPRsg:CTor", "Seed values can not be zero!");
+            }
+
+            _stateSeed = new ulong[Seed.Length];
+            _wrkBuffer = new ulong[Seed.Length];
+            Array.Copy(Seed, _stateSeed, Seed.Length);
+            _isShift1024 = (Seed.Length == SEED1024);
+            Reset();
+        }
+
+        /// <summary>
+        /// Finalize objects
+        /// </summary>
+        ~XSPRsg()
+        {
+            Dispose(false);
         }
         #endregion
 
         #region Public Methods
         /// <summary>
-        /// Re-initializes the generator with new state
+        /// Fill an array with pseudo random bytes
         /// </summary>
-        public void Initialize()
+        /// 
+        /// <param name="Output">The destination array</param>
+        public void GetBytes(byte[] Output)
         {
-            _stateSeed = XorShift3(ArrayEx.Concat(NetStats(), ProcessStats(), ThreadStats(), TimeStats()), MAX_ALLOC);
-            _stateOffset = 0;
+            Generate(Output, Output.Length);
         }
 
         /// <summary>
@@ -125,179 +182,150 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         /// 
         /// <param name="Size">The size of the seed returned; up to a maximum of 1024 bytes</param>
         /// 
-        /// <returns>A pseudo random seed</returns>
-        /// 
-        /// <exception cref="CryptoRandomException">Thrown if the requested size exceeds maximum allowable allocation (1024 bytes)</exception>
-        public byte[] GetSeed(int Size)
+        /// <returns>A pseudo random byte array</returns>
+        public byte[] GetBytes(int Size)
         {
-            if (Size > MAX_ALLOC)
-                throw new CryptoRandomException("XSPRsg:GetSeed", String.Format("Size requested exceeds maximum seed allocation size of {0} bytes!", MAX_ALLOC), new ArgumentException());
-
             byte[] data = new byte[Size];
-
-            if (Size + _stateOffset > MAX_ALLOC)
-            {
-                int len = MAX_ALLOC - _stateOffset;
-                Buffer.BlockCopy(_stateSeed, _stateOffset, data, 0, len);
-                Initialize();
-                int diff = Size - len;
-                Buffer.BlockCopy(_stateSeed, _stateOffset, data, len, diff);
-                _stateOffset += diff;
-            }
-            else
-            {
-                Buffer.BlockCopy(_stateSeed, _stateOffset, data, 0, data.Length);
-                _stateOffset += data.Length;
-            }
-
+            GetBytes(data);
             return data;
+        }
+
+        /// <summary>
+        /// Increment the state by 64 blocks; used with the 128 and 1024 implementations
+        /// </summary>
+        public void Jump()
+        {
+	        if (_isShift1024)
+		        Jump1024();
+	        else
+		        Jump128();
+        }
+
+        /// <summary>
+        /// Reinitialize the internal state
+        /// </summary>
+        public void Reset()
+        {
+            Array.Copy(_stateSeed, 0, _wrkBuffer, 0, _stateSeed.Length);
+        }
+
+        /// <summary>
+        /// Implementation of java's Splittable function
+        /// </summary>
+        /// 
+        /// <param name="X">Input integer</param>
+        /// 
+        /// <returns>A processed long integer</returns>
+        public ulong Split(ulong X)
+        {
+            ulong Z = (X += Z1);
+            Z = (Z ^ (Z >> 30)) * Z2;
+            Z = (Z ^ (Z >> 27)) * Z3;
+
+            return Z ^ (Z >> 31);
         }
         #endregion
 
         #region Private Methods
-        private static byte[] NetStats()
+        private void Generate(byte[] Output, int Size)
         {
-            if (!NetworkInterface.GetIsNetworkAvailable())
-                return new byte[0];
+	        int offset = 0;
+	        ulong X;
+            int len = SIZE64;
 
-            NetworkInterface[] interfaces = NetworkInterface.GetAllNetworkInterfaces();
-            long[] state = new long[2];
+	        while (offset < Size)
+	        {
+		        if (_isShift1024)
+			        X = Shift1024();
+		        else
+			        X = Shift128();
 
-            foreach (NetworkInterface ni in interfaces)
-            {
-                if (ni.OperationalStatus == OperationalStatus.Up)
-                {
-                    try
-                    {
-                        IPv4InterfaceStatistics stats = ni.GetIPv4Statistics();
-                        if (stats.BytesSent + stats.BytesReceived > 0)
-                        {
-                            state[0] += (RotateLeft(stats.BytesSent, 24) ^ stats.UnicastPacketsReceived) + stats.UnicastPacketsSent;
-                            state[1] += (RotateRight(ni.GetIPv4Statistics().BytesReceived, 31) ^ stats.NonUnicastPacketsReceived) + stats.NonUnicastPacketsSent;
-                        }
-                    }
-                    catch { continue; }
-                }
-            }
+		        if (Size - offset < len)
+			        len = Size - offset;
 
-            if (state[0] == 0 || state[1] == 0)
-                return new byte[0];
-
-            byte[] data = new byte[state.Length * 8];
-            Buffer.BlockCopy(state, 0, data, 0, data.Length);
-
-            return data;
+                Buffer.BlockCopy(IntUtils.ULongToBytes(X), 0, Output, offset, len);
+		        offset += len;
+	        }
         }
 
-        private static byte[] ProcessStats()
+        private int Next()
         {
-            long[] state = new long[3];
+	        ulong X;
 
-            try
-            {
-                Process localPrc = Process.GetCurrentProcess();
+	        if (_isShift1024)
+		        X = Shift1024();
+	        else
+		        X = Shift128();
 
-                state[0] = RotateRight(localPrc.StartTime.Ticks, 22) ^ localPrc.PeakWorkingSet64;
-                state[1] = RotateLeft(localPrc.NonpagedSystemMemorySize64, 34) ^ localPrc.PagedSystemMemorySize64;
-                state[2] = (long)localPrc.Handle * localPrc.HandleCount * RotateLeft(localPrc.Id, 25) ^ RotateRight(localPrc.PeakWorkingSet64, 4);
-
-                byte[] data = new byte[state.Length * 8];
-                Buffer.BlockCopy(state, 0, data, 0, data.Length);
-                return data;
-            }
-            catch
-            {
-                return new byte[0];
-            }
-
+            return (int)X;
         }
 
-        private static Int64 RotateLeft(Int64 X, Int32 Bits)
+        private void Jump128()
         {
-            return (X << Bits) | ((Int64)((UInt64)X >> -Bits));
+	        ulong s0 = 0;
+	        ulong s1 = 0;
+
+	        for (int i = 0; i < JMP128.Length; i++)
+	        {
+		        for (int b = 0; b < 64; b++)
+		        {
+			        if ((JMP128[i] & 1UL) << b != 0)
+			        {
+				        s0 ^= _wrkBuffer[0];
+				        s1 ^= _wrkBuffer[1];
+			        }
+
+			        Shift128();
+		        }
+	        }
+
+	        _wrkBuffer[0] = s0;
+	        _wrkBuffer[1] = s1;
         }
 
-        private static Int64 RotateRight(Int64 X, Int32 Bits)
+        private void Jump1024()
         {
-            return ((Int64)((UInt64)X >> Bits) | (X << (64 - Bits)));
+	        ulong[] T =  new ulong[16];
+
+	        for (int i = 0; i < JMP1024.Length; i++)
+	        {
+		        for (int b = 0; b < 64; b++)
+		        {
+			        if ((JMP1024[i] & 1UL) << b != 0)
+			        {
+				        for (int j = 0; j < 16; j++)
+					        T[j] ^= _wrkBuffer[(j + _stateOffset) & 15];
+			        }
+
+			        Shift1024();
+		        }
+	        }
+
+            Buffer.BlockCopy(T, 0, _wrkBuffer, 0, T.Length);
         }
 
-        private static byte[] ThreadStats()
+        private ulong Shift128()
         {
-            Process[] processes = Process.GetProcesses();
-            long[] state = new long[processes.Length];
-            int bits = 48;
+	        ulong X = _wrkBuffer[0];
+	        ulong Y = _wrkBuffer[1];
 
-            for (int i = 0; i < processes.Length; i++)
-            {
-                try
-                {
-                    state[i] = processes[i].WorkingSet64 * RotateRight(processes[i].VirtualMemorySize64, 13);
+	        _wrkBuffer[0] = Y;
+	        X ^= X << 23; // a
+	        _wrkBuffer[1] = X ^ Y ^ (X >> 18) ^ (Y >> 5); // b, c
 
-                    for (int j = 0; j < processes[i].Threads.Count; j++)
-                    {
-                        if (bits - j < 1)
-                            bits = 48;
-                        state[i] += RotateLeft((long)processes[i].Threads[j].StartAddress, bits - j) ^ processes[i].Threads[j].Id * processes[i].Threads[j].CurrentPriority;
-                        bits--;
-                    }
-                }
-                catch { continue; }
-            }
-
-            byte[] data = new byte[state.Length * 8];
-            Buffer.BlockCopy(state, 0, data, 0, data.Length);
-
-            return data;
+	        return _wrkBuffer[1] + Y; // +
         }
 
-        private static byte[] TimeStats()
+
+        private ulong Shift1024()
         {
-            long[] state = new long[2];
+	        ulong X = _wrkBuffer[_stateOffset];
+	        ulong Y = _wrkBuffer[_stateOffset = (_stateOffset + 1) & 15];
 
-            state[0] = RotateLeft(TimeSpan.FromMilliseconds(System.Environment.TickCount).Ticks, 33) ^ RotateRight(~DateTime.Now.Ticks, 1);
-            state[1] = RotateLeft(DateTime.Now.Ticks, 31) ^ RotateRight(~TimeSpan.FromMilliseconds(System.Environment.TickCount).Ticks, 3);
+	        Y ^= Y << 31; // a
+	        _wrkBuffer[_stateOffset] = Y ^ X ^ (Y >> 11) ^ (X >> 30); // b,c
 
-            byte[] data = new byte[state.Length * 8];
-            Buffer.BlockCopy(state, 0, data, 0, data.Length);
-
-            return data;
-        }
-
-        private static byte[] XorShift3(byte[] Seed, int Size)
-        {
-            int offset = 0;
-            int stateLen = Seed.Length / 8;
-            ulong[] X = new ulong[stateLen];
-            ulong[] S = new ulong[stateLen];
-            byte[] buffer = new byte[Size];
-
-            Buffer.BlockCopy(Seed, 0, S, 0, stateLen * 8);
-
-            while (offset < Size)
-            {
-                for (int i = 0; i < stateLen - 1; i += 2)
-                {
-                    if (offset >= buffer.Length)
-                        break;
-
-                    X[i] = S[i];
-                    X[i + 1] = S[i + 1];
-                    S[i] = X[i + 1];
-                    X[i] ^= X[i] << 23;                     // a
-                    X[i] ^= X[i] >> 17;                     // b
-                    X[i] ^= X[i + 1] ^ (X[i + 1] >> 26);    // c
-                    S[1] = X[i];
-                    X[i] += X[i + 1];                       // +
-
-                    buffer[offset++] = (byte)(X[i] & 0xFF);
-                    buffer[offset++] = (byte)((X[i] >> 8) & 0xFF);
-                    buffer[offset++] = (byte)((X[i] >> 16) & 0xFF);
-                    buffer[offset++] = (byte)((X[i] >> 24) & 0xFF);
-                }
-            }
-
-            return buffer;
+            return _wrkBuffer[_stateOffset] * Z4;
         }
         #endregion
 
@@ -317,12 +345,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
             {
                 try
                 {
+                    _stateOffset = 0;
+
                     if (_stateSeed != null)
                     {
                         Array.Clear(_stateSeed, 0, _stateSeed.Length);
                         _stateSeed = null;
                     }
-                    _stateOffset = 0;
+                    if (_wrkBuffer != null)
+                    {
+                        Array.Clear(_wrkBuffer, 0, _wrkBuffer.Length);
+                        _wrkBuffer = null;
+                    }
                 }
                 catch { }
 

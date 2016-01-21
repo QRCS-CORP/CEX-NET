@@ -33,7 +33,7 @@ namespace VTDev.Projects.CEX.Tests
                 // alt: manual creation
                 /*kf.Create(
                     kp, 
-                    Engines.RDX, 
+                    Engines.RHX, 
                     32, 
                     IVSizes.V128, 
                     CipherModes.CTR, 
@@ -46,7 +46,7 @@ namespace VTDev.Projects.CEX.Tests
 
                 // cipher paramaters
                 desc = new CipherDescription(
-                    SymmetricEngines.RDX, 32,
+                    SymmetricEngines.RHX, 32,
                     IVSizes.V128,
                     CipherModes.CTR,
                     PaddingModes.X923,
@@ -89,7 +89,7 @@ namespace VTDev.Projects.CEX.Tests
 
             // cipher paramaters
             CipherDescription desc = new CipherDescription(
-                SymmetricEngines.RDX, 32,
+                SymmetricEngines.RHX, 32,
                 IVSizes.V128,
                 CipherModes.CTR,
                 PaddingModes.X923,
@@ -146,7 +146,7 @@ namespace VTDev.Projects.CEX.Tests
 
             // cipher paramaters
             CipherDescription desc = new CipherDescription(
-                SymmetricEngines.RDX, 32,
+                SymmetricEngines.RHX, 32,
                 IVSizes.V128,
                 CipherModes.CTR,
                 PaddingModes.X923,

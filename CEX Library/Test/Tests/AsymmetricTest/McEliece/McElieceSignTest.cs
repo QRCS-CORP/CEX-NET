@@ -39,7 +39,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.McEliece
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -67,7 +67,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.McEliece
                 sgn.Initialize(akp.PublicKey);
                 int sz = sgn.MaxPlainText - 1;
                 byte[] data = new byte[320];
-                new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPRng().GetBytes(data);
+                new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPPrng().GetBytes(data);
 
                 byte[] code = sgn.Sign(data, 0, data.Length);
 

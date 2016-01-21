@@ -2,6 +2,7 @@
 using System;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Generator;
+using VTDev.Libraries.CEXEngine.Crypto.Helper;
 using VTDev.Libraries.CEXEngine.Crypto.Seed;
 using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
@@ -68,6 +69,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Get: The prngs type name
+        /// </summary>
+        public Prngs Enumeral
+        {
+            get { return Prngs.SP20Prng; }
+        }
+
         /// <summary>
         /// Algorithm name
         /// </summary>
@@ -163,17 +172,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// Fill an array with pseudo random bytes
         /// </summary>
         /// 
-        /// <param name="Data">Array to fill with random bytes</param>
-        public void GetBytes(byte[] Data)
+        /// <param name="Output">Array to fill with random bytes</param>
+        public void GetBytes(byte[] Output)
         {
             lock (_objLock)
             {
-                if (_byteBuffer.Length - _bufferIndex < Data.Length)
+                if (_byteBuffer.Length - _bufferIndex < Output.Length)
                 {
                     int bufSize = _byteBuffer.Length - _bufferIndex;
                     // copy remaining bytes
-                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Data, 0, bufSize);
-                    int rem = Data.Length - bufSize;
+                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Output, 0, bufSize);
+                    int rem = Output.Length - bufSize;
 
                     while (rem > 0)
                     {
@@ -182,13 +191,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
                         if (rem > _byteBuffer.Length)
                         {
-                            Buffer.BlockCopy(_byteBuffer, 0, Data, bufSize, _byteBuffer.Length);
+                            Buffer.BlockCopy(_byteBuffer, 0, Output, bufSize, _byteBuffer.Length);
                             bufSize += _byteBuffer.Length;
                             rem -= _byteBuffer.Length;
                         }
                         else
                         {
-                            Buffer.BlockCopy(_byteBuffer, 0, Data, bufSize, rem);
+                            Buffer.BlockCopy(_byteBuffer, 0, Output, bufSize, rem);
                             _bufferIndex = rem;
                             rem = 0;
                         }
@@ -196,8 +205,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
                 }
                 else
                 {
-                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Data, 0, Data.Length);
-                    _bufferIndex += Data.Length;
+                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Output, 0, Output.Length);
+                    _bufferIndex += Output.Length;
                 }
             }
         }
@@ -314,7 +323,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
             _rngGenerator = new SP20Drbg(_dfnRounds);
 
             if (_seedGenerator != null)
-                _rngGenerator.Initialize(_seedGenerator.GetSeed(_keySize));
+                _rngGenerator.Initialize(_seedGenerator.GetBytes(_keySize));
             else
                 _rngGenerator.Initialize(_stateSeed);
 
@@ -373,12 +382,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
         private ISeed GetSeedGenerator(SeedGenerators SeedEngine)
         {
-            switch (SeedEngine)
+            try
             {
-                case SeedGenerators.XSPRsg:
-                    return new XSPRsg();
-                default:
-                    return new CSPRsg();
+                return SeedGeneratorFromName.GetInstance(SeedEngine);
+            }
+            catch (Exception Ex)
+            {
+                throw new CryptoRandomException("SP20Prng:GetSeedGenerator", "The seed generator could not be initialized!", Ex);
             }
         }
         #endregion

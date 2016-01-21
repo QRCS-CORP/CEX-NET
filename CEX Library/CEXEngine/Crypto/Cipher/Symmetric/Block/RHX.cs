@@ -4,13 +4,15 @@ using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Generator;
+using VTDev.Libraries.CEXEngine.Crypto.Helper;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -47,8 +49,9 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 {
     /// <summary>
-    /// <h3>RHX: A Rijndael Cipher extended with an HKDF powered Key Schedule.</h3>
-    /// <para>RHX is a Rijndael<cite>Rijndael</cite> implementation that uses an HKDF generator to expand the user supplied key into a working key integer array.</para>
+    /// <h3>RHX: A Rijndael Cipher extended with an (optional) HKDF powered Key Schedule.</h3>
+    /// <para>RHX is a Rijndael<cite>Rijndael</cite> implementation that uses a standard configuration on key sizes up to 64 bytes (512 bits). 
+    /// On keys larger than 64 bytes, an HKDF bytes generator is used to expand the user supplied key into a working key integer array.</para>
     /// </summary> 
     /// 
     /// <example>
@@ -69,6 +72,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// <revision date="2015/01/23" version="1.3.0.0">Secondary release using an assignable Digest in the HKDF engine</revision>
     /// <revision date="2015/03/15" version="1.3.2.0">Added the IkmSize optional parameter to the constructor, and the DistributionCode property</revision>
     /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
+    /// <revision date="2016/01/30" version="1.5.0.0">Merged RDX and RHX</revision>
     /// </revisionHistory>
     /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode Interface</seealso>
@@ -77,17 +81,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
-    /// <para>The key schedule in RHX is the defining difference between this and a standard version of Rijndael<cite>Rijndael</cite>; 
-    /// instead of using a simple inline function to expand the user supplied key into a larger working array, it uses a hash based pseudo-random generator to create the working key.</para>
+    /// <para>The key schedule in RHX is the defining difference between this and a standard version of Rijndael<cite>Rijndael</cite>.
+    /// if the cipher key input is beyond the standard lengths used in Rijndael (128-512 bits), instead of using an inline function to expand the user supplied key into a larger working array, 
+    /// RHX uses a hash based pseudo-random generator to create the internal working key array.
+    /// When using a non-standard key size, the number of diffusion rounds can be set by the user (through the class constructor). RHX can run between 10 and 38 rounds.
+    /// </para>
     /// 
     /// <list type="bullet">
+    /// <item><description>When using a standard cipher key length the rounds calculation is done automatically: 10, 12, 14, and 22, for key sizes 126, 192, 256, and 512 bits.</description></item>
     /// <item><description><see cref="HKDF">HKDF</see> Digest <see cref="Digests">engine</see> is definable through the <see cref="RHX(int, int, Digests)">Constructor</see> parameter: KeyEngine.</description></item>
-    /// <item><description>Key Schedule is powered by a Hash based Key Derivation Function using a definable <see cref="IDigest">Digest</see>.</description></item>
+    /// <item><description>Key Schedule is powered by a Hash based Key Derivation Function using a user definable <see cref="IDigest">Digest</see>.</description></item>
     /// <item><description>Minimum key size is (IKm + Salt) (N * Digest State Size) + (Digest Hash Size) in bytes.</description></item>
     /// <item><description>Valid block sizes are 16 and 32 byte wide.</description></item>
     /// <item><description>Valid Rounds are 10 to 38, default is 22.</description></item>
     /// </list>
     /// 
+    /// <description><h4>HKDF Bytes Generator:</h4></description>
     /// <para>HKDF<cite>RFC 5869</cite> is a key derivation function that uses a Digest HMAC<cite>RFC 2104</cite> (Hash based Message Authentication Code) as its random engine. 
     /// This is one of the strongest<cite>Fips 198-1</cite> methods available for generating pseudo-random keying material, and far superior in entropy dispersion to Rijndael, or even Serpents key schedule. 
     /// HKDF uses up to three inputs; a nonce value called an information string, an Ikm (Input keying material), and a Salt value. 
@@ -126,27 +135,28 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     {
         #region Constants
         private const string ALG_NAME = "RHX";
-        private const Int32 BLOCK16 = 16;
-        private const Int32 BLOCK32 = 32;
-        private const Int32 ROUNDS22 = 22;
-        private const Int32 LEGAL_KEYS = 10;
-        private const Int32 MAX_ROUNDS = 38;
-        private const Int32 MIN_ROUNDS = 10;
+        private const int BLOCK16 = 16;
+        private const int BLOCK32 = 32;
+        private const int ROUNDS22 = 22;
+        private const int LEGAL_KEYS = 14;
+        private const int MAX_ROUNDS = 38;
+        private const int MAX_STDKEY = 64;
+        private const int MIN_ROUNDS = 10;
         #endregion
 
         #region Fields
-        private Int32 _blockSize = BLOCK16;
-        private Int32 _dfnRounds = 22;
+        private int _blockSize = BLOCK16;
+        private int _dfnRounds = 22;
         private UInt32[] _expKey;
         // configurable nonce can create a unique distribution, can be byte(0)
         private byte[] _hkdfInfo = System.Text.Encoding.ASCII.GetBytes("information string RHX version 1");
-        private Int32 _ikmSize = 0;
+        private int _ikmSize = 0;
         private IDigest _keyEngine;
+        private Digests _kdfEngineType;
         private bool _isDisposed = false;
         private bool _isEncryption = false;
         private bool _isInitialized = false;
         private int[] _legalKeySizes = new int[LEGAL_KEYS];
-        private Int32 _wrdBlocks = 4;
         #endregion
 
         #region Properties
@@ -179,6 +189,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 
                 _hkdfInfo = value; 
             }
+        }
+
+        /// <summary>
+        /// Get: The block ciphers type name
+        /// </summary>
+        public BlockCiphers Enumeral
+        {
+            get { return BlockCiphers.RHX; }
         }
 
         /// <summary>
@@ -228,7 +246,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// <summary>
         /// Get: Available block sizes for this cipher
         /// </summary>
-        public static int[] LegalBlockSizes
+        public int[] LegalBlockSizes
         {
             get { return new int[] { 16, 32 }; }
         }
@@ -245,7 +263,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// <summary>
         /// Get: Available diffusion round assignments
         /// </summary>
-        public static int[] LegalRounds
+        public int[] LegalRounds
         {
             get { return new int[] { 10, 12, 14, 22, 38 }; }
         }
@@ -272,26 +290,33 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// Initialize the class
         /// </summary>
         /// 
-        /// <param name="Rounds">Number of diffusion rounds. The <see cref="LegalRounds"/> property contains available sizes.  Default is 22 rounds.</param>
         /// <param name="BlockSize">Cipher input <see cref="BlockSize"/>. The <see cref="LegalBlockSizes"/> property contains available sizes. Default is 16 bytes.</param>
-        /// <param name="KeyEngine"><para>The Key Schedule KDF digest engine; can be any one of the <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> 
+        /// <param name="Rounds">Number of diffusion rounds. The <see cref="LegalRounds"/> property contains available sizes.  Default is 22 rounds.</param>
+        /// <param name="KdfEngine"><para>The Key Schedule KDF digest engine; can be any one of the <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> 
         /// implementations. The default engine is <see cref="SHA512"/></para>.</param>
         /// 
         /// <exception cref="CryptoSymmetricException">Thrown if an invalid block size or invalid rounds count are used</exception>
-        public RHX(int Rounds = ROUNDS22, int BlockSize = BLOCK16, Digests KeyEngine = Digests.SHA512)
+        public RHX(int BlockSize = BLOCK16, int Rounds = ROUNDS22, Digests KdfEngine = Digests.SHA512)
         {
             if (BlockSize != BLOCK16 && BlockSize != BLOCK32)
                 throw new CryptoSymmetricException("RHX:CTor", "Invalid block size! Supported block sizes are 16 and 32 bytes.", new ArgumentException());
             if (Rounds < MIN_ROUNDS || Rounds > MAX_ROUNDS || Rounds % 2 > 0)
                 throw new CryptoSymmetricException("RHX:CTor", "Invalid rounds size! Sizes supported are even numbers between 10 and 38.", new ArgumentException());
 
-            // get the kdf digest engine
-            _keyEngine = GetKeyEngine(KeyEngine);
+            _kdfEngineType = KdfEngine;
             // set the hmac key size
-            _ikmSize = _ikmSize == 0 ? _keyEngine.DigestSize : _ikmSize;
+            _ikmSize = _ikmSize == 0 ? GetIkmSize(KdfEngine) : _ikmSize;
+            // add standard key lengths
+            _legalKeySizes[0] = 16;
+            _legalKeySizes[1] = 24;
+            _legalKeySizes[2] = 32;
+            _legalKeySizes[3] = 64;
 
-            for (int i = 0; i < _legalKeySizes.Length; i++)
-                _legalKeySizes[i] = (_keyEngine.BlockSize * (i + 1)) + _ikmSize;
+            int dgtblock = GetSaltSize(KdfEngine);
+
+            // hkdf extended key sizes
+            for (int i = 4; i < _legalKeySizes.Length; ++i)
+                _legalKeySizes[i] = (dgtblock * (i - 3)) + _ikmSize;
 
             _dfnRounds = Rounds;
             _blockSize = BlockSize;
@@ -387,10 +412,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         {
             if (KeyParam.Key == null)
                 throw new CryptoSymmetricException("RHX:Initialize", "Invalid key! Key can not be null.", new ArgumentNullException());
-            if (KeyParam.Key.Length < LegalKeySizes[0])
-                throw new CryptoSymmetricException("RHX:Initialize", String.Format("Invalid key size! Key must be at least {0}  bytes ({1} bit).", LegalKeySizes[0], LegalKeySizes[0] * 8), new ArgumentOutOfRangeException());
-            if ((KeyParam.Key.Length - _keyEngine.DigestSize) % _keyEngine.BlockSize != 0)
-                throw new CryptoSymmetricException("RHX:Initialize", String.Format("Invalid key size! Key must be (length - IKm length: {0} bytes) + multiple of {1} block size.", _keyEngine.DigestSize, _keyEngine.BlockSize), new ArgumentOutOfRangeException());
+            if (KeyParam.Key.Length > LegalKeySizes[3] && (KeyParam.Key.Length - GetIkmSize(_kdfEngineType)) % GetSaltSize(_kdfEngineType) != 0)
+                throw new CryptoSymmetricException("RHX:Initialize", String.Format("Invalid key size! Key must be (length - IKm length: {0} bytes) + multiple of {1} block size.", GetIkmSize(_kdfEngineType), GetSaltSize(_kdfEngineType)), new ArgumentOutOfRangeException());
+            
+            for (int i = 0; i < LegalKeySizes.Length; ++i)
+            {
+                if (KeyParam.Key.Length == LegalKeySizes[i])
+                    break;
+                if (i == LegalKeySizes.Length - 1)
+                    throw new CryptoSymmetricException("RHX:Initialize", String.Format("Invalid key size! Key must be at least {0}  bytes ({1} bit).", LegalKeySizes[0], LegalKeySizes[0] * 8), new ArgumentOutOfRangeException());
+           }
+
+            // get the kdf digest engine
+            if (KeyParam.Key.Length > MAX_STDKEY)
+                _keyEngine = GetKdfEngine(_kdfEngineType);
 
             _isEncryption = Encryption;
             // expand the key
@@ -440,14 +475,58 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// </remarks>
         private UInt32[] ExpandKey(byte[] Key, bool Encryption)
         {
-            // block and key in 32 bit words
-            _wrdBlocks = _blockSize / 4;
+            uint[] expKey = new uint[0];
 
+            // min possible size for hkdf extended is 768 bit (96 bytes)
+            if (Key.Length > MAX_STDKEY)
+            {
+                // hkdf key expansion
+                expKey = SecureExpand(Key);
+            }
+            else
+            {
+                // standard rijndael key expansion + k512
+                expKey = StandardExpand(Key);
+            }
+
+            // block in 32 bit words
+            int blkWords = _blockSize / 4;
+            int expSize = blkWords * (_dfnRounds + 1);
+
+            // inverse cipher
+            if (!Encryption)
+            {
+                // reverse key
+                for (int i = 0, k = expSize - blkWords; i < k; i += blkWords, k -= blkWords)
+                {
+                    for (int j = 0; j < blkWords; j++)
+                    {
+                        uint temp = expKey[i + j];
+                        expKey[i + j] = expKey[k + j];
+                        expKey[k + j] = temp;
+                    }
+                }
+                // sbox inversion
+                for (int i = blkWords; i < expSize - blkWords; i++)
+                {
+                    expKey[i] = IT0[SBox[(expKey[i] >> 24)]] ^
+                        IT1[SBox[(byte)(expKey[i] >> 16)]] ^
+                        IT2[SBox[(byte)(expKey[i] >> 8)]] ^
+                        IT3[SBox[(byte)expKey[i]]];
+                }
+            }
+
+            return expKey;
+        }
+
+        private UInt32[] SecureExpand(byte[] Key)
+        {
+            // block in 32 bit words
+            int blkWords = _blockSize / 4;
             // expanded key size
-            int keySize = _wrdBlocks * (_dfnRounds + 1);
-
+            int expSize = blkWords * (_dfnRounds + 1);
             // kdf return array
-            int keyBytes = keySize * 4;
+            int keyBytes = expSize * 4;
             byte[] rawKey = new byte[keyBytes];
             int saltSize = Key.Length - _ikmSize;
 
@@ -458,7 +537,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             // hkdf input
             byte[] kdfKey = new byte[_ikmSize];
             byte[] kdfSalt = new byte[saltSize];
-
             // copy hkdf key and salt from user key
             Buffer.BlockCopy(Key, 0, kdfKey, 0, _ikmSize);
             Buffer.BlockCopy(Key, _ikmSize, kdfSalt, 0, saltSize);
@@ -471,346 +549,431 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             }
 
             // initialize working key
-            UInt32[] wK = new UInt32[keySize];
+            uint[] expKey = new uint[expSize];
             // copy bytes to working key
-            Buffer.BlockCopy(rawKey, 0, wK, 0, keyBytes);
+            Buffer.BlockCopy(rawKey, 0, expKey, 0, keyBytes);
 
-            // inverse cipher
-            if (!Encryption)
-            {
-                // reverse key
-                for (int i = 0, k = keySize - _wrdBlocks; i < k; i += _wrdBlocks, k -= _wrdBlocks)
-                {
-                    for (int j = 0; j < _wrdBlocks; j++)
-                    {
-                        UInt32 temp = wK[i + j];
-                        wK[i + j] = wK[k + j];
-                        wK[k + j] = temp;
-                    }
-                }
-                // sbox inversion
-                for (int i = _wrdBlocks; i < keySize - _wrdBlocks; i++)
-                {
-                    wK[i] = IT0[SBox[(wK[i] >> 24)]] ^
-                        IT1[SBox[(byte)(wK[i] >> 16)]] ^
-                        IT2[SBox[(byte)(wK[i] >> 8)]] ^
-                        IT3[SBox[(byte)wK[i]]];
-                }
-            }
-
-            return wK;
+            return expKey;
         }
 
-        private IDigest GetKeyEngine(Digests KeyEngine)
+        private UInt32[] StandardExpand(byte[] Key)
         {
-            switch (KeyEngine)
+            // block in 32 bit words
+            int blkWords = _blockSize / 4;
+            // key in 32 bit words
+            int keyWords = Key.Length / 4;
+
+            // rounds calculation
+            if (keyWords == 16)
+                _dfnRounds = 22;
+            else if (blkWords == 8 || keyWords == 8)
+                _dfnRounds = 14;
+            else if (keyWords == 6)
+                _dfnRounds = 12;
+            else
+                _dfnRounds = 10;
+
+            // setup expanded key
+            int expSize = blkWords * (_dfnRounds + 1);
+            uint[] expKey = new uint[expSize];
+
+            // add bytes to beginning of working key array
+            int pos = 0;
+            for (int i = 0; i < keyWords; i++)
             {
-                case Digests.Blake256:
-                    return new Blake256();
-                case Digests.Blake512:
-                    return new Blake512();
-                case Digests.Keccak256:
-                    return new Keccak256();
-                case Digests.Keccak512:
-                    return new Keccak512();
-                case Digests.SHA256:
-                    return new SHA256();
-                case Digests.SHA512:
-                    return new SHA512();
-                case Digests.Skein256:
-                    return new Skein256();
-                case Digests.Skein512:
-                    return new Skein512();
-                case Digests.Skein1024:
-                    return new Skein1024();
-                default:
-                    throw new CryptoSymmetricException("RHX:GetKeyEngine", "The digest type is not supported!", new ArgumentException());
+                uint value = ((uint)Key[pos++] << 24);
+                value |= ((uint)Key[pos++] << 16);
+                value |= ((uint)Key[pos++] << 8);
+                value |= ((uint)Key[pos++]);
+                expKey[i] = value;
             }
+
+            // build the remaining round keys
+            for (int i = keyWords; i < expSize; i++)
+            {
+                uint temp = expKey[i - 1];
+
+                // if it is a 512 bit key, maintain step 8 interval for 
+                // additional processing steps, equal to a 256 bit key distribution
+                if (keyWords > 8)
+                {
+                    if (i % keyWords == 0 || i % keyWords == 8)
+                    {
+                        // round the key
+                        uint rot = (uint)((temp << 8) | ((temp >> 24) & 0xff));
+                        // subbyte step
+                        temp = SubByte(rot) ^ Rcon[i / keyWords];
+                    }
+                    // step ik + 4 and 12
+                    else if ((i % keyWords) == 4 || (i % keyWords) == 12)
+                    {
+                        temp = SubByte(temp);
+                    }
+                }
+                else
+                {
+                    if (i % keyWords == 0)
+                    {
+                        // round the key
+                        uint rot = (uint)((temp << 8) | ((temp >> 24) & 0xff));
+                        // subbyte step
+                        temp = SubByte(rot) ^ Rcon[i / keyWords];
+                    }
+                    // step ik + 4
+                    else if (keyWords > 6 && (i % keyWords) == 4)
+                    {
+                        temp = SubByte(temp);
+                    }
+                }
+                // w[i-Nk] ^ w[i]
+                expKey[i] = (uint)expKey[i - keyWords] ^ temp;
+            }
+
+            return expKey;
         }
         #endregion
 
         #region Rounds Processing
-        private void Encrypt16(byte[] Input, int InOffset, byte[] Output, int OutOffset)
-        {
-            int keyCtr = 0;
-
-            // round 0
-            UInt32 X0 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X1 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X2 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X3 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset]) ^ _expKey[keyCtr++];
-
-            // round 1
-            UInt32 Y0 = T0[X0 >> 24] ^ T1[(byte)(X1 >> 16)] ^ T2[(byte)(X2 >> 8)] ^ T3[(byte)X3] ^ _expKey[keyCtr++];
-            UInt32 Y1 = T0[X1 >> 24] ^ T1[(byte)(X2 >> 16)] ^ T2[(byte)(X3 >> 8)] ^ T3[(byte)X0] ^ _expKey[keyCtr++];
-            UInt32 Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[keyCtr++];
-            UInt32 Y3 = T0[X3 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[keyCtr++];
-
-            // rounds loop
-            while (keyCtr < _expKey.Length - 4)
-            {
-                X0 = T0[Y0 >> 24] ^ T1[(byte)(Y1 >> 16)] ^ T2[(byte)(Y2 >> 8)] ^ T3[(byte)Y3] ^ _expKey[keyCtr++];
-                X1 = T0[Y1 >> 24] ^ T1[(byte)(Y2 >> 16)] ^ T2[(byte)(Y3 >> 8)] ^ T3[(byte)Y0] ^ _expKey[keyCtr++];
-                X2 = T0[Y2 >> 24] ^ T1[(byte)(Y3 >> 16)] ^ T2[(byte)(Y0 >> 8)] ^ T3[(byte)Y1] ^ _expKey[keyCtr++];
-                X3 = T0[Y3 >> 24] ^ T1[(byte)(Y0 >> 16)] ^ T2[(byte)(Y1 >> 8)] ^ T3[(byte)Y2] ^ _expKey[keyCtr++];
-                Y0 = T0[X0 >> 24] ^ T1[(byte)(X1 >> 16)] ^ T2[(byte)(X2 >> 8)] ^ T3[(byte)X3] ^ _expKey[keyCtr++];
-                Y1 = T0[X1 >> 24] ^ T1[(byte)(X2 >> 16)] ^ T2[(byte)(X3 >> 8)] ^ T3[(byte)X0] ^ _expKey[keyCtr++];
-                Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[keyCtr++];
-                Y3 = T0[X3 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[keyCtr++];
-            }
-
-            // final round
-            Output[OutOffset++] = (byte)(SBox[Y0 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y1 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y2 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y3] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y1 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y2 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y3 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y0] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y2 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y3 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y0 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y1] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y3 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y0 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y1 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset] = (byte)(SBox[(byte)Y2] ^ (byte)_expKey[keyCtr]);
-        }
-
-        private void Encrypt32(byte[] Input, int InOffset, byte[] Output, int OutOffset)
-        {
-            int keyCtr = 0;
-
-            // round 0
-            UInt32 X0 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X1 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X2 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X3 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X4 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X5 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X6 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X7 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset]) ^ _expKey[keyCtr++];
-
-            // round 1
-            UInt32 Y0 = T0[X0 >> 24] ^ T1[(byte)(X1 >> 16)] ^ T2[(byte)(X3 >> 8)] ^ T3[(byte)X4] ^ _expKey[keyCtr++];
-            UInt32 Y1 = T0[X1 >> 24] ^ T1[(byte)(X2 >> 16)] ^ T2[(byte)(X4 >> 8)] ^ T3[(byte)X5] ^ _expKey[keyCtr++];
-            UInt32 Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X5 >> 8)] ^ T3[(byte)X6] ^ _expKey[keyCtr++];
-            UInt32 Y3 = T0[X3 >> 24] ^ T1[(byte)(X4 >> 16)] ^ T2[(byte)(X6 >> 8)] ^ T3[(byte)X7] ^ _expKey[keyCtr++];
-            UInt32 Y4 = T0[X4 >> 24] ^ T1[(byte)(X5 >> 16)] ^ T2[(byte)(X7 >> 8)] ^ T3[(byte)X0] ^ _expKey[keyCtr++];
-            UInt32 Y5 = T0[X5 >> 24] ^ T1[(byte)(X6 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[keyCtr++];
-            UInt32 Y6 = T0[X6 >> 24] ^ T1[(byte)(X7 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[keyCtr++];
-            UInt32 Y7 = T0[X7 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X2 >> 8)] ^ T3[(byte)X3] ^ _expKey[keyCtr++];
-
-            // rounds loop
-            while (keyCtr < _expKey.Length - 8)
-            {
-                X0 = T0[Y0 >> 24] ^ T1[(byte)(Y1 >> 16)] ^ T2[(byte)(Y3 >> 8)] ^ T3[(byte)Y4] ^ _expKey[keyCtr++];
-                X1 = T0[Y1 >> 24] ^ T1[(byte)(Y2 >> 16)] ^ T2[(byte)(Y4 >> 8)] ^ T3[(byte)Y5] ^ _expKey[keyCtr++];
-                X2 = T0[Y2 >> 24] ^ T1[(byte)(Y3 >> 16)] ^ T2[(byte)(Y5 >> 8)] ^ T3[(byte)Y6] ^ _expKey[keyCtr++];
-                X3 = T0[Y3 >> 24] ^ T1[(byte)(Y4 >> 16)] ^ T2[(byte)(Y6 >> 8)] ^ T3[(byte)Y7] ^ _expKey[keyCtr++];
-                X4 = T0[Y4 >> 24] ^ T1[(byte)(Y5 >> 16)] ^ T2[(byte)(Y7 >> 8)] ^ T3[(byte)Y0] ^ _expKey[keyCtr++];
-                X5 = T0[Y5 >> 24] ^ T1[(byte)(Y6 >> 16)] ^ T2[(byte)(Y0 >> 8)] ^ T3[(byte)Y1] ^ _expKey[keyCtr++];
-                X6 = T0[Y6 >> 24] ^ T1[(byte)(Y7 >> 16)] ^ T2[(byte)(Y1 >> 8)] ^ T3[(byte)Y2] ^ _expKey[keyCtr++];
-                X7 = T0[Y7 >> 24] ^ T1[(byte)(Y0 >> 16)] ^ T2[(byte)(Y2 >> 8)] ^ T3[(byte)Y3] ^ _expKey[keyCtr++];
-
-                Y0 = T0[X0 >> 24] ^ T1[(byte)(X1 >> 16)] ^ T2[(byte)(X3 >> 8)] ^ T3[(byte)X4] ^ _expKey[keyCtr++];
-                Y1 = T0[X1 >> 24] ^ T1[(byte)(X2 >> 16)] ^ T2[(byte)(X4 >> 8)] ^ T3[(byte)X5] ^ _expKey[keyCtr++];
-                Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X5 >> 8)] ^ T3[(byte)X6] ^ _expKey[keyCtr++];
-                Y3 = T0[X3 >> 24] ^ T1[(byte)(X4 >> 16)] ^ T2[(byte)(X6 >> 8)] ^ T3[(byte)X7] ^ _expKey[keyCtr++];
-                Y4 = T0[X4 >> 24] ^ T1[(byte)(X5 >> 16)] ^ T2[(byte)(X7 >> 8)] ^ T3[(byte)X0] ^ _expKey[keyCtr++];
-                Y5 = T0[X5 >> 24] ^ T1[(byte)(X6 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[keyCtr++];
-                Y6 = T0[X6 >> 24] ^ T1[(byte)(X7 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[keyCtr++];
-                Y7 = T0[X7 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X2 >> 8)] ^ T3[(byte)X3] ^ _expKey[keyCtr++];
-            }
-
-            // final round
-            Output[OutOffset++] = (byte)(SBox[Y0 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y1 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y3 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y4] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y1 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y2 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y4 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y5] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y2 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y3 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y5 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y6] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y3 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y4 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y6 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y7] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y4 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y5 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y7 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y0] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y5 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y6 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y0 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y1] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y6 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y7 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y1 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(SBox[(byte)Y2] ^ (byte)_expKey[keyCtr++]);
-
-            Output[OutOffset++] = (byte)(SBox[Y7 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y0 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(SBox[(byte)(Y2 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset] = (byte)(SBox[(byte)Y3] ^ (byte)_expKey[keyCtr]);
-        }
-
         private void Decrypt16(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
+            int LRD = _expKey.Length - 5;
             int keyCtr = 0;
 
             // round 0
-            UInt32 X0 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X1 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X2 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X3 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset]) ^ _expKey[keyCtr++];
+            uint X0 = IntUtils.BytesToBe32(Input, InOffset) ^ _expKey[keyCtr];
+            uint X1 = IntUtils.BytesToBe32(Input, InOffset + 4) ^ _expKey[++keyCtr];
+            uint X2 = IntUtils.BytesToBe32(Input, InOffset + 8) ^ _expKey[++keyCtr];
+            uint X3 = IntUtils.BytesToBe32(Input, InOffset + 12) ^ _expKey[++keyCtr];
 
             // round 1
-            UInt32 Y0 = IT0[X0 >> 24] ^ IT1[(byte)(X3 >> 16)] ^ IT2[(byte)(X2 >> 8)] ^ IT3[(byte)X1] ^ _expKey[keyCtr++];
-            UInt32 Y1 = IT0[X1 >> 24] ^ IT1[(byte)(X0 >> 16)] ^ IT2[(byte)(X3 >> 8)] ^ IT3[(byte)X2] ^ _expKey[keyCtr++];
-            UInt32 Y2 = IT0[X2 >> 24] ^ IT1[(byte)(X1 >> 16)] ^ IT2[(byte)(X0 >> 8)] ^ IT3[(byte)X3] ^ _expKey[keyCtr++];
-            UInt32 Y3 = IT0[X3 >> 24] ^ IT1[(byte)(X2 >> 16)] ^ IT2[(byte)(X1 >> 8)] ^ IT3[(byte)X0] ^ _expKey[keyCtr++];
+            uint Y0 = IT0[X0 >> 24] ^ IT1[(byte)(X3 >> 16)] ^ IT2[(byte)(X2 >> 8)] ^ IT3[(byte)X1] ^ _expKey[++keyCtr];
+            uint Y1 = IT0[X1 >> 24] ^ IT1[(byte)(X0 >> 16)] ^ IT2[(byte)(X3 >> 8)] ^ IT3[(byte)X2] ^ _expKey[++keyCtr];
+            uint Y2 = IT0[X2 >> 24] ^ IT1[(byte)(X1 >> 16)] ^ IT2[(byte)(X0 >> 8)] ^ IT3[(byte)X3] ^ _expKey[++keyCtr];
+            uint Y3 = IT0[X3 >> 24] ^ IT1[(byte)(X2 >> 16)] ^ IT2[(byte)(X1 >> 8)] ^ IT3[(byte)X0] ^ _expKey[++keyCtr];
 
             // rounds loop
-            while (keyCtr < _expKey.Length - 4)
+            while (keyCtr != LRD)
             {
-                X0 = IT0[Y0 >> 24] ^ IT1[(byte)(Y3 >> 16)] ^ IT2[(byte)(Y2 >> 8)] ^ IT3[(byte)Y1] ^ _expKey[keyCtr++];
-                X1 = IT0[Y1 >> 24] ^ IT1[(byte)(Y0 >> 16)] ^ IT2[(byte)(Y3 >> 8)] ^ IT3[(byte)Y2] ^ _expKey[keyCtr++];
-                X2 = IT0[Y2 >> 24] ^ IT1[(byte)(Y1 >> 16)] ^ IT2[(byte)(Y0 >> 8)] ^ IT3[(byte)Y3] ^ _expKey[keyCtr++];
-                X3 = IT0[Y3 >> 24] ^ IT1[(byte)(Y2 >> 16)] ^ IT2[(byte)(Y1 >> 8)] ^ IT3[(byte)Y0] ^ _expKey[keyCtr++];
+                X0 = IT0[Y0 >> 24] ^ IT1[(byte)(Y3 >> 16)] ^ IT2[(byte)(Y2 >> 8)] ^ IT3[(byte)Y1] ^ _expKey[++keyCtr];
+                X1 = IT0[Y1 >> 24] ^ IT1[(byte)(Y0 >> 16)] ^ IT2[(byte)(Y3 >> 8)] ^ IT3[(byte)Y2] ^ _expKey[++keyCtr];
+                X2 = IT0[Y2 >> 24] ^ IT1[(byte)(Y1 >> 16)] ^ IT2[(byte)(Y0 >> 8)] ^ IT3[(byte)Y3] ^ _expKey[++keyCtr];
+                X3 = IT0[Y3 >> 24] ^ IT1[(byte)(Y2 >> 16)] ^ IT2[(byte)(Y1 >> 8)] ^ IT3[(byte)Y0] ^ _expKey[++keyCtr];
 
-                Y0 = IT0[X0 >> 24] ^ IT1[(byte)(X3 >> 16)] ^ IT2[(byte)(X2 >> 8)] ^ IT3[(byte)X1] ^ _expKey[keyCtr++];
-                Y1 = IT0[X1 >> 24] ^ IT1[(byte)(X0 >> 16)] ^ IT2[(byte)(X3 >> 8)] ^ IT3[(byte)X2] ^ _expKey[keyCtr++];
-                Y2 = IT0[X2 >> 24] ^ IT1[(byte)(X1 >> 16)] ^ IT2[(byte)(X0 >> 8)] ^ IT3[(byte)X3] ^ _expKey[keyCtr++];
-                Y3 = IT0[X3 >> 24] ^ IT1[(byte)(X2 >> 16)] ^ IT2[(byte)(X1 >> 8)] ^ IT3[(byte)X0] ^ _expKey[keyCtr++];
+                Y0 = IT0[X0 >> 24] ^ IT1[(byte)(X3 >> 16)] ^ IT2[(byte)(X2 >> 8)] ^ IT3[(byte)X1] ^ _expKey[++keyCtr];
+                Y1 = IT0[X1 >> 24] ^ IT1[(byte)(X0 >> 16)] ^ IT2[(byte)(X3 >> 8)] ^ IT3[(byte)X2] ^ _expKey[++keyCtr];
+                Y2 = IT0[X2 >> 24] ^ IT1[(byte)(X1 >> 16)] ^ IT2[(byte)(X0 >> 8)] ^ IT3[(byte)X3] ^ _expKey[++keyCtr];
+                Y3 = IT0[X3 >> 24] ^ IT1[(byte)(X2 >> 16)] ^ IT2[(byte)(X1 >> 8)] ^ IT3[(byte)X0] ^ _expKey[++keyCtr];
             }
 
             // final round
-            Output[OutOffset++] = (byte)(ISBox[Y0 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y3 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y2 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y1] ^ (byte)_expKey[keyCtr++]);
+            Output[OutOffset] = (byte)(ISBox[Y0 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y3 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y2 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y1] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y1 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y0 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y3 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y2] ^ (byte)_expKey[keyCtr++]);
+            Output[++OutOffset] = (byte)(ISBox[Y1 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y0 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y3 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y2] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y2 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y1 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y0 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y3] ^ (byte)_expKey[keyCtr++]);
+            Output[++OutOffset] = (byte)(ISBox[Y2 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y1 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y0 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y3] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y3 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y2 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y1 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset] = (byte)(ISBox[(byte)Y0] ^ (byte)_expKey[keyCtr]);
+            Output[++OutOffset] = (byte)(ISBox[Y3 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y2 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y1 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y0] ^ (byte)_expKey[keyCtr]);
         }
 
         private void Decrypt32(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
+            int LRD = _expKey.Length - 9;
             int keyCtr = 0;
 
             // round 0
-            UInt32 X0 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X1 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X2 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X3 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X4 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X5 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X6 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset++]) ^ _expKey[keyCtr++];
-            UInt32 X7 = (UInt32)((Input[InOffset++] << 24) | (Input[InOffset++] << 16) | (Input[InOffset++] << 8) | Input[InOffset]) ^ _expKey[keyCtr++];
+            uint X0 = IntUtils.BytesToBe32(Input, InOffset) ^ _expKey[keyCtr];
+            uint X1 = IntUtils.BytesToBe32(Input, InOffset + 4) ^ _expKey[++keyCtr];
+            uint X2 = IntUtils.BytesToBe32(Input, InOffset + 8) ^ _expKey[++keyCtr];
+            uint X3 = IntUtils.BytesToBe32(Input, InOffset + 12) ^ _expKey[++keyCtr];
+            uint X4 = IntUtils.BytesToBe32(Input, InOffset + 16) ^ _expKey[++keyCtr];
+            uint X5 = IntUtils.BytesToBe32(Input, InOffset + 20) ^ _expKey[++keyCtr];
+            uint X6 = IntUtils.BytesToBe32(Input, InOffset + 24) ^ _expKey[++keyCtr];
+            uint X7 = IntUtils.BytesToBe32(Input, InOffset + 28) ^ _expKey[++keyCtr];
 
             // round 1
-            UInt32 Y0 = IT0[X0 >> 24] ^ IT1[(byte)(X7 >> 16)] ^ IT2[(byte)(X5 >> 8)] ^ IT3[(byte)X4] ^ _expKey[keyCtr++];
-            UInt32 Y1 = IT0[X1 >> 24] ^ IT1[(byte)(X0 >> 16)] ^ IT2[(byte)(X6 >> 8)] ^ IT3[(byte)X5] ^ _expKey[keyCtr++];
-            UInt32 Y2 = IT0[X2 >> 24] ^ IT1[(byte)(X1 >> 16)] ^ IT2[(byte)(X7 >> 8)] ^ IT3[(byte)X6] ^ _expKey[keyCtr++];
-            UInt32 Y3 = IT0[X3 >> 24] ^ IT1[(byte)(X2 >> 16)] ^ IT2[(byte)(X0 >> 8)] ^ IT3[(byte)X7] ^ _expKey[keyCtr++];
-            UInt32 Y4 = IT0[X4 >> 24] ^ IT1[(byte)(X3 >> 16)] ^ IT2[(byte)(X1 >> 8)] ^ IT3[(byte)X0] ^ _expKey[keyCtr++];
-            UInt32 Y5 = IT0[X5 >> 24] ^ IT1[(byte)(X4 >> 16)] ^ IT2[(byte)(X2 >> 8)] ^ IT3[(byte)X1] ^ _expKey[keyCtr++];
-            UInt32 Y6 = IT0[X6 >> 24] ^ IT1[(byte)(X5 >> 16)] ^ IT2[(byte)(X3 >> 8)] ^ IT3[(byte)X2] ^ _expKey[keyCtr++];
-            UInt32 Y7 = IT0[X7 >> 24] ^ IT1[(byte)(X6 >> 16)] ^ IT2[(byte)(X4 >> 8)] ^ IT3[(byte)X3] ^ _expKey[keyCtr++];
+            uint Y0 = IT0[X0 >> 24] ^ IT1[(byte)(X7 >> 16)] ^ IT2[(byte)(X5 >> 8)] ^ IT3[(byte)X4] ^ _expKey[++keyCtr];
+            uint Y1 = IT0[X1 >> 24] ^ IT1[(byte)(X0 >> 16)] ^ IT2[(byte)(X6 >> 8)] ^ IT3[(byte)X5] ^ _expKey[++keyCtr];
+            uint Y2 = IT0[X2 >> 24] ^ IT1[(byte)(X1 >> 16)] ^ IT2[(byte)(X7 >> 8)] ^ IT3[(byte)X6] ^ _expKey[++keyCtr];
+            uint Y3 = IT0[X3 >> 24] ^ IT1[(byte)(X2 >> 16)] ^ IT2[(byte)(X0 >> 8)] ^ IT3[(byte)X7] ^ _expKey[++keyCtr];
+            uint Y4 = IT0[X4 >> 24] ^ IT1[(byte)(X3 >> 16)] ^ IT2[(byte)(X1 >> 8)] ^ IT3[(byte)X0] ^ _expKey[++keyCtr];
+            uint Y5 = IT0[X5 >> 24] ^ IT1[(byte)(X4 >> 16)] ^ IT2[(byte)(X2 >> 8)] ^ IT3[(byte)X1] ^ _expKey[++keyCtr];
+            uint Y6 = IT0[X6 >> 24] ^ IT1[(byte)(X5 >> 16)] ^ IT2[(byte)(X3 >> 8)] ^ IT3[(byte)X2] ^ _expKey[++keyCtr];
+            uint Y7 = IT0[X7 >> 24] ^ IT1[(byte)(X6 >> 16)] ^ IT2[(byte)(X4 >> 8)] ^ IT3[(byte)X3] ^ _expKey[++keyCtr];
 
             // rounds loop
-            while (keyCtr < _expKey.Length - 8)
+            while (keyCtr != LRD)
             {
-                X0 = IT0[Y0 >> 24] ^ IT1[(byte)(Y7 >> 16)] ^ IT2[(byte)(Y5 >> 8)] ^ IT3[(byte)Y4] ^ _expKey[keyCtr++];
-                X1 = IT0[Y1 >> 24] ^ IT1[(byte)(Y0 >> 16)] ^ IT2[(byte)(Y6 >> 8)] ^ IT3[(byte)Y5] ^ _expKey[keyCtr++];
-                X2 = IT0[Y2 >> 24] ^ IT1[(byte)(Y1 >> 16)] ^ IT2[(byte)(Y7 >> 8)] ^ IT3[(byte)Y6] ^ _expKey[keyCtr++];
-                X3 = IT0[Y3 >> 24] ^ IT1[(byte)(Y2 >> 16)] ^ IT2[(byte)(Y0 >> 8)] ^ IT3[(byte)Y7] ^ _expKey[keyCtr++];
-                X4 = IT0[Y4 >> 24] ^ IT1[(byte)(Y3 >> 16)] ^ IT2[(byte)(Y1 >> 8)] ^ IT3[(byte)Y0] ^ _expKey[keyCtr++];
-                X5 = IT0[Y5 >> 24] ^ IT1[(byte)(Y4 >> 16)] ^ IT2[(byte)(Y2 >> 8)] ^ IT3[(byte)Y1] ^ _expKey[keyCtr++];
-                X6 = IT0[Y6 >> 24] ^ IT1[(byte)(Y5 >> 16)] ^ IT2[(byte)(Y3 >> 8)] ^ IT3[(byte)Y2] ^ _expKey[keyCtr++];
-                X7 = IT0[Y7 >> 24] ^ IT1[(byte)(Y6 >> 16)] ^ IT2[(byte)(Y4 >> 8)] ^ IT3[(byte)Y3] ^ _expKey[keyCtr++];
+                X0 = IT0[Y0 >> 24] ^ IT1[(byte)(Y7 >> 16)] ^ IT2[(byte)(Y5 >> 8)] ^ IT3[(byte)Y4] ^ _expKey[++keyCtr];
+                X1 = IT0[Y1 >> 24] ^ IT1[(byte)(Y0 >> 16)] ^ IT2[(byte)(Y6 >> 8)] ^ IT3[(byte)Y5] ^ _expKey[++keyCtr];
+                X2 = IT0[Y2 >> 24] ^ IT1[(byte)(Y1 >> 16)] ^ IT2[(byte)(Y7 >> 8)] ^ IT3[(byte)Y6] ^ _expKey[++keyCtr];
+                X3 = IT0[Y3 >> 24] ^ IT1[(byte)(Y2 >> 16)] ^ IT2[(byte)(Y0 >> 8)] ^ IT3[(byte)Y7] ^ _expKey[++keyCtr];
+                X4 = IT0[Y4 >> 24] ^ IT1[(byte)(Y3 >> 16)] ^ IT2[(byte)(Y1 >> 8)] ^ IT3[(byte)Y0] ^ _expKey[++keyCtr];
+                X5 = IT0[Y5 >> 24] ^ IT1[(byte)(Y4 >> 16)] ^ IT2[(byte)(Y2 >> 8)] ^ IT3[(byte)Y1] ^ _expKey[++keyCtr];
+                X6 = IT0[Y6 >> 24] ^ IT1[(byte)(Y5 >> 16)] ^ IT2[(byte)(Y3 >> 8)] ^ IT3[(byte)Y2] ^ _expKey[++keyCtr];
+                X7 = IT0[Y7 >> 24] ^ IT1[(byte)(Y6 >> 16)] ^ IT2[(byte)(Y4 >> 8)] ^ IT3[(byte)Y3] ^ _expKey[++keyCtr];
 
-                Y0 = IT0[X0 >> 24] ^ IT1[(byte)(X7 >> 16)] ^ IT2[(byte)(X5 >> 8)] ^ IT3[(byte)X4] ^ _expKey[keyCtr++];
-                Y1 = IT0[X1 >> 24] ^ IT1[(byte)(X0 >> 16)] ^ IT2[(byte)(X6 >> 8)] ^ IT3[(byte)X5] ^ _expKey[keyCtr++];
-                Y2 = IT0[X2 >> 24] ^ IT1[(byte)(X1 >> 16)] ^ IT2[(byte)(X7 >> 8)] ^ IT3[(byte)X6] ^ _expKey[keyCtr++];
-                Y3 = IT0[X3 >> 24] ^ IT1[(byte)(X2 >> 16)] ^ IT2[(byte)(X0 >> 8)] ^ IT3[(byte)X7] ^ _expKey[keyCtr++];
-                Y4 = IT0[X4 >> 24] ^ IT1[(byte)(X3 >> 16)] ^ IT2[(byte)(X1 >> 8)] ^ IT3[(byte)X0] ^ _expKey[keyCtr++];
-                Y5 = IT0[X5 >> 24] ^ IT1[(byte)(X4 >> 16)] ^ IT2[(byte)(X2 >> 8)] ^ IT3[(byte)X1] ^ _expKey[keyCtr++];
-                Y6 = IT0[X6 >> 24] ^ IT1[(byte)(X5 >> 16)] ^ IT2[(byte)(X3 >> 8)] ^ IT3[(byte)X2] ^ _expKey[keyCtr++];
-                Y7 = IT0[X7 >> 24] ^ IT1[(byte)(X6 >> 16)] ^ IT2[(byte)(X4 >> 8)] ^ IT3[(byte)X3] ^ _expKey[keyCtr++];
+                Y0 = IT0[X0 >> 24] ^ IT1[(byte)(X7 >> 16)] ^ IT2[(byte)(X5 >> 8)] ^ IT3[(byte)X4] ^ _expKey[++keyCtr];
+                Y1 = IT0[X1 >> 24] ^ IT1[(byte)(X0 >> 16)] ^ IT2[(byte)(X6 >> 8)] ^ IT3[(byte)X5] ^ _expKey[++keyCtr];
+                Y2 = IT0[X2 >> 24] ^ IT1[(byte)(X1 >> 16)] ^ IT2[(byte)(X7 >> 8)] ^ IT3[(byte)X6] ^ _expKey[++keyCtr];
+                Y3 = IT0[X3 >> 24] ^ IT1[(byte)(X2 >> 16)] ^ IT2[(byte)(X0 >> 8)] ^ IT3[(byte)X7] ^ _expKey[++keyCtr];
+                Y4 = IT0[X4 >> 24] ^ IT1[(byte)(X3 >> 16)] ^ IT2[(byte)(X1 >> 8)] ^ IT3[(byte)X0] ^ _expKey[++keyCtr];
+                Y5 = IT0[X5 >> 24] ^ IT1[(byte)(X4 >> 16)] ^ IT2[(byte)(X2 >> 8)] ^ IT3[(byte)X1] ^ _expKey[++keyCtr];
+                Y6 = IT0[X6 >> 24] ^ IT1[(byte)(X5 >> 16)] ^ IT2[(byte)(X3 >> 8)] ^ IT3[(byte)X2] ^ _expKey[++keyCtr];
+                Y7 = IT0[X7 >> 24] ^ IT1[(byte)(X6 >> 16)] ^ IT2[(byte)(X4 >> 8)] ^ IT3[(byte)X3] ^ _expKey[++keyCtr];
             }
 
             // final round
-            Output[OutOffset++] = (byte)(ISBox[Y0 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y7 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y5 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y4] ^ (byte)_expKey[keyCtr++]);
+            Output[OutOffset] = (byte)(ISBox[Y0 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y7 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y5 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y4] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y1 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y0 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y6 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y5] ^ (byte)_expKey[keyCtr++]);
+            Output[++OutOffset] = (byte)(ISBox[Y1 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y0 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y6 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y5] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y2 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y1 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y7 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y6] ^ (byte)_expKey[keyCtr++]);
+            Output[++OutOffset] = (byte)(ISBox[Y2 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y1 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y7 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y6] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y3 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y2 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y0 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y7] ^ (byte)_expKey[keyCtr++]);
+            Output[++OutOffset] = (byte)(ISBox[Y3 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y2 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y0 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y7] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y4 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y3 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y1 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y0] ^ (byte)_expKey[keyCtr++]);
+            Output[++OutOffset] = (byte)(ISBox[Y4 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y3 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y1 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y0] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y5 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y4 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y2 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y1] ^ (byte)_expKey[keyCtr++]);
+            Output[++OutOffset] = (byte)(ISBox[Y5 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y4 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y2 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y1] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y6 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y5 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y3 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset++] = (byte)(ISBox[(byte)Y2] ^ (byte)_expKey[keyCtr++]);
+            Output[++OutOffset] = (byte)(ISBox[Y6 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y5 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y3 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y2] ^ (byte)_expKey[keyCtr]);
 
-            Output[OutOffset++] = (byte)(ISBox[Y7 >> 24] ^ (byte)(_expKey[keyCtr] >> 24));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y6 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
-            Output[OutOffset++] = (byte)(ISBox[(byte)(Y4 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
-            Output[OutOffset] = (byte)(ISBox[(byte)Y3] ^ (byte)_expKey[keyCtr]);
+            Output[++OutOffset] = (byte)(ISBox[Y7 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y6 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(ISBox[(byte)(Y4 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(ISBox[(byte)Y3] ^ (byte)_expKey[keyCtr]);
+        }
+
+        private void Encrypt16(byte[] Input, int InOffset, byte[] Output, int OutOffset)
+        {
+            int LRD = _expKey.Length - 5;
+            int keyCtr = 0;
+
+            // round 0
+            uint X0 = IntUtils.BytesToBe32(Input, InOffset) ^ _expKey[keyCtr];
+            uint X1 = IntUtils.BytesToBe32(Input, InOffset + 4) ^ _expKey[++keyCtr];
+            uint X2 = IntUtils.BytesToBe32(Input, InOffset + 8) ^ _expKey[++keyCtr];
+            uint X3 = IntUtils.BytesToBe32(Input, InOffset + 12) ^ _expKey[++keyCtr];
+
+            // round 1
+            uint Y0 = T0[X0 >> 24] ^ T1[(byte)(X1 >> 16)] ^ T2[(byte)(X2 >> 8)] ^ T3[(byte)X3] ^ _expKey[++keyCtr];
+            uint Y1 = T0[X1 >> 24] ^ T1[(byte)(X2 >> 16)] ^ T2[(byte)(X3 >> 8)] ^ T3[(byte)X0] ^ _expKey[++keyCtr];
+            uint Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[++keyCtr];
+            uint Y3 = T0[X3 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[++keyCtr];
+
+            while (keyCtr != LRD)
+            {
+                X0 = T0[Y0 >> 24] ^ T1[(byte)(Y1 >> 16)] ^ T2[(byte)(Y2 >> 8)] ^ T3[(byte)Y3] ^ _expKey[++keyCtr];
+                X1 = T0[Y1 >> 24] ^ T1[(byte)(Y2 >> 16)] ^ T2[(byte)(Y3 >> 8)] ^ T3[(byte)Y0] ^ _expKey[++keyCtr];
+                X2 = T0[Y2 >> 24] ^ T1[(byte)(Y3 >> 16)] ^ T2[(byte)(Y0 >> 8)] ^ T3[(byte)Y1] ^ _expKey[++keyCtr];
+                X3 = T0[Y3 >> 24] ^ T1[(byte)(Y0 >> 16)] ^ T2[(byte)(Y1 >> 8)] ^ T3[(byte)Y2] ^ _expKey[++keyCtr];
+                Y0 = T0[X0 >> 24] ^ T1[(byte)(X1 >> 16)] ^ T2[(byte)(X2 >> 8)] ^ T3[(byte)X3] ^ _expKey[++keyCtr];
+                Y1 = T0[X1 >> 24] ^ T1[(byte)(X2 >> 16)] ^ T2[(byte)(X3 >> 8)] ^ T3[(byte)X0] ^ _expKey[++keyCtr];
+                Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[++keyCtr];
+                Y3 = T0[X3 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[++keyCtr];
+            }
+
+            // final round
+            Output[OutOffset] = (byte)(SBox[Y0 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y1 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y2 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y3] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y1 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y2 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y3 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y0] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y2 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y3 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y0 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y1] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y3 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y0 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y1 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y2] ^ (byte)_expKey[keyCtr]);
+        }
+
+        private void Encrypt32(byte[] Input, int InOffset, byte[] Output, int OutOffset)
+        {
+            int LRD = _expKey.Length - 9;
+            int keyCtr = 0;
+
+            // round 0
+            UInt32 X0 = (UInt32)((Input[InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[keyCtr];
+            UInt32 X1 = (UInt32)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
+            UInt32 X2 = (UInt32)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
+            UInt32 X3 = (UInt32)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
+            UInt32 X4 = (UInt32)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
+            UInt32 X5 = (UInt32)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
+            UInt32 X6 = (UInt32)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
+            UInt32 X7 = (UInt32)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
+
+            // round 1
+            UInt32 Y0 = T0[X0 >> 24] ^ T1[(byte)(X1 >> 16)] ^ T2[(byte)(X3 >> 8)] ^ T3[(byte)X4] ^ _expKey[++keyCtr];
+            UInt32 Y1 = T0[X1 >> 24] ^ T1[(byte)(X2 >> 16)] ^ T2[(byte)(X4 >> 8)] ^ T3[(byte)X5] ^ _expKey[++keyCtr];
+            UInt32 Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X5 >> 8)] ^ T3[(byte)X6] ^ _expKey[++keyCtr];
+            UInt32 Y3 = T0[X3 >> 24] ^ T1[(byte)(X4 >> 16)] ^ T2[(byte)(X6 >> 8)] ^ T3[(byte)X7] ^ _expKey[++keyCtr];
+            UInt32 Y4 = T0[X4 >> 24] ^ T1[(byte)(X5 >> 16)] ^ T2[(byte)(X7 >> 8)] ^ T3[(byte)X0] ^ _expKey[++keyCtr];
+            UInt32 Y5 = T0[X5 >> 24] ^ T1[(byte)(X6 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[++keyCtr];
+            UInt32 Y6 = T0[X6 >> 24] ^ T1[(byte)(X7 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[++keyCtr];
+            UInt32 Y7 = T0[X7 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X2 >> 8)] ^ T3[(byte)X3] ^ _expKey[++keyCtr];
+
+            // rounds loop
+            while (keyCtr != LRD)
+            {
+                X0 = T0[Y0 >> 24] ^ T1[(byte)(Y1 >> 16)] ^ T2[(byte)(Y3 >> 8)] ^ T3[(byte)Y4] ^ _expKey[++keyCtr];
+                X1 = T0[Y1 >> 24] ^ T1[(byte)(Y2 >> 16)] ^ T2[(byte)(Y4 >> 8)] ^ T3[(byte)Y5] ^ _expKey[++keyCtr];
+                X2 = T0[Y2 >> 24] ^ T1[(byte)(Y3 >> 16)] ^ T2[(byte)(Y5 >> 8)] ^ T3[(byte)Y6] ^ _expKey[++keyCtr];
+                X3 = T0[Y3 >> 24] ^ T1[(byte)(Y4 >> 16)] ^ T2[(byte)(Y6 >> 8)] ^ T3[(byte)Y7] ^ _expKey[++keyCtr];
+                X4 = T0[Y4 >> 24] ^ T1[(byte)(Y5 >> 16)] ^ T2[(byte)(Y7 >> 8)] ^ T3[(byte)Y0] ^ _expKey[++keyCtr];
+                X5 = T0[Y5 >> 24] ^ T1[(byte)(Y6 >> 16)] ^ T2[(byte)(Y0 >> 8)] ^ T3[(byte)Y1] ^ _expKey[++keyCtr];
+                X6 = T0[Y6 >> 24] ^ T1[(byte)(Y7 >> 16)] ^ T2[(byte)(Y1 >> 8)] ^ T3[(byte)Y2] ^ _expKey[++keyCtr];
+                X7 = T0[Y7 >> 24] ^ T1[(byte)(Y0 >> 16)] ^ T2[(byte)(Y2 >> 8)] ^ T3[(byte)Y3] ^ _expKey[++keyCtr];
+
+                Y0 = T0[X0 >> 24] ^ T1[(byte)(X1 >> 16)] ^ T2[(byte)(X3 >> 8)] ^ T3[(byte)X4] ^ _expKey[++keyCtr];
+                Y1 = T0[X1 >> 24] ^ T1[(byte)(X2 >> 16)] ^ T2[(byte)(X4 >> 8)] ^ T3[(byte)X5] ^ _expKey[++keyCtr];
+                Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X5 >> 8)] ^ T3[(byte)X6] ^ _expKey[++keyCtr];
+                Y3 = T0[X3 >> 24] ^ T1[(byte)(X4 >> 16)] ^ T2[(byte)(X6 >> 8)] ^ T3[(byte)X7] ^ _expKey[++keyCtr];
+                Y4 = T0[X4 >> 24] ^ T1[(byte)(X5 >> 16)] ^ T2[(byte)(X7 >> 8)] ^ T3[(byte)X0] ^ _expKey[++keyCtr];
+                Y5 = T0[X5 >> 24] ^ T1[(byte)(X6 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[++keyCtr];
+                Y6 = T0[X6 >> 24] ^ T1[(byte)(X7 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[++keyCtr];
+                Y7 = T0[X7 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X2 >> 8)] ^ T3[(byte)X3] ^ _expKey[++keyCtr];
+            }
+
+            // final round
+            Output[OutOffset] = (byte)(SBox[Y0 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y1 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y3 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y4] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y1 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y2 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y4 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y5] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y2 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y3 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y5 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y6] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y3 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y4 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y6 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y7] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y4 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y5 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y7 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y0] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y5 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y6 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y0 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y1] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y6 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y7 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y1 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y2] ^ (byte)_expKey[keyCtr]);
+
+            Output[++OutOffset] = (byte)(SBox[Y7 >> 24] ^ (byte)(_expKey[++keyCtr] >> 24));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y0 >> 16)] ^ (byte)(_expKey[keyCtr] >> 16));
+            Output[++OutOffset] = (byte)(SBox[(byte)(Y2 >> 8)] ^ (byte)(_expKey[keyCtr] >> 8));
+            Output[++OutOffset] = (byte)(SBox[(byte)Y3] ^ (byte)_expKey[keyCtr]);
         }
         #endregion
 
         #region Helpers
+        private int GetIkmSize(Digests DigestType)
+        {
+            switch (DigestType)
+            {
+                case Digests.Blake256:
+                case Digests.Keccak256:
+                case Digests.SHA256:
+                case Digests.Skein256:
+                    return 32;
+                case Digests.Blake512:
+                case Digests.Keccak512:
+                case Digests.SHA512:
+                case Digests.Skein512:
+                    return 64;
+                case Digests.Skein1024:
+                    return 128;
+                default:
+                    throw new CryptoSymmetricException("RHX:GetDigestSize", "The digest type is not supported!", new ArgumentException());
+            }
+        }
+
+        private IDigest GetKdfEngine(Digests DigestType)
+        {
+            try
+            {
+                return DigestFromName.GetInstance(DigestType);
+            }
+            catch
+            {
+                throw new CryptoSymmetricException("RHX:GetKeyEngine", "The digest type is not supported!", new ArgumentException());
+            }
+        }
+
+        private int GetSaltSize(Digests DigestType)
+        {
+            switch (DigestType)
+            {
+                case Digests.Blake256:
+                case Digests.Skein256:
+                    return 32;
+                case Digests.Blake512:
+                case Digests.SHA256:
+                case Digests.Skein512:
+                    return 64;
+                case Digests.SHA512:
+                case Digests.Skein1024:
+                    return 128;
+                case Digests.Keccak256:
+                    return 136;
+                case Digests.Keccak512:
+                    return 72;
+                default:
+                    throw new CryptoSymmetricException("RHX:GetBlockSize", "The digest type is not supported!", new ArgumentException());
+            }
+        }
+
         private UInt32 SubByte(UInt32 Rot)
         {
             UInt32 value = 0xff & Rot;
@@ -1177,6 +1340,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                         Array.Clear(_expKey, 0, _expKey.Length);
                         _expKey = null;
                     }
+                    if (_legalKeySizes != null)
+                    {
+                        Array.Clear(_legalKeySizes, 0, _legalKeySizes.Length);
+                        _legalKeySizes = null;
+                    }
+                    _blockSize = 0;
+                    _dfnRounds = 0;
+                    _ikmSize = 0;
+                    _isEncryption = false;
+                    _isInitialized = false;
                 }
                 finally
                 {

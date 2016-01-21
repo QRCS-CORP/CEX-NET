@@ -40,7 +40,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Tools
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -60,7 +60,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Tools
         #region Private
         private void TestCompression()
         {
-            Compress cmp = new Compress();
+            Compressor cmp = new Compressor();
             MemoryStream cstm;
 
             /*string folder = @"C:\Tests\Compression Test";
@@ -68,7 +68,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Tools
             cstm.Position = 0;
             cmp.DeCompressArchive(cstm, folder + @"\Out");*/
 
-            byte[] data = new CSPRng().GetBytes(1000);
+            byte[] data = new CSPPrng().GetBytes(1000);
             cstm = cmp.CompressStream(new MemoryStream(data));
             cstm.Position = 0;
             MemoryStream cmp2 = cmp.DeCompressStream(cstm);
@@ -77,7 +77,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Tools
             if (!Evaluate.AreEqual(data, cmp2.ToArray()))
                 throw new Exception("CompressionTest: decompressed array is not equal!");
 
-            cmp.CompressionFormat = Compress.CompressionFormats.GZip;
+            cmp.CompressionFormat = Compressor.CompressionFormats.GZip;
             cstm = cmp.CompressStream(new MemoryStream(data));
             cstm.Position = 0;
             cmp2 = cmp.DeCompressStream(cstm);

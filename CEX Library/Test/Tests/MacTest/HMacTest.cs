@@ -1,6 +1,5 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Mac;
 using VTDev.Libraries.CEXEngine.Tools;
@@ -108,7 +107,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -143,16 +142,16 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
                 Buffer.BlockCopy(hash, 0, trnHash, 0, Out256.Length);
 
                 if (!Evaluate.AreEqual(Out256, trnHash))
-                    throw new Exception("SHA256HMAC is not equal! Expected: " + HexConverter.ToString(Out256) + " Received: " + HexConverter.ToString(trnHash));
+                    throw new Exception("HMAC is not equal! Expected: " + HexConverter.ToString(Out256) + " Received: " + HexConverter.ToString(trnHash));
             }
             else
             {
                 if (!Evaluate.AreEqual(Out256, hash))
-                    throw new Exception("SHA256HMAC is not equal! Expected: " + HexConverter.ToString(Out256) + " Received: " + HexConverter.ToString(hash));
+                    throw new Exception("HMAC is not equal! Expected: " + HexConverter.ToString(Out256) + " Received: " + HexConverter.ToString(hash));
             }
 
             // test 2: 256 hmac
-            using (SHA256HMAC hmac2 = new SHA256HMAC())
+            using (HMAC hmac2 = new HMAC(new SHA256()))
             {
                 hmac2.Initialize(Key);
                 hash = hmac2.ComputeMac(Input);
@@ -164,12 +163,12 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
                 Buffer.BlockCopy(hash, 0, trnHash, 0, Out256.Length);
 
                 if (!Evaluate.AreEqual(Out256, trnHash))
-                    throw new Exception("SHA256HMAC is not equal! Expected: " + HexConverter.ToString(Out256) + " Received: " + HexConverter.ToString(trnHash));
+                    throw new Exception("HMAC is not equal! Expected: " + HexConverter.ToString(Out256) + " Received: " + HexConverter.ToString(trnHash));
             }
             else
             {
                 if (!Evaluate.AreEqual(Out256, hash))
-                    throw new Exception("SHA256HMAC is not equal! Expected: " + HexConverter.ToString(Out256) + " Received: " + HexConverter.ToString(hash));
+                    throw new Exception("HMAC is not equal! Expected: " + HexConverter.ToString(Out256) + " Received: " + HexConverter.ToString(hash));
             }
 
             hash = new byte[32];
@@ -185,16 +184,16 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
                 Buffer.BlockCopy(hash, 0, trnHash, 0, Out512.Length);
 
                 if (!Evaluate.AreEqual(Out512, trnHash))
-                    throw new Exception("SHA512HMAC is not equal! Expected: " + HexConverter.ToString(Out512) + " Received: " + HexConverter.ToString(trnHash));
+                    throw new Exception("HMAC is not equal! Expected: " + HexConverter.ToString(Out512) + " Received: " + HexConverter.ToString(trnHash));
             }
             else
             {
                 if (!Evaluate.AreEqual(Out512, hash))
-                    throw new Exception("SHA512HMAC is not equal! Expected: " + HexConverter.ToString(Out512) + " Received: " + HexConverter.ToString(hash));
+                    throw new Exception("HMAC is not equal! Expected: " + HexConverter.ToString(Out512) + " Received: " + HexConverter.ToString(hash));
             }
 
-            // test 4: 256 hmac
-            using (SHA512HMAC hmac3 = new SHA512HMAC())
+            // test 4: 512 hmac
+            using (HMAC hmac3 = new HMAC(new SHA512()))
             {
                 hmac3.Initialize(Key);
                 hash = hmac3.ComputeMac(Input);
@@ -206,12 +205,12 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
                 Buffer.BlockCopy(hash, 0, trnHash, 0, Out512.Length);
 
                 if (!Evaluate.AreEqual(Out512, trnHash))
-                    throw new Exception("SHA512HMAC is not equal! Expected: " + HexConverter.ToString(Out512) + " Received: " + HexConverter.ToString(trnHash));
+                    throw new Exception("HMAC is not equal! Expected: " + HexConverter.ToString(Out512) + " Received: " + HexConverter.ToString(trnHash));
             }
             else
             {
                 if (!Evaluate.AreEqual(Out512, hash))
-                    throw new Exception("SHA512HMAC is not equal! Expected: " + HexConverter.ToString(Out512) + " Received: " + HexConverter.ToString(hash));
+                    throw new Exception("HMAC is not equal! Expected: " + HexConverter.ToString(Out512) + " Received: " + HexConverter.ToString(hash));
             }
         }
         #endregion

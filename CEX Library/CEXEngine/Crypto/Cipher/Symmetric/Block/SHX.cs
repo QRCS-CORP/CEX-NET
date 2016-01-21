@@ -4,13 +4,15 @@ using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Generator;
+using VTDev.Libraries.CEXEngine.Crypto.Helper;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -100,7 +102,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// The HMAC RFC 2104, recommends a key size equal to the digest output, in the case of SHA512, 64 bytes, anything larger gets passed through the hash function to get the required 512 bit key size. 
     /// The Salt size is a minimum of the hash functions block size, with SHA-2 512 that is 128 bytes.</para>
     /// 
-    /// <para>When using SHA-2 512, a minimum key size for RSM is 192 bytes, further blocks of salt can be added to the key so long as they align; ikm + (n * blocksize), ex. 192, 320, 448 bytes.. there is no upper maximum. 
+    /// <para>When using SHA-2 512, a minimum key size for SHX is 192 bytes, further blocks of salt can be added to the key so long as they align; ikm + (n * blocksize), ex. 192, 320, 448 bytes.. there is no upper maximum. 
     /// This means that you can create keys as large as you like so long as it falls on these boundaries, this effectively eliminates brute force as a means of attack on the cipher, even in quantum terms.</para> 
     /// 
     /// <para>The Digest that powers HKDF, can be any one of the Hash Digests implemented in the CEX library; Blake<cite>Blake</cite>, Keccak<cite>Keccak</cite>, SHA-2<cite>Fips 180-4</cite>, or Skein<cite>Skein</cite>.
@@ -131,24 +133,26 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     {
         #region Constants
         private const string ALG_NAME = "SHX";
-        private const Int32 BLOCK_SIZE = 16;
-        private const Int32 ROUNDS32 = 32;
-        private const Int32 LEGAL_KEYS = 10;
-        private const Int32 MAX_ROUNDS = 128;
-        private const Int32 MIN_ROUNDS = 32;
-        private const Int32 PHI = unchecked((Int32)0x9E3779B9);
+        private const int BLOCK_SIZE = 16;
+        private const int ROUNDS32 = 32;
+        private const int LEGAL_KEYS = 10;
+        private const int MAX_ROUNDS = 128;
+        private const int MAX_STDKEY = 64;
+        private const int MIN_ROUNDS = 32;
+        private const UInt32 PHI = 0x9E3779B9;
         #endregion
 
         #region Fields
-        private Int32 _dfnRounds = MIN_ROUNDS;
+        private int _dfnRounds = MIN_ROUNDS;
+        private UInt32[] _expKey;
         // configurable nonce can create a unique distribution, can be byte(0)
         private byte[] _hkdfInfo = System.Text.Encoding.ASCII.GetBytes("SHX version 1 information string");
         private IDigest _keyEngine;
         private bool _isDisposed = false;
         private bool _isEncryption;
-        private Int32 _ikmSize = 0;
-        private Int32[] _expKey;
+        private int _ikmSize = 0;
         private bool _isInitialized = false;
+        private Digests _keyEngineType;
         private int[] _legalKeySizes = new int[LEGAL_KEYS];
         #endregion
 
@@ -180,6 +184,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 
                 _hkdfInfo = value;
             }
+        }
+
+        /// <summary>
+        /// Get: The block ciphers type name
+        /// </summary>
+        public BlockCiphers Enumeral
+        {
+            get { return BlockCiphers.SHX; }
         }
 
         /// <summary>
@@ -229,15 +241,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// <summary>
         /// Get: Available block sizes for this cipher
         /// </summary>
-        public static int[] LegalBlockSizes
+        public int[] LegalBlockSizes
         {
-            get { return new int[] { 16, 32 }; }
+            get { return new int[] { 16 }; }
         }
 
         /// <summary>
         /// Get: Available Encryption Key Sizes in bytes
         /// </summary>
-        public Int32[] LegalKeySizes
+        public int[] LegalKeySizes
         {
             get { return _legalKeySizes; }
             private set { _legalKeySizes = value; }
@@ -246,7 +258,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// <summary>
         /// Get: Available diffusion round assignments
         /// </summary>
-        public static int[] LegalRounds
+        public int[] LegalRounds
         {
             get { return new int[] { 32, 40, 48, 56, 64, 80, 96, 128 }; }
         }
@@ -282,14 +294,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             if (Rounds != 32 && Rounds != 40 && Rounds != 48 && Rounds != 56 && Rounds != 64 && Rounds != 80 && Rounds != 96 && Rounds != 128)
                 throw new CryptoSymmetricException("SHX:CTor", "Invalid rounds size! Sizes supported are 32, 40, 48, 56, 64, 80, 96 and 128.", new ArgumentOutOfRangeException());
 
-            // get the kdf digest engine
-            _keyEngine = GetKeyEngine(KeyEngine);
+            _keyEngineType = KeyEngine;
             // set the hmac key size
-            _ikmSize = _ikmSize == 0 ? _keyEngine.DigestSize : _ikmSize;
+            _ikmSize = _ikmSize == 0 ? GetIkmSize(KeyEngine) : _ikmSize;
+            // add standard key lengths
+            _legalKeySizes[0] = 16;
+            _legalKeySizes[1] = 24;
+            _legalKeySizes[2] = 32;
+            _legalKeySizes[3] = 64;
 
-            for (int i = 0; i < _legalKeySizes.Length; i++)
-                _legalKeySizes[i] = (_keyEngine.BlockSize * (i + 1)) + _ikmSize;
+            int dgtblock = GetSaltSize(KeyEngine);
 
+            // hkdf extended key sizes
+            for (int i = 4; i < _legalKeySizes.Length; ++i)
+                _legalKeySizes[i] = (dgtblock * (i - 3)) + _ikmSize;
 
             _dfnRounds = Rounds;
         }
@@ -372,10 +390,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         {
             if (KeyParam.Key == null)
                 throw new CryptoSymmetricException("SHX:Initialize", "Invalid key! Key can not be null.", new ArgumentNullException());
-            if (KeyParam.Key.Length < LegalKeySizes[0])
-                throw new CryptoSymmetricException("SHX:Initialize", String.Format("Invalid key size! Key must be at least {0}  bytes ({1} bit).", LegalKeySizes[0], LegalKeySizes[0] * 8), new ArgumentOutOfRangeException());
-            if ((KeyParam.Key.Length - _keyEngine.DigestSize) % _keyEngine.BlockSize != 0)
-                throw new CryptoSymmetricException("SHX:Initialize", String.Format("Invalid key size! Key must be (length - IKm length: {0} bytes) + multiple of {1} block size.", _keyEngine.DigestSize, _keyEngine.BlockSize), new ArgumentOutOfRangeException());
+            if (KeyParam.Key.Length > LegalKeySizes[3] && (KeyParam.Key.Length - GetIkmSize(_keyEngineType)) % GetSaltSize(_keyEngineType) != 0)
+                throw new CryptoSymmetricException("SHX:Initialize", String.Format("Invalid key size! Key must be (length - IKm length: {0} bytes) + multiple of {1} block size.", GetIkmSize(_keyEngineType), GetSaltSize(_keyEngineType)), new ArgumentOutOfRangeException());
+
+            for (int i = 0; i < LegalKeySizes.Length; ++i)
+            {
+                if (KeyParam.Key.Length == LegalKeySizes[i])
+                    break;
+                if (i == LegalKeySizes.Length - 1)
+                    throw new CryptoSymmetricException("SHX:Initialize", String.Format("Invalid key size! Key must be at least {0}  bytes ({1} bit).", LegalKeySizes[0], LegalKeySizes[0] * 8), new ArgumentOutOfRangeException());
+            }
+
+            // get the kdf digest engine
+            if (KeyParam.Key.Length > MAX_STDKEY)
+                _keyEngine = GetKdfEngine(_keyEngineType);
 
             _isEncryption = Encryption;
             // expand the key
@@ -420,7 +448,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         #endregion
 
         #region Key Schedule
-        private Int32[] ExpandKey(byte[] Key)
+        private UInt32[] ExpandKey(byte[] Key)
+        {
+            if (Key.Length > MAX_STDKEY)
+            {
+                // using hkdf expansion
+                return SecureExpand(Key);
+            }
+            else
+            {
+                // standard serpent key expansion + k512
+                return StandardExpand(Key);
+            }
+        }
+
+        private UInt32[] SecureExpand(byte[] Key)
         {
             // expanded key size
             int keySize = 4 * (_dfnRounds + 1);
@@ -450,498 +492,476 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             }
 
             // initialize working key
-            Int32[] wK = new Int32[keySize];
+            uint[] expKey = new uint[keySize];
             // copy bytes to working key
-            Buffer.BlockCopy(rawKey, 0, wK, 0, keyBytes);
+            Buffer.BlockCopy(rawKey, 0, expKey, 0, keyBytes);
 
-            return wK;
+            return expKey;
         }
 
-        private IDigest GetKeyEngine(Digests KeyEngine)
+        private UInt32[] StandardExpand(byte[] Key)
         {
-            switch (KeyEngine)
+            int cnt = 0;
+            int index = 0;
+            int padSize = Key.Length < 32 ? 16 : Key.Length / 2;
+            uint[] tmpKey = new uint[padSize];
+            int offset = 0;
+
+            // less than 512 is default rounds
+            if (Key.Length < 64)
+                _dfnRounds = ROUNDS32;
+
+            int keySize = 4 * (_dfnRounds + 1);
+
+            // step 1: reverse copy key to temp array
+            for (offset = Key.Length; offset > 0; offset -= 4)
+                tmpKey[index++] = IntUtils.BytesToBe32(Key, offset - 4);
+
+            // pad small key
+            if (index < 8)
+                tmpKey[index] = 1;
+
+            // initialize the key
+            uint[] expKey = new uint[keySize];
+
+            if (padSize == 16)
             {
-                case Digests.Blake256:
-                    return new Blake256();
-                case Digests.Blake512:
-                    return new Blake512();
-                case Digests.Keccak256:
-                    return new Keccak256();
-                case Digests.Keccak512:
-                    return new Keccak512();
-                case Digests.SHA256:
-                    return new SHA256();
-                case Digests.SHA512:
-                    return new SHA512();
-                case Digests.Skein256:
-                    return new Skein256();
-                case Digests.Skein512:
-                    return new Skein512();
-                case Digests.Skein1024:
-                    return new Skein1024();
-                default:
-                    throw new CryptoSymmetricException("SHX:GetKeyEngine", "The digest type is not supported!", new ArgumentException());
+                // 32 byte key
+                // step 2: rotate k into w(k) ints
+                for (int i = 8; i < 16; i++)
+                    tmpKey[i] = IntUtils.RotateLeft((UInt32)(tmpKey[i - 8] ^ tmpKey[i - 5] ^ tmpKey[i - 3] ^ tmpKey[i - 1] ^ PHI ^ (i - 8)), 11);
+
+                // copy to expanded key
+                Array.Copy(tmpKey, 8, expKey, 0, 8);
+
+                // step 3: calculate remainder of rounds with rotating primitive
+                for (int i = 8; i < keySize; i++)
+                    expKey[i] = IntUtils.RotateLeft((UInt32)(expKey[i - 8] ^ expKey[i - 5] ^ expKey[i - 3] ^ expKey[i - 1] ^ PHI ^ i), 11);
             }
+            else
+            {
+                // *extended*: 64 byte key
+                // step 3: rotate k into w(k) ints, with extended polynominal
+                // Wp := (Wp-16 ^ Wp-13 ^ Wp-11 ^ Wp-10 ^ Wp-8 ^ Wp-5 ^ Wp-3 ^ Wp-1 ^ PHI ^ i) <<< 11
+                for (int i = 16; i < 32; i++)
+                    tmpKey[i] = IntUtils.RotateLeft((UInt32)(tmpKey[i - 16] ^ tmpKey[i - 13] ^ tmpKey[i - 11] ^ tmpKey[i - 10] ^ tmpKey[i - 8] ^ tmpKey[i - 5] ^ tmpKey[i - 3] ^ tmpKey[i - 1] ^ PHI ^ (i - 16)), 11);
+
+                // copy to expanded key
+                Array.Copy(tmpKey, 16, expKey, 0, 16);
+
+                // step 3: calculate remainder of rounds with rotating primitive
+                for (int i = 16; i < keySize; i++)
+                    expKey[i] = IntUtils.RotateLeft((UInt32)(expKey[i - 16] ^ expKey[i - 13] ^ expKey[i - 11] ^ expKey[i - 10] ^ expKey[i - 8] ^ expKey[i - 5] ^ expKey[i - 3] ^ expKey[i - 1] ^ PHI ^ i), 11);
+            }
+
+            // step 4: create the working keys by processing with the Sbox and IP
+            while (cnt < keySize - 4)
+            {
+                Sb3(ref expKey[cnt], ref expKey[cnt + 1], ref expKey[cnt + 2], ref expKey[cnt + 3]); cnt += 4;
+                Sb2(ref expKey[cnt], ref expKey[cnt + 1], ref expKey[cnt + 2], ref expKey[cnt + 3]); cnt += 4;
+                Sb1(ref expKey[cnt], ref expKey[cnt + 1], ref expKey[cnt + 2], ref expKey[cnt + 3]); cnt += 4;
+                Sb0(ref expKey[cnt], ref expKey[cnt + 1], ref expKey[cnt + 2], ref expKey[cnt + 3]); cnt += 4;
+                Sb7(ref expKey[cnt], ref expKey[cnt + 1], ref expKey[cnt + 2], ref expKey[cnt + 3]); cnt += 4;
+                Sb6(ref expKey[cnt], ref expKey[cnt + 1], ref expKey[cnt + 2], ref expKey[cnt + 3]); cnt += 4;
+                Sb5(ref expKey[cnt], ref expKey[cnt + 1], ref expKey[cnt + 2], ref expKey[cnt + 3]); cnt += 4;
+                Sb4(ref expKey[cnt], ref expKey[cnt + 1], ref expKey[cnt + 2], ref expKey[cnt + 3]); cnt += 4;
+            }
+
+            // last round
+            Sb3(ref expKey[cnt], ref expKey[cnt + 1], ref expKey[cnt + 2], ref expKey[cnt + 3]);
+
+            return expKey;
         }
         #endregion
 
         #region Rounds Processing
-        private void Decrypt16(byte[] Input, Int32 InOffset, byte[] Output, Int32 OutOffset)
+        private void Decrypt16(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
-            int keyCtr = _expKey.Length - 1;
+            int LRD = 4;
+            int keyCtr = _expKey.Length;
 
             // input round
-            Int32 R3 = _expKey[keyCtr--] ^ BytesToInt32(Input, InOffset);
-            Int32 R2 = _expKey[keyCtr--] ^ BytesToInt32(Input, InOffset + 4);
-            Int32 R1 = _expKey[keyCtr--] ^ BytesToInt32(Input, InOffset + 8);
-            Int32 R0 = _expKey[keyCtr--] ^ BytesToInt32(Input, InOffset + 12);
+            uint R3 = _expKey[--keyCtr] ^ IntUtils.BytesToBe32(Input, InOffset);
+            uint R2 = _expKey[--keyCtr] ^ IntUtils.BytesToBe32(Input, InOffset + 4);
+            uint R1 = _expKey[--keyCtr] ^ IntUtils.BytesToBe32(Input, InOffset + 8);
+            uint R0 = _expKey[--keyCtr] ^ IntUtils.BytesToBe32(Input, InOffset + 12);
 
             // process 8 round blocks
-            while (keyCtr > 4)
+            do
             {
                 Ib7(ref R0, ref R1, ref R2, ref R3);
-                R3 ^= _expKey[keyCtr--];
-                R2 ^= _expKey[keyCtr--];
-                R1 ^= _expKey[keyCtr--];
-                R0 ^= _expKey[keyCtr--];
+                R3 ^= _expKey[--keyCtr];
+                R2 ^= _expKey[--keyCtr];
+                R1 ^= _expKey[--keyCtr];
+                R0 ^= _expKey[--keyCtr];
                 InverseTransform(ref R0, ref R1, ref R2, ref R3);
 
                 Ib6(ref R0, ref R1, ref R2, ref R3);
-                R3 ^= _expKey[keyCtr--];
-                R2 ^= _expKey[keyCtr--];
-                R1 ^= _expKey[keyCtr--];
-                R0 ^= _expKey[keyCtr--];
+                R3 ^= _expKey[--keyCtr];
+                R2 ^= _expKey[--keyCtr];
+                R1 ^= _expKey[--keyCtr];
+                R0 ^= _expKey[--keyCtr];
                 InverseTransform(ref R0, ref R1, ref R2, ref R3);
 
                 Ib5(ref R0, ref R1, ref R2, ref R3);
-                R3 ^= _expKey[keyCtr--];
-                R2 ^= _expKey[keyCtr--];
-                R1 ^= _expKey[keyCtr--];
-                R0 ^= _expKey[keyCtr--];
+                R3 ^= _expKey[--keyCtr];
+                R2 ^= _expKey[--keyCtr];
+                R1 ^= _expKey[--keyCtr];
+                R0 ^= _expKey[--keyCtr];
                 InverseTransform(ref R0, ref R1, ref R2, ref R3);
 
                 Ib4(ref R0, ref R1, ref R2, ref R3);
-                R3 ^= _expKey[keyCtr--];
-                R2 ^= _expKey[keyCtr--];
-                R1 ^= _expKey[keyCtr--];
-                R0 ^= _expKey[keyCtr--];
+                R3 ^= _expKey[--keyCtr];
+                R2 ^= _expKey[--keyCtr];
+                R1 ^= _expKey[--keyCtr];
+                R0 ^= _expKey[--keyCtr];
                 InverseTransform(ref R0, ref R1, ref R2, ref R3);
 
                 Ib3(ref R0, ref R1, ref R2, ref R3);
-                R3 ^= _expKey[keyCtr--];
-                R2 ^= _expKey[keyCtr--];
-                R1 ^= _expKey[keyCtr--];
-                R0 ^= _expKey[keyCtr--];
+                R3 ^= _expKey[--keyCtr];
+                R2 ^= _expKey[--keyCtr];
+                R1 ^= _expKey[--keyCtr];
+                R0 ^= _expKey[--keyCtr];
                 InverseTransform(ref R0, ref R1, ref R2, ref R3);
 
                 Ib2(ref R0, ref R1, ref R2, ref R3);
-                R3 ^= _expKey[keyCtr--];
-                R2 ^= _expKey[keyCtr--];
-                R1 ^= _expKey[keyCtr--];
-                R0 ^= _expKey[keyCtr--];
+                R3 ^= _expKey[--keyCtr];
+                R2 ^= _expKey[--keyCtr];
+                R1 ^= _expKey[--keyCtr];
+                R0 ^= _expKey[--keyCtr];
                 InverseTransform(ref R0, ref R1, ref R2, ref R3);
 
                 Ib1(ref R0, ref R1, ref R2, ref R3);
-                R3 ^= _expKey[keyCtr--];
-                R2 ^= _expKey[keyCtr--];
-                R1 ^= _expKey[keyCtr--];
-                R0 ^= _expKey[keyCtr--];
+                R3 ^= _expKey[--keyCtr];
+                R2 ^= _expKey[--keyCtr];
+                R1 ^= _expKey[--keyCtr];
+                R0 ^= _expKey[--keyCtr];
                 InverseTransform(ref R0, ref R1, ref R2, ref R3);
 
                 Ib0(ref R0, ref R1, ref R2, ref R3);
 
                 // skip on last block
-                if (keyCtr > 4)
+                if (keyCtr != LRD)
                 {
-                    R3 ^= _expKey[keyCtr--];
-                    R2 ^= _expKey[keyCtr--];
-                    R1 ^= _expKey[keyCtr--];
-                    R0 ^= _expKey[keyCtr--];
+                    R3 ^= _expKey[--keyCtr];
+                    R2 ^= _expKey[--keyCtr];
+                    R1 ^= _expKey[--keyCtr];
+                    R0 ^= _expKey[--keyCtr];
                     InverseTransform(ref R0, ref R1, ref R2, ref R3);
                 }
             }
+            while (keyCtr != LRD);
 
             // last round
-            Int32ToBytes(R3 ^ _expKey[keyCtr--], Output, OutOffset);
-            Int32ToBytes(R2 ^ _expKey[keyCtr--], Output, OutOffset + 4);
-            Int32ToBytes(R1 ^ _expKey[keyCtr--], Output, OutOffset + 8);
-            Int32ToBytes(R0 ^ _expKey[keyCtr], Output, OutOffset + 12);
+            IntUtils.Be32ToBytes(R3 ^ _expKey[--keyCtr], Output, OutOffset);
+            IntUtils.Be32ToBytes(R2 ^ _expKey[--keyCtr], Output, OutOffset + 4);
+            IntUtils.Be32ToBytes(R1 ^ _expKey[--keyCtr], Output, OutOffset + 8);
+            IntUtils.Be32ToBytes(R0 ^ _expKey[--keyCtr], Output, OutOffset + 12);
         }
 
-        private void Encrypt16(byte[] Input, Int32 InOffset, byte[] Output, Int32 OutOffset)
+        private void Encrypt16(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
-            int keyCtr = 0;
+            int LRD = _expKey.Length - 5;
+            int keyCtr = -1;
 
             // input round
-            Int32 R0 = BytesToInt32(Input, InOffset + 12);
-            Int32 R1 = BytesToInt32(Input, InOffset + 8);
-            Int32 R2 = BytesToInt32(Input, InOffset + 4);
-            Int32 R3 = BytesToInt32(Input, InOffset);
+            uint R0 = IntUtils.BytesToBe32(Input, InOffset + 12);
+            uint R1 = IntUtils.BytesToBe32(Input, InOffset + 8);
+            uint R2 = IntUtils.BytesToBe32(Input, InOffset + 4);
+            uint R3 = IntUtils.BytesToBe32(Input, InOffset);
 
             // process 8 round blocks
-            while (keyCtr < _expKey.Length - 4)
+            do
             {
-                R0 ^= _expKey[keyCtr++];
-                R1 ^= _expKey[keyCtr++];
-                R2 ^= _expKey[keyCtr++];
-                R3 ^= _expKey[keyCtr++];
+                R0 ^= _expKey[++keyCtr];
+                R1 ^= _expKey[++keyCtr];
+                R2 ^= _expKey[++keyCtr];
+                R3 ^= _expKey[++keyCtr];
                 Sb0(ref R0, ref R1, ref R2, ref R3);
                 LinearTransform(ref R0, ref R1, ref R2, ref R3);
 
-                R0 ^= _expKey[keyCtr++];
-                R1 ^= _expKey[keyCtr++];
-                R2 ^= _expKey[keyCtr++];
-                R3 ^= _expKey[keyCtr++];
+                R0 ^= _expKey[++keyCtr];
+                R1 ^= _expKey[++keyCtr];
+                R2 ^= _expKey[++keyCtr];
+                R3 ^= _expKey[++keyCtr];
                 Sb1(ref R0, ref R1, ref R2, ref R3);
                 LinearTransform(ref R0, ref R1, ref R2, ref R3);
 
-                R0 ^= _expKey[keyCtr++];
-                R1 ^= _expKey[keyCtr++];
-                R2 ^= _expKey[keyCtr++];
-                R3 ^= _expKey[keyCtr++];
+                R0 ^= _expKey[++keyCtr];
+                R1 ^= _expKey[++keyCtr];
+                R2 ^= _expKey[++keyCtr];
+                R3 ^= _expKey[++keyCtr];
                 Sb2(ref R0, ref R1, ref R2, ref R3);
                 LinearTransform(ref R0, ref R1, ref R2, ref R3); ;
 
-                R0 ^= _expKey[keyCtr++];
-                R1 ^= _expKey[keyCtr++];
-                R2 ^= _expKey[keyCtr++];
-                R3 ^= _expKey[keyCtr++];
+                R0 ^= _expKey[++keyCtr];
+                R1 ^= _expKey[++keyCtr];
+                R2 ^= _expKey[++keyCtr];
+                R3 ^= _expKey[++keyCtr];
                 Sb3(ref R0, ref R1, ref R2, ref R3);
                 LinearTransform(ref R0, ref R1, ref R2, ref R3);
 
-                R0 ^= _expKey[keyCtr++];
-                R1 ^= _expKey[keyCtr++];
-                R2 ^= _expKey[keyCtr++];
-                R3 ^= _expKey[keyCtr++];
+                R0 ^= _expKey[++keyCtr];
+                R1 ^= _expKey[++keyCtr];
+                R2 ^= _expKey[++keyCtr];
+                R3 ^= _expKey[++keyCtr];
                 Sb4(ref R0, ref R1, ref R2, ref R3);
                 LinearTransform(ref R0, ref R1, ref R2, ref R3);
 
-                R0 ^= _expKey[keyCtr++];
-                R1 ^= _expKey[keyCtr++];
-                R2 ^= _expKey[keyCtr++];
-                R3 ^= _expKey[keyCtr++];
+                R0 ^= _expKey[++keyCtr];
+                R1 ^= _expKey[++keyCtr];
+                R2 ^= _expKey[++keyCtr];
+                R3 ^= _expKey[++keyCtr];
                 Sb5(ref R0, ref R1, ref R2, ref R3);
                 LinearTransform(ref R0, ref R1, ref R2, ref R3);
 
-                R0 ^= _expKey[keyCtr++];
-                R1 ^= _expKey[keyCtr++];
-                R2 ^= _expKey[keyCtr++];
-                R3 ^= _expKey[keyCtr++];
+                R0 ^= _expKey[++keyCtr];
+                R1 ^= _expKey[++keyCtr];
+                R2 ^= _expKey[++keyCtr];
+                R3 ^= _expKey[++keyCtr];
                 Sb6(ref R0, ref R1, ref R2, ref R3);
                 LinearTransform(ref R0, ref R1, ref R2, ref R3);
 
-                R0 ^= _expKey[keyCtr++];
-                R1 ^= _expKey[keyCtr++];
-                R2 ^= _expKey[keyCtr++];
-                R3 ^= _expKey[keyCtr++];
+                R0 ^= _expKey[++keyCtr];
+                R1 ^= _expKey[++keyCtr];
+                R2 ^= _expKey[++keyCtr];
+                R3 ^= _expKey[++keyCtr];
                 Sb7(ref R0, ref R1, ref R2, ref R3);
 
                 // skip on last block
-                if (keyCtr < _expKey.Length - 4)
+                if (keyCtr != LRD)
                     LinearTransform(ref R0, ref R1, ref R2, ref R3);
             }
+            while (keyCtr != LRD);
 
             // last round
-            Int32ToBytes(_expKey[keyCtr++] ^ R0, Output, OutOffset + 12);
-            Int32ToBytes(_expKey[keyCtr++] ^ R1, Output, OutOffset + 8);
-            Int32ToBytes(_expKey[keyCtr++] ^ R2, Output, OutOffset + 4);
-            Int32ToBytes(_expKey[keyCtr] ^ R3, Output, OutOffset);
-        }
-        #endregion
-
-        #region Helpers
-        private Int32 BytesToInt32(byte[] Input, Int32 InOffset)
-        {
-            return (((byte)(Input[InOffset]) << 24) |
-                ((byte)(Input[InOffset + 1]) << 16) |
-                ((byte)(Input[InOffset + 2]) << 8) |
-                ((byte)(Input[InOffset + 3])));
-        }
-
-        private void Int32ToBytes(Int32 Dword, byte[] Output, Int32 OutOffset)
-        {
-            Output[OutOffset + 3] = (byte)(Dword);
-            Output[OutOffset + 2] = (byte)(Dword >> 8);
-            Output[OutOffset + 1] = (byte)(Dword >> 16);
-            Output[OutOffset] = (byte)(Dword >> 24);
-        }
-
-        private Int32 RotateLeft(Int32 X, Int32 Bits)
-        {
-            return ((X << Bits) | (Int32)((UInt32)X >> (32 - Bits)));
-        }
-
-        private Int32 RotateRight(Int32 X, Int32 Bits)
-        {
-            return ((Int32)((UInt32)X >> Bits) | (X << (32 - Bits)));
+            IntUtils.Be32ToBytes(_expKey[++keyCtr] ^ R0, Output, OutOffset + 12);
+            IntUtils.Be32ToBytes(_expKey[++keyCtr] ^ R1, Output, OutOffset + 8);
+            IntUtils.Be32ToBytes(_expKey[++keyCtr] ^ R2, Output, OutOffset + 4);
+            IntUtils.Be32ToBytes(_expKey[++keyCtr] ^ R3, Output, OutOffset);
         }
         #endregion
 
         #region SBox Calculations
-        private void Sb0(ref Int32 R0, ref Int32 R1, ref Int32 R2, ref Int32 R3)
+        private void Sb0(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
         {
-            Int32 t1 = R0 ^ R3;
-            Int32 t2 = R2 ^ t1;
-            Int32 t3 = R1 ^ t2;
+            UInt32 t1 = R0 ^ R3;
+            UInt32 t2 = R2 ^ t1;
+            UInt32 t3 = R1 ^ t2;
             R3 = (R0 & R3) ^ t3;
-            Int32 t4 = R0 ^ (R1 & t1);
+            UInt32 t4 = R0 ^ (R1 & t1);
             R2 = t3 ^ (R2 | t4);
             R0 = R3 & (t2 ^ t4);
             R1 = (~t2) ^ R0;
             R0 ^= (~t4);
         }
 
-        /// <remarks>
-        /// InvSO - {13, 3,11, 0,10, 6, 5,12, 1,14, 4, 7,15, 9, 8, 2 } - 15 terms.
-        /// </remarks>
-        private void Ib0(ref Int32 R0, ref Int32 R1, ref Int32 R2, ref Int32 R3)
+        private void Ib0(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
         {
-            Int32 t1 = ~R0;
-            Int32 t2 = R0 ^ R1;
-            Int32 t3 = R3 ^ (t1 | t2);
-            Int32 t4 = R2 ^ t3;
+            UInt32 t1 = ~R0;
+            UInt32 t2 = R0 ^ R1;
+            UInt32 t3 = R3 ^ (t1 | t2);
+            UInt32 t4 = R2 ^ t3;
             R2 = t2 ^ t4;
-            Int32 t5 = t1 ^ (R3 & t2);
+            UInt32 t5 = t1 ^ (R3 & t2);
             R1 = t3 ^ (R2 & t5);
             R3 = (R0 & t3) ^ (t4 | R1);
             R0 = R3 ^ (t4 ^ t5);
         }
 
-        /// <remarks>
-        /// S1 - {15,12, 2, 7, 9, 0, 5,10, 1,11,14, 8, 6,13, 3, 4 } - 14 terms
-        /// </remarks>
-        private void Sb1(ref Int32 R0, ref Int32 R1, ref Int32 R2, ref Int32 R3)
+        private void Sb1(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
         {
-            Int32 t1 = R1 ^ (~R0);
-            Int32 t2 = R2 ^ (R0 | t1);
+            UInt32 t1 = R1 ^ (~R0);
+            UInt32 t2 = R2 ^ (R0 | t1);
             R2 = R3 ^ t2;
-            Int32 t3 = R1 ^ (R3 | t1);
-            Int32 t4 = t1 ^ R2;
+            UInt32 t3 = R1 ^ (R3 | t1);
+            UInt32 t4 = t1 ^ R2;
             R3 = t4 ^ (t2 & t3);
-            Int32 t5 = t2 ^ t3;
+            UInt32 t5 = t2 ^ t3;
             R1 = R3 ^ t5;
             R0 = t2 ^ (t4 & t5);
         }
 
-        /// <remarks>
-        /// InvS1 - { 5, 8, 2,14,15, 6,12, 3,11, 4, 7, 9, 1,13,10, 0 } - 14 steps
-        /// </remarks>
-        private void Ib1(ref Int32 R0, ref Int32 R1, ref Int32 R2, ref Int32 R3)
+        private void Ib1(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
         {
-            Int32 t1 = R1 ^ R3;
-            Int32 t2 = R0 ^ (R1 & t1);
-            Int32 t3 = t1 ^ t2;
+            UInt32 t1 = R1 ^ R3;
+            UInt32 t2 = R0 ^ (R1 & t1);
+            UInt32 t3 = t1 ^ t2;
             R3 = R2 ^ t3;
-            Int32 t4 = R1 ^ (t1 & t2);
+            UInt32 t4 = R1 ^ (t1 & t2);
             R1 = t2 ^ (R3 | t4);
-            Int32 t5 = ~R1;
-            Int32 t6 = R3 ^ t4;
+            UInt32 t5 = ~R1;
+            UInt32 t6 = R3 ^ t4;
             R0 = t5 ^ t6;
             R2 = t3 ^ (t5 | t6);
         }
 
-        /// <remarks>
-        /// S2 - { 8, 6, 7, 9, 3,12,10,15,13, 1,14, 4, 0,11, 5, 2 } - 16 terms
-        /// </remarks>
-        private void Sb2(ref Int32 R0, ref Int32 R1, ref Int32 R2, ref Int32 R3)
+        private void Sb2(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
         {
-            Int32 t1 = ~R0;
-            Int32 t2 = R1 ^ R3;
-            Int32 t3 = t2 ^ (R2 & t1);
-            Int32 t4 = R2 ^ t1;
-            Int32 t5 = R1 & (R2 ^ t3);
-            Int32 t6 = t4 ^ t5;
+            UInt32 t1 = ~R0;
+            UInt32 t2 = R1 ^ R3;
+            UInt32 t3 = t2 ^ (R2 & t1);
+            UInt32 t4 = R2 ^ t1;
+            UInt32 t5 = R1 & (R2 ^ t3);
+            UInt32 t6 = t4 ^ t5;
             R2 = R0 ^ ((R3 | t5) & (t3 | t4));
             R1 = (t2 ^ t6) ^ (R2 ^ (R3 | t1));
             R0 = t3;
             R3 = t6;
         }
 
-        /// <remarks>
-        /// InvS2 - {12, 9,15, 4,11,14, 1, 2, 0, 3, 6,13, 5, 8,10, 7 } - 16 steps
-        /// </remarks>
-        private void Ib2(ref Int32 R0, ref Int32 R1, ref Int32 R2, ref Int32 R3)
+        private void Ib2(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
         {
-            Int32 t1 = R1 ^ R3;
-            Int32 t2 = R0 ^ R2;
-            Int32 t3 = R2 ^ t1;
-            Int32 t4 = R0 | ~t1;
+            UInt32 t1 = R1 ^ R3;
+            UInt32 t2 = R0 ^ R2;
+            UInt32 t3 = R2 ^ t1;
+            UInt32 t4 = R0 | ~t1;
             R0 = t2 ^ (R1 & t3);
-            Int32 t5 = t1 ^ (t2 | (R3 ^ t4));
-            Int32 t6 = ~t3;
-            Int32 t7 = R0 | t5;
+            UInt32 t5 = t1 ^ (t2 | (R3 ^ t4));
+            UInt32 t6 = ~t3;
+            UInt32 t7 = R0 | t5;
             R1 = t6 ^ t7;
             R2 = (R3 & t6) ^ (t2 ^ t7);
             R3 = t5;
         }
 
-        /// <remarks>
-        /// S3 - { 0,15,11, 8,12, 9, 6, 3,13, 1, 2, 4,10, 7, 5,14 } - 16 terms
-        /// </remarks>
-        private void Sb3(ref Int32 R0, ref Int32 R1, ref Int32 R2, ref Int32 R3)
+        private void Sb3(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
         {
-            Int32 t1 = R0 ^ R1;
-            Int32 t2 = R0 | R3;
-            Int32 t3 = R2 ^ R3;
-            Int32 t4 = (R0 & R2) | (t1 & t2);
+            UInt32 t1 = R0 ^ R1;
+            UInt32 t2 = R0 | R3;
+            UInt32 t3 = R2 ^ R3;
+            UInt32 t4 = (R0 & R2) | (t1 & t2);
             R2 = t3 ^ t4;
-            Int32 t5 = t4 ^ (R1 ^ t2);
+            UInt32 t5 = t4 ^ (R1 ^ t2);
             R0 = t1 ^ (t3 & t5);
-            Int32 t6 = R2 & R0;
+            UInt32 t6 = R2 & R0;
             R3 = (R1 | R3) ^ (t3 ^ t6);
             R1 = t5 ^ t6;
         }
 
-        /// <remarks>
-        /// InvS3 - { 0, 9,10, 7,11,14, 6,13, 3, 5,12, 2, 4, 8,15, 1 } - 15 terms
-        /// </remarks>
-        private void Ib3(ref Int32 R0, ref Int32 R1, ref Int32 R2, ref Int32 R3)
+        private void Ib3(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
         {
-            Int32 t1 = R1 ^ R2;
-            Int32 t2 = R0 ^ (R1 & t1);
-            Int32 t3 = R3 | t2;
-            Int32 t4 = R3 ^ (t1 | t3);
+            UInt32 t1 = R1 ^ R2;
+            UInt32 t2 = R0 ^ (R1 & t1);
+            UInt32 t3 = R3 | t2;
+            UInt32 t4 = R3 ^ (t1 | t3);
             R2 = (R2 ^ t2) ^ t4;
-            Int32 t5 = (R0 | R1) ^ t4;
+            UInt32 t5 = (R0 | R1) ^ t4;
             R0 = t1 ^ t3;
             R3 = t2 ^ (R0 & t5);
             R1 = R3 ^ (R0 ^ t5);
         }
 
-        /// <remarks>
-        /// S4 - { 1,15, 8, 3,12, 0,11, 6, 2, 5, 4,10, 9,14, 7,13 } - 15 terms
-        /// </remarks>
-        private void Sb4(ref Int32 R0, ref Int32 R1, ref Int32 R2, ref Int32 R3)
+        private void Sb4(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
         {
-            Int32 t1 = R0 ^ R3;
-            Int32 t2 = R2 ^ (R3 & t1);
-            Int32 t3 = R1 | t2;
+            UInt32 t1 = R0 ^ R3;
+            UInt32 t2 = R2 ^ (R3 & t1);
+            UInt32 t3 = R1 | t2;
             R3 = t1 ^ t3;
-            Int32 t4 = ~R1;
-            Int32 t5 = t2 ^ (t1 | t4);
-            Int32 t6 = t1 ^ t4;
-            Int32 t7 = (R0 & t5) ^ (t3 & t6);
+            UInt32 t4 = ~R1;
+            UInt32 t5 = t2 ^ (t1 | t4);
+            UInt32 t6 = t1 ^ t4;
+            UInt32 t7 = (R0 & t5) ^ (t3 & t6);
             R1 = (R0 ^ t2) ^ (t6 & t7);
             R0 = t5;
             R2 = t7;
         }
 
-        /// <remarks>
-        /// InvS4 - { 5, 0, 8, 3,10, 9, 7,14, 2,12,11, 6, 4,15,13, 1 } - 15 terms
-        /// </remarks>
-        private void Ib4(ref Int32 R0, ref Int32 R1, ref Int32 R2, ref Int32 R3)
+        private void Ib4(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
         {
-            Int32 t1 = R1 ^ (R0 & (R2 | R3));
-            Int32 t2 = R2 ^ (R0 & t1);
-            Int32 t3 = R3 ^ t2;
-            Int32 t4 = ~R0;
-            Int32 t5 = t1 ^ (t2 & t3);
-            Int32 t6 = R3 ^ (t3 | t4);
+            UInt32 t1 = R1 ^ (R0 & (R2 | R3));
+            UInt32 t2 = R2 ^ (R0 & t1);
+            UInt32 t3 = R3 ^ t2;
+            UInt32 t4 = ~R0;
+            UInt32 t5 = t1 ^ (t2 & t3);
+            UInt32 t6 = R3 ^ (t3 | t4);
             R1 = t3;
             R0 = t5 ^ t6;
             R2 = (t1 & t6) ^ (t3 ^ t4);
             R3 = t5;
         }
 
-        /// <remarks>
-        /// S5 - {15, 5, 2,11, 4,10, 9,12, 0, 3,14, 8,13, 6, 7, 1 } - 16 terms
-        /// </remarks>
-        private void Sb5(ref Int32 R0, ref Int32 R1, ref Int32 R2, ref Int32 R3)
+        private void Sb5(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
         {
-            Int32 t1 = ~R0;
-            Int32 t2 = R0 ^ R1;
-            Int32 t3 = R0 ^ R3;
-            Int32 t4 = (R2 ^ t1) ^ (t2 | t3);
-            Int32 t5 = R3 & t4;
-            Int32 t6 = t5 ^ (t2 ^ t4);
-            Int32 t7 = t3 ^ (t1 | t4);
+            UInt32 t1 = ~R0;
+            UInt32 t2 = R0 ^ R1;
+            UInt32 t3 = R0 ^ R3;
+            UInt32 t4 = (R2 ^ t1) ^ (t2 | t3);
+            UInt32 t5 = R3 & t4;
+            UInt32 t6 = t5 ^ (t2 ^ t4);
+            UInt32 t7 = t3 ^ (t1 | t4);
             R2 = (t2 | t5) ^ t7;
             R3 = (R1 ^ t5) ^ (t6 & t7);
             R0 = t4;
             R1 = t6;
         }
 
-        /// <remarks>
-        /// InvS5 - { 8,15, 2, 9, 4, 1,13,14,11, 6, 5, 3, 7,12,10, 0 } - 16 terms
-        /// </remarks>
-        private void Ib5(ref Int32 R0, ref Int32 R1, ref Int32 R2, ref Int32 R3)
+        private void Ib5(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
         {
-            Int32 t1 = ~R2;
-            Int32 t2 = R3 ^ (R1 & t1);
-            Int32 t3 = R0 & t2;
-            Int32 t4 = t3 ^ (R1 ^ t1);
-            Int32 t5 = R1 | t4;
-            Int32 t6 = t2 ^ (R0 & t5);
-            Int32 t7 = R0 | R3;
+            UInt32 t1 = ~R2;
+            UInt32 t2 = R3 ^ (R1 & t1);
+            UInt32 t3 = R0 & t2;
+            UInt32 t4 = t3 ^ (R1 ^ t1);
+            UInt32 t5 = R1 | t4;
+            UInt32 t6 = t2 ^ (R0 & t5);
+            UInt32 t7 = R0 | R3;
             R2 = (R1 & t7) ^ (t3 | (R0 ^ R2));
             R0 = t7 ^ (t1 ^ t5);
             R1 = t6;
             R3 = t4;
         }
 
-        /// <remarks>
-        /// S6 - { 7, 2,12, 5, 8, 4, 6,11,14, 9, 1,15,13, 3,10, 0 } - 15 terms
-        /// </remarks>
-        private void Sb6(ref Int32 R0, ref Int32 R1, ref Int32 R2, ref Int32 R3)
+        private void Sb6(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
         {
-            Int32 t1 = R0 ^ R3;
-            Int32 t2 = R1 ^ t1;
-            Int32 t3 = R2 ^ (~R0 | t1);
+            UInt32 t1 = R0 ^ R3;
+            UInt32 t2 = R1 ^ t1;
+            UInt32 t3 = R2 ^ (~R0 | t1);
             R1 ^= t3;
-            Int32 t4 = t1 | R1;
-            Int32 t5 = R3 ^ (t1 | R1);
+            UInt32 t4 = t1 | R1;
+            UInt32 t5 = R3 ^ (t1 | R1);
             R2 = t2 ^ (t3 & t5);
-            Int32 t6 = t3 ^ t5;
+            UInt32 t6 = t3 ^ t5;
             R0 = R2 ^ t6;
             R3 = (~t3) ^ (t2 & t6);
         }
 
-        /// <remarks>
-        /// InvS6 - {15,10, 1,13, 5, 3, 6, 0, 4, 9,14, 7, 2,12, 8,11 } - 15 terms
-        /// </remarks>
-        private void Ib6(ref Int32 R0, ref Int32 R1, ref Int32 R2, ref Int32 R3)
+        private void Ib6(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
         {
-            Int32 t1 = ~R0;
-            Int32 t2 = R0 ^ R1;
-            Int32 t3 = R2 ^ t2;
-            Int32 t4 = R3 ^ (R2 | t1);
-            Int32 t5 = t3 ^ t4;
-            Int32 t6 = t2 ^ (t3 & t4);
-            Int32 t7 = t4 ^ (R1 | t6);
-            Int32 t8 = R1 | t7;
+            UInt32 t1 = ~R0;
+            UInt32 t2 = R0 ^ R1;
+            UInt32 t3 = R2 ^ t2;
+            UInt32 t4 = R3 ^ (R2 | t1);
+            UInt32 t5 = t3 ^ t4;
+            UInt32 t6 = t2 ^ (t3 & t4);
+            UInt32 t7 = t4 ^ (R1 | t6);
+            UInt32 t8 = R1 | t7;
             R0 = t6 ^ t8;
             R2 = (R3 & t1) ^ (t3 ^ t8);
             R1 = t5;
             R3 = t7;
         }
 
-        /// <remarks>
-        /// S7 - { 1,13,15, 0,14, 8, 2,11, 7, 4,12,10, 9, 3, 5, 6 } - 16 terms
-        /// </remarks>
-        private void Sb7(ref Int32 R0, ref Int32 R1, ref Int32 R2, ref Int32 R3)
+        private void Sb7(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
         {
-            Int32 t1 = R1 ^ R2;
-            Int32 t2 = R3 ^ (R2 & t1);
-            Int32 t3 = R0 ^ t2;
+            UInt32 t1 = R1 ^ R2;
+            UInt32 t2 = R3 ^ (R2 & t1);
+            UInt32 t3 = R0 ^ t2;
             R1 ^= (t3 & (R3 | t1));
-            Int32 t4 = t1 ^ (R0 & t3);
-            Int32 t5 = t3 ^ (t2 | R1);
+            UInt32 t4 = t1 ^ (R0 & t3);
+            UInt32 t5 = t3 ^ (t2 | R1);
             R2 = t2 ^ (t4 & t5);
             R0 = (~t5) ^ (t4 & R2);
             R3 = t4;
         }
 
-        /// <remarks>
-        /// InvS7 - { 3, 0, 6,13, 9,14,15, 8, 5,12,11, 7,10, 1, 4, 2 } - 17 terms
-        /// </remarks>
-        private void Ib7(ref Int32 R0, ref Int32 R1, ref Int32 R2, ref Int32 R3)
+        private void Ib7(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
         {
-            Int32 t1 = R2 | (R0 & R1);
-            Int32 t2 = R3 & (R0 | R1);
-            Int32 t3 = t1 ^ t2;
-            Int32 t4 = R1 ^ t2;
+            UInt32 t1 = R2 | (R0 & R1);
+            UInt32 t2 = R3 & (R0 | R1);
+            UInt32 t3 = t1 ^ t2;
+            UInt32 t4 = R1 ^ t2;
             R1 = R0 ^ (t4 | (t3 ^ ~R3));
-            Int32 t8 = (R2 ^ t4) ^ (R3 | R1);
+            UInt32 t8 = (R2 ^ t4) ^ (R3 | R1);
             R2 = (t1 ^ R1) ^ (t8 ^ (R0 & t3));
             R0 = t8;
             R3 = t3;
@@ -950,33 +970,91 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// <remarks>
         /// Apply the linear transformation to the register set
         /// </remarks>
-        private void LinearTransform(ref Int32 R0, ref Int32 R1, ref Int32 R2, ref Int32 R3)
+        private void LinearTransform(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
         {
-            Int32 x0 = RotateLeft(R0, 13);
-            Int32 x2 = RotateLeft(R2, 3);
-            Int32 x1 = R1 ^ x0 ^ x2;
-            Int32 x3 = R3 ^ x2 ^ x0 << 3;
+            UInt32 x0 = IntUtils.RotateLeft(R0, 13);
+            UInt32 x2 = IntUtils.RotateLeft(R2, 3);
+            UInt32 x1 = R1 ^ x0 ^ x2;
+            UInt32 x3 = R3 ^ x2 ^ x0 << 3;
 
-            R1 = RotateLeft(x1, 1);
-            R3 = RotateLeft(x3, 7);
-            R0 = RotateLeft(x0 ^ R1 ^ R3, 5);
-            R2 = RotateLeft(x2 ^ R3 ^ (R1 << 7), 22);
+            R1 = IntUtils.RotateLeft(x1, 1);
+            R3 = IntUtils.RotateLeft(x3, 7);
+            R0 = IntUtils.RotateLeft(x0 ^ R1 ^ R3, 5);
+            R2 = IntUtils.RotateLeft(x2 ^ R3 ^ (R1 << 7), 22);
         }
 
         /// <remarks>
         /// Apply the inverse of the linear transformation to the register set
         /// </remarks>
-        private void InverseTransform(ref Int32 R0, ref Int32 R1, ref Int32 R2, ref Int32 R3)
+        private void InverseTransform(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
         {
-            Int32 x2 = RotateRight(R2, 22) ^ R3 ^ (R1 << 7);
-            Int32 x0 = RotateRight(R0, 5) ^ R1 ^ R3;
-            Int32 x3 = RotateRight(R3, 7);
-            Int32 x1 = RotateRight(R1, 1);
+            UInt32 x2 = IntUtils.RotateRight(R2, 22) ^ R3 ^ (R1 << 7);
+            UInt32 x0 = IntUtils.RotateRight(R0, 5) ^ R1 ^ R3;
+            UInt32 x3 = IntUtils.RotateRight(R3, 7);
+            UInt32 x1 = IntUtils.RotateRight(R1, 1);
 
             R3 = x3 ^ x2 ^ x0 << 3;
             R1 = x1 ^ x0 ^ x2;
-            R2 = RotateRight(x2, 3);
-            R0 = RotateRight(x0, 13);
+            R2 = IntUtils.RotateRight(x2, 3);
+            R0 = IntUtils.RotateRight(x0, 13);
+        }
+        #endregion
+
+        #region Helpers
+        private int GetIkmSize(Digests Engine)
+        {
+            switch (Engine)
+            {
+                case Digests.Blake256:
+                case Digests.Keccak256:
+                case Digests.SHA256:
+                case Digests.Skein256:
+                    return 32;
+                case Digests.Blake512:
+                case Digests.Keccak512:
+                case Digests.SHA512:
+                case Digests.Skein512:
+                    return 64;
+                case Digests.Skein1024:
+                    return 128;
+                default:
+                    throw new CryptoSymmetricException("RHX:GetDigestSize", "The digest type is not supported!", new ArgumentException());
+            }
+        }
+
+        private IDigest GetKdfEngine(Digests KeyEngine)
+        {
+            try
+            {
+                return DigestFromName.GetInstance(KeyEngine);
+            }
+            catch
+            {
+                throw new CryptoSymmetricException("RHX:GetKeyEngine", "The digest type is not supported!", new ArgumentException());
+            }
+        }
+
+        private int GetSaltSize(Digests Engine)
+        {
+            switch (Engine)
+            {
+                case Digests.Blake256:
+                case Digests.Skein256:
+                    return 32;
+                case Digests.Blake512:
+                case Digests.SHA256:
+                case Digests.Skein512:
+                    return 64;
+                case Digests.SHA512:
+                case Digests.Skein1024:
+                    return 128;
+                case Digests.Keccak256:
+                    return 136;
+                case Digests.Keccak512:
+                    return 72;
+                default:
+                    throw new CryptoSymmetricException("RHX:GetBlockSize", "The digest type is not supported!", new ArgumentException());
+            }
         }
         #endregion
 

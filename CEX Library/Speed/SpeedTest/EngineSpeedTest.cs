@@ -13,8 +13,8 @@ namespace Speed.SpeedTest
     {
         #region Constants
         private const int MB1 = 1000000;
-        private const int MB10 = 10000000;
-        private const int MB100 = 100000000;
+        private const int MB10 = MB1 * 10;
+        private const int MB100 = MB1 * 100;
         #endregion
 
         #region Enums
@@ -65,7 +65,7 @@ namespace Speed.SpeedTest
                 _streamCipher = GetStreamEngine();
                 _streamCipher.Initialize(_keyParam);
 
-                if (_isParallel && _engineType == SymmetricEngines.Fusion || _engineType == SymmetricEngines.Salsa)
+                if (_isParallel && _engineType == SymmetricEngines.ChaCha || _engineType == SymmetricEngines.Salsa)
                 {
                     if (_dataSize > MB100)
                         _blockSize = MB100;
@@ -75,6 +75,10 @@ namespace Speed.SpeedTest
                         _blockSize = MB1;
                     else
                         _blockSize = 1024;
+
+                    // align block
+                    if (_isParallel)
+                        _blockSize -= (_blockSize % (64 * Environment.ProcessorCount));
                 }
                 else
                 {
@@ -114,6 +118,9 @@ namespace Speed.SpeedTest
                         ((CBC)_cipherEngine).ParallelBlockSize = _blockSize;
                     else if (_cipherEngine.GetType().Equals(typeof(CFB)))
                         ((CFB)_cipherEngine).ParallelBlockSize = _blockSize;
+                    // align block
+                    if (_isParallel)
+                        _blockSize -= (_blockSize % (16 * Environment.ProcessorCount));
                 }
                 else
                 {
@@ -312,22 +319,12 @@ namespace Speed.SpeedTest
 
         private IBlockCipher GetBlockEngine()
         {
-            if (_engineType == SymmetricEngines.RDX)
-                return new RDX();
-            else if (_engineType == SymmetricEngines.RHX)
-                return new RHX(_roundCount);
-            else if (_engineType == SymmetricEngines.RSM)
-                return new RSM(_roundCount);
+            if (_engineType == SymmetricEngines.RHX)
+                return new RHX(16, _roundCount);
             else if (_engineType == SymmetricEngines.SHX)
                 return new SHX(_roundCount);
-            else if (_engineType == SymmetricEngines.SPX)
-                return new SPX(_roundCount);
-            else if (_engineType == SymmetricEngines.TFX)
-                return new TFX(_roundCount);
             else if (_engineType == SymmetricEngines.THX)
                 return new THX(_roundCount);
-            else if (_engineType == SymmetricEngines.TSM)
-                return new TSM(_roundCount);
             else
                 return null;
         }
@@ -348,8 +345,6 @@ namespace Speed.SpeedTest
         {
             if (_engineType == SymmetricEngines.ChaCha)
                 return new ChaCha();
-            else if (_engineType == SymmetricEngines.Fusion)
-                return new Fusion();
             else if (_engineType == SymmetricEngines.Salsa)
                 return new Salsa20();
             else
@@ -362,22 +357,14 @@ namespace Speed.SpeedTest
                 return new KeyGenerator().GetKeyParams(_keySize, 8);
             else if (_engineType == SymmetricEngines.Salsa)
                 return new KeyGenerator().GetKeyParams(_keySize, 8);
-            else if (_engineType == SymmetricEngines.Fusion)
-                return new KeyGenerator().GetKeyParams(_keySize, 16);
 
             if (_keySize != 0)
                 return new KeyGenerator().GetKeyParams(_keySize, 16);
-            else if (_engineType == SymmetricEngines.RDX)
-                return new KeyGenerator().GetKeyParams(_keySize, 16);
             else if (_engineType == SymmetricEngines.RHX)
-                return new KeyGenerator().GetKeyParams(_keySize, 16);
-            else if (_engineType == SymmetricEngines.RSM)
                 return new KeyGenerator().GetKeyParams(_keySize, 16);
             else if (_engineType == SymmetricEngines.SHX)
                 return new KeyGenerator().GetKeyParams(_keySize, 16);
-            else if (_engineType == SymmetricEngines.SPX)
-                return new KeyGenerator().GetKeyParams(_keySize, 16);
-            else if (_engineType == SymmetricEngines.TFX)
+            else if (_engineType == SymmetricEngines.THX)
                 return new KeyGenerator().GetKeyParams(_keySize, 16);
             else
                 return null;
@@ -386,8 +373,7 @@ namespace Speed.SpeedTest
         private bool IsStreamCipher()
         {
             return _engineType == SymmetricEngines.ChaCha ||
-                _engineType == SymmetricEngines.Salsa ||
-                _engineType == SymmetricEngines.Fusion;
+                _engineType == SymmetricEngines.Salsa;
         }
         #endregion
     }

@@ -38,7 +38,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         /// </summary>
         public string GetCTRVector()
         {
-            CTRDrbg ctd = new CTRDrbg(new RDX());
+            CTRDrbg ctd = new CTRDrbg(new RHX());
             int ksze = 48;
             byte[] key = new byte[ksze];
             byte[] output = new byte[1024];

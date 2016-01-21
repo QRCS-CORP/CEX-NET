@@ -1,13 +1,14 @@
 ﻿#region Directives
 using System;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.CryptoException;
 #endregion
 
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -111,6 +112,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         }
 
         /// <summary>
+        /// Get: The cipher modes type name
+        /// </summary>
+        public CipherModes Enumeral
+        {
+            get { return CipherModes.OFB; }
+        }
+
+        /// <summary>
         /// Get: Initialized for encryption, false for decryption
         /// </summary>
         public bool IsEncryption
@@ -137,11 +146,47 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         }
 
         /// <summary>
+        /// Get/Set: Automatic processor parallelization
+        /// </summary>
+        public bool IsParallel
+        {
+            get { return false; }
+            set { }
+        }
+
+        /// <summary>
         /// Get: Cipher name
         /// </summary>
         public string Name
         {
             get { return ALG_NAME; }
+        }
+
+        /// <summary>
+        /// Get/Set: Parallel block size. Must be a multiple of <see cref="ParallelMinimumSize"/>.
+        /// </summary>
+        /// 
+        /// <exception cref="CryptoSymmetricException">Thrown if a parallel block size is not evenly divisible by ParallelMinimumSize, or  block size is less than ParallelMinimumSize or more than ParallelMaximumSize values</exception>
+        public int ParallelBlockSize
+        {
+            get { return 0; }
+            set { }
+        }
+
+        /// <summary>
+        /// Get: Maximum input size with parallel processing
+        /// </summary>
+        public int ParallelMaximumSize
+        {
+            get { return 0; }
+        }
+
+        /// <summary>
+        /// Get: The smallest parallel block size. Parallel blocks must be a multiple of this size.
+        /// </summary>
+        public int ParallelMinimumSize
+        {
+            get { return 0; }
         }
         #endregion
 

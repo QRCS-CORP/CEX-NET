@@ -1,14 +1,16 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Crypto.Common;
-using VTDev.Libraries.CEXEngine.CryptoException;
 using System.Threading.Tasks;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
+using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -119,6 +121,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         {
             get { return _blockCipher; }
             private set { _blockCipher = value; }
+        }
+
+        /// <summary>
+        /// Get: The cipher modes type name
+        /// </summary>
+        public CipherModes Enumeral
+        {
+            get { return CipherModes.CBC; }
         }
 
         /// <summary>
@@ -319,9 +329,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
             // decrypt input
             _blockCipher.DecryptBlock(Input, Output);
             // xor output and iv
-            for (int i = 0; i < _cbcIv.Length; i++)
-                Output[i] ^= _cbcIv[i];
-
+            IntUtils.XORBLK(_cbcIv, 0, Output, 0, _cbcIv.Length);
             // copy forward iv
             Buffer.BlockCopy(_cbcNextIv, 0, _cbcIv, 0, _cbcIv.Length);
         }
@@ -342,9 +350,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
             // decrypt input
             _blockCipher.DecryptBlock(Input, InOffset, Output, OutOffset);
             // xor output and iv
-            for (int i = 0; i < _cbcIv.Length; i++)
-                Output[OutOffset + i] ^= _cbcIv[i];
-
+            IntUtils.XORBLK(_cbcIv, 0, Output, OutOffset, _cbcIv.Length);
             // copy forward iv
             Buffer.BlockCopy(_cbcNextIv, 0, _cbcIv, 0, _cbcIv.Length);
         }
@@ -359,9 +365,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         public void EncryptBlock(byte[] Input, byte[] Output)
         {
             // xor iv and input
-            for (int i = 0; i < _cbcIv.Length; i++)
-                _cbcIv[i] ^= Input[i];
-
+            IntUtils.XORBLK(Input, 0, _cbcIv, 0, _cbcIv.Length);
             // encrypt iv
             _blockCipher.EncryptBlock(_cbcIv, Output);
             // copy output to iv
@@ -380,9 +384,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         public void EncryptBlock(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
             // xor iv and input
-            for (int i = 0; i < _cbcIv.Length; i++)
-                _cbcIv[i] ^= Input[InOffset + i];
-
+            IntUtils.XORBLK(Input, InOffset, _cbcIv, 0, _cbcIv.Length);
             // encrypt iv
             _blockCipher.EncryptBlock(_cbcIv, 0, Output, OutOffset);
             // copy output to iv
@@ -523,9 +525,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
             // decrypt input
             _blockCipher.DecryptBlock(Input, InOffset, Output, OutOffset);
             // xor output and iv
-            for (int i = 0; i < Vector.Length; i++)
-                Output[OutOffset + i] ^= Vector[i];
-
+            IntUtils.XORBLK(Vector, 0, Output, OutOffset, Vector.Length);
             // copy forward iv
             Buffer.BlockCopy(nextIv, 0, Vector, 0, _blockSize);
         }

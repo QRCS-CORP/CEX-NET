@@ -1,6 +1,7 @@
 ﻿#region Directives
 using System;
 using System.Security.Cryptography;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
@@ -15,6 +16,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Get: The padding modes type name
+        /// </summary>
+        public PaddingModes Enumeral
+        {
+            get { return PaddingModes.X923; }
+        }
+
         /// <summary>
         /// Get: Padding name
         /// </summary>
@@ -36,15 +45,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         public int AddPadding(byte[] Input, int Offset)
         {
             byte code = (byte)(Input.Length - Offset);
-            int plen = (Input.Length - Offset) - 1;
+            int len = (Input.Length - Offset) - 1;
 
-            if (plen > 0)
+            if (len > 0)
             {
-                byte[] data = new byte[plen];
+                byte[] data = new byte[len];
                 using (RNGCryptoServiceProvider random = new RNGCryptoServiceProvider())
                     random.GetBytes(data);
 
-                Buffer.BlockCopy(data, 0, Input, Offset, plen);
+                Buffer.BlockCopy(data, 0, Input, Offset, len);
             }
 
             Input[Input.Length - 1] = code;
@@ -61,7 +70,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         /// <returns>Length of padding</returns>
         public int GetPaddingLength(byte[] Input)
         {
-            return Input[Input.Length - 1] & 0xff;
+            int code = Input[Input.Length - 1] & 0xff;
+
+            if (code > Input.Length - 1)
+                code = 0;
+
+                return code;
         }
 
         /// <summary>
@@ -74,7 +88,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
         /// <returns>Length of padding</returns>
         public int GetPaddingLength(byte[] Input, int Offset)
         {
-            return Input[Input.Length - 1] & 0xff;
+            int code = Input[Input.Length - 1] & 0xff;
+
+            if (code > Input.Length - 1)
+                code = 0;
+
+            return code;
         }
         #endregion
     }

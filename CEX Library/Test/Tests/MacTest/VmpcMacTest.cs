@@ -15,9 +15,9 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
     public class VmpcMacTest : ITest
     {
         #region Constants
-        private const string DESCRIPTION = "VMPCMAC Known Answer Vector test.";
+        private const string DESCRIPTION = "VMAC Known Answer Vector test.";
         private const string FAILURE = "FAILURE! ";
-        private const string SUCCESS = "SUCCESS! All VMPCMAC tests have executed succesfully.";
+        private const string SUCCESS = "SUCCESS! All VMAC tests have executed succesfully.";
         #endregion
 
         #region Events
@@ -46,12 +46,12 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
         /// <summary>Vector test used by Bouncy Castle</summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
                 MacTest();
-                OnProgress(new TestEventArgs("Passed VMPCMAC vector tests.."));
+                OnProgress(new TestEventArgs("Passed VMAC vector tests.."));
                 return SUCCESS;
             }
             catch (Exception Ex)
@@ -71,7 +71,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
             for (int i = 0; i < 256; i++)
                 data[i] = (byte) i;
 
-            using (VMPCMAC mac = new VMPCMAC())
+            using (VMAC mac = new VMAC())
             {
                 mac.Initialize(_key, _iv);
                 mac.BlockUpdate(data, 0, data.Length);
@@ -79,7 +79,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
             }
 
             if (!Evaluate.AreEqual(_expected, hash))
-                throw new Exception("VMPCMAC is not equal! Expected: " + HexConverter.ToString(_expected) + " Received: " + HexConverter.ToString(hash));
+                throw new Exception("VMAC is not equal! Expected: " + HexConverter.ToString(_expected) + " Received: " + HexConverter.ToString(hash));
         }
         #endregion
     }

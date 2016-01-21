@@ -51,7 +51,7 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
         /// </summary>
         /// 
         /// <returns>Status</returns>
-        public string Test()
+        public string Run()
         {
             try
             {

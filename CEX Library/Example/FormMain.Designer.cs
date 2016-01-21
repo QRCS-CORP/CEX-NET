@@ -48,6 +48,31 @@
             this.pnlEncrypt = new System.Windows.Forms.Panel();
             this.btnInfo = new System.Windows.Forms.Button();
             this.label13 = new System.Windows.Forms.Label();
+            this.pnlKey = new System.Windows.Forms.Panel();
+            this.label19 = new System.Windows.Forms.Label();
+            this.btnPolicies = new System.Windows.Forms.Button();
+            this.label14 = new System.Windows.Forms.Label();
+            this.txtSubKeyCount = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
+            this.cbHmac = new System.Windows.Forms.ComboBox();
+            this.cbHkdf = new System.Windows.Forms.ComboBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.chkSign = new System.Windows.Forms.CheckBox();
+            this.cbRounds = new System.Windows.Forms.ComboBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.cbPaddingMode = new System.Windows.Forms.ComboBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.cbVectorSize = new System.Windows.Forms.ComboBox();
+            this.cbKeySize = new System.Windows.Forms.ComboBox();
+            this.cbCipherMode = new System.Windows.Forms.ComboBox();
+            this.btnCreateKey = new System.Windows.Forms.Button();
+            this.cbEngines = new System.Windows.Forms.ComboBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.pnlOptions = new System.Windows.Forms.Panel();
             this.chkNoExport = new System.Windows.Forms.CheckBox();
             this.chkDomainRestrict = new System.Windows.Forms.CheckBox();
@@ -62,18 +87,6 @@
             this.txtKeyDescription = new System.Windows.Forms.TextBox();
             this.chkNoNarrative = new System.Windows.Forms.CheckBox();
             this.ttInfo = new System.Windows.Forms.ToolTip(this.components);
-            this.cbEngines = new System.Windows.Forms.ComboBox();
-            this.btnCreateKey = new System.Windows.Forms.Button();
-            this.cbCipherMode = new System.Windows.Forms.ComboBox();
-            this.cbKeySize = new System.Windows.Forms.ComboBox();
-            this.cbVectorSize = new System.Windows.Forms.ComboBox();
-            this.cbPaddingMode = new System.Windows.Forms.ComboBox();
-            this.cbRounds = new System.Windows.Forms.ComboBox();
-            this.chkSign = new System.Windows.Forms.CheckBox();
-            this.cbHkdf = new System.Windows.Forms.ComboBox();
-            this.cbHmac = new System.Windows.Forms.ComboBox();
-            this.txtSubKeyCount = new System.Windows.Forms.TextBox();
-            this.btnPolicies = new System.Windows.Forms.Button();
             this.pnlAbout = new System.Windows.Forms.Panel();
             this.lnkGithub = new System.Windows.Forms.LinkLabel();
             this.lnkVtdev = new System.Windows.Forms.LinkLabel();
@@ -83,24 +96,12 @@
             this.label16 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
             this.label18 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.label12 = new System.Windows.Forms.Label();
-            this.label14 = new System.Windows.Forms.Label();
-            this.pnlKey = new System.Windows.Forms.Panel();
             this.lblTest = new System.Windows.Forms.Label();
             this.tsMain.SuspendLayout();
             this.pnlEncrypt.SuspendLayout();
+            this.pnlKey.SuspendLayout();
             this.pnlOptions.SuspendLayout();
             this.pnlAbout.SuspendLayout();
-            this.pnlKey.SuspendLayout();
             this.SuspendLayout();
             // 
             // ssStatus
@@ -238,6 +239,7 @@
             this.txtKeyFile.Size = new System.Drawing.Size(367, 20);
             this.txtKeyFile.TabIndex = 19;
             this.txtKeyFile.Text = "[Select a Key File]";
+            this.txtKeyFile.TextChanged += new System.EventHandler(this.OnKeyFileTextChanged);
             // 
             // btnKeyFile
             // 
@@ -314,6 +316,331 @@
             this.label13.TabIndex = 53;
             this.label13.Text = "Encrypt or Decrypt a File";
             // 
+            // pnlKey
+            // 
+            this.pnlKey.AutoSize = true;
+            this.pnlKey.Controls.Add(this.label19);
+            this.pnlKey.Controls.Add(this.btnPolicies);
+            this.pnlKey.Controls.Add(this.label14);
+            this.pnlKey.Controls.Add(this.txtSubKeyCount);
+            this.pnlKey.Controls.Add(this.label12);
+            this.pnlKey.Controls.Add(this.cbHmac);
+            this.pnlKey.Controls.Add(this.cbHkdf);
+            this.pnlKey.Controls.Add(this.label10);
+            this.pnlKey.Controls.Add(this.label8);
+            this.pnlKey.Controls.Add(this.label7);
+            this.pnlKey.Controls.Add(this.chkSign);
+            this.pnlKey.Controls.Add(this.cbRounds);
+            this.pnlKey.Controls.Add(this.label6);
+            this.pnlKey.Controls.Add(this.cbPaddingMode);
+            this.pnlKey.Controls.Add(this.label5);
+            this.pnlKey.Controls.Add(this.cbVectorSize);
+            this.pnlKey.Controls.Add(this.cbKeySize);
+            this.pnlKey.Controls.Add(this.cbCipherMode);
+            this.pnlKey.Controls.Add(this.btnCreateKey);
+            this.pnlKey.Controls.Add(this.cbEngines);
+            this.pnlKey.Controls.Add(this.label4);
+            this.pnlKey.Controls.Add(this.label1);
+            this.pnlKey.Controls.Add(this.label2);
+            this.pnlKey.Controls.Add(this.label3);
+            this.pnlKey.Location = new System.Drawing.Point(1, 50);
+            this.pnlKey.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
+            this.pnlKey.Name = "pnlKey";
+            this.pnlKey.Size = new System.Drawing.Size(433, 284);
+            this.pnlKey.TabIndex = 30;
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label19.Location = new System.Drawing.Point(12, 9);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(136, 16);
+            this.label19.TabIndex = 70;
+            this.label19.Text = "Create a Cipher Key";
+            // 
+            // btnPolicies
+            // 
+            this.btnPolicies.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnPolicies.Location = new System.Drawing.Point(15, 234);
+            this.btnPolicies.Name = "btnPolicies";
+            this.btnPolicies.Size = new System.Drawing.Size(130, 28);
+            this.btnPolicies.TabIndex = 69;
+            this.btnPolicies.Text = "Modify Key Policies";
+            this.ttInfo.SetToolTip(this.btnPolicies, "Create and Modify Policies that determine how a key is processed and authenticate" +
+        "d");
+            this.btnPolicies.UseVisualStyleBackColor = true;
+            this.btnPolicies.Click += new System.EventHandler(this.OnModifyPoliciesClick);
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label14.Location = new System.Drawing.Point(12, 175);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(144, 15);
+            this.label14.TabIndex = 68;
+            this.label14.Text = "Message Authentication";
+            // 
+            // txtSubKeyCount
+            // 
+            this.txtSubKeyCount.Location = new System.Drawing.Point(337, 141);
+            this.txtSubKeyCount.MaxLength = 5;
+            this.txtSubKeyCount.Name = "txtSubKeyCount";
+            this.txtSubKeyCount.ShortcutsEnabled = false;
+            this.txtSubKeyCount.Size = new System.Drawing.Size(48, 20);
+            this.txtSubKeyCount.TabIndex = 67;
+            this.txtSubKeyCount.Text = "10";
+            this.ttInfo.SetToolTip(this.txtSubKeyCount, "This is the number of subkeys, or unique key/iv sets in the package; determines h" +
+        "ow many files can be encrypted with this key package");
+            this.txtSubKeyCount.TextChanged += new System.EventHandler(this.OnSubKeyCountTextChanged);
+            this.txtSubKeyCount.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.OnSubKeyCountKeyPress);
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(13, 144);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(325, 14);
+            this.label12.TabIndex = 66;
+            this.label12.Text = "Select the Number of Sub Keys contained in the Key Package File:";
+            // 
+            // cbHmac
+            // 
+            this.cbHmac.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbHmac.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbHmac.FormattingEnabled = true;
+            this.cbHmac.Location = new System.Drawing.Point(291, 197);
+            this.cbHmac.Name = "cbHmac";
+            this.cbHmac.Size = new System.Drawing.Size(93, 22);
+            this.cbHmac.TabIndex = 51;
+            this.ttInfo.SetToolTip(this.cbHmac, "The Digest Engine used to sign a file");
+            this.cbHmac.SelectedIndexChanged += new System.EventHandler(this.OnHmacChanged);
+            // 
+            // cbHkdf
+            // 
+            this.cbHkdf.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbHkdf.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbHkdf.FormattingEnabled = true;
+            this.cbHkdf.Location = new System.Drawing.Point(326, 71);
+            this.cbHkdf.Name = "cbHkdf";
+            this.cbHkdf.Size = new System.Drawing.Size(93, 22);
+            this.cbHkdf.TabIndex = 55;
+            this.ttInfo.SetToolTip(this.cbHkdf, "The digest engine used in an HX or M series cipher Key Schedule");
+            this.cbHkdf.SelectedIndexChanged += new System.EventHandler(this.OnHkdfChanged);
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label10.Location = new System.Drawing.Point(323, 56);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(72, 14);
+            this.label10.TabIndex = 54;
+            this.label10.Text = "HKDF Engine:";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.Location = new System.Drawing.Point(12, 33);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(94, 15);
+            this.label8.TabIndex = 52;
+            this.label8.Text = "Cipher Settings";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Arial", 7F);
+            this.label7.Location = new System.Drawing.Point(290, 183);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(77, 13);
+            this.label7.TabIndex = 50;
+            this.label7.Text = "HMAC Engine:";
+            // 
+            // chkSign
+            // 
+            this.chkSign.AutoSize = true;
+            this.chkSign.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chkSign.Location = new System.Drawing.Point(16, 201);
+            this.chkSign.Name = "chkSign";
+            this.chkSign.Size = new System.Drawing.Size(274, 18);
+            this.chkSign.TabIndex = 36;
+            this.chkSign.Text = "Sign and Verify Messages encrypted with this Key:";
+            this.ttInfo.SetToolTip(this.chkSign, "Signing a message file is a way of testing the file for authenticity.");
+            this.chkSign.UseVisualStyleBackColor = true;
+            this.chkSign.CheckedChanged += new System.EventHandler(this.OnSigningChanged);
+            // 
+            // cbRounds
+            // 
+            this.cbRounds.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbRounds.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbRounds.FormattingEnabled = true;
+            this.cbRounds.Items.AddRange(new object[] {
+            "R8",
+            "R12",
+            "R20",
+            "R24"});
+            this.cbRounds.Location = new System.Drawing.Point(223, 114);
+            this.cbRounds.Name = "cbRounds";
+            this.cbRounds.Size = new System.Drawing.Size(93, 22);
+            this.cbRounds.TabIndex = 48;
+            this.ttInfo.SetToolTip(this.cbRounds, "The number of Diffusion Rounds used by the Cipher Engine");
+            this.cbRounds.SelectedIndexChanged += new System.EventHandler(this.OnRoundsChanged);
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.Location = new System.Drawing.Point(220, 99);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(47, 14);
+            this.label6.TabIndex = 47;
+            this.label6.Text = "Rounds:";
+            // 
+            // cbPaddingMode
+            // 
+            this.cbPaddingMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbPaddingMode.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbPaddingMode.FormattingEnabled = true;
+            this.cbPaddingMode.Items.AddRange(new object[] {
+            "PKCS7",
+            "X923"});
+            this.cbPaddingMode.Location = new System.Drawing.Point(119, 114);
+            this.cbPaddingMode.Name = "cbPaddingMode";
+            this.cbPaddingMode.Size = new System.Drawing.Size(93, 22);
+            this.cbPaddingMode.TabIndex = 46;
+            this.ttInfo.SetToolTip(this.cbPaddingMode, "The type of Padding Mode used when encrypting with a Block Cipher");
+            this.cbPaddingMode.SelectedIndexChanged += new System.EventHandler(this.OnPaddingModeChanged);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(116, 99);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(48, 14);
+            this.label5.TabIndex = 45;
+            this.label5.Text = "Padding:";
+            // 
+            // cbVectorSize
+            // 
+            this.cbVectorSize.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbVectorSize.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbVectorSize.FormattingEnabled = true;
+            this.cbVectorSize.Items.AddRange(new object[] {
+            "B128",
+            "B256",
+            "B512"});
+            this.cbVectorSize.Location = new System.Drawing.Point(223, 71);
+            this.cbVectorSize.Name = "cbVectorSize";
+            this.cbVectorSize.Size = new System.Drawing.Size(93, 22);
+            this.cbVectorSize.TabIndex = 44;
+            this.ttInfo.SetToolTip(this.cbVectorSize, "The size of the Initilization Vector in bits");
+            this.cbVectorSize.SelectedIndexChanged += new System.EventHandler(this.OnVectorSizeChanged);
+            // 
+            // cbKeySize
+            // 
+            this.cbKeySize.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbKeySize.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbKeySize.FormattingEnabled = true;
+            this.cbKeySize.Items.AddRange(new object[] {
+            "K512",
+            "K256",
+            "K128"});
+            this.cbKeySize.Location = new System.Drawing.Point(119, 71);
+            this.cbKeySize.Name = "cbKeySize";
+            this.cbKeySize.Size = new System.Drawing.Size(93, 22);
+            this.cbKeySize.TabIndex = 43;
+            this.ttInfo.SetToolTip(this.cbKeySize, "The size of the key in bits");
+            this.cbKeySize.SelectedIndexChanged += new System.EventHandler(this.OnKeySizeChanged);
+            // 
+            // cbCipherMode
+            // 
+            this.cbCipherMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbCipherMode.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbCipherMode.FormattingEnabled = true;
+            this.cbCipherMode.Items.AddRange(new object[] {
+            "CBC",
+            "CTR"});
+            this.cbCipherMode.Location = new System.Drawing.Point(15, 114);
+            this.cbCipherMode.Name = "cbCipherMode";
+            this.cbCipherMode.Size = new System.Drawing.Size(93, 22);
+            this.cbCipherMode.TabIndex = 42;
+            this.ttInfo.SetToolTip(this.cbCipherMode, "The Cipher Mode used when encrypting with a Block Cipher");
+            this.cbCipherMode.SelectedIndexChanged += new System.EventHandler(this.OnCipherModeChanged);
+            // 
+            // btnCreateKey
+            // 
+            this.btnCreateKey.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnCreateKey.Location = new System.Drawing.Point(347, 231);
+            this.btnCreateKey.Name = "btnCreateKey";
+            this.btnCreateKey.Size = new System.Drawing.Size(72, 38);
+            this.btnCreateKey.TabIndex = 39;
+            this.btnCreateKey.Text = "Save As";
+            this.ttInfo.SetToolTip(this.btnCreateKey, "Save the Key Package File");
+            this.btnCreateKey.UseVisualStyleBackColor = true;
+            this.btnCreateKey.Click += new System.EventHandler(this.OnCreateKeyClick);
+            // 
+            // cbEngines
+            // 
+            this.cbEngines.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbEngines.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbEngines.FormattingEnabled = true;
+            this.cbEngines.Items.AddRange(new object[] {
+            "ChaCha",
+            "RHX",
+            "Salsa20",
+            "SHX",
+            "THX"});
+            this.cbEngines.Location = new System.Drawing.Point(15, 71);
+            this.cbEngines.Name = "cbEngines";
+            this.cbEngines.Size = new System.Drawing.Size(93, 22);
+            this.cbEngines.TabIndex = 37;
+            this.ttInfo.SetToolTip(this.cbEngines, "The Encryption engine used to process a file");
+            this.cbEngines.SelectedIndexChanged += new System.EventHandler(this.OnEngineChanged);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Location = new System.Drawing.Point(220, 56);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(66, 14);
+            this.label4.TabIndex = 41;
+            this.label4.Text = "Vector Size:";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(116, 56);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(53, 14);
+            this.label1.TabIndex = 40;
+            this.label1.Text = "Key Size:";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(12, 56);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(42, 14);
+            this.label2.TabIndex = 38;
+            this.label2.Text = "Engine:";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.Location = new System.Drawing.Point(13, 99);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(70, 14);
+            this.label3.TabIndex = 35;
+            this.label3.Text = "Cipher Mode:";
+            // 
             // pnlOptions
             // 
             this.pnlOptions.Controls.Add(this.chkNoExport);
@@ -362,10 +689,10 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label9.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label9.Location = new System.Drawing.Point(12, 9);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(76, 15);
+            this.label9.Size = new System.Drawing.Size(86, 16);
             this.label9.TabIndex = 53;
             this.label9.Text = "Key Policies";
             // 
@@ -489,187 +816,6 @@
             this.ttInfo.InitialDelay = 2000;
             this.ttInfo.ReshowDelay = 500;
             // 
-            // cbEngines
-            // 
-            this.cbEngines.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbEngines.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbEngines.FormattingEnabled = true;
-            this.cbEngines.Items.AddRange(new object[] {
-            "ChaCha",
-            "DCS",
-            "RDX",
-            "RHX",
-            "RSM",
-            "RSX",
-            "Salsa20",
-            "SPX",
-            "SHX",
-            "TFX",
-            "THX",
-            "TSM",
-            "Fusion"});
-            this.cbEngines.Location = new System.Drawing.Point(15, 47);
-            this.cbEngines.Name = "cbEngines";
-            this.cbEngines.Size = new System.Drawing.Size(93, 22);
-            this.cbEngines.TabIndex = 37;
-            this.ttInfo.SetToolTip(this.cbEngines, "The Encryption engine used to process a file");
-            this.cbEngines.SelectedIndexChanged += new System.EventHandler(this.OnEngineChanged);
-            // 
-            // btnCreateKey
-            // 
-            this.btnCreateKey.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCreateKey.Location = new System.Drawing.Point(347, 231);
-            this.btnCreateKey.Name = "btnCreateKey";
-            this.btnCreateKey.Size = new System.Drawing.Size(72, 38);
-            this.btnCreateKey.TabIndex = 39;
-            this.btnCreateKey.Text = "Save As";
-            this.ttInfo.SetToolTip(this.btnCreateKey, "Save the Key Package File");
-            this.btnCreateKey.UseVisualStyleBackColor = true;
-            this.btnCreateKey.Click += new System.EventHandler(this.OnCreateKeyClick);
-            // 
-            // cbCipherMode
-            // 
-            this.cbCipherMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbCipherMode.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbCipherMode.FormattingEnabled = true;
-            this.cbCipherMode.Items.AddRange(new object[] {
-            "CBC",
-            "CTR"});
-            this.cbCipherMode.Location = new System.Drawing.Point(15, 90);
-            this.cbCipherMode.Name = "cbCipherMode";
-            this.cbCipherMode.Size = new System.Drawing.Size(93, 22);
-            this.cbCipherMode.TabIndex = 42;
-            this.ttInfo.SetToolTip(this.cbCipherMode, "The Cipher Mode used when encrypting with a Block Cipher");
-            this.cbCipherMode.SelectedIndexChanged += new System.EventHandler(this.OnCipherModeChanged);
-            // 
-            // cbKeySize
-            // 
-            this.cbKeySize.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbKeySize.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbKeySize.FormattingEnabled = true;
-            this.cbKeySize.Items.AddRange(new object[] {
-            "K512",
-            "K256",
-            "K128"});
-            this.cbKeySize.Location = new System.Drawing.Point(119, 47);
-            this.cbKeySize.Name = "cbKeySize";
-            this.cbKeySize.Size = new System.Drawing.Size(93, 22);
-            this.cbKeySize.TabIndex = 43;
-            this.ttInfo.SetToolTip(this.cbKeySize, "The size of the key in bits");
-            this.cbKeySize.SelectedIndexChanged += new System.EventHandler(this.OnKeySizeChanged);
-            // 
-            // cbVectorSize
-            // 
-            this.cbVectorSize.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbVectorSize.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbVectorSize.FormattingEnabled = true;
-            this.cbVectorSize.Items.AddRange(new object[] {
-            "B128",
-            "B256",
-            "B512"});
-            this.cbVectorSize.Location = new System.Drawing.Point(223, 47);
-            this.cbVectorSize.Name = "cbVectorSize";
-            this.cbVectorSize.Size = new System.Drawing.Size(93, 22);
-            this.cbVectorSize.TabIndex = 44;
-            this.ttInfo.SetToolTip(this.cbVectorSize, "The size of the Initilization Vector in bits");
-            this.cbVectorSize.SelectedIndexChanged += new System.EventHandler(this.OnVectorSizeChanged);
-            // 
-            // cbPaddingMode
-            // 
-            this.cbPaddingMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbPaddingMode.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbPaddingMode.FormattingEnabled = true;
-            this.cbPaddingMode.Items.AddRange(new object[] {
-            "PKCS7",
-            "X923"});
-            this.cbPaddingMode.Location = new System.Drawing.Point(119, 90);
-            this.cbPaddingMode.Name = "cbPaddingMode";
-            this.cbPaddingMode.Size = new System.Drawing.Size(93, 22);
-            this.cbPaddingMode.TabIndex = 46;
-            this.ttInfo.SetToolTip(this.cbPaddingMode, "The type of Padding Mode used when encrypting with a Block Cipher");
-            this.cbPaddingMode.SelectedIndexChanged += new System.EventHandler(this.OnPaddingModeChanged);
-            // 
-            // cbRounds
-            // 
-            this.cbRounds.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbRounds.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbRounds.FormattingEnabled = true;
-            this.cbRounds.Items.AddRange(new object[] {
-            "R8",
-            "R12",
-            "R20",
-            "R24"});
-            this.cbRounds.Location = new System.Drawing.Point(223, 90);
-            this.cbRounds.Name = "cbRounds";
-            this.cbRounds.Size = new System.Drawing.Size(93, 22);
-            this.cbRounds.TabIndex = 48;
-            this.ttInfo.SetToolTip(this.cbRounds, "The number of Diffusion Rounds used by the Cipher Engine");
-            this.cbRounds.SelectedIndexChanged += new System.EventHandler(this.OnRoundsChanged);
-            // 
-            // chkSign
-            // 
-            this.chkSign.AutoSize = true;
-            this.chkSign.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.chkSign.Location = new System.Drawing.Point(16, 177);
-            this.chkSign.Name = "chkSign";
-            this.chkSign.Size = new System.Drawing.Size(274, 18);
-            this.chkSign.TabIndex = 36;
-            this.chkSign.Text = "Sign and Verify Messages encrypted with this Key:";
-            this.ttInfo.SetToolTip(this.chkSign, "Signing a message file is a way of testing the file for authenticity.");
-            this.chkSign.UseVisualStyleBackColor = true;
-            this.chkSign.CheckedChanged += new System.EventHandler(this.OnKeyPolicyChanged);
-            // 
-            // cbHkdf
-            // 
-            this.cbHkdf.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbHkdf.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbHkdf.FormattingEnabled = true;
-            this.cbHkdf.Location = new System.Drawing.Point(326, 47);
-            this.cbHkdf.Name = "cbHkdf";
-            this.cbHkdf.Size = new System.Drawing.Size(93, 22);
-            this.cbHkdf.TabIndex = 55;
-            this.ttInfo.SetToolTip(this.cbHkdf, "The digest engine used in an HX or M series cipher Key Schedule");
-            this.cbHkdf.SelectedIndexChanged += new System.EventHandler(this.OnHkdfChanged);
-            // 
-            // cbHmac
-            // 
-            this.cbHmac.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbHmac.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbHmac.FormattingEnabled = true;
-            this.cbHmac.Location = new System.Drawing.Point(291, 173);
-            this.cbHmac.Name = "cbHmac";
-            this.cbHmac.Size = new System.Drawing.Size(93, 22);
-            this.cbHmac.TabIndex = 51;
-            this.ttInfo.SetToolTip(this.cbHmac, "The Digest Engine used to sign a file");
-            this.cbHmac.SelectedIndexChanged += new System.EventHandler(this.OnHmacChanged);
-            // 
-            // txtSubKeyCount
-            // 
-            this.txtSubKeyCount.Location = new System.Drawing.Point(337, 117);
-            this.txtSubKeyCount.MaxLength = 5;
-            this.txtSubKeyCount.Name = "txtSubKeyCount";
-            this.txtSubKeyCount.ShortcutsEnabled = false;
-            this.txtSubKeyCount.Size = new System.Drawing.Size(48, 20);
-            this.txtSubKeyCount.TabIndex = 67;
-            this.txtSubKeyCount.Text = "10";
-            this.ttInfo.SetToolTip(this.txtSubKeyCount, "This is the number of subkeys, or unique key/iv sets in the package; determines h" +
-        "ow many files can be encrypted with this key package");
-            this.txtSubKeyCount.TextChanged += new System.EventHandler(this.OnSubKeyCountTextChanged);
-            this.txtSubKeyCount.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.OnSubKeyCountKeyPress);
-            // 
-            // btnPolicies
-            // 
-            this.btnPolicies.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnPolicies.Location = new System.Drawing.Point(15, 210);
-            this.btnPolicies.Name = "btnPolicies";
-            this.btnPolicies.Size = new System.Drawing.Size(130, 28);
-            this.btnPolicies.TabIndex = 69;
-            this.btnPolicies.Text = "Modify Key Policies";
-            this.ttInfo.SetToolTip(this.btnPolicies, "Create and Modify Policies that determine how a key is processed and authenticate" +
-        "d");
-            this.btnPolicies.UseVisualStyleBackColor = true;
-            this.btnPolicies.Click += new System.EventHandler(this.OnModifyPoliciesClick);
-            // 
             // pnlAbout
             // 
             this.pnlAbout.Controls.Add(this.lnkGithub);
@@ -742,7 +888,7 @@
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(63, 15);
             this.label15.TabIndex = 9;
-            this.label15.Text = "V 1.3.2.0";
+            this.label15.Text = "V 1.5.0.0";
             // 
             // label16
             // 
@@ -761,9 +907,9 @@
             this.label17.ForeColor = System.Drawing.Color.Black;
             this.label17.Location = new System.Drawing.Point(80, 57);
             this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(82, 14);
+            this.label17.Size = new System.Drawing.Size(91, 14);
             this.label17.TabIndex = 11;
-            this.label17.Text = "March 19, 2015";
+            this.label17.Text = "January 21, 2016";
             // 
             // label18
             // 
@@ -775,147 +921,6 @@
             this.label18.Size = new System.Drawing.Size(64, 13);
             this.label18.TabIndex = 10;
             this.label18.Text = "Released:";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(13, 75);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(70, 14);
-            this.label3.TabIndex = 35;
-            this.label3.Text = "Cipher Mode:";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(12, 32);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(42, 14);
-            this.label2.TabIndex = 38;
-            this.label2.Text = "Engine:";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(116, 32);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(53, 14);
-            this.label1.TabIndex = 40;
-            this.label1.Text = "Key Size:";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(220, 32);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(66, 14);
-            this.label4.TabIndex = 41;
-            this.label4.Text = "Vector Size:";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(116, 75);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(48, 14);
-            this.label5.TabIndex = 45;
-            this.label5.Text = "Padding:";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(220, 75);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(47, 14);
-            this.label6.TabIndex = 47;
-            this.label6.Text = "Rounds:";
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("Arial", 7F);
-            this.label7.Location = new System.Drawing.Point(290, 159);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(77, 13);
-            this.label7.TabIndex = 50;
-            this.label7.Text = "HMAC Engine:";
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label8.Location = new System.Drawing.Point(12, 9);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(105, 16);
-            this.label8.TabIndex = 52;
-            this.label8.Text = "Cipher Settings";
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label10.Location = new System.Drawing.Point(323, 32);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(72, 14);
-            this.label10.TabIndex = 54;
-            this.label10.Text = "HKDF Engine:";
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(13, 120);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(325, 14);
-            this.label12.TabIndex = 66;
-            this.label12.Text = "Select the Number of Sub Keys contained in the Key Package File:";
-            // 
-            // label14
-            // 
-            this.label14.AutoSize = true;
-            this.label14.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label14.Location = new System.Drawing.Point(12, 151);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(159, 16);
-            this.label14.TabIndex = 68;
-            this.label14.Text = "Message Authentication";
-            // 
-            // pnlKey
-            // 
-            this.pnlKey.AutoSize = true;
-            this.pnlKey.Controls.Add(this.btnPolicies);
-            this.pnlKey.Controls.Add(this.label14);
-            this.pnlKey.Controls.Add(this.txtSubKeyCount);
-            this.pnlKey.Controls.Add(this.label12);
-            this.pnlKey.Controls.Add(this.cbHmac);
-            this.pnlKey.Controls.Add(this.cbHkdf);
-            this.pnlKey.Controls.Add(this.label10);
-            this.pnlKey.Controls.Add(this.label8);
-            this.pnlKey.Controls.Add(this.label7);
-            this.pnlKey.Controls.Add(this.chkSign);
-            this.pnlKey.Controls.Add(this.cbRounds);
-            this.pnlKey.Controls.Add(this.label6);
-            this.pnlKey.Controls.Add(this.cbPaddingMode);
-            this.pnlKey.Controls.Add(this.label5);
-            this.pnlKey.Controls.Add(this.cbVectorSize);
-            this.pnlKey.Controls.Add(this.cbKeySize);
-            this.pnlKey.Controls.Add(this.cbCipherMode);
-            this.pnlKey.Controls.Add(this.btnCreateKey);
-            this.pnlKey.Controls.Add(this.cbEngines);
-            this.pnlKey.Controls.Add(this.label4);
-            this.pnlKey.Controls.Add(this.label1);
-            this.pnlKey.Controls.Add(this.label2);
-            this.pnlKey.Controls.Add(this.label3);
-            this.pnlKey.Location = new System.Drawing.Point(0, 50);
-            this.pnlKey.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
-            this.pnlKey.Name = "pnlKey";
-            this.pnlKey.Size = new System.Drawing.Size(433, 284);
-            this.pnlKey.TabIndex = 30;
             // 
             // lblTest
             // 
@@ -954,12 +959,12 @@
             this.tsMain.PerformLayout();
             this.pnlEncrypt.ResumeLayout(false);
             this.pnlEncrypt.PerformLayout();
+            this.pnlKey.ResumeLayout(false);
+            this.pnlKey.PerformLayout();
             this.pnlOptions.ResumeLayout(false);
             this.pnlOptions.PerformLayout();
             this.pnlAbout.ResumeLayout(false);
             this.pnlAbout.PerformLayout();
-            this.pnlKey.ResumeLayout(false);
-            this.pnlKey.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1033,6 +1038,7 @@
         private System.Windows.Forms.Button btnInfo;
         private System.Windows.Forms.Button btnPolicies;
         private System.Windows.Forms.Label lblTest;
+        private System.Windows.Forms.Label label19;
 
         public System.EventHandler mniAboutSubClick { get; set; }
 

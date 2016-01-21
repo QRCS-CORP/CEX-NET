@@ -72,7 +72,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
         /// <summary>Test the CMAC implementation</summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -109,7 +109,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
         {
             byte[] hash = new byte[16];
 
-            using (CMAC mac = new CMAC(new RDX(), 128))
+            using (CMAC mac = new CMAC(new RHX(), 128))
             {
                 mac.Initialize(Key, null);
                 mac.BlockUpdate(Input, 0, Input.Length);

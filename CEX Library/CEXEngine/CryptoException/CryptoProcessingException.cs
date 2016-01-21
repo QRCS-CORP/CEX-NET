@@ -6,7 +6,7 @@ namespace VTDev.Libraries.CEXEngine.CryptoException
 {
     /// <summary>
     /// Wraps exceptions thrown within a Processing operational context.
-    /// <para>This exception is used throughout the CompressionCipher, PacketCipher, StreamCipher, StreamDigest, StreamMac, and VolumeCipher classes.</para>
+    /// <para>This exception is used throughout the CompressionCipher, PacketCipher, CipherStream, DigestStream, MacStream, and VolumeCipher classes.</para>
     /// </summary>
     public sealed class CryptoProcessingException : Exception
     {

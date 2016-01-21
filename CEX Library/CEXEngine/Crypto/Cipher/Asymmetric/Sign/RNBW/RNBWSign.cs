@@ -13,7 +13,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmetic;
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -347,8 +347,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
             MapLayer[] layer = ((RNBWPrivateKey)this._asmKey).Layers;
             int numberOfLayers = layer.Length;
             _X = new short[((RNBWPrivateKey)this._asmKey).InvA2.Length]; // all variables
-            short[] y;         // modified document
-            short[] yi;        // part of Y_ each polynomial
+            short[] y;          // modified document
+            short[] yi;         // part of Y_ each polynomial
             int counter;        // index of the current part of the doc
             short[] solVec;     // the solution of LES pro layer
             short[] tmpVec;
@@ -533,8 +533,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
                     return new SP20Prng();
                 case Prngs.DGCPrng:
                     return new DGCPrng();
-                case Prngs.CSPRng:
-                    return new CSPRng();
+                case Prngs.CSPPrng:
+                    return new CSPPrng();
                 case Prngs.BBSG:
                     return new BBSG();
                 case Prngs.CCG:

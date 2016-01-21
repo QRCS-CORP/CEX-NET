@@ -10,7 +10,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
 {
     /// <summary>
     /// An encrypted message file header structure. 
-    /// <para>Used in conjunction with the <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.StreamCipher"/> class.
+    /// <para>Used in conjunction with the <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.CipherStream"/> class.
     /// KeyID and Extension values must each be 16 bytes in length. Message MAC code is optional.</para>
     /// </summary>
     /// 
@@ -19,7 +19,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
     /// <revision date="2015/07/02" version="1.4.0.0">Changes to documentation and method structure</revision>
     /// </revisionHistory>
     /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.StreamCipher">VTDev.Libraries.CEXEngine.Crypto.Processing StreamCipher class</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.CipherStream">VTDev.Libraries.CEXEngine.Crypto.Processing CipherStream class</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Factory.PackageFactory">VTDev.Libraries.CEXEngine.Crypto PackageFactory class</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.PackageKey">VTDev.Libraries.CEXEngine.Crypto.Processing.Structures PackageKey structure</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.KeyAuthority">VTDev.Libraries.CEXEngine.Crypto.Processing.Structures KeyAuthority structure</seealso>

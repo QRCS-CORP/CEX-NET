@@ -10,14 +10,14 @@ using VTDev.Libraries.CEXEngine.Tools;
 namespace VTDev.Projects.CEX.Test.Tests.DigestTest
 {
     /// <summary>
-    /// Compares the linear mode of StreamDigest with the Concurrent mode for equality
+    /// Compares the linear mode of DigestStream with the Concurrent mode for equality
     /// </summary>
     public class StreamDigestTest : ITest
     {
         #region Constants
-        private const string DESCRIPTION = "Compares the normal mode of StreamCipher with the Concurrent mode for equality.";
+        private const string DESCRIPTION = "Compares the normal mode of CipherStream with the Concurrent mode for equality.";
         private const string FAILURE = "FAILURE! ";
-        private const string SUCCESS = "SUCCESS! All StreamCipher tests have executed succesfully.";
+        private const string SUCCESS = "SUCCESS! All CipherStream tests have executed succesfully.";
         #endregion
 
         #region Events
@@ -38,12 +38,12 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
 
         #region Public Methods
         /// <summary>
-        /// Tests for correctness of parallel processing mode in the StreamCipher implementation
+        /// Tests for correctness of parallel processing mode in the CipherStream implementation
         /// by comparing digest output between both modes performed on random temp files
         /// </summary>
         /// 
         /// <returns>Status</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -63,7 +63,7 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
         private string CreateTempFile(int Size)
         {
             string path = Path.GetTempFileName();
-            byte[] data = new CSPRng().GetBytes(Size);
+            byte[] data = new CSPPrng().GetBytes(Size);
 
             File.WriteAllBytes(path, data);
 
@@ -119,7 +119,7 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
         {
             using (FileStream inStream = new FileStream(FileName, FileMode.Open))
             {
-                using (StreamDigest dgst = new StreamDigest(new SHA512()))
+                using (DigestStream dgst = new DigestStream(new SHA512()))
                 {
                     dgst.Initialize(inStream);
                     // run concurrent mode
@@ -133,7 +133,7 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
         {
             using (FileStream inStream = new FileStream(FileName, FileMode.Open))
             {
-                using (StreamDigest dgst = new StreamDigest(new SHA512()))
+                using (DigestStream dgst = new DigestStream(new SHA512()))
                 {
                     dgst.Initialize(inStream);
                     // linear processing
@@ -145,11 +145,11 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
 
         private bool HashTest3()
         {
-            byte[] data = new CSPRng().GetBytes(33033);
+            byte[] data = new CSPPrng().GetBytes(33033);
             byte[] hash1;
             byte[] hash2;
 
-            using (StreamDigest dgt1 = new StreamDigest(new SHA512()))
+            using (DigestStream dgt1 = new DigestStream(new SHA512()))
             {
                 dgt1.Initialize(new MemoryStream(data));
                 // run concurrent mode

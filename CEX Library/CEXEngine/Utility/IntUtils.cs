@@ -62,6 +62,157 @@ namespace VTDev.Libraries.CEXEngine.Utility
         #endregion
 
         #region public Methods
+        
+	    // Different computer architectures store data using different byte orders. "Big-endian"
+	    // means the most significant byte is on the left end of a word. "Little-endian" means the 
+	    // most significant byte is on the right end of a word. i.e.: 
+	    // BE: uint(block[3]) | (uint(block[2]) << 8) | (uint(block[1]) << 16) | (uint(block[0]) << 24)
+	    // LE: uint(block[0]) | (uint(block[1]) << 8) | (uint(block[2]) << 16) | (uint(block[3]) << 24)
+
+	    // ** Big Endian word32 and dword ** //
+
+        /// <summary>
+        /// Convert a Big Endian 32 bit word to bytes
+        /// </summary>
+        /// 
+        /// <param name="Word">The 32 bit word</param>
+        /// <param name="Block">The destination bytes</param>
+        /// <param name="Offset">Offset within the destination array</param>
+	    public static void Be32ToBytes(uint Word, byte[] Block, int Offset)
+	    {
+		    Block[Offset + 3] = (byte)Word;
+		    Block[Offset + 2] = (byte)(Word >> 8);
+		    Block[Offset + 1] = (byte)(Word >> 16);
+		    Block[Offset] = (byte)(Word >> 24);
+	    }
+
+        /// <summary>
+        /// Convert a Big Endian 64 bit dword to bytes
+        /// </summary>
+        /// 
+        /// <param name="Word">The 64 bit word</param>
+        /// <param name="Block">The destination bytes</param>
+        /// <param name="Offset">Offset within the destination array</param>
+        public static void Be64ToBytes(ulong DWord, byte[] Block, int Offset)
+	    {
+		    Block[Offset + 7] = (byte)DWord;
+		    Block[Offset + 6] = (byte)(DWord >> 8);
+		    Block[Offset + 5] = (byte)(DWord >> 16);
+		    Block[Offset + 4] = (byte)(DWord >> 24);
+		    Block[Offset + 3] = (byte)(DWord >> 32);
+		    Block[Offset + 2] = (byte)(DWord >> 40);
+		    Block[Offset + 1] = (byte)(DWord >> 48);
+		    Block[Offset] = (byte)(DWord >> 56);
+	    }
+
+        /// <summary>
+        /// Convert a byte array to a Big Endian 32 bit word
+        /// </summary>
+        /// 
+        /// <param name="Block">The source byte array</param>
+        /// <param name="InOffset">Offset within the source array</param>
+        /// <returns>A 32 bit word in Big Endian format</returns>
+        public static uint BytesToBe32(byte[] Block, int InOffset)
+	    {
+		    return
+			    ((uint)Block[InOffset] << 24) |
+			    ((uint)Block[InOffset + 1] << 16) |
+			    ((uint)Block[InOffset + 2] << 8) |
+			    ((uint)Block[InOffset + 3]);
+	    }
+
+        /// <summary>
+        /// Convert a byte array to a Big Endian 64 bit dword
+        /// </summary>
+        /// 
+        /// <param name="Block">The source byte array</param>
+        /// <param name="InOffset">Offset within the source array</param>
+        /// <returns>A 64 bit word in Big Endian format</returns>
+        public static ulong BytesToBe64(byte[] Block, int InOffset)
+	    {
+		    return
+			    ((ulong)Block[InOffset] << 56) |
+			    ((ulong)Block[InOffset + 1] << 48) |
+			    ((ulong)Block[InOffset + 2] << 40) |
+			    ((ulong)Block[InOffset + 3] << 32) |
+			    ((ulong)Block[InOffset + 4] << 24) |
+			    ((ulong)Block[InOffset + 5] << 16) |
+			    ((ulong)Block[InOffset + 6] << 8) |
+			    ((ulong)Block[InOffset + 7]);
+	    }
+
+	    // ** Little Endian ** //
+
+        /// <summary>
+        /// Convert a Litthle Endian 32 bit word to bytes
+        /// </summary>
+        /// 
+        /// <param name="Word">The 32 bit word</param>
+        /// <param name="Block">The destination bytes</param>
+        /// <param name="Offset">Offset within the destination block</param>
+        public static void Le32ToBytes(uint Word, byte[] Block, int Offset)
+	    {
+		    Block[Offset] = (byte)Word;
+		    Block[Offset + 1] = (byte)(Word >> 8);
+		    Block[Offset + 2] = (byte)(Word >> 16);
+		    Block[Offset + 3] = (byte)(Word >> 24);
+	    }
+
+        /// <summary>
+        /// Convert a Little Endian 64 bit dword to bytes
+        /// </summary>
+        /// 
+        /// <param name="Word">The 64 bit word</param>
+        /// <param name="Block">The destination bytes</param>
+        /// <param name="Offset">Offset within the destination block</param>
+        public static void Le64ToBytes(ulong DWord, byte[] Block, int Offset)
+	    {
+		    Block[Offset] = (byte)DWord;
+		    Block[Offset + 1] = (byte)(DWord >> 8);
+		    Block[Offset + 2] = (byte)(DWord >> 16);
+		    Block[Offset + 3] = (byte)(DWord >> 24);
+		    Block[Offset + 4] = (byte)(DWord >> 32);
+		    Block[Offset + 5] = (byte)(DWord >> 40);
+		    Block[Offset + 6] = (byte)(DWord >> 48);
+		    Block[Offset + 7] = (byte)(DWord >> 56);
+	    }
+
+        /// <summary>
+        /// Convert a byte array to a Little Endian 32 bit word
+        /// </summary>
+        /// 
+        /// <param name="Block">The source byte array</param>
+        /// <param name="InOffset">Offset within the source array</param>
+        /// <returns>A 32 bit word in Little Endian format</returns>
+        public static uint BytesToLe32(byte[] Block, int InOffset)
+	    {
+		    return
+			    ((uint)Block[InOffset] |
+			    ((uint)Block[InOffset + 1] << 8) |
+			    ((uint)Block[InOffset + 2] << 16) |
+			    ((uint)Block[InOffset + 3] << 24));
+	    }
+
+        /// <summary>
+        /// Convert a byte array to a Little Endian 64 bit dword
+        /// </summary>
+        /// 
+        /// <param name="Block">The source byte array</param>
+        /// <param name="InOffset">Offset within the source array</param>
+        /// <returns>A 64 bit word in Little Endian format</returns>
+        public static ulong BytesToLe64(byte[] Block, int InOffset)
+	    {
+		    return
+			    ((ulong)Block[InOffset] |
+			    ((ulong)Block[InOffset + 1] << 8) |
+			    ((ulong)Block[InOffset + 2] << 16) |
+			    ((ulong)Block[InOffset + 3] << 24) |
+			    ((ulong)Block[InOffset + 4] << 32) |
+			    ((ulong)Block[InOffset + 5] << 40) |
+			    ((ulong)Block[InOffset + 6] << 48) |
+			    ((ulong)Block[InOffset + 7] << 56));
+	    }
+
         /// <summary>
         /// Returns the number of one-bits in the two's complement binary 
         /// representation of the specified int value. 
@@ -233,6 +384,69 @@ namespace VTDev.Libraries.CEXEngine.Utility
             Buffer.BlockCopy(ia, 0, fa, 0, 4);
 
             return fa[0];
+        }
+
+        /// <summary>
+        /// Copy a 64 bit integer to a byte array
+        /// </summary>
+        /// 
+        /// <param name="X">Integer to copy</param>
+        /// 
+        /// <returns>The integer bytes</returns>
+        public static byte[] LongToBytes(long X)
+        {
+            long[] num = new long[1] { X };
+            byte[] data = new byte[8];
+            Buffer.BlockCopy(num, 0, data, 0, 8);
+
+            return data;
+        }
+
+        /// <summary>
+        /// Copy an array of 64 bit integers to a byte array
+        /// </summary>
+        /// 
+        /// <param name="X">Array of integers</param>
+        /// 
+        /// <returns>The integers bytes</returns>
+        public static byte[] LongsToBytes(long[] X)
+        {
+            byte[] data = new byte[X.Length * 8];
+            Buffer.BlockCopy(X, 0, data, 0, X.Length * 8);
+
+            return data;
+        }
+
+        /// <summary>
+        /// Copy a 64 bit integer bits to a double
+        /// </summary>
+        /// 
+        /// <param name="X">Integer to copy</param>
+        /// 
+        /// <returns>The double</returns>
+        public static double LongToDouble(long X)
+        {
+            long[] ia = new long[] { X };
+            double[] fa = new double[1];
+            Buffer.BlockCopy(ia, 0, fa, 0, 8);
+
+            return fa[0];
+        }
+
+        /// <summary>
+        /// Copy a 64 bit integer to a byte array
+        /// </summary>
+        /// 
+        /// <param name="X">Integer to copy</param>
+        /// 
+        /// <returns>The integer bytes</returns>
+        public static byte[] ULongToBytes(ulong X)
+        {
+            ulong[] num = new ulong[1] { X };
+            byte[] data = new byte[8];
+            Buffer.BlockCopy(num, 0, data, 0, 8);
+
+            return data;
         }
 
         /// <summary>
@@ -449,6 +663,110 @@ namespace VTDev.Libraries.CEXEngine.Utility
         }
 
         /// <summary>
+        /// Rotate shift a 32 bit integer to the left
+        /// </summary>
+        /// 
+        /// <param name="Value">The initial value</param>
+        /// <param name="Shift">The number of bits to shift</param>
+        /// 
+        /// <returns>The left shifted integer</returns>
+        public static int RotateLeft(int Value, int Shift)
+	    {
+		    return (Value << Shift) | (Value >> (32 - Shift));
+	    }
+
+        /// <summary>
+        /// Rotate shift an unsigned 32 bit integer to the left
+        /// </summary>
+        /// 
+        /// <param name="Value">The initial value</param>
+        /// <param name="Shift">The number of bits to shift</param>
+        /// 
+        /// <returns>The left shifted integer</returns>
+        public static uint RotateLeft(uint Value, int Shift)
+        {
+            return (Value << Shift) | (Value >> (32 - Shift));
+        }
+
+        /// <summary>
+        /// Rotate shift a 64 bit integer to the left
+        /// </summary>
+        /// 
+        /// <param name="Value">The initial value</param>
+        /// <param name="Shift">The number of bits to shift</param>
+        /// 
+        /// <returns>The left shifted integer</returns>
+	    public static long RotateLeft(long Value, int Shift)
+	    {
+		    return (Value << Shift) | (Value >> (64 - Shift));
+	    }
+
+        /// <summary>
+        /// Rotate shift an unsigned 64 bit integer to the left
+        /// </summary>
+        /// 
+        /// <param name="Value">The initial value</param>
+        /// <param name="Shift">The number of bits to shift</param>
+        /// 
+        /// <returns>The left shifted integer</returns>
+	    public static ulong RotateLeft(ulong Value, int Shift)
+	    {
+		    return (Value << Shift) | (Value >> (64 - Shift));
+	    }
+
+        /// <summary>
+        /// Rotate shift an unsigned 32 bit integer to the right
+        /// </summary>
+        /// 
+        /// <param name="Value">The initial value</param>
+        /// <param name="Shift">The number of bits to shift</param>
+        /// 
+        /// <returns>The right shifted integer</returns>
+        public static int RotateRight(int Value, int Shift)
+        {
+            return (Value >> Shift) | (Value << (32 - Shift));
+        }
+
+        /// <summary>
+        /// Rotate shift a 32 bit integer to the right
+        /// </summary>
+        /// 
+        /// <param name="Value">The initial value</param>
+        /// <param name="Shift">The number of bits to shift</param>
+        /// 
+        /// <returns>The right shifted integer</returns>
+	    public static uint RotateRight(uint Value, int Shift)
+	    {
+		    return (Value >> Shift) | (Value << (32 - Shift));
+	    }
+
+        /// <summary>
+        /// Rotate shift a 64 bit integer to the right
+        /// </summary>
+        /// 
+        /// <param name="Value">The initial value</param>
+        /// <param name="Shift">The number of bits to shift</param>
+        /// 
+        /// <returns>The right shifted integer</returns>
+	    public static long RotateRight(long Value, int Shift)
+	    {
+		    return (Value >> Shift) | (Value << (64 - Shift));
+	    }
+
+        /// <summary>
+        /// Rotate shift an unsigned 64 bit integer to the right
+        /// </summary>
+        /// 
+        /// <param name="Value">The initial value</param>
+        /// <param name="Shift">The number of bits to shift</param>
+        /// 
+        /// <returns>The right shifted integer</returns>
+	    public static ulong RotateRight(ulong Value, int Shift)
+	    {
+		    return (Value >> Shift) | (Value << (64 - Shift));
+	    }
+
+        /// <summary>
         /// Returns the signum function of the specified long value. 
         /// <para>The return value is -1 if the specified value is negative;
         /// 0 if the specified value is zero; and 1 if the specified value is positive.</para>
@@ -517,6 +835,137 @@ namespace VTDev.Libraries.CEXEngine.Utility
             if (X >= 0)
                 return X >> NumBits;
             return (X >> NumBits) + (2L << ~NumBits);
+        }
+
+        /// <summary>
+        /// Block XOR 4 bytes
+        /// </summary>
+        /// 
+        /// <param name="Input">The source array</param>
+        /// <param name="InOffset">Offset within the source array</param>
+        /// <param name="Output">The destination array</param>
+        /// <param name="OutOffset">Offset within the destination array</param>
+        public static void XOR32(byte[] Input, int InOffset, byte[] Output, int OutOffset)
+        {
+	        Output[OutOffset] ^= Input[InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+        }
+
+        /// <summary>
+        /// Block XOR 8 bytes
+        /// </summary>
+        /// 
+        /// <param name="Input">The source array</param>
+        /// <param name="InOffset">Offset within the source array</param>
+        /// <param name="Output">The destination array</param>
+        /// <param name="OutOffset">Offset within the destination array</param>
+        public static void XOR64(byte[] Input, int InOffset, byte[] Output, int OutOffset)
+        {
+	        Output[OutOffset] ^= Input[InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+        }
+
+        /// <summary>
+        /// Block XOR 16 bytes
+        /// </summary>
+        /// 
+        /// <param name="Input">The source array</param>
+        /// <param name="InOffset">Offset within the source array</param>
+        /// <param name="Output">The destination array</param>
+        /// <param name="OutOffset">Offset within the destination array</param>
+        public static void XOR128(byte[] Input, int InOffset, byte[] Output, int OutOffset)
+        {
+	        Output[OutOffset] ^= Input[InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+        }
+
+        /// <summary>
+        /// Block XOR 32 bytes
+        /// </summary>
+        /// 
+        /// <param name="Input">The source array</param>
+        /// <param name="InOffset">Offset within the source array</param>
+        /// <param name="Output">The destination array</param>
+        /// <param name="OutOffset">Offset within the destination array</param>
+        public static void XOR256(byte[] Input, int InOffset, byte[] Output, int OutOffset)
+        {
+	        Output[OutOffset] ^= Input[InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+	        Output[++OutOffset] ^= Input[++InOffset];
+        }
+
+        /// <summary>
+        /// XOR contiguous 16 byte blocks in an array.
+        /// <para>The array must be aligned to 16</para>
+        /// </summary>
+        /// 
+        /// <param name="Input">The source array</param>
+        /// <param name="InOffset">Offset within the source array</param>
+        /// <param name="Output">The destination array</param>
+        /// <param name="OutOffset">Offset within the destination array</param>
+        /// <param name="Size">The number of (16 byte block aligned) bytes to process</param>
+        public static void XORBLK(byte[] Input, int InOffset, byte[] Output, int OutOffset, int Size)
+        {
+	        const int BLOCK = 16;
+	        int ctr = 0;
+
+	        do
+	        {
+		        XOR128(Input, InOffset + ctr, Output, OutOffset + ctr);
+		        ctr += BLOCK;
+
+	        } while (ctr != Size);
         }
         #endregion
     }

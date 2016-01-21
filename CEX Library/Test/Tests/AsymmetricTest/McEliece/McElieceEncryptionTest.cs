@@ -40,7 +40,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.McEliece
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Test()
+        public string Run()
         {
             try
             {
@@ -71,7 +71,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.McEliece
             {
                 cipher.Initialize(keyPair.PublicKey);
                 data = new byte[66];
-                new CSPRng().GetBytes(data);
+                new CSPPrng().GetBytes(data);
                 enc = cipher.Encrypt(data);
             }
             
@@ -101,7 +101,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.McEliece
 
                 int sz = mpe.MaxPlainText - 1;
                 byte[] data = new byte[sz];
-                new CSPRng().GetBytes(data);
+                new CSPPrng().GetBytes(data);
 
                 enc = mpe.Encrypt(data);
 
@@ -121,7 +121,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.McEliece
 
                 int sz = mpe.MaxPlainText - 1;
                 byte[] data = new byte[sz];
-                new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPRng().GetBytes(data);
+                new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPPrng().GetBytes(data);
 
                 enc = mpe.Encrypt(data);
 
@@ -141,7 +141,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.McEliece
 
                 int sz = mpe.MaxPlainText - 1;
                 byte[] data = new byte[sz];
-                new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPRng().GetBytes(data);
+                new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPPrng().GetBytes(data);
 
                 enc = mpe.Encrypt(data);
 

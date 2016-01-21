@@ -7,7 +7,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -208,11 +208,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             switch (ParamName)
             {
                 case GMSSParamNames.N2P10:
-                    return new byte[] { 5, 1, 1, 1 };
+                    return new byte[] { (byte)AsymmetricEngines.GMSS, 1, 1, 1 };
                 case GMSSParamNames.N2P20:
-                    return new byte[] { 5, 1, 2, 1 };
+                    return new byte[] { (byte)AsymmetricEngines.GMSS, 1, 2, 1 };
                 case GMSSParamNames.N2P40:
-                    return new byte[] { 5, 1, 3, 1 };
+                    return new byte[] { (byte)AsymmetricEngines.GMSS, 1, 3, 1 };
                 default:
                     throw new CryptoAsymmetricException("GMSSParamSets:GetID", "The Parameter Name is not recognized!", new ArgumentException());
             }
@@ -224,17 +224,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// Creates 2^10 (1024) signatures using the parameter set: (P(2, (5, 5), (3, 3), (3, 3)))
         /// <para>H: 10, W: 3, K: 2, PublicKey Size: 36, PrivateKey Size: 1806</para>
         /// </summary>
-        public static GMSSParameters GMSSN2P10 = new GMSSParameters(new byte[] { 5, 1, 1, 1 }, 1, new int[] { 10 }, new int[] { 3 }, new int[] { 2 }, Digests.SHA256);
+        public static GMSSParameters GMSSN2P10 = new GMSSParameters(new byte[] { (byte)AsymmetricEngines.GMSS, 1, 1, 1 }, 1, new int[] { 10 }, new int[] { 3 }, new int[] { 2 }, Digests.SHA256);
         /// <summary>
         /// Creates 2^20 (1048576) signatures using the parameter set: (P(2, (10, 10), (5, 4), (2, 2)))
         /// <para>H: 10,10, W: 5,4, K: 2,2, PublicKey Size: 36, PrivateKey Size: 6846</para>
         /// </summary>
-        public static GMSSParameters GMSSN2P20 = new GMSSParameters(new byte[] { 5, 1, 2, 1 }, 2, new int[] { 10, 10 }, new int[] { 5, 4 }, new int[] { 2, 2 }, Digests.SHA256);
+        public static GMSSParameters GMSSN2P20 = new GMSSParameters(new byte[] { (byte)AsymmetricEngines.GMSS, 1, 2, 1 }, 2, new int[] { 10, 10 }, new int[] { 5, 4 }, new int[] { 2, 2 }, Digests.SHA256);
         /// <summary>
         /// Creates 2^40 (1099511627776) signatures using the parameter set: (P(2, (10, 10, 10, 10), (9, 9, 9, 3), (2, 2, 2, 2)))
         /// <para>H: 10, 10, 10, 10, W: 9, 9, 9, 3 K: 2, 2, 2, 2, PublicKey Size: 36, PrivateKey Size: 14534</para>
         /// </summary>
-        public static GMSSParameters GMSSN2P40 = new GMSSParameters(new byte[] { 5, 1, 3, 1 }, 4, new int[] { 10, 10, 10, 10 }, new int[] { 9, 9, 9, 3 }, new int[] { 2, 2, 2, 2 }, Digests.SHA256);
+        public static GMSSParameters GMSSN2P40 = new GMSSParameters(new byte[] { (byte)AsymmetricEngines.GMSS, 1, 3, 1 }, 4, new int[] { 10, 10, 10, 10 }, new int[] { 9, 9, 9, 3 }, new int[] { 2, 2, 2, 2 }, Digests.SHA256);
         #endregion
     }
 }

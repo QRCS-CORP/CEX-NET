@@ -1,13 +1,14 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Numeric;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Numeric;
 #endregion
 
 #region License Information
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 John Underhill
+// Copyright (c) 2016 vtdev.com
 // This file is part of the CEX Cryptographic library.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -87,6 +88,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
         #region Properties
         /// <summary>
+        /// Get: The prngs type name
+        /// </summary>
+        public Prngs Enumeral
+        {
+            get { return Prngs.QCG2; }
+        }
+
+        /// <summary>
         /// Algorithm name
         /// </summary>
         public string Name
@@ -155,10 +164,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// Fill an array with pseudo random bytes
         /// </summary>
         /// 
-        /// <param name="Data">Array to fill with random bytes</param>
-        public void GetBytes(byte[] Data)
+        /// <param name="Output">Array to fill with random bytes</param>
+        public void GetBytes(byte[] Output)
         {
-            int reqSize = Data.Length;
+            int reqSize = Output.Length;
             int algSize = (reqSize % LONG_SIZE == 0 ? reqSize : reqSize + LONG_SIZE - (reqSize % LONG_SIZE));
             int lstBlock = algSize - LONG_SIZE;
             Int64[] rndNum = new Int64[1];
@@ -172,13 +181,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
                 if (i != lstBlock)
                 {
                     // copy in the int bytes
-                    Buffer.BlockCopy(rndNum, 0, Data, i, LONG_SIZE);
+                    Buffer.BlockCopy(rndNum, 0, Output, i, LONG_SIZE);
                 }
                 else
                 {
                     // final copy
                     int fnlSize = (reqSize % LONG_SIZE) == 0 ? LONG_SIZE : (reqSize % LONG_SIZE);
-                    Buffer.BlockCopy(rndNum, 0, Data, i, fnlSize);
+                    Buffer.BlockCopy(rndNum, 0, Output, i, fnlSize);
                 }
             }
         }

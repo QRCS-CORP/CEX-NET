@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Mac;
 using VTDev.Libraries.CEXEngine.Crypto.Processing;
@@ -141,8 +142,8 @@ namespace VTDev.Projects.CEX
         #region Crypto
         /// <remarks>
         /// This method demonstrates using a PackageFactory to extract a key.
-        /// StreamMac to verify with a keyed HMAC, that tests the encrypted file before it is conditionally decrypted. 
-        /// If accepted the stream is then decrypted using the StreamCipher class.
+        /// MacStream to verify with a keyed HMAC, that tests the encrypted file before it is conditionally decrypted. 
+        /// If accepted the stream is then decrypted using the CipherStream class.
         /// </remarks>
         private void Decrypt()
         {
@@ -178,7 +179,7 @@ namespace VTDev.Projects.CEX
                     {
                         // get the hmac for the encrypted file; this could be made selectable
                         // via the KeyHeaderStruct MacDigest and MacSize members.
-                        using (StreamMac mstrm = new StreamMac(new SHA512HMAC(keyParam.IKM)))
+                        using (MacStream mstrm = new MacStream(new HMAC(new SHA512(), keyParam.IKM)))
                         {
                             // get the message header mac
                             byte[] chksum = MessageHeader.GetMessageMac(inStream, cipherDesc.MacSize);
@@ -199,21 +200,21 @@ namespace VTDev.Projects.CEX
                         }
                     }
 
-                    // with this constructor, the StreamCipher class creates the cryptographic 
+                    // with this constructor, the CipherStream class creates the cryptographic 
                     // engine using the description contained in the CipherDescription structure.
                     // The (cipher and) engine are automatically destroyed in the cipherstream dispose
-                    using (StreamCipher cstrm = new StreamCipher(false, cipherDesc, keyParam))
+                    using (CipherStream cstrm = new CipherStream(cipherDesc))
                     {
                         using (FileStream outStream = new FileStream(_outputPath, FileMode.Create, FileAccess.Write))
                         {
                             // start at an input offset equal to the message header size
                             inStream.Seek(hdrOffset, SeekOrigin.Begin);
                             // use a percentage counter
-                            cstrm.ProgressPercent += new StreamCipher.ProgressDelegate(OnProgressPercent);
+                            cstrm.ProgressPercent += new CipherStream.ProgressDelegate(OnProgressPercent);
                             // initialize internals
-                            cstrm.Initialize(inStream, outStream);
+                            cstrm.Initialize(false, keyParam);
                             // write the decrypted output to file
-                            cstrm.Write();
+                            cstrm.Write(inStream, outStream);
                         }
                     }
                 }
@@ -235,9 +236,9 @@ namespace VTDev.Projects.CEX
         }
 
         /// <remarks>
-        /// This method demonstrates using a PackageFactory and StreamCipher class to
+        /// This method demonstrates using a PackageFactory and CipherStream class to
         /// both encrypt a file, and optionally sign the message with an SHA512 HMAC.
-        /// See the StreamCipher and StreamMac documentation for more examples.
+        /// See the CipherStream and MacStream documentation for more examples.
         /// </remarks>
         private void Encrypt()
         {
@@ -265,10 +266,10 @@ namespace VTDev.Projects.CEX
                 // offset start position is base header + Mac size
                 int hdrOffset = MessageHeader.GetHeaderSize + keyHeader.MacSize;
 
-                // with this constructor, the StreamCipher class creates the cryptographic
+                // with this constructor, the CipherStream class creates the cryptographic
                 // engine using the description in the CipherDescription.
                 // The (cipher and) engine are destroyed in the cipherstream dispose
-                using (StreamCipher cstrm = new StreamCipher(true, keyHeader, keyParam))
+                using (CipherStream cstrm = new CipherStream(keyHeader))
                 {
                     using (FileStream inStream = new FileStream(_inputPath, FileMode.Open, FileAccess.Read))
                     {
@@ -277,11 +278,11 @@ namespace VTDev.Projects.CEX
                             // start at an output offset equal to the message header + MAC length
                             outStream.Seek(hdrOffset, SeekOrigin.Begin);
                             // use a percentage counter
-                            cstrm.ProgressPercent += new StreamCipher.ProgressDelegate(OnProgressPercent);
+                            cstrm.ProgressPercent += new CipherStream.ProgressDelegate(OnProgressPercent);
                             // initialize internals
-                            cstrm.Initialize(inStream, outStream);
+                            cstrm.Initialize(true, keyParam);
                             // write the encrypted output to file
-                            cstrm.Write();
+                            cstrm.Write(inStream, outStream);
 
                             // write the key id to the header
                             MessageHeader.SetKeyId(outStream, keyId);
@@ -296,8 +297,8 @@ namespace VTDev.Projects.CEX
                                 // This is where you would select and initialize the correct Digest via the
                                 // CipherDescription members, and initialize the corresponding digest. 
                                 // For expedience, this example is fixed on the default SHA512.
-                                // An optional progress event is available in the StreamMac class.
-                                using (StreamMac mstrm = new StreamMac(new SHA512HMAC(keyParam.IKM)))
+                                // An optional progress event is available in the MacStream class.
+                                using (MacStream mstrm = new MacStream(new HMAC(new SHA512(), keyParam.IKM)))
                                 {
                                     // seek to end of header
                                     outStream.Seek(hdrOffset, SeekOrigin.Begin);
@@ -457,19 +458,19 @@ namespace VTDev.Projects.CEX
             return string.Empty;
         }
 
-        private void LoadComboParams()
+        private void LoadComboDefaults()
         {
             ComboHelper.LoadEnumValues(cbEngines, typeof(SymmetricEngines));
-            ComboHelper.LoadEnumValues(cbCipherMode, typeof(CipherModes));
+            ComboHelper.AddEnumRange(cbCipherMode, typeof(CipherModes), 1, 8);
             ComboHelper.LoadEnumValues(cbPaddingMode, typeof(PaddingModes));
             ComboHelper.LoadEnumValues(cbHkdf, typeof(Digests));
             ComboHelper.LoadEnumValues(cbHmac, typeof(Digests));
 
             cbVectorSize.SelectedIndex = 0;
-            cbCipherMode.SelectedIndex = 3;
-            cbPaddingMode.SelectedIndex = 3;
-            cbHkdf.SelectedIndex = 4;
-            cbHmac.SelectedIndex = 2;
+            cbCipherMode.SelectedIndex = 2;
+            cbPaddingMode.SelectedIndex = 1;
+            cbHkdf.SelectedIndex = 5;
+            cbHmac.SelectedIndex = 5;
         }
 
         private void Reset()
@@ -495,20 +496,19 @@ namespace VTDev.Projects.CEX
         {
             cbKeySize.Items.Clear();
 
-            if (CipherEngine == SymmetricEngines.Fusion ||
-                CipherEngine == SymmetricEngines.RHX ||
-                CipherEngine == SymmetricEngines.RSM ||
+            if (CipherEngine == SymmetricEngines.RHX ||
                 CipherEngine == SymmetricEngines.SHX ||
-                CipherEngine == SymmetricEngines.TSM ||
                 CipherEngine == SymmetricEngines.THX)
             {
-                cbHkdf.Enabled = true;
+                cbKeySize.Items.Add(KeySizes.K128);
+                cbKeySize.Items.Add(KeySizes.K192);
+                cbKeySize.Items.Add(KeySizes.K256);
+                cbKeySize.Items.Add(KeySizes.K512);
 
                 switch (KdfEngine)
                 {
                     case Digests.Blake256:
                     case Digests.Skein256:
-                        cbKeySize.Items.Add(KeySizes.K512);
                         cbKeySize.Items.Add(KeySizes.K768);
                         cbKeySize.Items.Add(KeySizes.K1024);
                         cbKeySize.Items.Add(KeySizes.K1280);
@@ -545,39 +545,27 @@ namespace VTDev.Projects.CEX
                         cbKeySize.Items.Add(KeySizes.K5120);
                         break;
                 }
-            }
-            else if (CipherEngine == SymmetricEngines.RDX ||
-                CipherEngine == SymmetricEngines.SPX ||
-                CipherEngine == SymmetricEngines.TFX)
-            {
-                cbHkdf.Enabled = false;
-                cbKeySize.Items.Add(KeySizes.K128);
-                cbKeySize.Items.Add(KeySizes.K256);
-                cbKeySize.Items.Add(KeySizes.K512);
+                ComboHelper.SetSelectedIndex(cbKeySize, 2);
             }
             else if (CipherEngine == SymmetricEngines.ChaCha ||
                 CipherEngine == SymmetricEngines.Salsa)
             {
-                cbHkdf.Enabled = false;
                 cbKeySize.Items.Add(KeySizes.K128);
                 cbKeySize.Items.Add(KeySizes.K256);
-                cbKeySize.Items.Add(KeySizes.K384);
-                cbKeySize.Items.Add(KeySizes.K448);
+                ComboHelper.SetSelectedIndex(cbKeySize, 1);
             }
-
-            ComboHelper.SetSelectedIndex(cbKeySize, 1);
         }
 
         private void SetComboParams(SymmetricEngines Engine)
         {
             cbCipherMode.Enabled = true;
-            cbPaddingMode.Enabled = true;
             cbRounds.Enabled = true;
             cbVectorSize.Enabled = true;
             cbRounds.Items.Clear();
             cbVectorSize.Items.Clear();
             cbVectorSize.Items.Add(IVSizes.V128);
             cbVectorSize.SelectedIndex = 0;
+            cbVectorSize.Enabled = cbHkdf.Enabled = cbPaddingMode.Enabled = Engine != SymmetricEngines.ChaCha && Engine != SymmetricEngines.Salsa;
 
             switch (Engine)
             {
@@ -585,36 +573,15 @@ namespace VTDev.Projects.CEX
                 case SymmetricEngines.Salsa:
                     cbCipherMode.Enabled = false;
                     cbPaddingMode.Enabled = false;
-                    ComboHelper.AddEnumRange(cbRounds, typeof(RoundCounts), 8, 30);
+                    ComboHelper.AddEnumRange(cbRounds, typeof(RoundCounts), 8, 20);
                     ComboHelper.SetSelectedIndex(cbRounds, 6);
                     cbVectorSize.Items.Clear();
                     cbVectorSize.Items.Add(IVSizes.V64);
                     cbVectorSize.SelectedIndex = 0;
                     break;
-                case SymmetricEngines.Fusion:
-                    cbCipherMode.Enabled = false;
-                    cbPaddingMode.Enabled = false;
-                    ComboHelper.AddEnumRange(cbRounds, typeof(RoundCounts), 16, 32);
-                    ComboHelper.SetSelectedIndex(cbRounds, 0);
-                    break;
-                case SymmetricEngines.RDX:
-                    cbRounds.Enabled = false;
-                    cbVectorSize.Items.Add(IVSizes.V256);
-                    cbVectorSize.SelectedIndex = 0;
-                    break;
                 case SymmetricEngines.RHX:
                     ComboHelper.AddEnumRange(cbRounds, typeof(RoundCounts), 10, 38);
                     ComboHelper.SetSelectedIndex(cbRounds, 2);
-                    cbVectorSize.Items.Add(IVSizes.V256);
-                    cbVectorSize.SelectedIndex = 0;
-                    break;
-                case SymmetricEngines.RSM:
-                    cbRounds.Items.Add(RoundCounts.R10);
-                    cbRounds.Items.Add(RoundCounts.R18);
-                    cbRounds.Items.Add(RoundCounts.R26);
-                    cbRounds.Items.Add(RoundCounts.R34);
-                    cbRounds.Items.Add(RoundCounts.R42);
-                    ComboHelper.SetSelectedIndex(cbRounds, 1);
                     cbVectorSize.Items.Add(IVSizes.V256);
                     cbVectorSize.SelectedIndex = 0;
                     break;
@@ -626,29 +593,16 @@ namespace VTDev.Projects.CEX
                     cbRounds.Items.Add(RoundCounts.R64);
                     ComboHelper.SetSelectedIndex(cbRounds, 0);
                     break;
-                case SymmetricEngines.SPX:
-                    cbRounds.Items.Add(RoundCounts.R32);
-                    cbRounds.Items.Add(RoundCounts.R40);
-                    cbRounds.Items.Add(RoundCounts.R48);
-                    cbRounds.Items.Add(RoundCounts.R56);
-                    cbRounds.Items.Add(RoundCounts.R64);
-                    ComboHelper.SetSelectedIndex(cbRounds, 0);
-                    break;
-                case SymmetricEngines.TFX:
+                case SymmetricEngines.THX:
                     ComboHelper.AddEnumRange(cbRounds, typeof(RoundCounts), 16, 32);
                     ComboHelper.SetSelectedIndex(cbRounds, 0);
-                    break;
-                case SymmetricEngines.TSM:
-                    cbRounds.Items.Add(RoundCounts.R16);
-                    cbRounds.Items.Add(RoundCounts.R24);
-                    cbRounds.Items.Add(RoundCounts.R32);
-                    ComboHelper.SetSelectedIndex(cbRounds, 0);
+                    cbVectorSize.SelectedIndex = 0;
                     break;
                 default:
-                    ComboHelper.AddEnumRange(cbRounds, typeof(RoundCounts), 16, 32);
-                    ComboHelper.SetSelectedIndex(cbRounds, 0);
-                    break;
+                    throw new ArgumentOutOfRangeException();
             }
+
+            SetRounds();
         }
         #endregion
 
@@ -659,6 +613,7 @@ namespace VTDev.Projects.CEX
             CipherModes cmode = CipherModes.CTR;
             Enum.TryParse<CipherModes>(((ComboBox)sender).Text, out cmode);
             _container.Description.CipherType = (int)cmode;
+            cbPaddingMode.Enabled = cmode != CipherModes.CTR;
         }
 
         private void OnEngineChanged(object sender, EventArgs e)
@@ -688,24 +643,7 @@ namespace VTDev.Projects.CEX
             Digests digest = Digests.Keccak512;
             Enum.TryParse<Digests>(((ComboBox)sender).Text, out digest);
             _container.Description.MacEngine = (int)digest;
-
-            switch (digest)
-            {
-                case Digests.Blake256:
-                case Digests.SHA256:
-                case Digests.Skein256:
-                    _macSize = 32;
-                    break;
-                case Digests.Blake512:
-                case Digests.SHA512:
-                case Digests.Skein512:
-                case Digests.Keccak512:
-                    _macSize = 64;
-                    break;
-                case Digests.Skein1024:
-                    _macSize = 128;
-                    break;
-            }
+            _macSize = GetMacSize(digest);
         }
 
         private void OnInfoButtonClick(object sender, EventArgs e)
@@ -764,9 +702,9 @@ namespace VTDev.Projects.CEX
 
         private void OnKeySizeChanged(object sender, EventArgs e)
         {
-            KeySizes ksize = KeySizes.K256;
-            Enum.TryParse<KeySizes>(((ComboBox)sender).Text, out ksize);
-            _container.Description.KeySize = (int)ksize;
+            int ksize = GetKeySize();
+            _container.Description.KeySize = ksize;
+            SetRounds();
         }
 
         private void OnPaddingModeChanged(object sender, EventArgs e)
@@ -776,10 +714,10 @@ namespace VTDev.Projects.CEX
             _container.Description.PaddingType = (int)padding;
         }
 
-        private void OnProgressPercent(object sender, ProgressChangedEventArgs e)
+        private void OnProgressPercent(object sender, CipherStream.ProgressEventArgs args)
         {
             if (pbStatus.InvokeRequired)
-                pbStatus.Invoke(new MethodInvoker(delegate { pbStatus.Value = (int)e.ProgressPercentage; }));
+                pbStatus.Invoke(new MethodInvoker(delegate { pbStatus.Value = (int)args.Percent; }));
         }
 
         private void OnRoundsChanged(object sender, EventArgs e)
@@ -789,9 +727,22 @@ namespace VTDev.Projects.CEX
             _container.Description.RoundCount = (int)rcount;
         }
 
+        private void OnSigningChanged(object sender, EventArgs e)
+        {
+            CheckBox chk = sender as CheckBox;
+            Digests digest = Digests.Keccak512;
+            Enum.TryParse<Digests>(cbHmac.Text, out digest);
+
+            if (!chk.Checked)
+                _macSize = 0;
+            else
+                _macSize = GetMacSize(digest);
+            _container.Description.MacSize = _macSize;
+        }
+
         private void OnSubKeyCountKeyPress(object sender, KeyPressEventArgs e)
         {
-            e.Handled = (!char.IsDigit(e.KeyChar) /*&& !char.IsControl(e.KeyChar)*/);
+            e.Handled = (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar));
         }
 
         private void OnSubKeyCountTextChanged(object sender, EventArgs e)
@@ -863,6 +814,11 @@ namespace VTDev.Projects.CEX
                 chkPackageAuth.Enabled = true;
                 chkPackageAuth.Checked = true;
             }
+        }
+
+        private void OnKeyFileTextChanged(object sender, EventArgs e)
+        {
+            btnInfo.Enabled = txtKeyFile.Text.Length != 0 ? File.Exists(txtKeyFile.Text) : false;
         }
 
         private void OnLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -1038,7 +994,7 @@ namespace VTDev.Projects.CEX
         {
             _isParallel = Environment.ProcessorCount > 1;
             Reset();
-            LoadComboParams();
+            LoadComboDefaults();
             SetComboParams(SymmetricEngines.RHX);
             LoadSettings();
         }
@@ -1087,14 +1043,14 @@ namespace VTDev.Projects.CEX
                     _container.Authority.OptionFlag = 0;
                     _container.Authority.KeyPolicy = 0;
                     // apply the container values to controls
-                    cbEngines.SelectedIndex = _container.Description.EngineType;
+                    cbEngines.SelectedIndex = ComboHelper.IndexFromValue(_container.Description.EngineType, typeof(SymmetricEngines), cbEngines);
                     SetComboParams((SymmetricEngines)_container.Description.EngineType);
                     SetKeySizes((SymmetricEngines)_container.Description.EngineType, (Digests)_container.Description.KdfEngine);
-                    cbCipherMode.SelectedIndex = _container.Description.CipherType;
-                    cbHkdf.SelectedIndex = _container.Description.KdfEngine;
-                    cbHmac.SelectedIndex = _container.Description.MacEngine;
+                    cbCipherMode.SelectedIndex = ComboHelper.IndexFromValue(_container.Description.CipherType, typeof(CipherModes), cbCipherMode);
+                    cbHkdf.SelectedIndex = ComboHelper.IndexFromValue(_container.Description.KdfEngine, typeof(Digests), cbHkdf);
+                    cbHmac.SelectedIndex = ComboHelper.IndexFromValue(_container.Description.MacEngine, typeof(Digests), cbHmac);
                     cbKeySize.SelectedIndex = ComboHelper.IndexFromValue(_container.Description.KeySize, typeof(KeySizes), cbKeySize);
-                    cbPaddingMode.SelectedIndex = _container.Description.PaddingType;
+                    cbPaddingMode.SelectedIndex = ComboHelper.IndexFromValue(_container.Description.PaddingType, typeof(PaddingModes), cbPaddingMode);
                     cbRounds.SelectedIndex = ComboHelper.IndexFromValue(_container.Description.RoundCount, typeof(RoundCounts), cbRounds);
                     cbVectorSize.SelectedIndex = ComboHelper.IndexFromValue(_container.Description.IvSize, typeof(IVSizes), cbVectorSize);
                     chkDomainRestrict.Checked = _container.DomainRestrictChecked;
@@ -1150,6 +1106,38 @@ namespace VTDev.Projects.CEX
                 _container.Authority.KeyPolicy &= ~(long)KeyPolicy;
         }
 
+        private int GetKeySize()
+        {
+            KeySizes ksize = KeySizes.K256;
+            Enum.TryParse<KeySizes>(cbKeySize.Text, out ksize);
+            return (int)ksize;
+        }
+
+        private int GetMacSize(Digests DigestType)
+        {
+            int macSize = 0;
+
+            switch (DigestType)
+            {
+                case Digests.Blake256:
+                case Digests.SHA256:
+                case Digests.Skein256:
+                    macSize = 32;
+                    break;
+                case Digests.Blake512:
+                case Digests.SHA512:
+                case Digests.Skein512:
+                case Digests.Keccak512:
+                    macSize = 64;
+                    break;
+                case Digests.Skein1024:
+                    macSize = 128;
+                    break;
+            }
+
+            return macSize;
+        }
+
         private bool HasPolicy(KeyPolicies KeyPolicy)
         {
             return ((_container.Authority.KeyPolicy & (long)KeyPolicy) == (long)KeyPolicy);
@@ -1165,6 +1153,35 @@ namespace VTDev.Projects.CEX
         {
             if (!HasPolicy(KeyPolicy))
                 _container.Authority.KeyPolicy |= (long)KeyPolicy;
+        }
+
+        private void SetRounds()
+        {
+            int ksize = GetKeySize();
+            cbRounds.Enabled = true;
+
+            if (cbEngines.SelectedIndex == 0)
+            {
+                if (ksize == 16)
+                    cbRounds.SelectedIndex = 0;
+                else if (ksize == 24)
+                    cbRounds.SelectedIndex = 1;
+                else if (ksize == 32)
+                    cbRounds.SelectedIndex = 2;
+                else
+                    cbRounds.SelectedIndex = 6;
+            }
+            else if (cbEngines.SelectedIndex < 3)
+            {
+                cbRounds.SelectedIndex = 0;
+            }
+            else
+            {
+                cbRounds.SelectedIndex = 6;
+            }
+
+            cbHkdf.Enabled = (ksize > 64 && cbEngines.SelectedIndex < 3);
+            cbRounds.Enabled = (ksize > 64 || cbEngines.SelectedIndex > 2);
         }
 
         private bool ShowAuthDialog()
@@ -1226,28 +1243,6 @@ namespace VTDev.Projects.CEX
                 lblStatus.Visible = false;
                 this.Text = "CEX - Set the Key Package Attributes";
             }
-        }
-
-        #endregion
-
-        #region Saved
-        /// <summary>
-        /// Use this method to test speeds on.. anything and everything
-        /// </summary>
-        private string SpeedTest(Action Test, int Iterations = 1)
-        {
-            // output results to a label to test compiled times..
-            string ft = @"m\:ss\.ff";
-            System.Diagnostics.Stopwatch runTimer = new System.Diagnostics.Stopwatch();
-
-            runTimer.Start();
-
-            for (int i = 0; i < Iterations; i++)
-                Test();
-
-            runTimer.Stop();
-
-            return TimeSpan.FromMilliseconds(runTimer.Elapsed.TotalMilliseconds).ToString(ft);
         }
         #endregion
     }

@@ -107,7 +107,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             get { return _dgtEngineType; }
             private set
             {
-                if (value == Digests.Keccak1024 || value == Digests.Skein1024)
+                if (value == Digests.Skein1024)
                     throw new CryptoAsymmetricException("MPKCParameters:Digest", "Only 512 and 256 bit Digests are supported!", new ArgumentException());
 
                 _dgtEngineType = value;

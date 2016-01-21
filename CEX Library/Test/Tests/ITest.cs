@@ -18,6 +18,6 @@ namespace VTDev.Projects.CEX.Test.Tests
         /// Run the test
         /// </summary>
         /// <returns>Test result message</returns>
-        string Test();
+        string Run();
     }
 }
