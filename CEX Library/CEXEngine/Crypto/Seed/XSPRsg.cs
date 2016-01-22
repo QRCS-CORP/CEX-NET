@@ -39,7 +39,7 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 {
     /// <summary>
-    /// XSPRsg: Generates seed material using an XorShift+ generator.
+    /// <h5>XSPRsg: Generates seed material using an XorShift+ generator.</h5>
     /// <para>This generator is not generally considered a cryptographic quality generator. 
     /// This generator is suitable as a quality high-speed number generator, but not to be used directly for tasks that require secrecy, ex. key generation.</para>
     /// </summary>
@@ -137,7 +137,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         ///
         /// <param name="Seed">The initial state values; can be either 2, or 16, (non-zero) 64bit values</param>
         ///
-        /// <exception cref="CEX::Exception::CryptoRandomException">Thrown if an invalid seed array is used</exception>
+        /// <exception cref="CryptoRandomException">Thrown if an invalid seed array is used</exception>
+        [CLSCompliant(false)]
         public XSPRsg(ulong[] Seed)
         {
             if (Seed.Length != SEED128 && Seed.Length != SEED1024)
@@ -216,6 +217,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         /// <param name="X">Input integer</param>
         /// 
         /// <returns>A processed long integer</returns>
+        [CLSCompliant(false)]
         public ulong Split(ulong X)
         {
             ulong Z = (X += Z1);

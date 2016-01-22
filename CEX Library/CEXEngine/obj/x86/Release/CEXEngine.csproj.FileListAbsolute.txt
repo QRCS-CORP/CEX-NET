@@ -6,3 +6,7 @@ C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\CEXEngine\bin\x86\Release\CEXEngine.pdb
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\CEXEngine\obj\x86\Release\CEXEngine.dll
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\CEXEngine\obj\x86\Release\CEXEngine.pdb
+C:\Users\John\Documents\Visual Studio 2015\Projects\Crypto\CEX .NET\CEX Library\CEXEngine\bin\x86\Release\CEXEngine.dll
+C:\Users\John\Documents\Visual Studio 2015\Projects\Crypto\CEX .NET\CEX Library\CEXEngine\bin\x86\Release\CEXEngine.pdb
+C:\Users\John\Documents\Visual Studio 2015\Projects\Crypto\CEX .NET\CEX Library\CEXEngine\obj\x86\Release\CEXEngine.dll
+C:\Users\John\Documents\Visual Studio 2015\Projects\Crypto\CEX .NET\CEX Library\CEXEngine\obj\x86\Release\CEXEngine.pdb

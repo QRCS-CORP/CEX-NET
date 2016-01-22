@@ -40,7 +40,7 @@ using VTDev.Libraries.CEXEngine.Tools;
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 {
     /// <summary>
-    /// <h3>Compression cipher helper class.</h3>
+    /// <h5>CompressionCipher: Used to compress and cryptographically transform a stream.</h5>
     /// <para>Extends the CipherStream class for encrypting a compressed directory of files.
     /// If the cipher is for encryption, files are compressed and encrypted to the output stream.
     /// If the cipher is for decryption, the input stream contains the compressed and encrypted directory, 
@@ -116,7 +116,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     /// <item><description>Uses any of the implemented <see cref="ICipherMode">Cipher Mode</see> wrapped <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">Block Ciphers</see>, or any of the implemented <see cref="IStreamCipher">Stream Ciphers</see>.</description></item>
     /// <item><description>Cipher Engine can be Disposed when this class is Disposed, set the DisposeEngine parameter in the class Constructor to true to dispose automatically.</description></item>
     /// <item><description>Streams can be Disposed when the class is Disposed, set the DisposeStream parameter in the Initialize(Stream, Stream, bool) call to true to dispose automatically.</description></item>
-    /// <item><description>Implementation has a Progress counter that returns total sum of bytes processed per any of the <see cref="Write()">Write()</see> calls.</description></item>
+    /// <item><description>Implementation has a Progress counter that returns total sum of bytes processed per any of the compress/decompress calls.</description></item>
     /// <item><description>Changes to the Cipher or CipherStream ParallelBlockSize must be set after initialization.</description></item>
     /// </list>
     /// </remarks>
@@ -193,8 +193,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// 
         /// <param name="Encryption">Archive encryption or decryption</param>
         /// <param name="KeyParam">The class containing the cipher keying material</param>
-        public void Initialize(bool Encryption, KeyParams KeyParam)
+        /// <param name="Format">The compression algorithm</param>
+        public void Initialize(bool Encryption, KeyParams KeyParam, Compressor.CompressionFormats Format = Compressor.CompressionFormats.Deflate)
         {
+            _cmpEngine = new Compressor(Format);
             base.Initialize(Encryption, KeyParam);
             _isInitialized = true;
         }

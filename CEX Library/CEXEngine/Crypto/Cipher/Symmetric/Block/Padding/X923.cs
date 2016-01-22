@@ -7,7 +7,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
 {
     /// <summary>
-    /// <h3>The X.923 Padding Scheme.</h3>
+    /// <h5>X923: The X.923 Padding Scheme.</h5>
     /// </summary>
     public sealed class X923 : IPadding
     {

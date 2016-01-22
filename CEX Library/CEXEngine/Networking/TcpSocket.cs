@@ -153,7 +153,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
         /// The Session Error delegate
         /// </summary>
         /// <param name="owner">The owner object</param>
-        /// <param name="args">A <see cref="CryptoSocketException"/> class</param>
+        /// <param name="ex">A <see cref="CryptoSocketException"/> class</param>
         public delegate void TcpSocketErrorDelegate(object owner, CryptoSocketException ex);
         /// <summary>
         /// The Session Error event; fires when an error has occured

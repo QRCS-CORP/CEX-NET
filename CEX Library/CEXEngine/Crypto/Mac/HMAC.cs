@@ -39,7 +39,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 {
     /// <summary>
-    /// <h3>An implementation of a Hash based Message Authentication Code: HMAC<cite>Fips 198-1</cite>.</h3>
+    /// <h5>HMAC: An implementation of a Hash based Message Authentication Code: HMAC<cite>Fips 198-1</cite>.</h5>
     /// <para>A HMAC as outlined in the NIST document: Fips 198-1<cite>Fips 198-1</cite></para>
     /// </summary>
     /// 
@@ -176,7 +176,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 
         /// <summary>
         /// Initialize the class and working variables.
-        /// <para>When this constructor is used, <see cref="Initialize(KeyParams)"/> is called automatically.</para>
+        /// <para>When this constructor is used, <see cref="Initialize(byte[], byte[])"/> is called automatically.</para>
         /// </summary>
         /// 
         /// <param name="Digest">Message Digest instance</param>

@@ -38,7 +38,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 {
     /// <summary>
-    /// <h3>An implementation of a Variably Modified Permutation Composition based Message Authentication Code: VMPC-MAC.</h3>
+    /// <h5>VMAC: An implementation of a Variably Modified Permutation Composition based Message Authentication Code: VMPC-MAC.</h5>
     /// <para>A VMPC-MAC as outlined in the VMPC-MAC Specification<cite>VMPC-MAC</cite></para>
     /// </summary>
     /// 

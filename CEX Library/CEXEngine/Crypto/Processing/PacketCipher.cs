@@ -42,7 +42,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Helper;
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 {
     /// <summary>
-    /// <h3>Packet cipher helper class.</h3>
+    /// <h5>PacketCipher: Performs a streaming packet cryptographic transform.</h5>
     /// <para>Wraps encryption/decryption of a byte array in a continuous operation.</para>
     /// 
     /// </summary> 

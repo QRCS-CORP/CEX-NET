@@ -39,7 +39,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 {
     /// <summary>
-    /// <h3>Skein512: An implementation of the Skein digest with a 512 bit digest return size.</h3>
+    /// <h5>Skein512: An implementation of the Skein digest with a 512 bit digest return size.</h5>
     /// <para>SHA-3 finalist<cite>NIST IR7896</cite>: The Skein<cite>Skein</cite> digest</para>
     /// </summary> 
     /// 

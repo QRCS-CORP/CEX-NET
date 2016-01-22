@@ -216,7 +216,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// Get the cipher engine
         /// </summary>
         /// 
-        /// <param name="Prng">The Prng</param>
+        /// <param name="PrngType">The Prng</param>
         /// 
         /// <returns>An initialized prng</returns>
         private IRandom GetPrng(Prngs PrngType)

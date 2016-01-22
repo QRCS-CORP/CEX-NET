@@ -38,7 +38,7 @@ using VTDev.Libraries.CEXEngine.Numeric;
 namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 {
     /// <summary>
-    /// <h3>An implementation of a Quadratic Congruential Generator II random number generator : QCG-II.</h3>
+    /// <h5>QCG2: An implementation of a Quadratic Congruential Generator II random number generator : QCG-II.</h5>
     /// <para>Implements QCGII as defined in the NIST document: SP800-22 1a<cite>SP800-22A</cite>, Section D.3</para>
     /// </summary>
     /// 

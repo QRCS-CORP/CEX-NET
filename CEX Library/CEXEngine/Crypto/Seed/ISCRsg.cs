@@ -39,7 +39,7 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 {
     /// <summary>
-    /// ISCRsg: Generates seed material using an ISAAC random number generator
+    /// <h5>ISCRsg: Generates seed material using an ISAAC random number generator.</h5>
     /// <para>A high speed, cryptographically secure pseudo random provider.</para>
     /// </summary>
     /// 
@@ -73,16 +73,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 	    private const int MSIZE = 1 << SIZE64;
 	    private const int MASK = (MSIZE - 1) << 2;
         private const int GDNR = unchecked((int)0x9e3779b9); // golden ratio
-        private readonly int MAX_ALLOC = 1024;
         #endregion
 
         #region Fields
         private int _accululator = 0;
         private int _cycCounter = 0;
-        private bool _isDestroyed = false;
         private bool _isDisposed = false;
         private int _lstResult = 0;
-        private int _rndCount = 0;
         private int[] _rndResult = new int[MSIZE];
         private uint _rslCounter = 0;
         private int[] _wrkBuffer = new int[MSIZE];
@@ -255,6 +252,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         /// <summary>
         /// Returns the next pseudo random 32bit integer
         /// </summary>
+        /// 
+        /// <returns>A pseudo random 32 bit integer</returns>
         public int Next()
         {
             if (0 == _rslCounter--)
@@ -392,7 +391,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
                     _accululator = 0;
                     _cycCounter = 0;
                     _lstResult = 0;
-                    _rndCount = 0;
                     _rslCounter = 0;
 
                     if (_rndResult != null)

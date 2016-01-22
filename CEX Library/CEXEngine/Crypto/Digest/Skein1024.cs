@@ -40,7 +40,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 {
     /// <summary>
-    /// <h3>Skein1024: An implementation of the Skein digest with a 1024 bit digest return size.</h3>
+    /// <h5>Skein1024: An implementation of the Skein digest with a 1024 bit digest return size.</h5>
     /// <para>SHA-3 finalist<cite>NIST IR7896</cite>: The Skein<cite>Skein</cite> digest</para>
     /// </summary> 
     /// 
@@ -107,7 +107,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         private byte[] _inputBuffer;
         private bool _isDisposed = false;
         private UInt64[] _digestState;
-        private int _stateSize;
         private UbiTweak _ubiParameters;
         #endregion
 

@@ -40,7 +40,7 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 {
     /// <summary>
-    /// <h3>Implements a Parallel Segmented Counter Mode: CTR.</h3>
+    /// <h5>CTR: Implements a Parallel Segmented Counter Mode: CTR.</h5>
     /// <para>CTR as outlined in the NIST document: SP800-38A<cite>SP800-38A</cite></para>
     /// </summary> 
     /// 
@@ -71,10 +71,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
     /// <list type="bullet">
+    /// <item><description>In CTR mode, both encryption and decryption can be processed in parallel.</description></item>
     /// <item><description>Parallel processing is enabled by passing a block size of <see cref="ParallelBlockSize"/> to the transform.</description></item>
     /// <item><description><see cref="ParallelBlockSize"/> must be divisible by <see cref="ParallelMinimumSize"/>.</description></item>
     /// <item><description>Parallel block calculation ex. <c>int blocklen = (data.Length / cipher.ParallelMinimumSize) * 10</c></description></item>
-    /// <item><description>Cipher Engine is automatically disposed of unless DisposeEngine is set to <c>false</c> in the class constructor <see cref="CBC(IBlockCipher, bool)"/></description></item>
+    /// <item><description>Cipher Engine is automatically disposed of unless DisposeEngine is set to <c>false</c> in the class constructor <see cref="CTR(IBlockCipher, bool)"/></description></item>
     /// </list>
     /// 
     /// <description><h4>Guiding Publications:</h4></description>

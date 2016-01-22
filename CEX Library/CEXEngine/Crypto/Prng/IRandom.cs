@@ -24,7 +24,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// Fill an array with pseudo random bytes
         /// </summary>
         /// 
-        /// <param name="Data">Array to fill with random bytes</param>
+        /// <param name="Output">Array to fill with random bytes</param>
         void GetBytes(byte[] Output);
 
         /// <summary>

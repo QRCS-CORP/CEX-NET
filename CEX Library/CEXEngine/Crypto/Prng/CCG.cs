@@ -38,7 +38,7 @@ using VTDev.Libraries.CEXEngine.Numeric;
 namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 {
     /// <summary>
-    /// <h3>An implementation of the Cubic Congruential Generator II random number generator: CCG</h3>
+    /// <h5>CCG: An implementation of the Cubic Congruential Generator II random number generator: CCG</h5>
     /// <para>Implements CCG as defined in the NIST document: SP800-22 1a<cite>SP800-22A</cite>, Section D.4</para>
     /// </summary>
     /// 

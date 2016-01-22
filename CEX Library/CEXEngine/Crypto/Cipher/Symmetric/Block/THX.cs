@@ -49,8 +49,11 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 {
     /// <summary>
-    /// <h3>THX: A Twofish Cipher extended with an HKDF powered Key Schedule.</h3>
-    /// <para>THX is an implementation of the Twofish<cite>Twofish</cite> block cipher combined with an HKDF powered Key Schedule.</para>
+    /// <h5>THX: A Twofish Cipher extended with an (optional) HKDF powered Key Schedule.</h5>
+    /// <para>THX is a Twofish<cite>Twofish</cite> implementation that can use a standard configuration on key sizes up to 256 bits, 
+    /// an extended key size of 512 bits, or unlimited key sizes greater than 64 bytes. 
+    /// On <see cref="LegalKeySizes"/> larger than 64 bytes, an HKDF bytes generator is used to expand the <c>working key</c> integer array.
+    /// In extended mode, the number of <c>transformation rounds</c> can be user assigned (through the constructor) to between 16 and 32 rounds.</para>
     /// </summary>
     /// 
     /// <example>
@@ -71,19 +74,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// <revision date="2015/01/23" version="1.3.0.0">Secondary release using an assignable Digest in the HKDF engine</revision>
     /// <revision date="2015/03/15" version="1.3.2.0">Added the IkmSize optional parameter to the constructor, and the DistributionCode property</revision>
     /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
+    /// <revision date="2016/01/21" version="1.5.0.0">Merged TFX and THX implementations</revision>
     /// </revisionHistory>
     /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Generator.HKDF">VTDev.Libraries.CEXEngine.Crypto.HKDF Generator</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockCiphers">VTDev.Libraries.CEXEngine.Crypto.Enumeration BlockCiphers Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.CipherModes">VTDev.Libraries.CEXEngine.Crypto.Enumeration CipherModes Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Generator.HKDF">VTDev.Libraries.CEXEngine.Crypto.Generator HKDF Generator</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode ICipherMode Interface</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest IDigest Interface</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
     /// <list type="bullet">
     /// <item><description><see cref="HKDF">HKDF</see> Digest <see cref="Digests">engine</see> is definable through the <see cref="THX(int, Digests)">Constructor</see> parameter: KeyEngine.</description></item>
-    /// <item><description>Key Schedule is powered by a Hash based Key Derivation Function using a definable <see cref="IDigest">Digest</see>.</description></item>
+    /// <item><description>Key Schedule is (optionally) powered by a Hash based Key Derivation Function using a definable <see cref="IDigest">Digest</see>.</description></item>
     /// <item><description>Minimum key size is (IKm + Salt) (N * Digest State Size) + (Digest Hash Size) in bytes.</description></item>
     /// <item><description>Valid block size is 16 bytes wide.</description></item>
+    /// <item><description>Valid Rounds assignments are set at 16 in standard mode, and 32, 40, 48, 56, and 64 in extended mode.</description></item>
     /// <item><description>Valid Rounds assignments are 16, 18, 20, 22, 24, 26, 28, 30 and 32, default is 16.</description></item>
     /// </list>
     /// 
@@ -220,7 +228,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         }
 
         /// <summary>
-        /// Get: Initialized for encryption, false for decryption.
+        /// Get: Cipher is initialized for encryption, false for decryption.
         /// <para>Value set in <see cref="Initialize(bool, KeyParams)"/>.</para>
         /// </summary>
         public bool IsEncryption

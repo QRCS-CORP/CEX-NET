@@ -37,7 +37,7 @@ using System.Threading;
 namespace VTDev.Libraries.CEXEngine.Queue
 {
     /// <summary>
-    /// <h3>JitterQueue: Adds a small amount of random delay time to a queuing operation.</h3>
+    /// <h5>JitterQueue: Adds a small amount of random delay time to a queuing operation.</h5>
     /// <para>Note v1.3: Not Tested</para>
     /// </summary>
     public sealed class JitterQueue : IDisposable

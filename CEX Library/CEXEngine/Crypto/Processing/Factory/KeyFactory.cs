@@ -11,7 +11,7 @@ using VTDev.Libraries.CEXEngine.Tools;
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
 {
     /// <summary>
-    /// <h3>A helper class used to create or extract a CipherKey file.</h3>
+    /// <h5>KeyFactory: Used to create or extract a CipherKey file.</h5>
     /// 
     /// <list type="bullet">
     /// <item><description>Constructors may use a fully qualified path to a key file, or the keys file stream.</description></item>

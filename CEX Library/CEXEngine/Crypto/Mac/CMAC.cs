@@ -41,7 +41,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 {
     /// <summary>
-    /// <h3>An implementation of a Cipher based Message Authentication Code: CMAC.</h3>
+    /// <h5>CMAC: An implementation of a Cipher based Message Authentication Code: CMAC.</h5>
     /// <para>A CMAC as outlined in the NIST document: SP800-38B<cite>SP800-38B</cite></para>
     /// </summary>
     /// 

@@ -43,7 +43,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 {
     /// <summary>
-    /// <h3>SHA256: An implementation of the SHA-2 digest with a 256 bit digest return size</h3>.
+    /// <h5>SHA256: An implementation of the SHA-2 digest with a 256 bit digest return size.</h5>
     /// <para>The SHA-2<cite>Fips 180-4</cite> 256 digest</para>
     /// </summary> 
     /// 

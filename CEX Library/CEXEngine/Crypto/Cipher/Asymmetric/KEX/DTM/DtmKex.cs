@@ -229,7 +229,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     ///         <description>Contains a minimal description of the symmetric cipher.</description>
     ///     </item>
     ///     <item>
-    ///         <description><see cref="DtmFileInfoStruct"/></description>
+    ///         <description><see cref="DtmFileInfoSruct"/></description>
     ///         <description>The DtmFileInfoSruct structure is a header that preceedes a file.</description>
     ///     </item>
     ///     <item>
@@ -2819,7 +2819,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// When a new forward session key is received, the KeyRequested event fires, allowing the application to set the 
         /// key valid lifetime parameters. Once both keys have been received and the transaction has completed, 
         /// the KeySynchronized event is fired, and the keys are stored in the ForwardSessionKey and the ReturnSessionKey properties.
-        /// The RatchetStream flag triggers and immediate re-keying of the symmetric crypto processors.</para>
+        /// The RatchetStream flag triggers an immediate re-keying of the symmetric crypto processors.</para>
         /// </summary>
         /// 
         /// <param name="RatchetStream">Setting the flag to <c>true</c> triggers the re-keying of the symmetric crypto processors</param>

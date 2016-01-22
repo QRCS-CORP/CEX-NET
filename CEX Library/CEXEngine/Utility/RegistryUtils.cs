@@ -10,6 +10,9 @@ using System.Security.Permissions;
 
 namespace VTDev.Libraries.CEXEngine.Utility
 {
+    /// <summary>
+    /// A Registry utilities class
+    /// </summary>
     [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
     public sealed class RegistryUtils
     {
@@ -71,33 +74,97 @@ namespace VTDev.Libraries.CEXEngine.Utility
         #endregion
 
         #region Enums
-        // root keys
-        public enum RootKey : uint
+        /// <summary>
+        /// Root keys
+        /// </summary>
+        public enum RootKey : long
         {
+            /// <summary>
+            /// HKCR
+            /// </summary>
             HKEY_CLASSES_ROOT = 0x80000000,
+            /// <summary>
+            /// HKCU
+            /// </summary>
             HKEY_CURRENT_USER = 0x80000001,
+            /// <summary>
+            /// HKLM
+            /// </summary>
             HKEY_LOCAL_MACHINE = 0x80000002,
+            /// <summary>
+            /// HKU
+            /// </summary>
             HKEY_USERS = 0x80000003,
+            /// <summary>
+            /// HKPD
+            /// </summary>
             HKEY_PERFORMANCE_DATA = 0x80000004,
+            /// <summary>
+            /// HKCC
+            /// </summary>
             HKEY_CURRENT_CONFIG = 0x80000005,
+            /// <summary>
+            /// HKDD
+            /// </summary>
             HKEY_DYN_DATA = 0x80000006
         }
 
-        // value types
-        public enum ValueType : uint
+        /// <summary>
+        /// Value types
+        /// </summary>
+        public enum ValueType : long
         {
+            /// <summary>
+            /// None
+            /// </summary>
             REG_NONE,
+            /// <summary>
+            /// String
+            /// </summary>
             REG_SZ = 1,
+            /// <summary>
+            /// Expand
+            /// </summary>
             REG_EXPAND_SZ = 2,
+            /// <summary>
+            /// Binary
+            /// </summary>
             REG_BINARY = 3,
+            /// <summary>
+            /// Dword
+            /// </summary>
             REG_DWORD = 4,
+            /// <summary>
+            /// Little Endian
+            /// </summary>
             REG_DWORD_LITTLE_ENDIAN = 4,
+            /// <summary>
+            /// Big Endian
+            /// </summary>
             REG_DWORD_BIG_ENDIAN = 5,
+            /// <summary>
+            /// Link
+            /// </summary>
             REG_LINK = 6,
+            /// <summary>
+            /// Multi SZ
+            /// </summary>
             REG_MULTI_SZ = 7,
+            /// <summary>
+            /// Resource List
+            /// </summary>
             REG_RESOURCE_LIST = 8,
+            /// <summary>
+            /// Resource Descriptor
+            /// </summary>
             REG_FULL_RESOURCE_DESCRIPTOR = 9,
+            /// <summary>
+            /// Resource Requirements
+            /// </summary>
             REG_RESOURCE_REQUIREMENTS_LIST = 10,
+            /// <summary>
+            /// QWord
+            /// </summary>
             REG_QWORD_LITTLE_ENDIAN = 11
         }
 
@@ -115,22 +182,70 @@ namespace VTDev.Libraries.CEXEngine.Utility
             TOKEN_ADJUST_SESSIONID = 0x100
         }
 
+        /// <summary>
+        /// Show command arguments
+        /// </summary>
         public enum SHOW_COMMANDS : int
         {
+            /// <summary>
+            /// Hide
+            /// </summary>
             SW_HIDE = 0,
+            /// <summary>
+            /// Normal
+            /// </summary>
             SW_SHOWNORMAL = 1,
+            /// <summary>
+            /// Show Normal
+            /// </summary>
             SW_NORMAL = 1,
+            /// <summary>
+            /// Minimized
+            /// </summary>
             SW_SHOWMINIMIZED = 2,
+            /// <summary>
+            /// Maximized
+            /// </summary>
             SW_SHOWMAXIMIZED = 3,
+            /// <summary>
+            /// Maximize
+            /// </summary>
             SW_MAXIMIZE = 3,
+            /// <summary>
+            /// No Activate
+            /// </summary>
             SW_SHOWNOACTIVATE = 4,
+            /// <summary>
+            /// Show
+            /// </summary>
             SW_SHOW = 5,
+            /// <summary>
+            /// Minimize
+            /// </summary>
             SW_MINIMIZE = 6,
+            /// <summary>
+            /// Inactive
+            /// </summary>
             SW_SHOWMINNOACTIVE = 7,
+            /// <summary>
+            /// NA
+            /// </summary>
             SW_SHOWNA = 8,
+            /// <summary>
+            /// Restore
+            /// </summary>
             SW_RESTORE = 9,
+            /// <summary>
+            /// Default
+            /// </summary>
             SW_SHOWDEFAULT = 10,
+            /// <summary>
+            /// Force Minimize
+            /// </summary>
             SW_FORCEMINIMIZE = 11,
+            /// <summary>
+            /// Max size
+            /// </summary>
             SW_MAX = 11
         }
         #endregion
@@ -466,7 +581,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
             {
                 CreateProcessWithLogonW(UserName, domain, Password, (UInt32)1, Command, Command, (UInt32)0, (UInt32)0, currentDirectory, ref startupInfo, out processInfo);
             } 
-            catch(Exception e){ }
+            catch { }
 
             WaitForSingleObject(processInfo.process, Infinite);
             GetExitCodeProcess(processInfo.process, ref exitCode);

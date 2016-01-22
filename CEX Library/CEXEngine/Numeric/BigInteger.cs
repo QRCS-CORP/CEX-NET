@@ -42,7 +42,7 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Numeric
 {
     /// <summary>
-    /// <h3>This class represents immutable integer numbers of arbitrary length</h3>
+    /// <h5>BigInteger: This class represents immutable integer numbers of arbitrary length</h5>
     /// 
     /// <description>Immutable arbitrary-precision integers.</description>
     /// <para>All operations behave as if BigIntegers were represented in two's-complement notation.  

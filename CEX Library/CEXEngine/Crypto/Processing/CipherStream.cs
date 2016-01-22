@@ -42,9 +42,8 @@ using VTDev.Libraries.CEXEngine.Crypto.Helper;
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 {
     /// <summary>
-    /// <h3>Cipher stream helper class.</h3>
+    /// <h5>CipherStream: Used to wrap a streams cryptographic transformation.</h5>
     /// <para>Wraps encryption stream functions in an easy to use interface.</para>
-    /// 
     /// </summary> 
     /// 
     /// <example>
@@ -131,8 +130,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     /// <list type="bullet">
     /// <item><description>Uses any of the implemented <see cref="ICipherMode">Cipher Mode</see> wrapped <see cref="SymmetricEngines">Block Ciphers</see>, or any of the implemented <see cref="IStreamCipher">Stream Ciphers</see>.</description></item>
     /// <item><description>Cipher Engine can be Disposed when this class is <see cref="Dispose()">Disposed</see>, set the DisposeEngine parameter in the class Constructor to true to dispose automatically.</description></item>
-    /// <item><description>Streams can be Disposed when the class is <see cref="Dispose()">Disposed</see>, set the DisposeStream parameter in the <see cref="Initialize(Stream, Stream, bool)"/> call to true to dispose automatically.</description></item>
-    /// <item><description>Implementation has a Progress counter that returns total sum of bytes processed per any of the <see cref="Write()">Write()</see> calls.</description></item>
+    /// <item><description>Streams can be Disposed when the class is <see cref="Dispose()">Disposed</see>, set the DisposeStream parameter in the <see cref="Initialize(bool, KeyParams)"/> call to true to dispose automatically.</description></item>
+    /// <item><description>Implementation has a Progress counter that returns total sum of bytes processed per either of the <see cref="Write(Stream, Stream)">Write()</see> calls.</description></item>
     /// <item><description>Changes to the Cipher or CipherStream <see cref="ParallelBlockSize">ParallelBlockSize</see> must be set after initialization.</description></item>
     /// </list>
     /// </remarks>
@@ -175,22 +174,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         {
             #region Fields
             /// <summary>
-            /// 
+            /// Length of the stream
             /// </summary>
             public long Length = 0;
             /// <summary>
-            /// 
+            /// The percentage of data processed
             /// </summary>
             public int Percent = 0;
             #endregion
 
             #region Constructor
             /// <summary>
-            /// 
+            /// Initialize this class
             /// </summary>
             /// 
-            /// <param name="Length"></param>
-            /// <param name="Percent"></param>
+            /// <param name="Length">Length of the stream</param>
+            /// <param name="Percent">The percentage of data processed</param>
             public ProgressEventArgs(long Length, int Percent)
             {
                 this.Length = Length;
@@ -206,7 +205,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// </summary>
         /// 
         /// <param name="sender">Event owner object</param>
-        /// <param name="e">Progress event arguments containing percentage and bytes processed as the UserState param</param>
+        /// <param name="args">Progress event arguments containing percentage and bytes processed as the UserState param</param>
         public delegate void ProgressDelegate(object sender, ProgressEventArgs args);
 
         /// <summary>
@@ -216,7 +215,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         #endregion
 
         #region Fields
-        private IBlockCipher _blockCipher;
         private int _blockSize = 0;
         private ICipherMode _cipherEngine;
         private IPadding _cipherPadding;

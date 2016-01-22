@@ -34,8 +34,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces
         /// </summary>
         /// 
         /// <param name="AsmKey">The <see cref="IAsymmetricKey"/> containing the Public (encrypt) or Private (decryption) key</param>
-        /// 
-        /// <exception>CryptoAsymmetricException Thrown if an invalid key is used</exception>
         void Initialize(IAsymmetricKey AsmKey);
 
         /// <summary>

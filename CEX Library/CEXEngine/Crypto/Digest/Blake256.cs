@@ -41,7 +41,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 {
     /// <summary>
-    /// <h3>Blake256: An implementation of the Blake digest with a 256 bit return size.</h3>
+    /// <h5>Blake256: An implementation of the Blake digest with a 256 bit return size.</h5>
     /// <para>SHA-3 finalist<cite>NIST IR7896</cite>: The Blake<cite>Blake</cite> digest</para>
     /// </summary> 
     /// 
@@ -170,13 +170,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             Initialize();
         }
 
-        
+
         /// <summary>
         /// Initialize the class with a salt value
         /// </summary>
         /// 
         /// <param name="Salt">The optional salt value; must be 4 uint in length</param>
-        public Blake256(UInt32[] Salt)
+        public Blake256(Int32[] Salt)
         {
             if (Salt.Length != 4)
                 throw new CryptoHashException("Blake256:Ctor", "The Salt array length must be 4!", new ArgumentOutOfRangeException());

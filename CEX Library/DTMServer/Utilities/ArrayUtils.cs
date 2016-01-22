@@ -169,7 +169,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Arrays">Arrays to be joined</param>
         /// 
         /// <returns>Joined array</returns>
-        [CLSCompliant(false)]
         public static int[] Concat(params int[][] Arrays)
         {
             int len = 0;
@@ -194,7 +193,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Arrays">Arrays to be joined</param>
         /// 
         /// <returns>Joined array</returns>
-        [CLSCompliant(false)]
         public static uint[] Concat(params uint[][] Arrays)
         {
             int len = 0;
@@ -219,7 +217,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Arrays">Arrays to be joined</param>
         /// 
         /// <returns>Joined array</returns>
-        [CLSCompliant(false)]
         public static long[] Concat(params long[][] Arrays)
         {
             int len = 0;
@@ -244,7 +241,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Arrays">Arrays to be joined</param>
         /// 
         /// <returns>Joined array</returns>
-        [CLSCompliant(false)]
         public static ulong[] Concat(params ulong[][] Arrays)
         {
             int len = 0;
@@ -417,7 +413,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Index">The starting position of the second array</param>
         /// 
         /// <returns>A jagged array containing the split array</returns>
-        [CLSCompliant(false)]
         public static byte[][] Split(byte[] Data, int Index)
         {
             byte[] rd1 = new byte[Index];
@@ -436,7 +431,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Index">The starting position of the second array</param>
         /// 
         /// <returns>A jagged array containing the split array</returns>
-        [CLSCompliant(false)]
         public static int[][] Split(int[] Data, int Index)
         {
             int[] rd1 = new int[Index];
@@ -455,7 +449,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Index">The starting position of the second array</param>
         /// 
         /// <returns>A jagged array containing the split array</returns>
-        [CLSCompliant(false)]
         public static uint[][] Split(uint[] Data, int Index)
         {
             uint[] rd1 = new uint[Index];
@@ -474,7 +467,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Index">The starting position of the second array</param>
         /// 
         /// <returns>A jagged array containing the split array</returns>
-        [CLSCompliant(false)]
         public static long[][] Split(long[] Data, int Index)
         {
             long[] rd1 = new long[Index];
@@ -493,7 +485,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Index">The starting position of the second array</param>
         /// 
         /// <returns>A jagged array containing the split array</returns>
-        [CLSCompliant(false)]
         public static ulong[][] Split(ulong[] Data, int Index)
         {
             ulong[] rd1 = new ulong[Index];
@@ -511,7 +502,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Data">Array to convert</param>
         /// 
         /// <returns>Sbyte array converted to bytes</returns>
-        [CLSCompliant(false)]
         public static byte[] ToBytes(sbyte[] Data)
         {
             byte[] rd = new byte[Data.Length];
@@ -540,7 +530,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Data">Array to convert</param>
         /// 
         /// <returns>Uint array converted to bytes</returns>
-        [CLSCompliant(false)]
         public static byte[] ToBytes(uint[] Data)
         {
             byte[] rd = new byte[Data.Length * 4];
@@ -555,7 +544,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Data">Array to convert</param>
         /// 
         /// <returns>Long array converted to bytes</returns>
-        [CLSCompliant(false)]
         public static byte[] ToBytes(long[] Data)
         {
             byte[] rd = new byte[Data.Length * 8];
@@ -582,7 +570,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Data">Array to convert</param>
         /// 
         /// <returns>2 dimensional Int16 jagged array converted to bytes</returns>
-        [CLSCompliant(false)]
         public static byte[] ToBytes(short[][] Data)
         {
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
@@ -610,7 +597,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Data">Array to convert</param>
         /// 
         /// <returns>2 dimensional Int32 jagged array converted to bytes</returns>
-        [CLSCompliant(false)]
         public static byte[] ToBytes(int[][] Data)
         {
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
@@ -638,7 +624,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Data">Array to convert</param>
         /// 
         /// <returns>2 dimensional Int64 jagged array converted to bytes</returns>
-        [CLSCompliant(false)]
         public static byte[] ToBytes(long[][] Data)
         {
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
@@ -666,7 +651,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Data">Array to convert</param>
         /// 
         /// <returns>3 dimensional Int16 jagged array converted to bytes</returns>
-        [CLSCompliant(false)]
         public static byte[] ToBytes(short[][][] Data)
         {
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
@@ -698,7 +682,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Data">Array to convert</param>
         /// 
         /// <returns>3 dimensional Int16 jagged array converted to bytes</returns>
-        [CLSCompliant(false)]
         public static byte[] ToBytes(int[][][] Data)
         {
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
@@ -730,7 +713,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Data">Array to convert</param>
         /// 
         /// <returns>3 dimensional Int64 jagged array converted to bytes</returns>
-        [CLSCompliant(false)]
         public static byte[] ToBytes(long[][][] Data)
         {
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
@@ -762,7 +744,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Data">Array to convert</param>
         /// 
         /// <returns>2 dimensional Int16 jagged array</returns>
-        [CLSCompliant(false)]
         public static short[][] ToArray2x16(byte[] Data)
         {
             BinaryReader reader = new BinaryReader(new MemoryStream(Data));
@@ -795,7 +776,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Data">Array to convert</param>
         /// 
         /// <returns>2 dimensional Int32 jagged array</returns>
-        [CLSCompliant(false)]
         public static int[][] ToArray2x32(byte[] Data)
         {
             BinaryReader reader = new BinaryReader(new MemoryStream(Data));
@@ -828,7 +808,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Data">Array to convert</param>
         /// 
         /// <returns>2 dimensional Int64 jagged array</returns>
-        [CLSCompliant(false)]
         public static long[][] ToArray2x64(byte[] Data)
         {
             BinaryReader reader = new BinaryReader(new MemoryStream(Data));
@@ -861,7 +840,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Data">Array to convert</param>
         /// 
         /// <returns>3 dimensional Int16 jagged array</returns>
-        [CLSCompliant(false)]
         public static short[][][] ToArray3x16(byte[] Data)
         {
             BinaryReader reader = new BinaryReader(new MemoryStream(Data));
@@ -898,7 +876,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Data">Array to convert</param>
         /// 
         /// <returns>3 dimensional Int32 jagged array</returns>
-        [CLSCompliant(false)]
         public static int[][][] ToArray3x32(byte[] Data)
         {
             BinaryReader reader = new BinaryReader(new MemoryStream(Data));
@@ -935,7 +912,6 @@ namespace DTMServerTest.Utilities
         /// <param name="Data">Array to convert</param>
         /// 
         /// <returns>3 dimensional Int64 jagged array</returns>
-        [CLSCompliant(false)]
         public static long[][][] ToArray3x64(byte[] Data)
         {
             BinaryReader reader = new BinaryReader(new MemoryStream(Data));

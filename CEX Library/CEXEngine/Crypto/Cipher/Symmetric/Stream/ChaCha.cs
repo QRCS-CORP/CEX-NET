@@ -48,7 +48,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
 {
     /// <summary>
-    /// <h3>ChaCha+: A parallelized ChaCha stream cipher implementation.</h3>
+    /// <h5>ChaCha+: A parallelized ChaCha stream cipher implementation.</h5>
     /// <para>A ChaCha cipher extended to use up to 30 rounds.</para>
     /// </summary>
     /// 

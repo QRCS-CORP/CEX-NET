@@ -44,7 +44,7 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 {
     /// <summary>
-    /// <h3>Provides a source of system entropy for pseudo random generators.</h3>
+    /// <h5>EntropyPool: Provides a source of system entropy for pseudo random generators.</h5>
     /// <para>Uses various system state, timers, and counters, which are compressed into an entropy pool.</para>
     /// </summary> 
     /// 
@@ -108,6 +108,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
     ///         From each running thread, collects the CurrentPriority, Id, and StartAddress. The local process contributes each thread Handle, StartAddress, 
     ///         StartTime, TotalProcessorTime and UserProcessorTime statistics.</para></description>
     ///     </item>
+    ///     <item>
     ///         <description>Registry Info</description>
     ///         <description>Adds all of the systems application Clsid's from the registry.</description>
     ///     </item>

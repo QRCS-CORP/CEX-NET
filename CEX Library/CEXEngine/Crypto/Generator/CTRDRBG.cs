@@ -39,7 +39,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 {
     /// <summary>
-    /// <h3>CTRDrbg: An implementation of a Encryption Counter based Deterministic Random Byte Generator.</h3>
+    /// <h5>CTRDrbg: An implementation of a Encryption Counter based Deterministic Random Byte Generator.</h5>
     /// <para>A Block Cipher Counter DRBG as outlined in NIST document: SP800-90A<cite>SP800-90B</cite></para>
     /// </summary> 
     /// 

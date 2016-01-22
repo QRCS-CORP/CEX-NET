@@ -17,10 +17,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
     {
         #region Fields
         private ManualResetEvent _opDone = new ManualResetEvent(false);
-        private bool _isDisposed = false;
         private bool _isListening = false;
         private Socket _lsnSocket;
-        private NetworkStream _tcpStream = null;
         #endregion
 
         #region Delegates/Events

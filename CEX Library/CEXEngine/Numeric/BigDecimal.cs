@@ -43,7 +43,7 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Numeric
 {
     /// <summary>
-    /// <h3>This class represents immutable arbitrary precision decimal numbers</h3>
+    /// <h5>BigDecimal: This class represents immutable arbitrary precision decimal numbers</h5>
     /// 
     /// 
     /// <description>Immutable, arbitrary-precision signed decimal numbers.</description> 

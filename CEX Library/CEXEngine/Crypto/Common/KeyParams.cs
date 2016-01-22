@@ -6,7 +6,7 @@ using System.IO;
 namespace VTDev.Libraries.CEXEngine.Crypto.Common
 {
     /// <summary>
-    /// A Symmetric Cipher Key and Vector Container class
+    /// <h5>KeyParams: A Symmetric Cipher Key and Vector Container class.</h5>
     /// </summary>
     public class KeyParams : IDisposable, ICloneable
     {

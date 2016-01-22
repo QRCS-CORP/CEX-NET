@@ -8,7 +8,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 {
     /// <summary>
-    /// <h3>KDF2Drbg: An implementation of an Hash based Key Derivation Function.</h3>
+    /// <h5>KDF2Drbg: An implementation of an Hash based Key Derivation Function.</h5>
     /// <para>KDF2Drbg as outlined in ISO 18033-2 <cite>ISO 18033</cite>.</para>
     /// </summary> 
     /// 

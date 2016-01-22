@@ -44,7 +44,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Helper;
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 {
     /// <summary>
-    /// <h3>Volume cipher helper class.</h3>
+    /// <h5>VolumeCipher: Performs bulk file cryptographic transforms.</h5>
     /// <para>A helper class used to encrypt or decrypt a series of files on a directory or volume.
     /// Note: If the cipher is for encryption, files are encrypted in place.
     /// If the cipher is for decryption, individual files or the entire directory can be decrypted.</para>

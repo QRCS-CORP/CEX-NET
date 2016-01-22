@@ -9,7 +9,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 {
     /// <summary>
-    /// <h3>DGCPrng: An implementation of a Digest Counter based Random Number Generator.</h3>
+    /// <h5>DGCPrng: An implementation of a Digest Counter based Random Number Generator.</h5>
     /// <para>Uses a Digest Counter DRBG as outlined in NIST document: SP800-90A<cite>SP800-90A</cite></para>
     /// </summary> 
     /// 

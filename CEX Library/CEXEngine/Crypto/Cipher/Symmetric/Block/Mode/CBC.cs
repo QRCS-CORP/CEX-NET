@@ -40,7 +40,7 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 {
     /// <summary>
-    /// <h3>Implements a Cipher Block Chaining Mode: CBC.</h3>
+    /// <h5>CBC: Implements a Cipher Block Chaining Mode: CBC.</h5>
     /// <para>CBC as outlined in the NIST document: SP800-38A<cite>SP800-38A</cite></para>
     /// </summary> 
     /// 
@@ -71,6 +71,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
     /// <list type="bullet">
+    /// <item><description>In CBC mode, only decryption can be processed in parallel.</description></item>
     /// <item><description>Parallel processing is enabled on decryption by passing a block size of <see cref="ParallelBlockSize"/> to the transform.</description></item>
     /// <item><description><see cref="ParallelBlockSize"/> must be divisible by <see cref="ParallelMinimumSize"/>.</description></item>
     /// <item><description>Parallel block calculation ex. <c>int blocklen = (data.Length / cipher.ParallelMinimumSize) * 10</c></description></item>

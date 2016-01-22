@@ -90,7 +90,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// Convert a Big Endian 64 bit dword to bytes
         /// </summary>
         /// 
-        /// <param name="Word">The 64 bit word</param>
+        /// <param name="DWord">The 64 bit word</param>
         /// <param name="Block">The destination bytes</param>
         /// <param name="Offset">Offset within the destination array</param>
         public static void Be64ToBytes(ulong DWord, byte[] Block, int Offset)
@@ -162,7 +162,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// Convert a Little Endian 64 bit dword to bytes
         /// </summary>
         /// 
-        /// <param name="Word">The 64 bit word</param>
+        /// <param name="DWord">The 64 bit word</param>
         /// <param name="Block">The destination bytes</param>
         /// <param name="Offset">Offset within the destination block</param>
         public static void Le64ToBytes(ulong DWord, byte[] Block, int Offset)

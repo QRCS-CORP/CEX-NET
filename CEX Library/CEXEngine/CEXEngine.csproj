@@ -29,6 +29,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\CEXEngine.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -88,8 +89,6 @@
     <Compile Include="Crypto\Cipher\Asymmetric\Common\AsymmetricUtils.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Argument\DtmKeyRequestedArgs.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Argument\DtmKeySynchronizedArgs.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Support\DtmNameClient.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Support\DtmNameServer.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Argument\DtmFileRequestArgs.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\DtmParamSets.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Flag\DtmErrorFlags.cs" />

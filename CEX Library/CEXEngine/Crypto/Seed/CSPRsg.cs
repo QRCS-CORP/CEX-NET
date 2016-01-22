@@ -39,7 +39,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 {
     /// <summary>
-    /// <h3>CSPRsg: An implementation of a Cryptographically Secure seed generator using the RNGCryptoServiceProvider class.</h3>
+    /// <h5>CSPRsg: An implementation of a Cryptographically Secure seed generator using the RNGCryptoServiceProvider class.</h5>
     /// <para>Implements a random byte generator using the RNGCryptoServiceProvider<cite>RNGCryptoServiceProvider</cite> class.</para>
     /// </summary>
     /// 

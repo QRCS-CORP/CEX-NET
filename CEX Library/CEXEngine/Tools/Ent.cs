@@ -5,8 +5,8 @@ using System.ComponentModel;
 #endregion
 
 #region Notes
-/// A version of Brett Trotter's C# version of Ent: http://www.codeproject.com/Articles/11672/ENT-A-Pseudorandom-Number-Sequence-Test-Program-C?msg=4671947#xx4671947xx
-/// The original c++ program written by John Walker: http://www.fourmilab.ch/random/
+// A version of Brett Trotter's C# version of Ent: http://www.codeproject.com/Articles/11672/ENT-A-Pseudorandom-Number-Sequence-Test-Program-C?msg=4671947#xx4671947xx
+// The original c++ program written by John Walker: http://www.fourmilab.ch/random/
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Tools
@@ -70,6 +70,9 @@ namespace VTDev.Libraries.CEXEngine.Tools
         public double[] MeanSamples;
     }
 
+    /// <summary>
+    /// The ENT random tests class
+    /// </summary>
     public class Ent : IDisposable
     {
         #region Event
@@ -237,8 +240,6 @@ namespace VTDev.Libraries.CEXEngine.Tools
         /// <summary>
         /// Initialize random counters
         /// </summary>
-        /// 
-        /// <param name="BinaryMode">Binary mode</param>
         private void Init()
         {
             // Reset Monte Carlo accumulator pointer
@@ -263,7 +264,6 @@ namespace VTDev.Libraries.CEXEngine.Tools
         /// </summary>
         /// 
         /// <param name="Samples">Buffer</param>
-        /// <param name="Fold">Fold - not implemented</param>
         private void AddSamples(byte[] Samples)
         {
             int mp = 0;
@@ -438,6 +438,9 @@ namespace VTDev.Libraries.CEXEngine.Tools
         #endregion
 
         #region IDispose
+        /// <summary>
+        /// Dispose of this class
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);

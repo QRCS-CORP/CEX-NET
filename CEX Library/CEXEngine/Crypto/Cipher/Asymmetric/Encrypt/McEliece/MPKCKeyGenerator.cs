@@ -204,7 +204,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// Get the digest engine
         /// </summary>
         /// 
-        /// <param name="Digest">Engine type</param>
+        /// <param name="DigestType">Engine type</param>
         /// 
         /// <returns>Instance of digest</returns>
         private IDigest GetDigest(Digests DigestType)
@@ -223,7 +223,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// Get the cipher engine
         /// </summary>
         /// 
-        /// <param name="Prng">The Prng</param>
+        /// <param name="PrngType">The Prng</param>
         /// 
         /// <returns>An initialized prng</returns>
         /// 

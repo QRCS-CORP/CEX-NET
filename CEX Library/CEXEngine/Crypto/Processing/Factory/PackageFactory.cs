@@ -15,13 +15,13 @@ using VTDev.Libraries.CEXEngine.Tools;
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
 {
     /// <summary>
-    /// <h3>A helper class used to create or extract a Key Package file.</h3>
+    /// <h5>PackageFactory: Used to create or extract a Key Package file.</h5>
     /// <para>This class works in conjunction with the <see cref="PackageKey"/> structure to create and manage key package files; encryption key bundles, that contain cipher Key and IV material, 
     /// and optionally an HMAC key used for message authentication.</para>
     /// </summary>
     /// 
     /// <example>
-    /// <description>Example using the <see cref="Create(PackageKey, Prngs, Digests)"/> method:</description>
+    /// <description>Example using the <see cref="Create(PackageKey, SeedGenerators, Digests)"/> method:</description>
     /// <code>
     /// // populate a KeyAuthority structure
     /// KeyAuthority authority =  new KeyAuthority(domainId, originId, packageId, packageTag, keyPolicy);
@@ -87,7 +87,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     /// 
     /// <list type="bullet">
     /// <item><description>Constructors may use a fully qualified path to a key file and the local <see cref="KeyAuthority"/>.</description></item>
-    /// <item><description>The <see cref="Create(PackageKey, Prngs, Digests)"/> method auto-generates the keying material.</description></item>
+    /// <item><description>The <see cref="Create(PackageKey, SeedGenerators, Digests)"/> method auto-generates the keying material.</description></item>
     /// <item><description>The Extract() method retrieves a populated cipher description (CipherDescription), key material (KeyParams), and the file extension key from the key file.</description></item>
     /// </list>
     /// </remarks>

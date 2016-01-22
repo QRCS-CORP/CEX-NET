@@ -8,6 +8,9 @@ using System.Net.Sockets;
 
 namespace VTDev.Libraries.CEXEngine.Utility
 {
+    /// <summary>
+    /// A Network utilities class
+    /// </summary>
     public static class NetworkUtils
     {
         /// <summary>
@@ -152,7 +155,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// 
         /// <returns>Returns <c>true</c> if an application is listening on the port, otherwise <c>false</c></returns>
         /// 
-        /// <exception cref="CryptoSocketException">Thrown if the operation is in an error state</exception>
+        /// <exception cref="SocketException">Thrown if the operation is in an error state</exception>
         public static bool IsPortOpen(int Port)
         {
             var listener = default(TcpListener);

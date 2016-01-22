@@ -30,8 +30,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces
         /// </summary>
         /// 
         /// <param name="AsmKey">The <see cref="IAsymmetricKey"/> containing the Public (verify) or Private (sign) key</param>
-        /// 
-        /// <exception>CryptoAsymmetricException Thrown if an invalid key is used</exception>
         void Initialize(IAsymmetricKey AsmKey);
 
         /// <summary>
@@ -46,8 +44,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces
         /// <param name="InputStream">The stream containing the data</param>
         /// 
         /// <returns>The encrypted hash code</returns>
-        /// 
-        /// <exception>CryptoAsymmetricException Thrown if an invalid key is used, or signer has not been initialized</exception>
         byte[] Sign(Stream InputStream);
 
         /// <summary>
@@ -59,8 +55,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces
         /// <param name="Length">The number of bytes to process</param>
         /// 
         /// <returns>The encrypted hash code</returns>
-        /// 
-        /// <exception>CryptoAsymmetricSignException Thrown if input array is too short, signer is not initialized, or the key is invalid</exception>
         byte[] Sign(byte[] Input, int Offset, int Length);
 
         /// <summary>
@@ -71,8 +65,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces
         /// <param name="Code">The encrypted hash code</param>
         /// 
         /// <returns>Returns <c>true</c> if the codes match</returns>
-        /// 
-        /// <exception>CryptoAsymmetricSignException Thrown if signer is not initialized, or the key is invalid</exception>
         bool Verify(Stream InputStream, byte[] Code);
 
         /// <summary>
@@ -85,8 +77,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces
         /// <param name="Code">The encrypted hash code</param>
         /// 
         /// <returns>Returns <c>true</c> if the codes match</returns>
-        /// 
-        /// <exception>CryptoAsymmetricSignException Thrown if input array is too short, signer is not initialized, or the key is invalid</exception>
         bool Verify(byte[] Input, int Offset, int Length, byte[] Code);
     }
 }

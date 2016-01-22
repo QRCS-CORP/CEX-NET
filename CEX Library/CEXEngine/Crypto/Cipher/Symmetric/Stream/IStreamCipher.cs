@@ -51,8 +51,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// <summary>
         /// Get/Set: Parallel block size. Must be a multiple of <see cref="ParallelMinimumSize"/>.
         /// </summary>
-        ///
-        /// <exception cref="CryptoCipherModeException">Thrown if a parallel block size is not evenly divisible by ParallelMinimumSize, or  block size is less than ParallelMinimumSize or more than ParallelMaximumSize values</exception>
         int ParallelBlockSize { get; set; }
 
         /// <summary>
@@ -70,9 +68,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// </summary>
         /// 
         /// <param name="KeyParam">Cipher key container. The LegalKeySizes property contains valid sizes</param>
-        /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null key ot iv is used</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid key or iv size is used</exception>
         void Initialize(KeyParams KeyParam);
 
         /// <summary>
@@ -90,7 +85,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// <para>Parallel capable function if Output array length is at least equal to <see cref="ParallelMinimumSize"/>. 
         /// This method will process a single block from the source array of either ParallelBlockSize or Blocksize depending on IsParallel property setting.
         /// Partial blocks are permitted with both parallel and linear operation modes.
-        /// <see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
+        /// <see cref="Initialize(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
         /// 
         /// <param name="Input">Bytes to Encrypt</param>

@@ -11,7 +11,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 {
     /// <summary>
-    /// <h3>CTRPrng: An implementation of a Encryption Counter based Deterministic Random Number Generator.</h3>
+    /// <h5>CTRPrng: An implementation of a Encryption Counter based Deterministic Random Number Generator.</h5>
     /// <para>A Block Cipher Counter DRBG as outlined in NIST document: SP800-90A<cite>SP800-90B</cite></para>
     /// </summary> 
     /// 

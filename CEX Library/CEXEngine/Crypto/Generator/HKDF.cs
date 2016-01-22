@@ -48,7 +48,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 {
     /// <summary>
-    /// <h3>HKDF: An implementation of an Hash based Key Derivation Function.</h3>
+    /// <h5>HKDF: An implementation of an Hash based Key Derivation Function.</h5>
     /// <para>HKDF as outlined in RFC 5869<cite>RFC 5869</cite></para>
     /// </summary> 
     /// 

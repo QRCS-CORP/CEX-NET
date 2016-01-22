@@ -39,7 +39,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 {
     /// <summary>
-    /// <h3>PBPRng: An implementation of a passphrase based PKCS#5 random number generator.</h3>
+    /// <h5>PBPRng: An implementation of a passphrase based PKCS#5 random number generator.</h5>
     /// <para>Implements PKCS#5 as defined in RFC 2898</para>
     /// </summary>
     /// 

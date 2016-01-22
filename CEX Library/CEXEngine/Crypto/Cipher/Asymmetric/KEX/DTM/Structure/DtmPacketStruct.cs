@@ -66,7 +66,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure
         /// <param name="PacketType">The <see cref="DtmPacketFlags"/> message type; describes the packet classification</param>
         /// <param name="PayloadLength">The length of the payload contained in the packet</param>
         /// <param name="Sequence">The packet sequence number</param>
-        /// <param name="Sequence">The <see cref="DtmServiceFlags"/> exchange state; indicates the exchange state position</param>
+        /// <param name="PacketFlag">The <see cref="DtmServiceFlags"/> exchange state; indicates the exchange state position</param>
         /// <param name="OptionFlag">The packet header option flag</param>
         public DtmPacketStruct(DtmPacketFlags PacketType, long PayloadLength, int Sequence, short PacketFlag, long OptionFlag = 0)
         {

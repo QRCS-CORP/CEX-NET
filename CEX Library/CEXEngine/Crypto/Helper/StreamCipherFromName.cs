@@ -5,7 +5,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Helper
 {
     /// <summary>
-    /// Get a Stream Cipher instance from it's enumeration name
+    /// <h5>StreamCipherFromName: Get a Stream Cipher instance from it's enumeration name.</h5>
     /// </summary>
     public static class StreamCipherFromName
     {

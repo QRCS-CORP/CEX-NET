@@ -49,9 +49,11 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 {
     /// <summary>
-    /// <h3>RHX: A Rijndael Cipher extended with an (optional) HKDF powered Key Schedule.</h3>
-    /// <para>RHX is a Rijndael<cite>Rijndael</cite> implementation that uses a standard configuration on key sizes up to 64 bytes (512 bits). 
-    /// On keys larger than 64 bytes, an HKDF bytes generator is used to expand the user supplied key into a working key integer array.</para>
+    /// <h5>RHX: A Rijndael Cipher extended with an (optional) HKDF powered Key Schedule.</h5>
+    /// <para>RHX is a Rijndael<cite>Rijndael</cite> implementation that can use a standard configuration on key sizes up to 256 bits, 
+    /// an extended key size of 512 bits, or unlimited key sizes greater than 64 bytes. 
+    /// On <see cref="LegalKeySizes"/> larger than 64 bytes, an HKDF bytes generator is used to expand the <c>working key</c> integer array.
+    /// In extended mode, the number of <c>transformation rounds</c> can be user assigned (through the constructor) to between 10 and 32 rounds.</para>
     /// </summary> 
     /// 
     /// <example>
@@ -72,28 +74,31 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// <revision date="2015/01/23" version="1.3.0.0">Secondary release using an assignable Digest in the HKDF engine</revision>
     /// <revision date="2015/03/15" version="1.3.2.0">Added the IkmSize optional parameter to the constructor, and the DistributionCode property</revision>
     /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
-    /// <revision date="2016/01/30" version="1.5.0.0">Merged RDX and RHX</revision>
+    /// <revision date="2016/01/21" version="1.5.0.0">Merged RDX and RHX implementations</revision>
     /// </revisionHistory>
     /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Generator.HKDF">VTDev.Libraries.CEXEngine.Crypto.HKDF Generator</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockCiphers">VTDev.Libraries.CEXEngine.Crypto.Enumeration BlockCiphers Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.CipherModes">VTDev.Libraries.CEXEngine.Crypto.Enumeration CipherModes Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Generator.HKDF">VTDev.Libraries.CEXEngine.Crypto.Generator HKDF Generator</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode ICipherMode Interface</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest IDigest Interface</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
     /// <para>The key schedule in RHX is the defining difference between this and a standard version of Rijndael<cite>Rijndael</cite>.
-    /// if the cipher key input is beyond the standard lengths used in Rijndael (128-512 bits), instead of using an inline function to expand the user supplied key into a larger working array, 
+    /// If the cipher key input is beyond the standard lengths used in Rijndael (128-512 bits), instead of using an inline function to expand the user supplied key into a larger working array, 
     /// RHX uses a hash based pseudo-random generator to create the internal working key array.
     /// When using a non-standard key size, the number of diffusion rounds can be set by the user (through the class constructor). RHX can run between 10 and 38 rounds.
     /// </para>
     /// 
     /// <list type="bullet">
-    /// <item><description>When using a standard cipher key length the rounds calculation is done automatically: 10, 12, 14, and 22, for key sizes 126, 192, 256, and 512 bits.</description></item>
+    /// <item><description>When using a standard cipher key length the rounds calculation is done automatically: 10, 12, 14, and 22, for key sizes 128, 192, 256, and 512 bits.</description></item>
     /// <item><description><see cref="HKDF">HKDF</see> Digest <see cref="Digests">engine</see> is definable through the <see cref="RHX(int, int, Digests)">Constructor</see> parameter: KeyEngine.</description></item>
-    /// <item><description>Key Schedule is powered by a Hash based Key Derivation Function using a user definable <see cref="IDigest">Digest</see>.</description></item>
+    /// <item><description>Key Schedule is (optionally) powered by a Hash based Key Derivation Function using a user definable <see cref="IDigest">Digest</see>.</description></item>
     /// <item><description>Minimum key size is (IKm + Salt) (N * Digest State Size) + (Digest Hash Size) in bytes.</description></item>
     /// <item><description>Valid block sizes are 16 and 32 byte wide.</description></item>
-    /// <item><description>Valid Rounds are 10 to 38, default is 22.</description></item>
+    /// <item><description>Rounds are determined automatically when using standard key sizes, and user assignable in extended mode to between 10 and 38 rounds in steps of two, (default is 22).</description></item>
     /// </list>
     /// 
     /// <description><h4>HKDF Bytes Generator:</h4></description>
@@ -225,7 +230,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         }
 
         /// <summary>
-        /// Get: Initialized for encryption, false for decryption.
+        /// Get: Cipher is initialized for encryption, false for decryption.
         /// <para>Value set in <see cref="Initialize(bool, KeyParams)"/>.</para>
         /// </summary>
         public bool IsEncryption

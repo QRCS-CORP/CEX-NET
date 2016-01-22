@@ -38,7 +38,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 {
     /// <summary>
-    /// <h3>An implementation of a Cryptographically Secure Pseudo Random Number Generator: SecureRandom.</h3> 
+    /// <h5>SecureRandom: An implementation of a Cryptographically Secure Pseudo Random Number Generator: SecureRandom.</h5> 
     /// 
     /// <para>Uses the RNGCryptoServiceProvider<cite>RNGCryptoServiceProvider</cite> class to generate non-negative random numbers.</para>
     /// </summary>

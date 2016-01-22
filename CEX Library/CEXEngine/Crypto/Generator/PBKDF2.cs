@@ -9,7 +9,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 {
     /// <summary>
-    /// <h3>PBKDF2 V2: An implementation of an Hash based Key Derivation Function.</h3>
+    /// <h5>PBKDF2 V2: An implementation of an Hash based Key Derivation Function.</h5>
     /// <para>PBKDF2 Version 2, as outlined in RFC 2898<cite>RFC 2898</cite></para>
     /// </summary> 
     /// 
