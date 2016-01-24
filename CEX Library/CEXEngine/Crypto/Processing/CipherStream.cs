@@ -1175,11 +1175,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 		            _parallelBlockSize -= (_parallelBlockSize % ParallelMinimumSize);
 	        }
 
-	        // set the ciphers block size
-	        if (!_isStreamCipher)
-		        _cipherEngine.ParallelBlockSize = _parallelBlockSize;
-	        else
-		        _streamCipher.ParallelBlockSize = _parallelBlockSize;
+            // set the ciphers block size
+            if (_parallelBlockSize >= ParallelMinimumSize)
+            {
+                if (!_isStreamCipher)
+                    _cipherEngine.ParallelBlockSize = _parallelBlockSize;
+                else
+                    _streamCipher.ParallelBlockSize = _parallelBlockSize;
+            }
         }
 
         private void CalculateProgress(long Length, long Processed)
