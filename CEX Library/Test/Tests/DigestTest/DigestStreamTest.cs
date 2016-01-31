@@ -12,7 +12,7 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
     /// <summary>
     /// Compares the linear mode of DigestStream with the Concurrent mode for equality
     /// </summary>
-    public class StreamDigestTest : ITest
+    public class DigestStreamTest : ITest
     {
         #region Constants
         private const string DESCRIPTION = "Compares the normal mode of CipherStream with the Concurrent mode for equality.";

@@ -41,17 +41,17 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 {
     /// <summary>
-    /// <h5>CMAC: An implementation of a Cipher based Message Authentication Code: CMAC.</h5>
+    /// CMAC: An implementation of a Cipher based Message Authentication Code: CMAC.
     /// <para>A CMAC as outlined in the NIST document: SP800-38B<cite>SP800-38B</cite></para>
     /// </summary>
     /// 
     /// <example>
     /// <description>Example using an <c>IMac</c> interface:</description>
     /// <code>
-    /// using (IMac mac = new CMAC(new RDX(), [DisposeEngine]))
+    /// using (IMac mac = new CMAC(new RHX(), [DisposeEngine]))
     /// {
     ///     // initialize
-    ///     mac.Initialize(KeyParams);
+    ///     mac.Initialize(Key, Iv);
     ///     // get mac
     ///     Output = mac.ComputeMac(Input);
     /// }

@@ -15,7 +15,7 @@ using VTDev.Libraries.CEXEngine.Tools;
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
 {
     /// <summary>
-    /// <h5>PackageFactory: Used to create or extract a Key Package file.</h5>
+    /// PackageFactory: Used to create or extract a Key Package file.
     /// <para>This class works in conjunction with the <see cref="PackageKey"/> structure to create and manage key package files; encryption key bundles, that contain cipher Key and IV material, 
     /// and optionally an HMAC key used for message authentication.</para>
     /// </summary>
@@ -26,7 +26,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     /// // populate a KeyAuthority structure
     /// KeyAuthority authority =  new KeyAuthority(domainId, originId, packageId, packageTag, keyPolicy);
     /// // create a key file
-    /// new PackageFactory(KeyPath, authority).Create(PackageKey);
+    /// MemoryStream keyStream = new MemoryStream();
+    /// new PackageFactory(keyStream, authority).Create(PackageKey);
     /// </code>
     /// 
     /// <description>Example using the <see cref="Extract(byte[], out CipherDescription, out KeyParams, out byte[])"/> method to get an existing key for decryption:</description>
@@ -39,7 +40,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     /// byte[] keyId;
     /// 
     /// // extract a key for decryption
-    /// using (PackageFactory factory = new PackageFactory(KeyPath, authority))
+    /// using (PackageFactory factory = new PackageFactory(KeyStream, authority))
     ///     factory.Extract(keyId, out description, out keyparam, out extKey);
     /// </code>
     /// 
@@ -52,7 +53,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     /// byte[] extKey;
     ///
     /// // get the next available encryption subkey
-    /// using (PackageFactory factory = new PackageFactory(KeyPath, authority))
+    /// using (PackageFactory factory = new PackageFactory(KeyStream, authority))
     ///     keyId = factory.NextKey(out description, out keyparam, out extKey)
     /// </code>
     /// </example>
@@ -80,13 +81,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     /// <para>A PackageKey file contains a <see cref="KeyAuthority"/> structure that defines its identity and security settings, 
     /// a <see cref="CipherDescription"/> that contains the settings required to create a specific cipher instance, and the 'subkey set', an array of unique subkey id strings and 
     /// policy flags that identify and control each subkey.</para>
-    /// <para>A PackageKey file can contain one subkey, or many thousands of subkeys. Each subkey provides a unique keying material, and can only be used once for encryption; 
+    /// <para>A PackageKey can contain one subkey, or many thousands of subkeys. Each subkey provides a unique keying material, and can only be used once for encryption; 
     /// guaranteeing a unique Key, IV, and HMAC key is used for every single encryption cycle.</para>
     /// <para>Each subkey in the Key Package contains a unique policy flag, which can be used to mark a key as locked(decryption) or expired(encryption), or trigger an erasure 
     /// of a specific subkey after the key is read for decryption using the <see cref="Extract(byte[], out CipherDescription, out KeyParams, out byte[])"/> function.</para>
     /// 
     /// <list type="bullet">
-    /// <item><description>Constructors may use a fully qualified path to a key file and the local <see cref="KeyAuthority"/>.</description></item>
+    /// <item><description>Constructors may use either a memory or file stream, and a <see cref="KeyAuthority"/> structure.</description></item>
     /// <item><description>The <see cref="Create(PackageKey, SeedGenerators, Digests)"/> method auto-generates the keying material.</description></item>
     /// <item><description>The Extract() method retrieves a populated cipher description (CipherDescription), key material (KeyParams), and the file extension key from the key file.</description></item>
     /// </list>
@@ -100,7 +101,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
 
         #region Fields
         private bool _isDisposed = false;
-        private string _keyPath;
+        private Stream _keyStream;
         private PackageKey _keyPackage;
         private KeyAuthority _keyOwner;
         #endregion
@@ -133,21 +134,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// <para>If the key exixts, permissions are tested, otherwise this path is used as the new key path and file name.</para>
         /// </summary>
         /// 
-        /// <param name="KeyPath">The fully qualified path to the key file to be read or created</param>
+        /// <param name="KeyStream">The stream used to create or extract the key file</param>
         /// <param name="Authority">The local KeyAuthority credentials structure</param>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if an empty KeyPath is used</exception>
-        public PackageFactory(string KeyPath, KeyAuthority Authority)
+        public PackageFactory(Stream KeyStream, KeyAuthority Authority)
         {
-            if (string.IsNullOrEmpty(KeyPath) || Path.GetExtension(KeyPath).Length < 1 || Path.GetFileNameWithoutExtension(KeyPath).Length < 1 || !Path.IsPathRooted(KeyPath))
-                throw new CryptoProcessingException("PackageFactory:Ctor", "The key path must contain a valid directory and file name!", new ArgumentException());
-
             // store authority
             _keyOwner = Authority;
             // file path or destination
-            _keyPath = KeyPath;
+            _keyStream = KeyStream;
 
-            if (File.Exists(_keyPath))
+            if (_keyStream.Length > 0)
                 AccessScope = Authenticate();
         }
 
@@ -302,10 +300,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         public void Create(PackageKey Package, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, Digests DigestEngine = Digests.SHA512)
         {
             // if you are getting exceptions.. read the docs!
-            if (File.Exists(_keyPath))
-                throw new CryptoProcessingException("PackageFactory:Create", "The key file exists! Can not overwrite an existing key file, choose a different path.", new FileLoadException());
-            if (!DirectoryTools.IsWritable(Path.GetDirectoryName(_keyPath)))
-                throw new CryptoProcessingException("PackageFactory:Create", "The selected directory is read only! Choose a different path.", new UnauthorizedAccessException());
             if (!CipherDescription.IsValid(Package.Description))
                 throw new CryptoProcessingException("PackageFactory:Create", "The key package cipher settings are invalid!", new FormatException());
             if (!KeyAuthority.IsValid(Package.Authority))
@@ -341,40 +335,40 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 using (KeyGenerator keyGen = new KeyGenerator(SeedEngine, DigestEngine))
                     keyGen.GetBytes(buffer);
 
-                using (BinaryWriter keyWriter = new BinaryWriter(new FileStream(_keyPath, FileMode.Create, FileAccess.Write)))
-                {
-                    // pre-set the size to avoid fragmentation
-                    keyWriter.BaseStream.SetLength(PackageKey.GetHeaderSize(Package) + (subKeySize * Package.SubKeyCount));
+                BinaryWriter keyWriter = new BinaryWriter(_keyStream);
+                // pre-set the size to avoid fragmentation
+                keyWriter.BaseStream.SetLength(PackageKey.GetHeaderSize(Package) + (subKeySize * Package.SubKeyCount));
 
-                    if (IsEncrypted(Package.KeyPolicy))
-                    {
-                        // add policy flags, only part of key not encrypted
-                        keyWriter.Write(Package.KeyPolicy);
-                        // get salt, return depends on auth flag settings
-                        byte[] salt = GetSalt();
-                        // create a buffer for encrypted data
-                        int hdrLen = header.Length - PackageKey.GetPolicyOffset();
-                        byte[] data = new byte[buffer.Length + hdrLen];
-                        // copy header and key material
-                        Buffer.BlockCopy(header, PackageKey.GetPolicyOffset(), data, 0, hdrLen);
-                        Buffer.BlockCopy(buffer, 0, data, hdrLen, buffer.Length);
-                        // encrypt the key and header
-                        TransformBuffer(data, salt);
-                        // write to file
-                        keyWriter.Write(data);
-                        // don't wait for gc
-                        Array.Clear(salt, 0, salt.Length);
-                        Array.Clear(data, 0, data.Length);
-                    }
-                    else
-                    {
-                        // write the keypackage header
-                        keyWriter.Write(header, 0, header.Length);
-                        // write the keying material
-                        keyWriter.Write(buffer, 0, buffer.Length);
-                    }
+                if (IsEncrypted(Package.KeyPolicy))
+                {
+                    // add policy flags, only part of key not encrypted
+                    keyWriter.Write(Package.KeyPolicy);
+                    // get salt, return depends on auth flag settings
+                    byte[] salt = GetSalt();
+                    // create a buffer for encrypted data
+                    int hdrLen = header.Length - PackageKey.GetPolicyOffset();
+                    byte[] data = new byte[buffer.Length + hdrLen];
+                    // copy header and key material
+                    Buffer.BlockCopy(header, PackageKey.GetPolicyOffset(), data, 0, hdrLen);
+                    Buffer.BlockCopy(buffer, 0, data, hdrLen, buffer.Length);
+                    // encrypt the key and header
+                    TransformBuffer(data, salt);
+                    // write to file
+                    keyWriter.Write(data);
+                    // don't wait for gc
+                    Array.Clear(salt, 0, salt.Length);
+                    Array.Clear(data, 0, data.Length);
                 }
+                else
+                {
+                    // write the keypackage header
+                    keyWriter.Write(header, 0, header.Length);
+                    // write the keying material
+                    keyWriter.Write(buffer, 0, buffer.Length);
+                }
+
                 // cleanup
+                _keyStream.Seek(0, SeekOrigin.Begin);
                 Array.Clear(header, 0, header.Length);
                 Array.Clear(buffer, 0, buffer.Length);
             }
@@ -407,7 +401,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 int index;
                 // get the key data
                 MemoryStream keyStream = GetKeyStream();
-
                 // get the keying materials starting offset within the key file
                 keyPos = PackageKey.SubKeyOffset(keyStream, KeyId);
 
@@ -416,7 +409,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
 
                 // get the index
                 index = PackageKey.IndexFromId(keyStream, KeyId);
-
                 // key flagged SingleUse was used for decryption and is locked out
                 if (PackageKey.KeyHasPolicy(_keyPackage.SubKeyPolicy[index], (long)PackageKeyStates.Locked))
                     throw new CryptoProcessingException("PackageFactory:Extract", "SubKey is locked. The subkey has a single use policy and was previously used to decrypt the file.", new Exception());
@@ -692,41 +684,41 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// </remarks>
         private MemoryStream GetKeyStream()
         {
-            MemoryStream keyStream = null;
+            MemoryStream keymem = null;
 
             try
             {
-                using (BinaryReader keyReader = new BinaryReader(new FileStream(_keyPath, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                BinaryReader keyReader = new BinaryReader(_keyStream);
+                // output stream and writer
+                keymem = new MemoryStream((int)keyReader.BaseStream.Length);
+                BinaryWriter keyWriter = new BinaryWriter(keymem);
+
+                // add policy flags
+                this.KeyPolicy = keyReader.ReadInt64();
+                keyWriter.Write(KeyPolicy);
+                // get the data
+                byte[] data = keyReader.ReadBytes((int)(keyReader.BaseStream.Length - PackageKey.GetPolicyOffset()));
+
+                // decrypt
+                if (IsEncrypted(KeyPolicy))
                 {
-                    // output stream and writer
-                    keyStream = new MemoryStream((int)keyReader.BaseStream.Length);
-                    BinaryWriter keyWriter = new BinaryWriter(keyStream);
-
-                    // add policy flags
-                    this.KeyPolicy = keyReader.ReadInt64();
-                    keyWriter.Write(KeyPolicy);
-                    // get the data
-                    byte[] data = keyReader.ReadBytes((int)(keyReader.BaseStream.Length - PackageKey.GetPolicyOffset()));
-
-                    // decrypt
-                    if (IsEncrypted(KeyPolicy))
-                    {
-                        // get the salt
-                        byte[] salt = GetSalt();
-                        // decrypt the key
-                        TransformBuffer(data, salt);
-                        // clear the salt
-                        Array.Clear(salt, 0, salt.Length);
-                    }
-
-                    // copy to stream
-                    keyWriter.Write(data);
-                    // don't wait for gc
-                    Array.Clear(data, 0, data.Length);
-                    // reset position
-                    keyStream.Seek(0, SeekOrigin.Begin);
+                    // get the salt
+                    byte[] salt = GetSalt();
+                    // decrypt the key
+                    TransformBuffer(data, salt);
+                    // clear the salt
+                    Array.Clear(salt, 0, salt.Length);
                 }
-                return keyStream;
+
+                // copy to stream
+                keyWriter.Write(data);
+                // don't wait for gc
+                Array.Clear(data, 0, data.Length);
+                // reset position
+                keymem.Seek(0, SeekOrigin.Begin);
+                _keyStream.Seek(0, SeekOrigin.Begin);
+
+                return keymem;
             }
             catch
             {
@@ -797,11 +789,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// </remarks>
         private void Overwrite(byte[] KeyData, long Offset, long Length)
         {
-            using (FileStream outputWriter = new FileStream(_keyPath, FileMode.Open, FileAccess.Write, FileShare.Read, KeyData.Length, FileOptions.WriteThrough))
-            {
-                outputWriter.Seek(Offset, SeekOrigin.Begin);
-                outputWriter.Write(KeyData, 0, KeyData.Length);
-            }
+            _keyStream.Seek(Offset, SeekOrigin.Begin);
+            _keyStream.Write(KeyData, 0, KeyData.Length);
         }
 
         /// <remarks>
@@ -834,22 +823,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// <remarks>
         /// Writes a memorystream to the key package file
         /// </remarks>
-        private void WriteKeyStream(MemoryStream KeyStream)
+        private void WriteKeyStream(MemoryStream InStream)
         {
-            KeyStream.Seek(0, SeekOrigin.Begin);
+            InStream.Seek(0, SeekOrigin.Begin);
 
             try
             {
-                using (BinaryWriter keyWriter = new BinaryWriter(new FileStream(_keyPath, FileMode.Open, FileAccess.Write, FileShare.Read)))
+                using (BinaryWriter keyWriter = new BinaryWriter(_keyStream))
                 {
-                    using (BinaryReader keyReader = new BinaryReader(KeyStream))
+                    using (BinaryReader keyReader = new BinaryReader(InStream))
                     {
                         // policy flag is not encrypted
                         long policies = keyReader.ReadInt64();
                         keyWriter.Write(policies);
                         // get the header and keying material
-                        byte[] data = new byte[KeyStream.Length - PackageKey.GetPolicyOffset()];
-                        KeyStream.Read(data, 0, data.Length);
+                        byte[] data = new byte[InStream.Length - PackageKey.GetPolicyOffset()];
+                        InStream.Read(data, 0, data.Length);
 
                         if (IsEncrypted(policies))
                         {
@@ -867,7 +856,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                     }
                 }
 
-                KeyStream.Dispose();
+                InStream.Dispose();
             }
             catch
             {
@@ -892,8 +881,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             {
                 try
                 {
-                    if (_keyPath != null)
-                        _keyPath = null;
+                    if (_keyStream != null)
+                    {
+                        _keyStream.Close();
+                        _keyStream.Dispose();
+                        _keyStream = null;
+                    }
                 }
                 finally
                 {

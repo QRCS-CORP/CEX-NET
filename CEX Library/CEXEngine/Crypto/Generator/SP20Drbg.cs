@@ -38,7 +38,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 {
     /// <summary>
-    /// <h5>SP20Drbg: A parallelized Salsa20 deterministic random byte generator implementation.</h5>
+    /// SP20Drbg: A parallelized Salsa20 deterministic random byte generator implementation.
     /// <para>A Salsa20 key stream, parallelized and extended to use up to 30 rounds of diffusion.</para>
     /// </summary>
     /// 

@@ -821,17 +821,37 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int result = 1;
-            result += 31 * KeyPolicy.GetHashCode();
-            result += 31 * CreatedOn.GetHashCode();
-            result += 31 * Authority.GetHashCode();
-            result += 31 * Description.GetHashCode();
-            result += 31 * ExtensionKey.GetHashCode();
-            result += 31 * SubKeyCount.GetHashCode();
-            result += 31 * SubKeyPolicy.GetHashCode();
-            result += 31 * SubKeyID.GetHashCode();
+            int code = 31;
 
-            return result;
+            code *= (int)KeyPolicy;
+            code *= (int)CreatedOn;
+            code *= SubKeyCount;
+            code *= Authority.GetHashCode();
+            code += 31 * Description.GetHashCode();
+
+            if (ExtensionKey.Length != 0)
+            {
+                for (int i = 0; i < ExtensionKey.Length; ++i)
+                    code *= ExtensionKey[i];
+            }
+            if (SubKeyPolicy.Length != 0)
+            {
+                for (int i = 0; i < SubKeyPolicy.Length; ++i)
+                    code *= (int)SubKeyPolicy[i];
+            }
+            if (SubKeyID.Length != 0)
+            {
+                for (int i = 0; i < SubKeyID[i].Length; ++i)
+                {
+                    if (SubKeyID[i].Length != 0)
+                    {
+                        for (int j = 0; j < SubKeyID[i].Length; ++j)
+                            code *= SubKeyID[i][j];
+                    }
+                }
+            }
+
+            return code;
         }
 
         /// <summary>
@@ -848,7 +868,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
 
             PackageKey other = (PackageKey)Obj;
 
-            if (KeyPolicy.GetHashCode() != other.KeyPolicy.GetHashCode())
+            if (KeyPolicy != other.KeyPolicy)
                 return false;
             if (CreatedOn != other.CreatedOn)
                 return false;
@@ -856,14 +876,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
                 return false;
             if (Description.GetHashCode() != other.Description.GetHashCode())
                 return false;
-            if (ExtensionKey.GetHashCode() != other.ExtensionKey.GetHashCode())
+            if (!Compare.IsEqual(ExtensionKey, other.ExtensionKey))
                 return false;
             if (SubKeyCount != other.SubKeyCount)
                 return false;
-            if (SubKeyPolicy.GetHashCode() != other.SubKeyPolicy.GetHashCode())
+            if (!Compare.IsEqual(SubKeyPolicy, other.SubKeyPolicy))
                 return false;
-            if (SubKeyID.GetHashCode() != other.SubKeyID.GetHashCode())
-                return false;
+
+            if (SubKeyID.Length != 0)
+            {
+                for (int i = 0; i < SubKeyID.Length; ++i)
+                {
+                    if (SubKeyID[i].Length != 0)
+                    {
+                        for (int j = 0; j < SubKeyID[i].Length; ++j)
+                        {
+                            if (SubKeyID[i][j] != other.SubKeyID[i][j])
+                                return false;
+                        }
+                    }
+                }
+            }
 
             return true;
         }

@@ -40,7 +40,7 @@ using VTDev.Libraries.CEXEngine.Tools;
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 {
     /// <summary>
-    /// <h5>CompressionCipher: Used to compress and cryptographically transform a stream.</h5>
+    /// CompressionCipher: Used to compress and cryptographically transform a stream.
     /// <para>Extends the CipherStream class for encrypting a compressed directory of files.
     /// If the cipher is for encryption, files are compressed and encrypted to the output stream.
     /// If the cipher is for decryption, the input stream contains the compressed and encrypted directory, 
@@ -56,7 +56,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     ///     KeyParams kp = new KeyGenerator().GetKeyParams(32, 16);
     ///     // Create an archive //
     ///     // create the cipher
-    ///     using (ICipherMode cipher = new CTR(new RDX()))
+    ///     using (ICipherMode cipher = new CTR(new RHX()))
     ///     {
     ///         // initialize the cipher for encryption
     ///         cipher.Initialize(true, kp);
@@ -77,7 +77,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     /// 
     ///     // Inflate an archive //
     ///     // create the cipher
-    ///     using (ICipherMode cipher = new CTR(new RDX()))
+    ///     using (ICipherMode cipher = new CTR(new RHX()))
     ///     {
     ///         // initialize the cipher for decryption
     ///         cipher.Initialize(false, kp);

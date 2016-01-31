@@ -41,7 +41,7 @@ using VTDev.Libraries.CEXEngine.Tools;
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 {
     /// <summary>
-    /// <h5>VolumeCipher: Performs bulk file cryptographic transforms.</h5>
+    /// VolumeCipher: Performs bulk file cryptographic transforms.
     /// <para>A helper class used to encrypt or decrypt a series of files on a directory or volume.
     /// Note: If the cipher is for encryption, files are encrypted in place.
     /// If the cipher is for decryption, individual files or the entire directory can be decrypted.</para>
@@ -350,9 +350,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             }
 
             // update the key header
-            byte[] ks = _volumeKey.ToBytes();
-            _keyStream.Write(ks, 0, ks.Length);
-            _keyStream.Seek(0, SeekOrigin.Begin);
+            if (_isEncryption)
+            {
+                byte[] ks = _volumeKey.ToBytes();
+                _keyStream.Seek(0, SeekOrigin.Begin);
+                _keyStream.Write(ks, 0, ks.Length);
+            }
         }
         #endregion
 
@@ -404,9 +407,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
                     _isEncryption = false;
                     _progressTotal = 0;
                     _volumeKey.Reset();
-
-                   if (_keyStream != null)
-                        _keyStream.Close();
                     if (_cipherStream != null)
                         _cipherStream.Dispose();
                 }

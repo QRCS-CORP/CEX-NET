@@ -42,7 +42,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Helper;
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 {
     /// <summary>
-    /// <h5>PacketCipher: Performs a streaming packet cryptographic transform.</h5>
+    /// PacketCipher: Performs a streaming packet cryptographic transform.
     /// <para>Wraps encryption/decryption of a byte array in a continuous operation.</para>
     /// 
     /// </summary> 
@@ -70,7 +70,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     /// 
     ///     // Encrypt a stream //
     ///     // create the outbound cipher
-    ///     using (ICipherMode cipher = new CTR(new RDX()))
+    ///     using (ICipherMode cipher = new CTR(new RHX()))
     ///     {
     ///         // initialize the cipher for encryption
     ///         cipher.Initialize(true, key);
@@ -100,7 +100,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     /// 
     ///     // Decrypt a stream //
     ///     // create the inbound cipher
-    ///     using (ICipherMode cipher = new CTR(new RDX()))
+    ///     using (ICipherMode cipher = new CTR(new RHX()))
     ///     {
     ///         // initialize the cipher for decryption
     ///         cipher.Initialize(false, key);

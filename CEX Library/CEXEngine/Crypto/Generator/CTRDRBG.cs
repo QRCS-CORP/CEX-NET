@@ -39,14 +39,14 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 {
     /// <summary>
-    /// <h5>CTRDrbg: An implementation of a Encryption Counter based Deterministic Random Byte Generator.</h5>
+    /// CTRDrbg: An implementation of a Encryption Counter based Deterministic Random Byte Generator.
     /// <para>A Block Cipher Counter DRBG as outlined in NIST document: SP800-90A<cite>SP800-90B</cite></para>
     /// </summary> 
     /// 
     /// <example>
     /// <description>Example using an <c>IGenerator</c> interface:</description>
     /// <code>
-    /// using (IGenerator rnd = new CTRDrbg(new RDX()))
+    /// using (IGenerator rnd = new CTRDrbg(new RHX()))
     /// {
     ///     // initialize
     ///     rnd.Initialize(Salt, [Ikm], [Nonce]);

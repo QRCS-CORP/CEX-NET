@@ -40,14 +40,14 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 {
     /// <summary>
-    /// <h5>CBC: Implements a Cipher Block Chaining Mode: CBC.</h5>
+    /// CBC: Implements a Cipher Block Chaining Mode: CBC.
     /// <para>CBC as outlined in the NIST document: SP800-38A<cite>SP800-38A</cite></para>
     /// </summary> 
     /// 
     /// <example>
     /// <description>Example using an <c>ICipherMode</c> interface:</description>
     /// <code>
-    /// using (ICipherMode cipher = new CBC(new RDX(), [DisposeEngine]))
+    /// using (ICipherMode cipher = new CBC(new RHX(), [DisposeEngine]))
     /// {
     ///     // initialize for encryption
     ///     cipher.Initialize(true, new KeyParams(Key, IV));

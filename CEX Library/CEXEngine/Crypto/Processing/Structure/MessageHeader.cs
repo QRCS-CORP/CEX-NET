@@ -31,12 +31,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
     public struct MessageHeader
     {
         #region Constants
+        private const int KEYID_SIZE = 16;
+        private const int EXTKEY_SIZE = 16;
+        private const int SIZE_BASEHEADER = 32;
         private const int SEEKTO_ID = 0;
         private const int SEEKTO_EXT = 16;
         private const int SEEKTO_HASH = 32;
-        private const int SIZE_ID = 16;
-        private const int SIZE_EXT = 16;
-        private const int SIZE_BASEHEADER = 32;
         #endregion
 
         #region Public Fields
@@ -87,10 +87,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
 
             BinaryReader reader = new BinaryReader(HeaderStream);
 
-            KeyID = reader.ReadBytes(SIZE_ID);
-            Extension = reader.ReadBytes(SIZE_EXT);
-            byte[] mac = reader.ReadBytes(MacLength);
-            MessageMac = mac;
+            KeyID = reader.ReadBytes(KEYID_SIZE);
+            Extension = reader.ReadBytes(EXTKEY_SIZE);
+            MessageMac = reader.ReadBytes(MacLength);
         }
 
         /// <summary>
@@ -98,9 +97,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// </summary>
         /// 
         /// <param name="HeaderArray">The byte array containing the MessageHeader</param>
-        public MessageHeader(byte[] HeaderArray) :
-            this (new MemoryStream(HeaderArray))
+        public MessageHeader(byte[] HeaderArray)
         {
+            MemoryStream ms = new MemoryStream(HeaderArray);
+            BinaryReader reader =  new BinaryReader(ms);
+            KeyID = reader.ReadBytes(KEYID_SIZE);
+            Extension = reader.ReadBytes(EXTKEY_SIZE);
+            long len = ms.Length - ms.Position;
+            MessageMac = reader.ReadBytes((int)len);
         }
         #endregion
 
@@ -147,8 +151,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
             MemoryStream stream = new MemoryStream();
             BinaryWriter writer = new BinaryWriter(stream);
 
-            stream.Write(KeyID, 0, SIZE_ID);
-            stream.Write(Extension, 0, SIZE_EXT);
+            stream.Write(KeyID, 0, KEYID_SIZE);
+            stream.Write(Extension, 0, EXTKEY_SIZE);
 
             if (MessageMac != null)
                 stream.Write(MessageMac, 0, MessageMac.Length);
@@ -161,19 +165,38 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
 
         #region Getters
         /// <summary>
-        /// Get the size of a MessageHeader
+        /// Get decrypted file extension
         /// </summary>
-        public static int GetHeaderSize { get { return SIZE_BASEHEADER; } }
+        /// 
+        /// <param name="Extension">The encrypted file extension</param>
+        /// <param name="Key">Random byte array used to encrypt the extension</param>
+        /// 
+        /// <returns>File extension</returns>
+        public static string DecryptExtension(byte[] Extension, byte[] Key)
+        {
+            byte[] data = new byte[16];
+            char[] letters = new char[8];
+
+            Buffer.BlockCopy(Extension, 0, data, 0, Extension.Length);
+
+            // xor the buffer and hash
+            for (int i = 0; i < data.Length; i++)
+                data[i] ^= Key[i];
+
+            Buffer.BlockCopy(data, 0, letters, 0, 16);
+
+            return new string(letters).Replace("\0", String.Empty);
+        }
 
         /// <summary>
         /// Encrypt the file extension
         /// </summary>
         /// 
         /// <param name="Extension">The message file extension</param>
-        /// <param name="ExtKey">Random byte array used to encrypt the extension</param>
+        /// <param name="Key">Random byte array used to encrypt the extension</param>
         /// 
         /// <returns>Encrypted file extension</returns>
-        public static byte[] GetEncryptedExtension(string Extension, byte[] ExtKey)
+        public static byte[] EncryptExtension(string Extension, byte[] Key)
         {
             byte[] data = new byte[16];
             char[] letters = Extension.ToCharArray();
@@ -183,37 +206,28 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
 
             // xor the buffer and hash
             for (int i = 0; i < data.Length; i++)
-                data[i] ^= ExtKey[i];
+                data[i] ^= Key[i];
 
             return data;
         }
 
         /// <summary>
-        /// Get decrypted file extension
+        /// Get the file extension key
         /// </summary>
         /// 
         /// <param name="MessageStream">Stream containing a message header</param>
-        /// <param name="ExtKey">Random byte array used to encrypt the extension</param>
         /// 
-        /// <returns>File extension</returns>
-        public static string GetExtension(Stream MessageStream, byte[] ExtKey)
+        /// <returns>The 16 byte extension field</returns>
+        public static byte[] GetExtension(Stream MessageStream)
         {
-            byte[] data = new byte[16];
-            char[] letters = new char[8];
-
-            BinaryReader reader = new BinaryReader(MessageStream);
-
             MessageStream.Seek(SEEKTO_EXT, SeekOrigin.Begin);
-            data = reader.ReadBytes(SIZE_EXT);
-
-            // xor the buffer and hash
-            for (int i = 0; i < data.Length; i++)
-                data[i] ^= ExtKey[i];
-
-            Buffer.BlockCopy(data, 0, letters, 0, 16);
-
-            return new string(letters).Replace("\0", String.Empty);
+            return new BinaryReader(MessageStream).ReadBytes(EXTKEY_SIZE);
         }
+
+        /// <summary>
+        /// Get the size of a MessageHeader
+        /// </summary>
+        public static int GetHeaderSize { get { return SIZE_BASEHEADER; } }
 
         /// <summary>
         /// Get the messages unique key identifier
@@ -225,7 +239,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         public static byte[] GetKeyId(Stream MessageStream)
         {
             MessageStream.Seek(SEEKTO_ID, SeekOrigin.Begin);
-            return new BinaryReader(MessageStream).ReadBytes(SIZE_ID);
+            return new BinaryReader(MessageStream).ReadBytes(KEYID_SIZE);
         }
 
         /// <summary>
@@ -266,7 +280,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         public static void SetExtension(Stream MessageStream, byte[] Extension)
         {
             MessageStream.Seek(SEEKTO_EXT, SeekOrigin.Begin);
-            MessageStream.Write(Extension, 0, SIZE_EXT);
+            MessageStream.Write(Extension, 0, EXTKEY_SIZE);
         }
 
         /// <summary>
@@ -278,7 +292,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         public static void SetKeyId(Stream MessageStream, byte[] KeyID)
         {
             MessageStream.Seek(SEEKTO_ID, SeekOrigin.Begin);
-            MessageStream.Write(KeyID, 0, SIZE_ID);
+            MessageStream.Write(KeyID, 0, KEYID_SIZE);
         }
 
         /// <summary>

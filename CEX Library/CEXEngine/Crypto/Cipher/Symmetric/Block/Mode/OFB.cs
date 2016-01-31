@@ -38,14 +38,14 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 {
     /// <summary>
-    /// <h5>OFB: Implements a Output FeedBack Mode: OFB.</h5>
+    /// OFB: Implements a Output FeedBack Mode: OFB.
     /// <para>OFB as outlined in the NIST document: SP800-38A<cite>SP800-38A</cite></para>
     /// </summary>
     /// 
     /// <example>
     /// <description>Example using an <c>ICipherMode</c> interface:</description>
     /// <code>
-    /// using (ICipherMode cipher = new OFB(new RDX(), [DisposeEngine]))
+    /// using (ICipherMode cipher = new OFB(new RHX(), [DisposeEngine]))
     /// {
     ///     // initialize for encryption
     ///     cipher.Initialize(true, new KeyParams(Key, IV));

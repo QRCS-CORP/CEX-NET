@@ -39,7 +39,7 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 {
     /// <summary>
-    /// <h5>ISCRsg: Generates seed material using an ISAAC random number generator.</h5>
+    /// ISCRsg: Generates seed material using an ISAAC random number generator.
     /// <para>A high speed, cryptographically secure pseudo random provider.</para>
     /// </summary>
     /// 

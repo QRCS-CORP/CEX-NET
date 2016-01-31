@@ -39,7 +39,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 {
     /// <summary>
-    /// <h5>HMAC: An implementation of a Hash based Message Authentication Code: HMAC<cite>Fips 198-1</cite>.</h5>
+    /// HMAC: An implementation of a Hash based Message Authentication Code: HMAC<cite>Fips 198-1</cite>.
     /// <para>A HMAC as outlined in the NIST document: Fips 198-1<cite>Fips 198-1</cite></para>
     /// </summary>
     /// 
@@ -49,7 +49,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
     /// using (IMac mac = new HMAC(new SHA256Digest(), [DisposeEngine]))
     /// {
     ///     // initialize
-    ///     mac.Initialize(KeyParams);
+    ///     mac.Initialize(Key, [Iv]);
     ///     // get mac
     ///     Output = mac.ComputeMac(Input);
     /// }

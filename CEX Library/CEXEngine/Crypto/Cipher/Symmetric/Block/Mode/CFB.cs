@@ -39,14 +39,14 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 {
     /// <summary>
-    /// <h5>CFB: Implements a Cipher FeedBack Mode: CFB.</h5>
+    /// CFB: Implements a Cipher FeedBack Mode: CFB.
     /// <para>CFB as outlined in the NIST document: SP800-38A<cite>SP800-38A</cite></para>
     /// </summary>
     /// 
     /// <example>
     /// <description>Example using an <c>ICipherMode</c> interface:</description>
     /// <code>
-    /// using (ICipherMode cipher = new CFB(new RDX(), [BlockSizeBits], [DisposeEngine]))
+    /// using (ICipherMode cipher = new CFB(new RHX(), [BlockSizeBits], [DisposeEngine]))
     /// {
     ///     // initialize for encryption
     ///     cipher.Initialize(true, new KeyParams(Key, IV));

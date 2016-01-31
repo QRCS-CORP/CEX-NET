@@ -125,7 +125,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <param name="KeyStream">The Stream containing the VolumeKey</param>
         public VolumeKey(Stream KeyStream)
         {
-            KeyStream.Position = 0;
+            KeyStream.Seek(0, SeekOrigin.Begin);
             BinaryReader reader = new BinaryReader(KeyStream);
 
             Tag = reader.ReadBytes(TAG_SIZE);
@@ -515,14 +515,28 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int result = 1;
-            result += 31 * Tag.GetHashCode();
-            result += 31 * Description.GetHashCode();
-            result += 31 * Count;
-            result += 31 * FileId.GetHashCode();
-            result += 31 * State.GetHashCode();
+            int code = 31;
 
-            return result;
+            if (Tag.Length != 0)
+            {
+                for (int i = 0; i < Tag.Length; ++i)
+                    code *= Tag[i];
+            }
+            if (FileId.Length != 0)
+            {
+                for (int i = 0; i < FileId.Length; ++i)
+                    code *= FileId[i];
+            }
+            if (State.Length != 0)
+            {
+                for (int i = 0; i < State.Length; ++i)
+                    code *= State[i];
+            }
+
+            code += 31 * Description.GetHashCode();
+            code += 31 * Count;
+
+            return code;
         }
 
         /// <summary>
@@ -539,15 +553,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
 
             VolumeKey other = (VolumeKey)Obj;
 
-            if (Tag.GetHashCode() != other.Tag.GetHashCode())
+            if (!Compare.IsEqual(Tag, other.Tag))
                 return false;
             if (Description.GetHashCode() != other.Description.GetHashCode())
                 return false;
             if (Count != other.Count)
                 return false;
-            if (FileId.GetHashCode() != other.FileId.GetHashCode())
+            if (!Compare.IsEqual(FileId, other.FileId))
                 return false;
-            if (State.GetHashCode() != other.State.GetHashCode())
+            if (!Compare.IsEqual(State,other.State))
                 return false;
 
             return true;

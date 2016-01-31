@@ -41,7 +41,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 {
     /// <summary>
-    /// <h5>Blake256: An implementation of the Blake digest with a 256 bit return size.</h5>
+    /// Blake256: An implementation of the Blake digest with a 256 bit return size.
     /// <para>SHA-3 finalist<cite>NIST IR7896</cite>: The Blake<cite>Blake</cite> digest</para>
     /// </summary> 
     /// 

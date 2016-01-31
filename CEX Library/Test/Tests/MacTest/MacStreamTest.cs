@@ -13,7 +13,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
     /// <summary>
     /// Compares the normal mode of MacStream with the Concurrent mode for equality
     /// </summary>
-    public class StreamMacTest : ITest
+    public class MacStreamTest : ITest
     {
         #region Constants
         private const string DESCRIPTION = "Compares the normal mode of MacStream with the Concurrent mode for equality.";

@@ -39,7 +39,7 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 {
     /// <summary>
-    /// <h5>XSPRsg: Generates seed material using an XorShift+ generator.</h5>
+    /// XSPRsg: Generates seed material using an XorShift+ generator.
     /// <para>This generator is not generally considered a cryptographic quality generator. 
     /// This generator is suitable as a quality high-speed number generator, but not to be used directly for tasks that require secrecy, ex. key generation.</para>
     /// </summary>

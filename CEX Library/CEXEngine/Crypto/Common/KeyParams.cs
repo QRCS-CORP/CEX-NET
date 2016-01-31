@@ -6,7 +6,7 @@ using System.IO;
 namespace VTDev.Libraries.CEXEngine.Crypto.Common
 {
     /// <summary>
-    /// <h5>KeyParams: A Symmetric Cipher Key and Vector Container class.</h5>
+    /// KeyParams: A Symmetric Cipher Key and Vector Container class.
     /// </summary>
     public class KeyParams : IDisposable, ICloneable
     {
@@ -210,16 +210,43 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <param name="Obj">KeyParams to compare</param>
         /// 
         /// <returns>Returns true if equal</returns>
-        bool Equals(KeyParams Obj)
+        public bool Equals(KeyParams Obj)
         {
-            if (Obj.Key != _Key)
+            if (!Compare.IsEqual(Obj.Key, _Key))
                 return false;
-            if (Obj.IV != _Iv)
+            if (!Compare.IsEqual(Obj.IV, _Iv))
                 return false;
-            if (Obj.IKM != _Ikm)
+            if (!Compare.IsEqual(Obj.IKM, _Ikm))
                 return false;
 
             return true;
+        }
+
+        /// <summary>
+        /// Get the hash code for this object
+        /// </summary>
+        /// 
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            int code = 31;
+            if (_Key.Length != 0)
+            {
+                for (int i = 0; i < _Key.Length; ++i)
+                    code *= _Key[i];
+            }
+            if (_Iv.Length != 0)
+            {
+                for (int i = 0; i < _Iv.Length; ++i)
+                    code *= _Iv[i];
+            }
+            if (_Ikm.Length != 0)
+            {
+                for (int i = 0; i < _Ikm.Length; ++i)
+                    code *= _Ikm[i];
+            }
+
+            return code;
         }
         #endregion
 

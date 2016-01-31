@@ -38,17 +38,17 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 {
     /// <summary>
-    /// <h5>VMAC: An implementation of a Variably Modified Permutation Composition based Message Authentication Code: VMPC-MAC.</h5>
+    /// VMAC: An implementation of a Variably Modified Permutation Composition based Message Authentication Code: VMPC-MAC.
     /// <para>A VMPC-MAC as outlined in the VMPC-MAC Specification<cite>VMPC-MAC</cite></para>
     /// </summary>
     /// 
     /// <example>
     /// <description>Example using an <c>IMac</c> interface:</description>
     /// <code>
-    /// using (IMac mac = new VMAC(new RDX()))
+    /// using (IMac mac = new VMAC())
     /// {
     ///     // initialize
-    ///     mac.Initialize(KeyParams);
+    ///     mac.Initialize(Key, Iv);
     ///     // get mac
     ///     Output = mac.ComputeMac(Input);
     /// }
@@ -285,11 +285,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <exception cref="CryptoMacException">Thrown if a null or invalid Key, or IV is used</exception>
         public void Initialize(byte[] MacKey, byte[] IV)
         {
-            if (MacKey == null || MacKey.Length == 0)
+            if (MacKey == null || MacKey.Length < 1)
                 throw new CryptoMacException("VMAC:Initialize", "Key can not be zero length or null!", new ArgumentNullException());
             if (IV == null)
                 throw new CryptoMacException("VMAC:Initialize", "The IV can not be null!", new ArgumentNullException());
-            if (IV == null || IV.Length < 1 || IV.Length > 768)
+            if (IV.Length < 1 || IV.Length > 768)
                 throw new CryptoMacException("VMAC:Initialize", "VMAC requires 1 to 768 bytes of IV!", new ArgumentOutOfRangeException());
 
 			_workingIV = (byte[])IV.Clone();

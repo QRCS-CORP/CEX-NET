@@ -43,11 +43,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
 
         #region Public Fields
         /// <summary>
-        /// The <see cref="CipherDescription">CipherDescription</see> structure containing a complete description of the cipher instance
-        /// </summary>
-        [MarshalAs(UnmanagedType.Struct, SizeConst = DESC_SIZE)]
-        public CipherDescription Description;
-        /// <summary>
         /// The unique 16 byte ID field used to identify this key. A null value auto generates this field
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = KEYID_SIZE)]
@@ -57,6 +52,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = EXTKEY_SIZE)]
         public byte[] ExtensionKey;
+        /// <summary>
+        /// The <see cref="CipherDescription">CipherDescription</see> structure containing a complete description of the cipher instance
+        /// </summary>
+        [MarshalAs(UnmanagedType.Struct, SizeConst = DESC_SIZE)]
+        public CipherDescription Description;
         #endregion
 
         #region Constructor
@@ -297,9 +297,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
 
             if (Description.GetHashCode() != other.Description.GetHashCode())
                 return false;
-            if (KeyID.GetHashCode() != other.KeyID.GetHashCode())
+            if (!Compare.IsEqual(KeyID, other.KeyID))
                 return false;
-            if (ExtensionKey.GetHashCode() != other.ExtensionKey.GetHashCode())
+            if (!Compare.IsEqual(ExtensionKey, other.ExtensionKey))
                 return false;
 
             return true;

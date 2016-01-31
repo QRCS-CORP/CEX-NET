@@ -38,7 +38,7 @@ using VTDev.Libraries.CEXEngine.Numeric;
 namespace VTDev.Libraries.CEXEngine.Crypto.Prng 
 {
     /// <summary>
-    /// <h5>BBSG: An implementation of a Blum-Blum-Shub random number generator.</h5>
+    /// BBSG: An implementation of a Blum-Blum-Shub random number generator.
     /// <para>Implements BBSG as defined in the NIST document: SP800-22 1a<cite>SP800-22A</cite>, Section D.8</para>
     /// </summary>
     /// 

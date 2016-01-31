@@ -86,6 +86,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <returns>Equal</returns>
         public static bool IsEqual(byte[] A, byte[] B)
         {
+            if (A == null && B != null || B == null && A != null)
+                return false;
+
             int i = A.Length;
 
             if (i != B.Length)
@@ -111,6 +114,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <returns>Equal</returns>
         public static bool IsEqual(char[] A, char[] B)
         {
+            if (A == null && B != null || B == null && A != null)
+                return false;
+
             int i = A.Length;
 
             if (i != B.Length)
@@ -136,6 +142,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <returns>Equal</returns>
         public static bool IsEqual(short[] A, short[] B)
         {
+            if (A == null && B != null || B == null && A != null)
+                return false;
+
             int i = A.Length;
 
             if (i != B.Length)
@@ -161,6 +170,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <returns>Equal</returns>
         public static bool IsEqual(int[] A, int[] B)
         {
+            if (A == null && B != null || B == null && A != null)
+                return false;
+
             int i = A.Length;
 
             if (i != B.Length)
@@ -186,6 +198,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <returns>Equal</returns>
         public static bool IsEqual(long[] A, long[] B)
         {
+            if (A == null && B != null || B == null && A != null)
+                return false;
+
             int i = A.Length;
 
             if (i != B.Length)
@@ -211,6 +226,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <returns>Equal</returns>
         public static bool IsEqual(float[] A, float[] B)
         {
+            if (A == null && B != null || B == null && A != null)
+                return false;
+
             int i = A.Length;
 
             if (i != B.Length)
@@ -236,6 +254,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <returns>Equal</returns>
         public static bool IsEqual(double[] A, double[] B)
         {
+            if (A == null && B != null || B == null && A != null)
+                return false;
+
             int i = A.Length;
 
             if (i != B.Length)

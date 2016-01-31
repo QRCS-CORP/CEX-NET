@@ -98,13 +98,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
     /// <remarks>
     /// <description><h4>Basic Operations:</h4></description>
     /// 
-    /// <description><h5>Encryption</h5></description>
+    /// <description>Encryption</description>
     /// <list type="table">
     /// <item><description>Randomly select a “small” polynomial <c>r ∈ Dr</c>.</description></item>
     /// <item><description>Calculate the ciphertext e as <c>e ≡ r ∗ h+m (mod q)</c>.</description></item>
     /// </list>
     /// 
-    /// <description><h5>Decryption:</h5></description>
+    /// <description>Decryption:</description>
     /// <list type="table">
     /// <item><description>Calculate <c>a ≡ center(f ∗ e)</c>, where the centering operation center reduces its input into the interval <c>[A,A+q−1]</c>.</description></item>
     /// <item><description>Recover m by calculating <c>m ≡ fp ∗ a (mod p)</c>.</description></item>

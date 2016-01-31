@@ -38,14 +38,14 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 {
     /// <summary>
-    /// <h5>ECB: Implements an Electronic Cookbook Mode: ECB (Not Recommended).</h5>
+    /// ECB: Implements an Electronic Cookbook Mode: ECB (Not Recommended).
     /// <para>ECB as outlined in the NIST document: SP800-38A<cite>SP800-38A</cite></para>
     /// </summary> 
     /// 
     /// <example>
     /// <description>Example using an <c>ICipherMode</c> interface:</description>
     /// <code>
-    /// using (ICipherMode cipher = new ECB(new RDX(), [DisposeEngine]))
+    /// using (ICipherMode cipher = new ECB(new RHX(), [DisposeEngine]))
     /// {
     ///     // initialize for encryption
     ///     cipher.Initialize(true, new KeyParams(Key));

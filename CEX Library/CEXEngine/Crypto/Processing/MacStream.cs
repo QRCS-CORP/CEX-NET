@@ -40,7 +40,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 {
     /// <summary>
-    /// <h5>MacStream: Wraps file and memory stream message authentication.</h5>
+    /// MacStream: Wraps file and memory stream message authentication.
     /// <para>Wraps Message Authentication Code (MAC) stream functions in an easy to use interface.</para>
     /// </summary> 
     /// 

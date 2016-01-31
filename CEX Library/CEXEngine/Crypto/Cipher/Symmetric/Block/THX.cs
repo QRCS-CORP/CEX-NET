@@ -49,7 +49,7 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 {
     /// <summary>
-    /// <h5>THX: A Twofish Cipher extended with an (optional) HKDF powered Key Schedule.</h5>
+    /// THX: A Twofish Cipher extended with an (optional) HKDF powered Key Schedule.
     /// <para>THX is a Twofish<cite>Twofish</cite> implementation that can use a standard configuration on key sizes up to 256 bits, 
     /// an extended key size of 512 bits, or unlimited key sizes greater than 64 bytes. 
     /// On <see cref="LegalKeySizes"/> larger than 64 bytes, an HKDF bytes generator is used to expand the <c>working key</c> integer array.

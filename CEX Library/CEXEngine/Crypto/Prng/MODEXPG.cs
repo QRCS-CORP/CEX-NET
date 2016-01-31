@@ -37,7 +37,7 @@ using VTDev.Libraries.CEXEngine.Numeric;
 namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 {
     /// <summary>
-    /// <h5>An implementation of the Modular Exponentiation Generator random number generator: MODEXPG</h5>
+    /// An implementation of the Modular Exponentiation Generator random number generator: MODEXPG
     /// <para>Implements MODEXPG as defined in the NIST document: SP800-22 1a<cite>SP800-22A</cite>, Section D.6</para>
     /// </summary>
     /// 

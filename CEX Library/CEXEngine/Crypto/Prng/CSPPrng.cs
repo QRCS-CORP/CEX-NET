@@ -39,7 +39,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 {
     /// <summary>
-    /// <h5>An implementation of a Cryptographically Secure PRNG using the RNGCryptoServiceProvider class.</h5>
+    /// An implementation of a Cryptographically Secure PRNG using the RNGCryptoServiceProvider class.
     /// <para>Implements a random number generator using the RNGCryptoServiceProvider<cite>RNGCryptoServiceProvider</cite> class</para>
     /// </summary>
     /// 

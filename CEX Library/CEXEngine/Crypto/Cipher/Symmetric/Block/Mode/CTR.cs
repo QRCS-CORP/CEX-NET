@@ -40,14 +40,14 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 {
     /// <summary>
-    /// <h5>CTR: Implements a Parallel Segmented Counter Mode: CTR.</h5>
+    /// CTR: Implements a Parallel Segmented Counter Mode: CTR.
     /// <para>CTR as outlined in the NIST document: SP800-38A<cite>SP800-38A</cite></para>
     /// </summary> 
     /// 
     /// <example>
     /// <description>Example using an <c>ICipherMode</c> interface:</description>
     /// <code>
-    /// using (ICipherMode cipher = new CTR(new RDX(), [DisposeEngine]))
+    /// using (ICipherMode cipher = new CTR(new RHX(), [DisposeEngine]))
     /// {
     ///     // initialize for encryption
     ///     cipher.Initialize(true, new KeyParams(Key, IV));
@@ -295,7 +295,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 
         #region Public Methods
         /// <summary>
-        /// Initialize the Cipher
+        /// Initialize the Cipher with a key
         /// </summary>
         /// 
         /// <param name="Encryption">Cipher is used. for encryption, false to decrypt</param>
@@ -318,7 +318,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         /// <summary>
         /// Process an array of bytes. 
         /// <para>This method processes the entire array; used when processing small data or buffers from a larger source.
-        /// Parallel capable function if Output array length is at least equal to <see cref="ParallelMinimumSize"/>. 
+        /// This is a Parallel capable function if Output array length is at least equal to <see cref="ParallelMinimumSize"/>. 
         /// <see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
         /// 
@@ -332,7 +332,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         /// <summary>
         /// Process a block of bytes using offset parameters.  
         /// <para>This method will process a single block from the source array of either ParallelBlockSize or Blocksize depending on IsParallel property setting.
-        /// Parallel capable function if Output array length is at least equal to <see cref="ParallelMinimumSize"/>. 
+        /// This is a Parallel capable function if Output array length is at least equal to <see cref="ParallelMinimumSize"/>. 
         /// Partial blocks are permitted with both parallel and linear operation modes.
         /// The <see cref="Initialize(bool, KeyParams)"/> method must be called before this method can be used.</para>
         /// </summary>

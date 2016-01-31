@@ -44,7 +44,7 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 {
     /// <summary>
-    /// <h5>EntropyPool: Provides a source of system entropy for pseudo random generators.</h5>
+    /// EntropyPool: Provides a source of system entropy for pseudo random generators.
     /// <para>Uses various system state, timers, and counters, which are compressed into an entropy pool.</para>
     /// </summary> 
     /// 

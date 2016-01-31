@@ -6,7 +6,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
 {
     /// <summary>
-    /// <h5>ZeroPad: The Zero Padding Scheme (Not Recommended).</h5>
+    /// ZeroPad: The Zero Padding Scheme (Not Recommended).
     /// </summary>
     public sealed class ZeroPad : IPadding
     {

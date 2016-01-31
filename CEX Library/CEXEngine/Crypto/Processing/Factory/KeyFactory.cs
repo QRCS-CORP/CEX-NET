@@ -11,36 +11,29 @@ using VTDev.Libraries.CEXEngine.Tools;
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
 {
     /// <summary>
-    /// <h5>KeyFactory: Used to create or extract a CipherKey file.</h5>
-    /// 
-    /// <list type="bullet">
-    /// <item><description>Constructors may use a fully qualified path to a key file, or the keys file stream.</description></item>
-    /// <item><description>The <see cref="Create(CipherDescription, KeyParams)"/> method requires a populated KeyParams class.</description></item>
-    /// <item><description>The <see cref="Create(CipherDescription, SeedGenerators, Digests)"/> method auto-generate keying material.</description></item>
-    /// <item><description>The Extract() method retrieves a populated cipher key (CipherKey), and key material (KeyParams), from the key file.</description></item>
-    /// </list>
+    /// KeyFactory: Used to create or extract a CipherKey stream
     /// </summary>
     /// 
     /// <example>
     /// <description>Example using the <see cref="Create(CipherDescription, SeedGenerators, Digests)"/> overload:</description>
     /// <code>
     /// // create the key file
-    /// new KeyFactory(KeyPath).Create(description);
+    /// new KeyFactory(KeyStream).Create(CipherDescription);
     /// </code>
     /// 
     /// <description>Example using the <see cref="Extract(out CipherKey, out KeyParams)"/> method:</description>
     /// <code>
-    /// // local vars
-    /// keyparam KeyParams;
+    /// KeyParams key;
     /// CipherKey header;
     /// 
-    /// new KeyFactory(KeyPath).Extract(out header, out keyparam);
+    /// new KeyFactory(KeyStream).Extract(out header, out key);
     /// </code>
     /// </example>
     /// 
     /// <revisionHistory>
     /// <revision date="2015/01/23" version="1.3.0.0">Initial release</revision>
     /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
+    /// <revision date="2016/01/30" version="1.5.0.0">Transitioned from path to stream</revision>
     /// </revisionHistory>
     /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.CipherKey">VTDev.Libraries.CEXEngine.Crypto.Processing.Structures CipherKey Structure</seealso>
@@ -50,39 +43,28 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.KeyGenerator">VTDev.Libraries.CEXEngine.Crypto.Processing.Factory KeyGenerator class</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.KeyParams">VTDev.Libraries.CEXEngine.Crypto.Processing.Structure KeyParams class</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.CipherStream">VTDev.Libraries.CEXEngine.Crypto.Processing CipherStream class</seealso>
+    /// 
+    /// <remarks>
+    /// <list type="bullet">
+    /// <item><description>Constructor may use a FileStream or a MemoryStream.</description></item>
+    /// <item><description>The <see cref="Create(CipherDescription, KeyParams)"/> method requires a populated KeyParams class.</description></item>
+    /// <item><description>The <see cref="Create(CipherDescription, SeedGenerators, Digests)"/> method auto-generate keying material.</description></item>
+    /// <item><description>The Extract() method retrieves a populated cipher key (CipherKey), and key material (KeyParams), from the key stream.</description></item>
+    /// </list>
+    /// </remarks>
     public sealed class KeyFactory : IDisposable
     {
         #region Fields
         private bool _isDisposed = false;
-        private string _keyPath;
         private Stream _keyStream;
         #endregion
 
         #region Constructor
         /// <summary>
-        /// Initialize this class with a key file path; key will be written to the path
+        /// Initialize this class with a stream; key will be written to or read from the stream
         /// </summary>
         /// 
-        /// <param name="KeyPath">The fully qualified path to the key file to be read or created</param>
-        /// 
-        /// <exception cref="CryptoProcessingException">Thrown if the key path is invalid, a key file exists at the path specified, or file path is read only</exception>
-        public KeyFactory(string KeyPath)
-        {
-            if (string.IsNullOrEmpty(KeyPath) || Path.GetExtension(KeyPath).Length < 1 || Path.GetFileNameWithoutExtension(KeyPath).Length < 1 || !Path.IsPathRooted(KeyPath))
-                throw new CryptoProcessingException("KeyFactory:Ctor", "The key path must contain a valid directory and file name!", new ArgumentException());
-            if (File.Exists(KeyPath))
-                throw new CryptoProcessingException("KeyFactory:Ctor", "The key file exists! Can not overwrite an existing key file, choose a different path.", new FileLoadException());
-            if (!DirectoryTools.IsWritable(Path.GetDirectoryName(KeyPath)))
-                throw new CryptoProcessingException("KeyFactory:Ctor", "The selected directory is read only! Choose a different path.", new UnauthorizedAccessException());
-
-            _keyPath = KeyPath;
-        }
-
-        /// <summary>
-        /// Initialize this class with a stream; key will be written to the stream
-        /// </summary>
-        /// 
-        /// <param name="KeyStream">The output stream</param>
+        /// <param name="KeyStream">The key stream</param>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if a null stream is passed</exception>
         public KeyFactory(Stream KeyStream)
@@ -157,9 +139,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                     throw new CryptoProcessingException("KeyFactory:Create", "Header MacSize does not align with the size of the KeyParam IKM!", new ArgumentOutOfRangeException());
             }
 
-            if (_keyStream == null)
-                _keyStream = new FileStream(_keyPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
-
             byte[] hdr = new CipherKey(Description).ToBytes();
             _keyStream.Write(hdr, 0, hdr.Length);
             byte[] key = ((MemoryStream)KeyParams.Serialize(KeyParam)).ToArray();
@@ -214,22 +193,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// <exception cref="CryptoProcessingException">Thrown if the key file could not be found or a Header parameter does not match the keystream length</exception>
         public void Extract(out CipherKey KeyHeader, out KeyParams KeyParam)
         {
-            if (!string.IsNullOrEmpty(_keyPath))
-            {
-                if (!File.Exists(_keyPath))
-                    throw new CryptoProcessingException("KeyFactory:Extract", "The key file could not be found! Check the path.", new FileNotFoundException());
-            }
-
-            if (_keyStream == null)
-                _keyStream = new FileStream(_keyPath, FileMode.Open, FileAccess.Read);
-
+            _keyStream.Seek(0, SeekOrigin.Begin);
             KeyHeader = new CipherKey(_keyStream);
             CipherDescription dsc = KeyHeader.Description;
 
             if (_keyStream.Length < dsc.KeySize + dsc.IvSize + dsc.MacSize + CipherKey.GetHeaderSize())
                 throw new CryptoProcessingException("KeyFactory:Extract", "The size of the key file does not align with the CipherKey sizes! Key is corrupt.", new ArgumentOutOfRangeException());
 
-            _keyStream.Position = CipherKey.GetHeaderSize();
+            _keyStream.Seek(CipherKey.GetHeaderSize(), SeekOrigin.Begin);
             KeyParam = KeyParams.DeSerialize(_keyStream);
         }
         #endregion
@@ -248,20 +219,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         {
             if (!_isDisposed && Disposing)
             {
-                try
-                {
-                    if (_keyStream != null)
-                    {
-                        _keyStream.Dispose();
-                        _keyStream = null;
-                    }
-                    if (_keyPath != null)
-                    {
-                        _keyPath = null;
-                    }
-                }
-                catch { }
-
                 _isDisposed = true;
             }
         }

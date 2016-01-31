@@ -7,8 +7,8 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Numeric 
 {
     /// <summary>
-	/// <h5>MathContext: Immutable objects describing settings such as rounding mode and digit precision for the numerical operations 
-	/// provided by class <see cref="BigDecimal"/>.</h5>
+	/// MathContext: Immutable objects describing settings such as rounding mode and digit precision for the numerical operations 
+	/// provided by class <see cref="BigDecimal"/>.
 	/// </summary>
     [Serializable]
     public sealed class MathContext

@@ -42,7 +42,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Helper;
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 {
     /// <summary>
-    /// <h5>DigestStream: Used to wrap file and memory stream hashing.</h5>
+    /// DigestStream: Used to wrap file and memory stream hashing.
     /// <para>Wraps Message Digest stream functions in an easy to use interface.</para>
     /// </summary> 
     /// 

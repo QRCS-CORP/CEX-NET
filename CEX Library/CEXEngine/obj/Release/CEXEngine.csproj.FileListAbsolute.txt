@@ -7,9 +7,3 @@ C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\CEXEngine\bin\Release\CEXEngine.pdb
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\CEXEngine\obj\Release\CEXEngine.dll
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\CEXEngine\obj\Release\CEXEngine.pdb
-C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\CEXEngine\bin\Release\CEXEngine.XML
-C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\CEXEngine\bin\Release\CEXEngine.dll
-C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\CEXEngine\bin\Release\CEXEngine.pdb
-C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\CEXEngine\obj\Release\CEXEngine.csprojResolveAssemblyReference.cache
-C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\CEXEngine\obj\Release\CEXEngine.dll
-C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\CEXEngine\obj\Release\CEXEngine.pdb

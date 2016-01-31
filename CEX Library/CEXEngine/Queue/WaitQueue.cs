@@ -37,7 +37,7 @@ using System.Threading;
 namespace VTDev.Libraries.CEXEngine.Queue
 {
     /// <summary>
-    /// <h5>WaitQueue: An implementation of a delayed Wait Queue.</h5>
+    /// WaitQueue: An implementation of a delayed Wait Queue.
     /// </summary>
     public class WaitQueue : IDisposable
     {
@@ -239,7 +239,7 @@ namespace VTDev.Libraries.CEXEngine.Queue
         #endregion
 
         /// <summary>
-        /// <h5>Test WaitQueue to calculate time threshhold measurements.</h5>
+        /// Test WaitQueue to calculate time threshhold measurements.
         /// </summary>
         public class SampleQueue : WaitQueue
         {

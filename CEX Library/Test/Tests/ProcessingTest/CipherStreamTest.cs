@@ -57,7 +57,6 @@ namespace VTDev.Projects.CEX.Test.Tests.ProcessingTest
         #region Constructor
         public CipherStreamTest()
         {
-
             _processorCount = VTDev.Libraries.CEXEngine.Utility.ParallelUtils.ProcessorCount;
         }
         #endregion
@@ -92,22 +91,22 @@ namespace VTDev.Projects.CEX.Test.Tests.ProcessingTest
 
 				RHX eng = new RHX();
 				OnProgress(new TestEventArgs("***Testing Padding Modes***.."));
-				StreamModesTest(new CBC(eng), new X923());
+				StreamModesTest(new CBC(eng, false), new X923());
 				OnProgress(new TestEventArgs("Passed CBC/X923 CipherStream test.."));
-				StreamModesTest(new CBC(eng), new PKCS7());
+				StreamModesTest(new CBC(eng, false), new PKCS7());
 				OnProgress(new TestEventArgs("Passed CBC/PKCS7 CipherStream test.."));
-                StreamModesTest(new CBC(eng), new TBC());
+                StreamModesTest(new CBC(eng, false), new TBC());
 				OnProgress(new TestEventArgs("Passed CBC/TBC CipherStream test.."));
-				StreamModesTest(new CBC(eng), new ISO7816());
+				StreamModesTest(new CBC(eng, false), new ISO7816());
 				OnProgress(new TestEventArgs("Passed CBC/ISO7816 CipherStream test.."));
 				OnProgress(new TestEventArgs(""));
 
 				OnProgress(new TestEventArgs("***Testing Cipher Modes***.."));
-				StreamModesTest(new CTR(eng), new ISO7816());
+				StreamModesTest(new CTR(eng, false), new ISO7816());
 				OnProgress(new TestEventArgs("Passed CTR CipherStream test.."));
-				StreamModesTest(new CFB(eng), new ISO7816());
+				StreamModesTest(new CFB(eng, 128, false), new ISO7816());
 				OnProgress(new TestEventArgs("Passed CFB CipherStream test.."));
-				StreamModesTest(new OFB(eng), new ISO7816());
+				StreamModesTest(new OFB(eng, false), new ISO7816());
 				OnProgress(new TestEventArgs("Passed OFB CipherStream test.."));
 				OnProgress(new TestEventArgs(""));
 				eng.Dispose();
@@ -138,11 +137,11 @@ namespace VTDev.Projects.CEX.Test.Tests.ProcessingTest
 
 				OnProgress(new TestEventArgs("***Testing Block Ciphers***.. "));
 				THX tfx = new THX();
-				StreamModesTest(new CBC(tfx), new ISO7816());
+				StreamModesTest(new CBC(tfx, false), new ISO7816());
 				tfx.Dispose();
 				OnProgress(new TestEventArgs("Passed THX CipherStream test.."));
 				SHX spx = new SHX();
-				StreamModesTest(new CBC(spx), new ISO7816());
+				StreamModesTest(new CBC(spx, false), new ISO7816());
                 spx.Dispose();
 				OnProgress(new TestEventArgs("Passed SHX CipherStream test.."));
 
@@ -152,15 +151,15 @@ namespace VTDev.Projects.CEX.Test.Tests.ProcessingTest
 
 				// test extended ciphers
 				RHX rhx = new RHX();
-				StreamModesTest(new CBC(rhx), new ISO7816());
+				StreamModesTest(new CBC(rhx, false), new ISO7816());
                 rhx.Dispose();
 				OnProgress(new TestEventArgs("Passed RHX CipherStream test.."));
 				SHX shx = new SHX();
-				StreamModesTest(new CBC(shx), new ISO7816());
+				StreamModesTest(new CBC(shx, false), new ISO7816());
                 shx.Dispose();
 				OnProgress(new TestEventArgs("Passed SHX CipherStream test.."));
 				THX thx = new THX();
-				StreamModesTest(new CBC(thx), new ISO7816());
+				StreamModesTest(new CBC(thx, false), new ISO7816());
                 thx.Dispose();
 				OnProgress(new TestEventArgs("Passed THX CipherStream test.."));
 				OnProgress(new TestEventArgs(""));
@@ -598,7 +597,7 @@ namespace VTDev.Projects.CEX.Test.Tests.ProcessingTest
 			
 			// 1 byte w/ byte arrays
 			{
-				CTR cipher = new CTR(engine);
+				CTR cipher = new CTR(engine, false);
 				CipherStream cs = new CipherStream(cipher);
 
 				cs.Initialize(true, kp);
@@ -614,7 +613,7 @@ namespace VTDev.Projects.CEX.Test.Tests.ProcessingTest
 			}
 			// 1 byte w/ stream
 			{
-				CTR cipher = new CTR(engine);
+				CTR cipher = new CTR(engine, false);
 				CipherStream cs = new CipherStream(cipher);
 				cs.Initialize(true, kp);
 				AllocateRandom(ref _plnText, 1);
@@ -635,7 +634,7 @@ namespace VTDev.Projects.CEX.Test.Tests.ProcessingTest
 
 			// partial block w/ byte arrays
 			{
-				CTR cipher = new CTR(engine);
+				CTR cipher = new CTR(engine, false);
 				CipherStream cs = new CipherStream(cipher);
 				AllocateRandom(ref _plnText, 15);
 				Array.Resize(ref _decText, 15);
@@ -654,7 +653,7 @@ namespace VTDev.Projects.CEX.Test.Tests.ProcessingTest
 			}
 			// partial block w/ stream
 			{
-				CTR cipher = new CTR(engine);
+				CTR cipher = new CTR(engine, false);
 				CipherStream cs = new CipherStream(cipher);
 				AllocateRandom(ref _plnText, 15);
 				Array.Resize(ref _decText, 15);
@@ -680,7 +679,7 @@ namespace VTDev.Projects.CEX.Test.Tests.ProcessingTest
 			{
 				for (int i = 0; i < 100; i++)
 				{
-					CTR cipher = new CTR(engine);
+					CTR cipher = new CTR(engine, false);
 
 					int sze = AllocateRandom(ref _plnText);
 					_decText = new byte[sze];
@@ -703,7 +702,7 @@ namespace VTDev.Projects.CEX.Test.Tests.ProcessingTest
 			{
 				for (int i = 0; i < 100; i++)
 				{
-					CTR cipher = new CTR(engine);
+					CTR cipher = new CTR(engine, false);
 					int sze = AllocateRandom(ref _plnText);
 					_decText = new byte[sze];
 					_encText = new byte[sze];

@@ -42,7 +42,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 {
     /// <summary>
-    /// <h5>DGTDRBG: An implementation of a Digest Counter based Deterministic Random Byte Generator.</h5>
+    /// DGTDRBG: An implementation of a Digest Counter based Deterministic Random Byte Generator.
     /// <para>A Digest Counter DRBG as outlined in NIST document: SP800-90A<cite>SP800-90A</cite></para>
     /// </summary> 
     /// 

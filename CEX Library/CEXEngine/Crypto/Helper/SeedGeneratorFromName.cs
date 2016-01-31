@@ -5,7 +5,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Helper
 {
     /// <summary>
-    /// <h5>SeedGeneratorFromName: Get a Prng instance from it's enumeration name.</h5>
+    /// SeedGeneratorFromName: Get a Prng instance from it's enumeration name.
     /// </summary>
     public static class SeedGeneratorFromName
     {

@@ -5,7 +5,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Helper
 {
     /// <summary>
-    /// <h5>DigestFromName: Get a Message Digest instance from it's enumeration name.</h5>
+    /// DigestFromName: Get a Message Digest instance from it's enumeration name.
     /// </summary>
     public static class DigestFromName
     {

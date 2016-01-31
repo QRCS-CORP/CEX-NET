@@ -11,7 +11,7 @@ using VTDev.Libraries.CEXEngine.Tools;
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
 {
     /// <summary>
-    /// <h5>VolumeFactory: Used to create and extract a VolumeKey file.</h5>
+    /// VolumeFactory: Used to create and extract a VolumeKey file.
     /// 
     /// <list type="bullet">
     /// <item><description>Constructors may use a fully qualified path to a key file, or the keys file stream.</description></item>

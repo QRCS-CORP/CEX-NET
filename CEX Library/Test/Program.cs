@@ -14,6 +14,7 @@ using VTDev.Projects.CEX.Test.Tests.DigestTest;
 using VTDev.Projects.CEX.Test.Tests.GeneratorTest;
 using VTDev.Projects.CEX.Test.Tests.MacTest;
 using VTDev.Projects.CEX.Test.Tests.PrngTest;
+using VTDev.Projects.CEX.Test.Tests.ProcessingTest;
 using VTDev.Projects.CEX.Test.Tests.SeedTest;
 using VTDev.Projects.CEX.Test.Tests.Tools;
 #endregion
@@ -40,7 +41,7 @@ namespace Test
             ConsoleUtils.CenterConsole();
             Console.Title = "CEX Test Suite";
             Console.BufferHeight = 600;
-            //RunTest(new GMSSSignTest());
+            
 
             Console.WriteLine("**********************************************");
             Console.WriteLine("* CEX Version 1.5                            *");
@@ -74,7 +75,6 @@ namespace Test
             Console.WriteLine("");
 
             Console.WriteLine("******TESTING MESSAGE DIGESTS******");
-            RunTest(new StreamDigestTest());
             RunTest(new BlakeTest());
             RunTest(new KeccakTest());
             RunTest(new Sha2Test());
@@ -82,11 +82,18 @@ namespace Test
             Console.WriteLine("");
 
             Console.WriteLine("******TESTING MESSAGE AUTHENTICATION CODE GENERATORS******");
-            RunTest(new StreamMacTest());
+
             RunTest(new HMacTest());
             RunTest(new VmpcMacTest());
             RunTest(new CMacTest());
             Console.WriteLine("");
+
+            Console.WriteLine("******TESTING CRYPTOGRAPHIC STREAM PROCESSORS******");
+            RunTest(new CipherStreamTest());
+            RunTest(new DigestStreamTest());
+            RunTest(new MacStreamTest());
+            RunTest(new KeyFactoryTest());
+            RunTest(new FactoryStructureTest());
 
             Console.WriteLine("******TESTING DETERMINISTIC RANDOM BYTE GENERATORS******");
             RunTest(new HkdfTest());

@@ -75,7 +75,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs Enumeration</seealso>
     /// 
     /// <remarks>
-    /// <description><h5>Key Generation:</h5></description>
+    /// <description>Key Generation:</description>
     /// <list type="table">
     /// <item><description>Randomly generate polynomials f and g in Df, Dg respectively.</description></item>
     /// <item><description>Invert f in Rq to obtain fq, invert f in Rp to obtain fp, and check that g is invertible in Rq.</description></item>

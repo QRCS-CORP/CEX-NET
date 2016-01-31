@@ -6,7 +6,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
 {
     /// <summary>
-    /// <h5>PKCS7: The PKCS7 Padding Scheme.</h5>
+    /// PKCS7: The PKCS7 Padding Scheme.
     /// <para>PKCS7 as outlined in RFC 5652<cite>RFC 5652</cite></para>
     /// </summary>
     public sealed class PKCS7 : IPadding

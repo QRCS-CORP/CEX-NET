@@ -1,6 +1,5 @@
 ﻿#region Directives
 using System;
-using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,8 +62,8 @@ namespace VTDev.Projects.CEX
             //VTDev.Projects.CEX.Tests.FactoryTests.KeyFactoryTest();
             //VTDev.Projects.CEX.Tests.FactoryTests.PackageFactoryTest();
             //VTDev.Projects.CEX.Tests.FactoryTests.VolumeFactoryTest();
-            VTDev.Projects.CEX.Tests.ProcessingTests.VolumeCipherTest(@"C:\Tests\Test");
-            //VTDev.Projects.CEX.Tests.ProcessingTests.CompressionCipherTest(@"C:\Tests\Test", @"C:\Tests\Extract", @"C:\Tests\voltest.cep");
+            //VTDev.Projects.CEX.Tests.ProcessingTests.VolumeCipherTest(@"C:\Tests\Volume");
+            //VTDev.Projects.CEX.Tests.ProcessingTests.CompressionCipherTest(@"C:\Tests\Compress", @"C:\Tests\Extract", @"C:\Tests\voltest.cep");
             //VTDev.Projects.CEX.Tests.ProcessingTests.PacketCipherTest();
             //VTDev.Projects.CEX.Tests.ProcessingTests.StreamCipherTest();
             //VTDev.Projects.CEX.Tests.ProcessingTests.StreamDigestTest();
@@ -158,7 +157,7 @@ namespace VTDev.Projects.CEX
                     byte[] keyId = MessageHeader.GetKeyId(inStream);
 
                     // get the keyheader and key material from the key file
-                    using (PackageFactory keyFactory = new PackageFactory(_keyFilePath, _container.Authority))
+                    using (PackageFactory keyFactory = new PackageFactory(new FileStream(_keyFilePath, FileMode.Open, FileAccess.ReadWrite), _container.Authority))
                     {
                         if (keyFactory.AccessScope == KeyScope.NoAccess)
                         {
@@ -172,11 +171,15 @@ namespace VTDev.Projects.CEX
                     int hdrOffset = MessageHeader.GetHeaderSize + cipherDesc.MacSize;
 
                     // decrypt file extension and create a unique path
-                    _outputPath = Utilities.GetUniquePath(_outputPath + MessageHeader.GetExtension(inStream, extKey));
+                    byte[] ext = MessageHeader.GetExtension(inStream);
+                    _outputPath = Utilities.GetUniquePath(_outputPath + MessageHeader.DecryptExtension(ext, extKey));
 
                     // if a signing key, test the mac: (MacSize = 0; not signed)
                     if (cipherDesc.MacSize > 0)
                     {
+                        if (lblStatus.InvokeRequired)
+                            lblStatus.Invoke(new MethodInvoker(delegate { lblStatus.Text = "Calculating the MAC code.."; }));
+
                         // get the hmac for the encrypted file; this could be made selectable
                         // via the KeyHeaderStruct MacDigest and MacSize members.
                         using (MacStream mstrm = new MacStream(new HMAC(new SHA512(), keyParam.IKM)))
@@ -186,6 +189,8 @@ namespace VTDev.Projects.CEX
 
                             // initialize mac stream
                             inStream.Seek(hdrOffset, SeekOrigin.Begin);
+                            mstrm.ProgressPercent -= OnMacProgress;
+                            mstrm.ProgressPercent += OnMacProgress;
                             mstrm.Initialize(inStream);
 
                             // get the mac; offset by header length + Mac and specify adjusted length
@@ -200,6 +205,9 @@ namespace VTDev.Projects.CEX
                         }
                     }
 
+                    if (lblStatus.InvokeRequired)
+                        lblStatus.Invoke(new MethodInvoker(delegate { lblStatus.Text = "Decrypting the file.."; }));
+
                     // with this constructor, the CipherStream class creates the cryptographic 
                     // engine using the description contained in the CipherDescription structure.
                     // The (cipher and) engine are automatically destroyed in the cipherstream dispose
@@ -210,7 +218,8 @@ namespace VTDev.Projects.CEX
                             // start at an input offset equal to the message header size
                             inStream.Seek(hdrOffset, SeekOrigin.Begin);
                             // use a percentage counter
-                            cstrm.ProgressPercent += new CipherStream.ProgressDelegate(OnProgressPercent);
+                            cstrm.ProgressPercent -= OnCipherProgress;
+                            cstrm.ProgressPercent += new CipherStream.ProgressDelegate(OnCipherProgress);
                             // initialize internals
                             cstrm.Initialize(false, keyParam);
                             // write the decrypted output to file
@@ -251,7 +260,7 @@ namespace VTDev.Projects.CEX
                 byte[] extKey = null;
 
                 // get the keyheader and key material from the key file
-                using (PackageFactory keyFactory = new PackageFactory(_keyFilePath, _container.Authority))
+                using (PackageFactory keyFactory = new PackageFactory(new FileStream(_keyFilePath, FileMode.Open, FileAccess.ReadWrite), _container.Authority))
                 {
                     // get the key info
                     PackageInfo pki = keyFactory.KeyInfo();
@@ -275,10 +284,14 @@ namespace VTDev.Projects.CEX
                     {
                         using (FileStream outStream = new FileStream(_outputPath, FileMode.Create, FileAccess.ReadWrite))
                         {
+                            if (lblStatus.InvokeRequired)
+                                lblStatus.Invoke(new MethodInvoker(delegate { lblStatus.Text = "Encrypting the file.."; }));
+
                             // start at an output offset equal to the message header + MAC length
                             outStream.Seek(hdrOffset, SeekOrigin.Begin);
                             // use a percentage counter
-                            cstrm.ProgressPercent += new CipherStream.ProgressDelegate(OnProgressPercent);
+                            cstrm.ProgressPercent -= OnCipherProgress;
+                            cstrm.ProgressPercent += new CipherStream.ProgressDelegate(OnCipherProgress);
                             // initialize internals
                             cstrm.Initialize(true, keyParam);
                             // write the encrypted output to file
@@ -287,11 +300,14 @@ namespace VTDev.Projects.CEX
                             // write the key id to the header
                             MessageHeader.SetKeyId(outStream, keyId);
                             // write the encrypted file extension
-                            MessageHeader.SetExtension(outStream, MessageHeader.GetEncryptedExtension(Path.GetExtension(_inputPath), extKey));
+                            MessageHeader.SetExtension(outStream, MessageHeader.EncryptExtension(Path.GetExtension(_inputPath), extKey));
 
                             // if this is a signing key, calculate the mac 
                             if (keyHeader.MacSize > 0)
                             {
+                                if (lblStatus.InvokeRequired)
+                                    lblStatus.Invoke(new MethodInvoker(delegate { lblStatus.Text = "Generating the MAC code.."; }));
+
                                 // Get the mac for the encrypted file; Mac engine is SHA512 by default, 
                                 // configurable via the CipherDescription MacSize and MacEngine members.
                                 // This is where you would select and initialize the correct Digest via the
@@ -300,6 +316,8 @@ namespace VTDev.Projects.CEX
                                 // An optional progress event is available in the MacStream class.
                                 using (MacStream mstrm = new MacStream(new HMAC(new SHA512(), keyParam.IKM)))
                                 {
+                                    mstrm.ProgressPercent -= OnMacProgress;
+                                    mstrm.ProgressPercent += OnMacProgress;
                                     // seek to end of header
                                     outStream.Seek(hdrOffset, SeekOrigin.Begin);
                                     // initialize mac stream
@@ -370,7 +388,7 @@ namespace VTDev.Projects.CEX
                     IdGenerator());                 // the file extension encryption key
 
                 // create and write the key
-                using (PackageFactory factory = new PackageFactory(_keyFilePath, _container.Authority))
+                using (PackageFactory factory = new PackageFactory(new FileStream(_keyFilePath, FileMode.Create, FileAccess.ReadWrite), _container.Authority))
                     factory.Create(package);
 
                 // store path
@@ -402,7 +420,7 @@ namespace VTDev.Projects.CEX
                 {
                     byte[] messageId = MessageHeader.GetKeyId(msgFile);
 
-                    using (PackageFactory factory = new PackageFactory(KeyPath, _container.Authority))
+                    using (PackageFactory factory = new PackageFactory(new FileStream(KeyPath, FileMode.Open, FileAccess.Read), _container.Authority))
                         isEqual = factory.ContainsSubKey(messageId) > -1;
                 }
             }
@@ -648,7 +666,7 @@ namespace VTDev.Projects.CEX
 
         private void OnInfoButtonClick(object sender, EventArgs e)
         {
-            using (PackageFactory keyFactory = new PackageFactory(_keyFilePath, _container.Authority))
+            using (PackageFactory keyFactory = new PackageFactory(new FileStream(_keyFilePath, FileMode.Open, FileAccess.Read), _container.Authority))
             {
                 using (FormInfo frmInfo = new FormInfo())
                 {
@@ -714,10 +732,16 @@ namespace VTDev.Projects.CEX
             _container.Description.PaddingType = (int)padding;
         }
 
-        private void OnProgressPercent(object sender, CipherStream.ProgressEventArgs args)
+        private void OnCipherProgress(object sender, CipherStream.ProgressEventArgs args)
         {
             if (pbStatus.InvokeRequired)
-                pbStatus.Invoke(new MethodInvoker(delegate { pbStatus.Value = (int)args.Percent; }));
+                pbStatus.Invoke(new MethodInvoker(delegate { pbStatus.Value = args.Percent; }));
+        }
+
+        private void OnMacProgress(object sender, System.ComponentModel.ProgressChangedEventArgs e)
+        {
+            if (pbStatus.InvokeRequired)
+                pbStatus.Invoke(new MethodInvoker(delegate { pbStatus.Value = e.ProgressPercentage; }));
         }
 
         private void OnRoundsChanged(object sender, EventArgs e)
@@ -904,7 +928,7 @@ namespace VTDev.Projects.CEX
                 // ask for passphrase
                 if (ShowAuthDialog())
                 {
-                    using (PackageFactory keyFactory = new PackageFactory(keyFile, _container.Authority))
+                    using (PackageFactory keyFactory = new PackageFactory(new FileStream(keyFile, FileMode.Open, FileAccess.Read), _container.Authority))
                     {
                         if (keyFactory.AccessScope == KeyScope.NoAccess)
                         {

@@ -12,7 +12,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Common
 {
     /// <summary>
-    /// <h5>KeyGenerator: A helper class for generating cryptographically strong keying material.</h5>
+    /// KeyGenerator: A helper class for generating cryptographically strong keying material.
     /// <para>Generates an array or a populated KeyParams class, using a definable Digest(Drbg) dual stage generator.
     /// The first stage of the generator gets seed material from the selected seed generator, the second hashes the seed and adds the result to the state array.
     /// An optional (random) counter array can be prepended to the seed array, sized between 4 and 16 bytes. 

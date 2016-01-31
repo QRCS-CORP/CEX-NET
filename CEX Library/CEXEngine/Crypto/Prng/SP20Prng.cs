@@ -10,7 +10,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 {
     /// <summary>
-    /// <h5>SP20Prng: An implementation of a Encryption Counter based Deterministic Random Number Generator.</h5>
+    /// SP20Prng: An implementation of a Encryption Counter based Deterministic Random Number Generator.
     /// <para>Uses the Salsa20 Key stream as a source of random input.</para>
     /// </summary> 
     /// 

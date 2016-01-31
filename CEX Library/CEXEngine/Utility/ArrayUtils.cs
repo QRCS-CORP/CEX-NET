@@ -508,6 +508,49 @@ namespace VTDev.Libraries.CEXEngine.Utility
         }
         #endregion
 
+        #region Increment
+        /// <summary>
+        /// Increase a segmented integer array by a specified size.
+        /// <para>This method can be used to increment a counter to a specific position.</para>
+        /// </summary>
+        /// 
+        /// <param name="Counter">The counter array</param>
+        /// <param name="Size">The size of the increase.</param>
+        /// 
+        /// <returns>The increased integer array</returns>
+        public static byte[] Increase(byte[] Counter, int Size)
+        {
+            int carry = 0;
+            byte[] buffer = new byte[Counter.Length];
+            int offset = buffer.Length - 1;
+            byte[] cnt = BitConverter.GetBytes(Size);
+            byte osrc, odst, ndst;
+            Buffer.BlockCopy(Counter, 0, buffer, 0, Counter.Length);
+
+            for (int i = offset; i > 0; i--)
+            {
+                odst = buffer[i];
+                osrc = offset - i < cnt.Length ? cnt[offset - i] : (byte)0;
+                ndst = (byte)(odst + osrc + carry);
+                carry = ndst < odst ? 1 : 0;
+                buffer[i] = ndst;
+            }
+
+            return buffer;
+        }
+
+        /// <summary>
+        /// Increment a segmented integer array by one
+        /// </summary>
+        /// 
+        /// <param name="Counter">The counter to increase</param>
+        public static void Increment(byte[] Counter)
+        {
+            int i = Counter.Length;
+            while (--i >= 0 && ++Counter[i] == 0) { }
+        }
+        #endregion
+
         #region Jagged
         /// <summary>
         /// Create and initialize a jagged array

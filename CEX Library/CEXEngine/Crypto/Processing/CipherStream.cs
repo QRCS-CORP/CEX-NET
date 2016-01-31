@@ -42,7 +42,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Helper;
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 {
     /// <summary>
-    /// <h5>CipherStream: Used to wrap a streams cryptographic transformation.</h5>
+    /// CipherStream: Used to wrap a streams cryptographic transformation.
     /// <para>Wraps encryption stream functions in an easy to use interface.</para>
     /// </summary> 
     /// 

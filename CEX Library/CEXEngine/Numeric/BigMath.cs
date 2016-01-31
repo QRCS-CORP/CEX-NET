@@ -7,7 +7,7 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Numeric
 {
     /// <summary>
-    /// <h5>BigMath: Class of number-theory related functions for use with integers represented as <c>int</c>'s or <c>BigInteger</c> objects.</h5>
+    /// BigMath: Class of number-theory related functions for use with integers represented as <c>int</c>'s or <c>BigInteger</c> objects.
     /// </summary>
     public sealed class BigMath
     {

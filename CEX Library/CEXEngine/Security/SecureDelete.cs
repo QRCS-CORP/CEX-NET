@@ -38,7 +38,7 @@ using System.Security.Principal;
 namespace VTDev.Libraries.CEXEngine.Security
 {
     /// <summary>
-    /// <h5>Secure File Deletion class.</h5>
+    /// Secure File Deletion class.
     /// <para>A utility class for performing secure erasure of drive data.</para>
     /// </summary>
     /// 

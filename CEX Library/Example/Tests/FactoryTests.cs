@@ -24,8 +24,9 @@ namespace VTDev.Projects.CEX.Tests
             KeyParams key2;
             CipherKey cikey;
             CipherDescription desc;
+            MemoryStream ks = new MemoryStream();
 
-            using (KeyFactory factory = new KeyFactory(path))
+            using (KeyFactory factory = new KeyFactory(ks))
             {
                 // create a key/iv
                 key1 = new KeyGenerator().GetKeyParams(32, 16, 64);
@@ -46,7 +47,8 @@ namespace VTDev.Projects.CEX.Tests
 
                 // cipher paramaters
                 desc = new CipherDescription(
-                    SymmetricEngines.RHX, 32,
+                    SymmetricEngines.RHX, 
+                    32,
                     IVSizes.V128,
                     CipherModes.CTR,
                     PaddingModes.X923,
@@ -71,9 +73,6 @@ namespace VTDev.Projects.CEX.Tests
                 throw new Exception();
             if (!Evaluate.AreEqual(key1.Key, key2.Key))
                 throw new Exception();
-
-            if (File.Exists(path))
-                File.Delete(path);
         }
 
         /// <summary>
@@ -103,7 +102,7 @@ namespace VTDev.Projects.CEX.Tests
             PackageKey pkey = new PackageKey(authority, desc, 10);
 
             // write a key file
-            using (PackageFactory pf = new PackageFactory(path, authority))
+            using (PackageFactory pf = new PackageFactory(new FileStream(path, FileMode.Open, FileAccess.ReadWrite), authority))
                 pf.Create(pkey);
 
             for (int i = 0; i < pkey.SubKeyCount; i++)
@@ -115,11 +114,11 @@ namespace VTDev.Projects.CEX.Tests
                 byte[] id = pkey.SubKeyID[i];
 
                 // get at index
-                using (FileStream stream = new FileStream(path, FileMode.Open))
+                using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read))
                     kp2 = PackageKey.AtIndex(stream, i);
 
                 // read the package from id
-                using (PackageFactory pf = new PackageFactory(path, authority))
+                using (PackageFactory pf = new PackageFactory(new FileStream(path, FileMode.Open, FileAccess.ReadWrite), authority))
                     pf.Extract(id, out desc2, out kp1, out ext);
 
                 // compare key material
@@ -144,7 +143,8 @@ namespace VTDev.Projects.CEX.Tests
         {
             // cipher paramaters
             CipherDescription desc = new CipherDescription(
-                SymmetricEngines.RHX, 32,
+                SymmetricEngines.RHX, 
+                32,
                 IVSizes.V128,
                 CipherModes.CTR,
                 PaddingModes.X923,

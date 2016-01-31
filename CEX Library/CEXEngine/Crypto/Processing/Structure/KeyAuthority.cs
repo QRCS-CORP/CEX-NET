@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 
 #endregion
@@ -282,16 +283,38 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int result = 1;
-            result += 31 * DomainId.GetHashCode();
-            result += 31 * OriginId.GetHashCode();
-            result += 31 * TargetId.GetHashCode();
-            result += 31 * PackageId.GetHashCode();
-            result += 31 * PackageTag.GetHashCode();
-            result += 31 * KeyPolicy.GetHashCode();
-            result += 31 * OptionFlag.GetHashCode();
+            int code = 31;
 
-            return result;
+            if (DomainId.Length != 0)
+            {
+                for (int i = 0; i < DomainId.Length; ++i)
+                    code *= DomainId[i];
+            }
+            if (OriginId.Length != 0)
+            {
+                for (int i = 0; i < OriginId.Length; ++i)
+                    code *= OriginId[i];
+            }
+            if (TargetId.Length != 0)
+            {
+                for (int i = 0; i < TargetId.Length; ++i)
+                    code *= TargetId[i];
+            }
+            if (PackageId.Length != 0)
+            {
+                for (int i = 0; i < PackageId.Length; ++i)
+                    code *= PackageId[i];
+            }
+            if (PackageTag.Length != 0)
+            {
+                for (int i = 0; i < PackageTag.Length; ++i)
+                    code *= PackageTag[i];
+            }
+
+            code += (int)(31 * KeyPolicy);
+            code += (int)(31 * OptionFlag);
+
+            return code;
         }
 
         /// <summary>
@@ -308,15 +331,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
 
             KeyAuthority other = (KeyAuthority)Obj;
 
-            if (DomainId.GetHashCode() != other.DomainId.GetHashCode())
+            if (!Compare.IsEqual(DomainId, other.DomainId))
                 return false;
-            if (OriginId.GetHashCode() != other.OriginId.GetHashCode())
+            if (!Compare.IsEqual(OriginId, other.OriginId))
                 return false;
-            if (TargetId.GetHashCode() != other.TargetId.GetHashCode())
+            if (!Compare.IsEqual(TargetId, other.TargetId))
                 return false;
-            if (PackageId.GetHashCode() != other.PackageId.GetHashCode())
+            if (!Compare.IsEqual(PackageId, other.PackageId))
                 return false;
-            if (PackageTag.GetHashCode() != other.PackageTag.GetHashCode())
+            if (!Compare.IsEqual(PackageTag, other.PackageTag))
                 return false;
             if (KeyPolicy != other.KeyPolicy)
                 return false;
