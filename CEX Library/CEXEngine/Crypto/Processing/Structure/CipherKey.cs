@@ -33,12 +33,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
     public struct CipherKey
     {
         #region Constants
-        private const int DESC_SIZE = 11;
         private const int KEYID_SIZE = 16;
         private const int EXTKEY_SIZE = 16;
-        private const long DESC_SEEK = 0;
-        private const long KEYID_SEEK = DESC_SEEK;
-        private const long EXTKEY_SEEK = DESC_SEEK + KEYID_SIZE;
+        private const int DESC_SIZE = 11;
+        private const long KEYID_SEEK = 0;
+        private const long EXTKEY_SEEK = KEYID_SIZE;
+        private const long DESC_SEEK = KEYID_SIZE + EXTKEY_SIZE;
         #endregion
 
         #region Public Fields
@@ -112,9 +112,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         {
             BinaryReader reader = new BinaryReader(KeyStream);
 
-            Description = new CipherDescription(KeyStream);
             KeyID = reader.ReadBytes(KEYID_SIZE);
             ExtensionKey = reader.ReadBytes(EXTKEY_SIZE);
+            Description = new CipherDescription(reader.ReadBytes(CipherDescription.GetHeaderSize()));
         }
 
         /// <summary>
@@ -162,9 +162,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
             MemoryStream stream = new MemoryStream();
             BinaryWriter writer = new BinaryWriter(stream);
 
-            writer.Write(Description.ToBytes());
             writer.Write(KeyID);
             writer.Write(ExtensionKey);
+            writer.Write(Description.ToBytes());
             stream.Seek(0, SeekOrigin.Begin);
 
             return stream;
@@ -179,7 +179,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <returns>Header size</returns>
         public static int GetHeaderSize()
         {
-            return DESC_SIZE + KEYID_SIZE + EXTKEY_SIZE;
+            return KEYID_SIZE + EXTKEY_SIZE + DESC_SIZE;
         }
 
         /// <summary>
@@ -250,7 +250,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         }
 
         /// <summary>
-        /// Set the ExtensionKey
+        /// Set the Key Id
         /// </summary>
         /// 
         /// <param name="KeyStream">The stream containing a cipher key</param>

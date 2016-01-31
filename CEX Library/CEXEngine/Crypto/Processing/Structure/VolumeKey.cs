@@ -94,6 +94,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
             this.Count = Count;
             this.FileId = new Int32[Count];
             this.State = new byte[Count];
+            for (int i = 0; i < Count; ++i)
+                this.State[i] = (byte)VolumeKeyStates.Unassigned;
         }
 
         /// <summary>
@@ -111,6 +113,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
             this.Count = Count;
             this.FileId = new Int32[Count];
             this.State = new byte[Count];
+            for (int i = 0; i < Count; ++i)
+                this.State[i] = (byte)VolumeKeyStates.Unassigned;
         }
 
         
@@ -121,6 +125,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <param name="KeyStream">The Stream containing the VolumeKey</param>
         public VolumeKey(Stream KeyStream)
         {
+            KeyStream.Position = 0;
             BinaryReader reader = new BinaryReader(KeyStream);
 
             Tag = reader.ReadBytes(TAG_SIZE);

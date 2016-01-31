@@ -51,7 +51,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     /// <code>
     /// public static void StreamCipherTest()
     /// {
-    ///     const int BLSZ = 1024;
     ///     KeyParams key;
     ///     byte[] data;
     ///     MemoryStream instrm;
@@ -69,19 +68,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     /// 
     ///     // Encrypt a stream //
     ///     // create the outbound cipher
-    ///     using (ICipherMode cipher = new CTR(new RDX()))
+    ///     using (ICipherMode cipher = new CTR(new RHX()))
     ///     {
-    ///         // initialize the cipher for encryption
-    ///         cipher.Initialize(true, key);
-    ///         // set block size
-    ///         ((CTR)cipher).ParallelBlockSize = BLSZ;
-    /// 
     ///         // encrypt the stream
     ///         using (CipherStream sc = new CipherStream(cipher))
     ///         {
-    ///             sc.Initialize(instrm, outstrm);
+    ///             sc.Initialize(true, key);
     ///             // encrypt the buffer
-    ///             sc.Write();
+    ///             sc.Write(instrm, outstrm);
     ///         }
     ///     }
     /// 
@@ -91,19 +85,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     /// 
     ///     // Decrypt a stream //
     ///     // create the decryption cipher
-    ///     using (ICipherMode cipher = new CTR(new RDX()))
+    ///     using (ICipherMode cipher = new CTR(new RHX()))
     ///     {
-    ///         // initialize the cipher for decryption
-    ///         cipher.Initialize(false, key);
-    ///         // set block size
-    ///         ((CTR)cipher).ParallelBlockSize = BLSZ;
-    /// 
     ///         // decrypt the stream
     ///         using (CipherStream sc = new CipherStream(cipher))
     ///         {
-    ///             sc.Initialize(outstrm, tmpstrm);
+    ///             sc.Initialize(false, key);
     ///             // process the encrypted bytes
-    ///             sc.Write();
+    ///             sc.Write(outstrm, tmpstrm);
     ///         }
     ///     }
     /// 

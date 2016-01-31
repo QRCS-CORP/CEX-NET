@@ -53,7 +53,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// <para>RHX is a Rijndael<cite>Rijndael</cite> implementation that can use a standard configuration on key sizes up to 256 bits, 
     /// an extended key size of 512 bits, or unlimited key sizes greater than 64 bytes. 
     /// On <see cref="LegalKeySizes"/> larger than 64 bytes, an HKDF bytes generator is used to expand the <c>working key</c> integer array.
-    /// In extended mode, the number of <c>transformation rounds</c> can be user assigned (through the constructor) to between 10 and 32 rounds.</para>
+    /// In extended mode, the number of <c>transformation rounds</c> can be user assigned (through the constructor) to between 10 and 38 rounds.</para>
     /// </summary> 
     /// 
     /// <example>

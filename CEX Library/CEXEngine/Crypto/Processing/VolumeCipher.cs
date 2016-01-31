@@ -1,16 +1,13 @@
 ﻿#region Directives
 using System;
 using System.IO;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Processing.Structure;
 using VTDev.Libraries.CEXEngine.CryptoException;
 using VTDev.Libraries.CEXEngine.Tools;
-using VTDev.Libraries.CEXEngine.Crypto.Helper;
 #endregion
 
 #region License Information
@@ -112,31 +109,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     /// </remarks>
     public class VolumeCipher : IDisposable
     {
-        #region Enums
-        /// <summary>
-        /// ParallelBlockProfile enumeration
-        /// </summary>
-        public enum BlockProfiles : int
-        {
-            /// <summary>
-            /// Set parallel block size as a division of 100 segments
-            /// </summary>
-            ProgressProfile = 0,
-            /// <summary>
-            /// Set parallel block size for maximum possible speed
-            /// </summary>
-            SpeedProfile
-        }
-        #endregion
-
-        #region Constants
-        // Max array size allocation base; multiply by processor count for actual
-        // byte/memory allocation during parallel loop execution
-        private const int MAXALLOC_MB100 = 100000000;
-        // default parallel block size
-        private const int PARALLEL_DEFBLOCK = 64000;
-        #endregion
-
         #region Events
         /// <summary>
         /// Progress indicator delegate
@@ -166,21 +138,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         #endregion
 
         #region Fields
-        private ICipherMode _cipherEngine;
-        private IStreamCipher _streamCipher;
         private bool _isEncryption = true;
-        private int _blockSize = PARALLEL_DEFBLOCK;
-        private IPadding _cipherPadding;
-        private bool _disposeEngine = false;
-        private bool _isCounterMode = false;
-        private bool _isDisposed = false;
-        private bool _isParallel = false;
-        private bool _isStreamCipher = false;
-        private BlockProfiles _parallelBlockProfile = BlockProfiles.ProgressProfile;
         private long _progressTotal = 0;
-        private int _processorCount;
+        private bool _isDisposed = false;
         private VolumeKey _volumeKey;
         private Stream _keyStream;
+        private CipherStream _cipherStream;
         #endregion
         
         #region Properties
@@ -189,17 +152,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// </summary>
         public bool IsParallel
         {
-            get { return _isParallel; }
-            set { _isParallel = value; }
+            get { return _cipherStream.IsParallel; }
+            set { _cipherStream.IsParallel = value; }
         }
 
         /// <summary>
-        /// Get/Set: Determines how the size of a parallel block is calculated; using the <see cref="BlockProfiles">Block Profiles</see>
+        /// Get/Set: Determines how the size of a parallel block is calculated
         /// </summary>
-        public BlockProfiles ParallelBlockProfile
+        public CipherStream.BlockProfiles ParallelBlockProfile
         {
-            get { return _parallelBlockProfile; }
-            set { _parallelBlockProfile = value; }
+            get { return _cipherStream.ParallelBlockProfile; }
+            set { _cipherStream.ParallelBlockProfile = value; }
         }
 
         /// <summary>
@@ -210,15 +173,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// or the size is less than ParallelMinimumSize or more than ParallelMaximumSize values</exception>
         public int ParallelBlockSize
         {
-            get { return _blockSize; }
+            get { return _cipherStream.ParallelBlockSize; }
             set
             {
-                if (value % ParallelMinimumSize != 0)
-                    throw new CryptoProcessingException("VolumeCipher:ParallelBlockSize", String.Format("Parallel block size must be evenly divisible by ParallelMinimumSize: {0}", ParallelMinimumSize), new ArgumentException());
-                if (value > ParallelMaximumSize || value < ParallelMinimumSize)
-                    throw new CryptoProcessingException("VolumeCipher:ParallelBlockSize", String.Format("Parallel block must be Maximum of ParallelMaximumSize: {0} and evenly divisible by ParallelMinimumSize: {1}", ParallelMaximumSize, ParallelMinimumSize), new ArgumentOutOfRangeException());
-
-                _blockSize = value;
+                try
+                {
+                    _cipherStream.ParallelBlockSize = value;
+                }
+                catch (Exception ex)
+                {
+                    throw new CryptoProcessingException("VolumeCipher:ParallelBlockSize", "The block size is invalid!", ex);
+                }
             }
         }
 
@@ -227,7 +192,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// </summary>
         public int ParallelMaximumSize
         {
-            get { return MAXALLOC_MB100; }
+            get { return _cipherStream.ParallelMaximumSize; }
         }
 
         /// <summary>
@@ -235,36 +200,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// </summary>
         public int ParallelMinimumSize
         {
-            get 
-            {
-                if (_isStreamCipher)
-                {
-                    if (_streamCipher.GetType().Equals(typeof(ChaCha)))
-                        return ((ChaCha)_streamCipher).ParallelMinimumSize;
-                    else
-                        return ((Salsa20)_streamCipher).ParallelMinimumSize;
-                }
-                else
-                {
-                    if (_cipherEngine.GetType().Equals(typeof(CTR)))
-                        return ((CTR)_cipherEngine).ParallelMinimumSize;
-                    else if (_cipherEngine.GetType().Equals(typeof(CBC)) && !_isEncryption)
-                        return ((CBC)_cipherEngine).ParallelMinimumSize;
-                    else if (_cipherEngine.GetType().Equals(typeof(CFB)) && !_isEncryption)
-                        return ((CFB)_cipherEngine).ParallelMinimumSize;
-                    else
-                        return 0;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Get: The system processor count
-        /// </summary>
-        public int ProcessorCount 
-        { 
-            get { return _processorCount; }
-            private set { _processorCount = value; }
+            get { return _cipherStream.ParallelMinimumSize; }
         }
         #endregion
 
@@ -287,50 +223,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             if (!CipherDescription.IsValid(_volumeKey.Description))
                 throw new CryptoProcessingException("VolumeCipher:CTor", "The key Header is invalid!", new ArgumentException());
 
-            _disposeEngine = true;
             _isEncryption = Encryption;
-            _blockSize = _volumeKey.Description.BlockSize;
-            _isParallel = false;
             CipherDescription desc = _volumeKey.Description;
 
-            if (_isStreamCipher = IsStreamCipher((SymmetricEngines)desc.EngineType))
+            try
             {
-                _streamCipher = GetStreamCipher((StreamCiphers)desc.EngineType, desc.RoundCount);
-
-                if (_streamCipher.GetType().Equals(typeof(ChaCha)))
-                {
-                    if (_isParallel = ((ChaCha)_streamCipher).IsParallel)
-                        _blockSize = ((ChaCha)_streamCipher).ParallelBlockSize;
-                }
-                else
-                {
-                    if (_isParallel = ((Salsa20)_streamCipher).IsParallel)
-                        _blockSize = ((Salsa20)_streamCipher).ParallelBlockSize;
-                }
+                _cipherStream = new CipherStream(desc);
             }
-            else
+            catch (Exception ex)
             {
-                _cipherEngine = GetCipherMode((CipherModes)desc.CipherType, (BlockCiphers)desc.EngineType, desc.BlockSize, desc.RoundCount, (Digests)desc.KdfEngine);
-
-                if (_isCounterMode = _cipherEngine.GetType().Equals(typeof(CTR)))
-                {
-                    if (_isParallel = ((CTR)_cipherEngine).IsParallel)
-                        _blockSize = ((CTR)_cipherEngine).ParallelBlockSize;
-                }
-                else
-                {
-                    if (_cipherEngine.GetType().Equals(typeof(CBC)))
-                    {
-                        if (_isParallel = ((CBC)_cipherEngine).IsParallel && !((CBC)_cipherEngine).IsEncryption)
-                            _blockSize = ((CBC)_cipherEngine).ParallelBlockSize;
-                    }
-                    else if (_cipherEngine.GetType().Equals(typeof(CFB)))
-                    {
-                        if (_isParallel = ((CFB)_cipherEngine).IsParallel && !((CFB)_cipherEngine).IsEncryption)
-                            _blockSize = ((CFB)_cipherEngine).ParallelBlockSize;
-                    }
-                    _cipherPadding = GetPaddingMode((PaddingModes)_volumeKey.Description.PaddingType);
-                }
+                throw new CryptoProcessingException("VolumeCipher:CTor", "The cipher could not be initialized!", ex);
             }
         }
 
@@ -368,282 +270,96 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// <exception cref="CryptoProcessingException">Thrown if the VolumeKey does not contain enough keys to encrypt all the files in the directory</exception>
         public void Transform(string[] FilePaths)
         {
+            if (FilePaths.Length < 1)
+                throw new CryptoProcessingException("VolumeCipher:Transform", "The file paths list is empty!", new ArgumentException());
             if (_isEncryption && _volumeKey.KeyCount() < FilePaths.Length)
                 throw new CryptoProcessingException("VolumeCipher:Transform", "Not enough keys in the volume key to encrypt this directory!", new ArgumentException());
             
             Initialize(FilePaths);
 
+            if (_progressTotal < 1)
+                throw new CryptoProcessingException("VolumeCipher:Initialize", "The files are all zero bytes!", new ArgumentException());
+
+            long prgCtr = 0;
+
             for (int i = 0; i < FilePaths.Length; i++)
             {
                 // next key
                 int index = -1;
-                FileStream wrkStream;
+                FileStream inpStream;
+                FileStream outStream;
                 KeyParams key;
                 int hash = FilePaths[i].GetHashCode();
-                wrkStream = GetStream(FilePaths[i]);
+                inpStream = GetStream(FilePaths[i]);
+                outStream = GetStream(FilePaths[i]);
 
                 // should notify or log
-                if (wrkStream == null)
+                if (inpStream == null || outStream == null)
                 {
                     if (ErrorNotification != null)
                         ErrorNotification(this, String.Format("The file {0}; could not be written to", FilePaths[i]));
-
-                    continue;
-                }
-                if (_isEncryption)
-                {
-                    // get an unused key
-                    index = _volumeKey.NextSubKey();
-                    key = VolumeKey.AtIndex(_keyStream, index);
-                    // update header
-                    _volumeKey.FileId[index] = hash;
-                    _volumeKey.State[index] = (byte)VolumeKeyStates.Encrypted;
                 }
                 else
                 {
-                    // get key associated with file
-                    key = VolumeKey.FromId(_keyStream, hash);
-
-                    // user dropped a file in, notify or log
-                    if (key == null)
+                    if (_isEncryption)
                     {
-                        if (ErrorNotification != null)
-                            ErrorNotification(this, String.Format("The file {0}; has no key assigned", FilePaths[i]));
-
-                        continue;
-                    }
-                    _volumeKey.State[_volumeKey.GetIndex(hash)] = (byte)VolumeKeyStates.Decrypted;
-                }
-
-                // process file
-                if (!_isStreamCipher)
-                {
-                    _cipherEngine.Initialize(_isEncryption, key);
-
-                    if (_isParallel)
-                    {
-                        ProcessParallel(wrkStream);
+                        // get an unused key
+                        index = _volumeKey.NextSubKey();
+                        key = VolumeKey.AtIndex(_keyStream, index);
+                        if (key == null)
+                        {
+                            if (ErrorNotification != null)
+                                ErrorNotification(this, String.Format("The file {0}; has no key assigned", FilePaths[i]));
+                        }
+                        else
+                        {
+                            // update header
+                            _volumeKey.FileId[index] = hash;
+                            _volumeKey.State[index] = (byte)VolumeKeyStates.Encrypted;
+                            _cipherStream.Initialize(_isEncryption, key);
+                            _cipherStream.Write(inpStream, outStream);
+                        }
                     }
                     else
                     {
-                        if (_isEncryption)
-                            Encrypt(wrkStream);
+                        // get key associated with file
+                        key = VolumeKey.FromId(_keyStream, hash);
+
+                        // user dropped a file in, notify or log
+                        if (key == null)
+                        {
+                            if (ErrorNotification != null)
+                                ErrorNotification(this, String.Format("The file {0}; has no key assigned", FilePaths[i]));
+                        }
                         else
-                            Decrypt(wrkStream);
+                        {
+                            _volumeKey.State[_volumeKey.GetIndex(hash)] = (byte)VolumeKeyStates.Decrypted;
+                            _cipherStream.Initialize(_isEncryption, key);
+                            _cipherStream.Write(inpStream, outStream);
+                        }
                     }
                 }
-                else
-                {
-                    _streamCipher.Initialize(key);
-                    ProcessStream(wrkStream);
-                }
 
-                wrkStream.Close();
-                wrkStream.Dispose();
+                prgCtr += inpStream.Position;
+                CalculateProgress(prgCtr);
+
+                inpStream.Close();
+                inpStream.Dispose();
+                outStream.Close();
+                outStream.Dispose();
             }
 
             // update the key header
-            _keyStream.Seek(0, SeekOrigin.Begin);
             byte[] ks = _volumeKey.ToBytes();
             _keyStream.Write(ks, 0, ks.Length);
-        }
-        #endregion
-
-        #region Crypto
-        private void Decrypt(FileStream WorkStream)
-        {
-            byte[] inputBuffer = new byte[_blockSize];
-            byte[] outputBuffer = new byte[_blockSize];
-            int bytesRead = 0;
-            long bytesTotal = 0;
-            long lastBlock = WorkStream.Length;
-
-            while ((bytesRead = WorkStream.Read(inputBuffer, 0, _blockSize)) == _blockSize)
-            {
-                _cipherEngine.Transform(inputBuffer, outputBuffer);
-                bytesTotal += bytesRead;
-                WorkStream.Position -= bytesRead;
-
-                if (bytesTotal < lastBlock)
-                {
-                    WorkStream.Write(outputBuffer, 0, _blockSize);
-                    CalculateProgress(bytesTotal);
-                }
-                else
-                {
-                    int fnlSize = _cipherEngine.BlockSize - _cipherPadding.GetPaddingLength(outputBuffer);
-                    WorkStream.Write(outputBuffer, 0, fnlSize);
-                    bytesTotal += fnlSize;
-                }
-            }
-
-            CalculateProgress(bytesTotal);
-        }
-
-        private void Encrypt(FileStream WorkStream)
-        {
-            byte[] inputBuffer = new byte[_blockSize];
-            byte[] outputBuffer = new byte[_blockSize];
-            int bytesRead = 0;
-            long bytesTotal = 0;
-
-            while ((bytesRead = WorkStream.Read(inputBuffer, 0, _blockSize)) == _blockSize)
-            {
-                _cipherEngine.Transform(inputBuffer, outputBuffer);
-                WorkStream.Position -= bytesRead;
-                WorkStream.Write(outputBuffer, 0, bytesRead);
-                bytesTotal += bytesRead;
-                CalculateProgress(bytesTotal);
-            }
-
-            if (bytesRead > 0)
-            {
-                if (bytesRead < _blockSize)
-                    _cipherPadding.AddPadding(inputBuffer, (int)bytesRead);
-
-                _cipherEngine.Transform(inputBuffer, outputBuffer);
-                WorkStream.Position -= bytesRead;
-                WorkStream.Write(outputBuffer, 0, _blockSize);
-                bytesTotal += bytesRead;
-            }
-
-            CalculateProgress(bytesTotal);
-        }
-
-        private IBlockCipher GetBlockCipher(BlockCiphers EngineType, int BlockSize, int RoundCount, Digests KdfEngine)
-        {
-            try
-            {
-                return BlockCipherFromName.GetInstance(EngineType, BlockSize, RoundCount, KdfEngine);
-            }
-            catch (Exception ex)
-            {
-                throw new CryptoProcessingException("CipherStream:GetBlockEngine", ex);
-            }
-        }
-
-        private ICipherMode GetCipherMode(CipherModes CipherType, BlockCiphers EngineType, int BlockSize, int RoundCount, Digests KdfEngine)
-        {
-            IBlockCipher engine = GetBlockCipher(EngineType, BlockSize, RoundCount, KdfEngine);
-
-            try
-            {
-                return CipherModeFromName.GetInstance(CipherType, engine);
-            }
-            catch (Exception ex)
-            {
-                throw new CryptoProcessingException("CipherStream:GetCipherMode", ex);
-            }
-        }
-
-        private IPadding GetPaddingMode(PaddingModes PaddingType)
-        {
-            try
-            {
-                return PaddingFromName.GetInstance(PaddingType);
-            }
-            catch (Exception ex)
-            {
-                throw new CryptoProcessingException("CipherStream:GetPaddingMode", ex);
-            }
-        }
-
-        private IStreamCipher GetStreamCipher(StreamCiphers EngineType, int RoundCount)
-        {
-            try
-            {
-                return StreamCipherFromName.GetInstance(EngineType, RoundCount);
-            }
-            catch (Exception ex)
-            {
-                throw new CryptoProcessingException("CipherStream:GetStreamEngine", ex);
-            }
-        }
-
-        private bool IsStreamCipher(SymmetricEngines EngineType)
-        {
-            return EngineType == SymmetricEngines.ChaCha ||
-                EngineType == SymmetricEngines.Salsa;
-        }
-
-        private void ProcessParallel(FileStream WorkStream)
-        {
-            long bytesTotal = 0;
-            int bytesRead = 0;
-            byte[] inputBuffer = new byte[_blockSize];
-            byte[] outputBuffer = new byte[_blockSize];
-
-            // loop through file
-            while ((bytesRead = WorkStream.Read(inputBuffer, 0, _blockSize)) == _blockSize)
-            {
-                bytesTotal += bytesRead;
-                _cipherEngine.Transform(inputBuffer, outputBuffer);
-                WorkStream.Position -= bytesRead;
-                WorkStream.Write(outputBuffer, 0, bytesRead);
-                CalculateProgress(bytesTotal);
-            }
-
-            // last block
-            if (bytesRead > 0)
-            {
-                outputBuffer = new byte[bytesRead];
-                // parallel modes handle alignment
-                _cipherEngine.Transform(inputBuffer, outputBuffer);
-
-                if (_isCounterMode)
-                {
-                    WorkStream.Position -= bytesRead;
-                    WorkStream.Write(outputBuffer, 0, bytesRead);
-                    bytesTotal += bytesRead;
-                }
-                else
-                {
-                    // decrypt cbc/cfb
-                    int fnlSize = bytesRead - _cipherPadding.GetPaddingLength(outputBuffer);
-                    WorkStream.Position -= bytesRead;
-                    WorkStream.Write(outputBuffer, 0, fnlSize);
-                    bytesTotal += fnlSize;
-                }
-            }
-
-            CalculateProgress(bytesTotal);
-        }
-
-        private void ProcessStream(FileStream WorkStream)
-        {
-            int bytesRead = 0;
-            long bytesTotal = 0;
-            byte[] inputBuffer = new byte[_blockSize];
-            byte[] outputBuffer = new byte[_blockSize];
-
-            // loop through file
-            while ((bytesRead = WorkStream.Read(inputBuffer, 0, _blockSize)) == _blockSize)
-            {
-                _streamCipher.Transform(inputBuffer, outputBuffer);
-                WorkStream.Position -= bytesRead;
-                WorkStream.Write(outputBuffer, 0, bytesRead);
-                bytesTotal += bytesRead;
-                CalculateProgress(bytesTotal);
-            }
-
-            // last block
-            if (bytesRead > 0)
-            {
-                outputBuffer = new byte[bytesRead];
-                _streamCipher.Transform(inputBuffer, outputBuffer);
-                WorkStream.Position -= bytesRead;
-                WorkStream.Write(outputBuffer, 0, bytesRead);
-                bytesTotal += bytesRead;
-            }
-
-            CalculateProgress(bytesTotal);
+            _keyStream.Seek(0, SeekOrigin.Begin);
         }
         #endregion
 
         #region Helpers
         private void CalculateProgress(long Size)
         {
-            if (ProgressPercent != null)
+            if (ProgressPercent != null && Size > 0)
             {
                 double progress = 100.0 * (double)Size / _progressTotal;
                 ProgressPercent(this, new System.ComponentModel.ProgressChangedEventArgs((int)progress, (object)Size));
@@ -654,7 +370,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         {
             try
             {
-                return new FileStream(FilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read, 64000, FileOptions.WriteThrough);
+                return new FileStream(FilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite, 64000, FileOptions.WriteThrough);
             }
             catch
             {
@@ -666,9 +382,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         {
             for (int i = 0; i < FilePaths.Length; i++)
                 _progressTotal += FileTools.GetSize(FilePaths[i]);
-
-            if (!_isParallel)
-                _blockSize = _volumeKey.Description.BlockSize;
         }
         #endregion
 
@@ -688,23 +401,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             {
                 try
                 {
-                    if (_disposeEngine)
-                    {
-                        if (_cipherEngine != null)
-                        {
-                            _cipherEngine.Dispose();
-                            _cipherEngine = null;
-                        }
-                        if (_cipherPadding != null)
-                        {
-                            _cipherPadding = null;
-                        }
-                        if (_streamCipher != null)
-                        {
-                            _streamCipher.Dispose();
-                            _streamCipher = null;
-                        }
-                    }
+                    _isEncryption = false;
+                    _progressTotal = 0;
+                    _volumeKey.Reset();
+
+                   if (_keyStream != null)
+                        _keyStream.Close();
+                    if (_cipherStream != null)
+                        _cipherStream.Dispose();
                 }
                 finally
                 {

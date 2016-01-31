@@ -26,7 +26,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     /// 
     ///     // set cipher paramaters
     ///     CipherDescription desc = new CipherDescription(
-    ///         Engines.RDX, 32,
+    ///         Engines.RHX, 32,
     ///         IVSizes.V128,
     ///         CipherModes.CTR,
     ///         PaddingModes.X923,
@@ -43,8 +43,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     ///     MemoryStream keyStream = new MemoryStream();
     /// 
     ///     // create the volume key stream
-    ///     using (VolumeFactory vf = new VolumeFactory(keyStream))
-    ///         vf.Create(vkey);
+    ///     using (VolumeFactory vf = new VolumeFactory())
+    ///         keyStream = vf.Create(vkey);
     /// </code>
     /// </example>
     /// 
@@ -63,49 +63,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     {
         #region Fields
         private bool _isDisposed = false;
-        private bool _disposeKey = false;
-        private string _keyPath;
-        private Stream _keyStream;
         #endregion
 
         #region Constructor
         /// <summary>
-        /// Initialize this class with a key file path; key will be written to the path
+        /// Initialize this class
         /// </summary>
-        /// 
-        /// <param name="KeyPath">The fully qualified path to the key file to be read or created</param>
-        /// 
-        /// <exception cref="CryptoProcessingException">Thrown if the key path is invalid, the key file exists, or the path is read onle</exception>
-        public VolumeFactory(string KeyPath)
-        {
-            if (string.IsNullOrEmpty(KeyPath) || Path.GetExtension(KeyPath).Length < 1 || Path.GetFileNameWithoutExtension(KeyPath).Length < 1 || !Path.IsPathRooted(KeyPath))
-                throw new CryptoProcessingException("VolumeFactory:Ctor", "The key path must contain a valid directory and file name!", new ArgumentException());
-            if (File.Exists(KeyPath))
-                throw new CryptoProcessingException("VolumeFactory:Ctor", "The key file exists! Can not overwrite an existing key file, choose a different path.", new FileLoadException());
-            if (!DirectoryTools.IsWritable(Path.GetDirectoryName(KeyPath)))
-                throw new CryptoProcessingException("VolumeFactory:Ctor", "The selected directory is read only! Choose a different path.", new UnauthorizedAccessException());
-
-            _keyPath = KeyPath;
-        }
-
-        /// <summary>
-        /// Initialize this class with a stream; key will be written to the stream
-        /// </summary>
-        /// 
-        /// <param name="KeyStream">The stream that receives the key</param>
-        /// <param name="DisposeKey">Dispose of the key stream when this class is disposed; default is false</param>
-        /// 
-        /// <exception cref="CryptoProcessingException">Thrown if a null stream is passed</exception>
-        public VolumeFactory(Stream KeyStream, bool DisposeKey = false)
-        {
-            if (KeyStream == null)
-                throw new CryptoProcessingException("VolumeFactory:Ctor", "The key stream can not be null!", new ArgumentException());
-            _disposeKey = DisposeKey;
-
-            _keyStream = KeyStream;
-        }
-
-        private VolumeFactory()
+        public VolumeFactory()
         {
         }
 
@@ -126,12 +90,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// </summary>
         /// 
         /// <param name="Key">The <see cref="VolumeKey">VolumeKey</see> containing the cipher and key implementation details</param>
-        /// <param name="SeedEngine">The <see cref="Prngs">Random Generator</see> used to create the stage I seed material during key generation.</param>
+        /// <param name="SeedEngine">The <see cref="SeedGenerators">Random Generator</see> used to create the stage I seed material during key generation.</param>
         /// <param name="HashEngine">The <see cref="Digests">Digest Engine</see> used in the stage II phase of key generation.</param>
         /// 
-        /// <exception cref="System.IO.FileLoadException">A key file exists at the path specified</exception>
-        /// <exception cref="System.UnauthorizedAccessException">The key file path is read only</exception>
-        public void Create(VolumeKey Key, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, Digests HashEngine = Digests.SHA512)
+        /// <returns>A populated VolumeKey</returns>
+        public MemoryStream Create(VolumeKey Key, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, Digests HashEngine = Digests.SHA512)
         {
             int ksize = Key.Count * (Key.Description.KeySize + Key.Description.IvSize);
             byte[] kdata;
@@ -139,12 +102,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             using (KeyGenerator keyGen = new KeyGenerator(SeedEngine, HashEngine, null))
                 kdata = keyGen.GetBytes(ksize);
 
-            if (_keyStream == null)
-                _keyStream = new FileStream(_keyPath, FileMode.Create, FileAccess.Write);
-
+            MemoryStream keyStream = new MemoryStream();
             byte[] hdr = Key.ToBytes();
-            _keyStream.Write(hdr, 0, hdr.Length);
-            _keyStream.Write(kdata, 0, kdata.Length);
+            keyStream.Write(hdr, 0, hdr.Length);
+            keyStream.Write(kdata, 0, kdata.Length);
+            keyStream.Seek(0, SeekOrigin.Begin);
+
+            return keyStream;
         }
 
         /// <summary>
@@ -156,9 +120,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// 
         /// <exception cref="System.IO.FileLoadException">A key file exists at the path specified</exception>
         /// <exception cref="System.UnauthorizedAccessException">The key file path is read only</exception>
-        public void Create(CipherDescription Description, int KeyCount)
+        /// 
+        /// <returns>A populated VolumeKey</returns>
+        public MemoryStream Create(CipherDescription Description, int KeyCount)
         {
-            this.Create(new VolumeKey(Description, KeyCount));
+            return this.Create(new VolumeKey(Description, KeyCount));
         }
 
         /// <summary>
@@ -177,9 +143,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// <param name="MacSize">The size of the HMAC message authentication code; a zeroed parameter means authentication is not enabled with this key</param>
         /// <param name="MacEngine">The HMAC <see cref="Digests">Digest</see> engine used to authenticate a message file encrypted with this key</param>
         /// 
-        /// <exception cref="System.IO.FileLoadException">A key file exists at the path specified</exception>
-        /// <exception cref="System.UnauthorizedAccessException">The key file path is read only</exception>
-        public void Create(int KeyCount, SymmetricEngines EngineType, int KeySize, IVSizes IvSize, CipherModes CipherType,
+        /// <returns>A populated VolumeKey</returns>
+        public MemoryStream Create(int KeyCount, SymmetricEngines EngineType, int KeySize, IVSizes IvSize, CipherModes CipherType,
             PaddingModes PaddingType, BlockSizes BlockSize, RoundCounts Rounds, Digests KdfEngine, int MacSize, Digests MacEngine)
         {
             CipherDescription dsc = new CipherDescription()
@@ -196,32 +161,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 MacSize = MacSize
             };
 
-            Create(dsc, KeyCount);
+            return Create(dsc, KeyCount);
         }
 
         /// <summary>
-        /// Extract a KeyParams and CipherDescription
+        /// Extract a KeyParams and CipherDescription from a VolumeKey stream
         /// </summary>
         /// 
+        /// <param name="KeyStream">The stream containing the VolumeKey</param>
         /// <param name="Index">The index of the key set to extract</param>
         /// <param name="Description">The <see cref="CipherDescription"/> that receives the cipher description</param>
         /// <param name="KeyParam">The <see cref="KeyParams"/> container that receives the key material from the file</param>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if the key file could not be found</exception>
-        public void Extract(int Index, out CipherDescription Description, out KeyParams KeyParam)
+        public void Extract(Stream KeyStream, int Index, out CipherDescription Description, out KeyParams KeyParam)
         {
-            if (!string.IsNullOrEmpty(_keyPath))
-            {
-                if (!File.Exists(_keyPath))
-                    throw new CryptoProcessingException("VolumeFactory:Extract", "The key file could not be found! Check the path.", new FileNotFoundException());
-            }
+            if (KeyStream == null || KeyStream.Length < 96)
+                throw new CryptoProcessingException("VolumeFactory:Extract", "The key file could not be loaded! Check the stream.", new FileNotFoundException());
 
-            if (_keyStream == null)
-                _keyStream = new FileStream(_keyPath, FileMode.Open, FileAccess.Read);
-
-            VolumeKey vkey = new VolumeKey(_keyStream);
+            VolumeKey vkey = new VolumeKey(KeyStream);
             Description = vkey.Description;
-            KeyParam = VolumeKey.AtIndex(_keyStream, Index);
+            KeyParam = VolumeKey.AtIndex(KeyStream, Index);
         }
         #endregion
 
@@ -238,23 +198,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         private void Dispose(bool Disposing)
         {
             if (!_isDisposed && Disposing)
-            {
-                try
-                {
-                    if (_keyStream != null && _disposeKey)
-                    {
-                        _keyStream.Dispose();
-                        _keyStream = null;
-                    }
-                    if (_keyPath != null)
-                    {
-                        _keyPath = null;
-                    }
-                }
-                catch { }
-
                 _isDisposed = true;
-            }
         }
         #endregion
     }

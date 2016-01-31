@@ -121,6 +121,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <exception cref="CryptoGeneratorException">Thrown if the counter is not <c>0</c>, or a value between <c>4</c> and <c>32</c></exception>
         public KeyGenerator(SeedGenerators SeedEngine, Digests DigestEngine, byte[] Counter)
         {
+            if (Counter == null)
+                Counter = new byte[DEFCTR_SIZE];
+
             if (Counter.Length > 32 || (Counter.Length < 4 && Counter.Length != 0))
                 throw new CryptoGeneratorException("KeyGenerator:Ctor", "The counter size must be either 0, or between 4 and 32", new ArgumentException());
 

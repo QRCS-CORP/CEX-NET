@@ -309,8 +309,8 @@ namespace VTDev.Projects.CEX.Tests
             MemoryStream keyStream = new MemoryStream();
 
             // create the volume key stream
-            using (VolumeFactory vf = new VolumeFactory(keyStream))
-                vf.Create(vkey);
+            using (VolumeFactory vf = new VolumeFactory())
+                keyStream = vf.Create(vkey);
 
             // encrypt the files in the directory
             using (VolumeCipher vc = new VolumeCipher(true, keyStream))

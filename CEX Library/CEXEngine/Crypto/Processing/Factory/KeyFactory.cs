@@ -82,7 +82,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// Initialize this class with a stream; key will be written to the stream
         /// </summary>
         /// 
-        /// <param name="KeyStream">The fully qualified path to the key file to be read or created</param>
+        /// <param name="KeyStream">The output stream</param>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if a null stream is passed</exception>
         public KeyFactory(Stream KeyStream)
@@ -119,7 +119,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// 
         /// <exception cref="System.ArgumentNullException">Thrown if a KeyParams member is null, but specified in the Header</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">Thrown if a Header parameter does not match a KeyParams value</exception>
-        public void Create(CipherDescription Description, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, Digests HashEngine = VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests.SHA512)
+        public void Create(CipherDescription Description, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, Digests HashEngine = Digests.SHA512)
         {
             KeyParams keyParam;
 

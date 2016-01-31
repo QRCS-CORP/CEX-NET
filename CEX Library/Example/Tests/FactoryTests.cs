@@ -142,8 +142,6 @@ namespace VTDev.Projects.CEX.Tests
         /// </summary>
         public static void VolumeFactoryTest()
         {
-            string path = GetTempPath();
-
             // cipher paramaters
             CipherDescription desc = new CipherDescription(
                 SymmetricEngines.RHX, 32,
@@ -162,9 +160,10 @@ namespace VTDev.Projects.CEX.Tests
             for (int i = 0; i < vkey.FileId.Length; i++)
                 vkey.FileId[i] = i;
 
-            // write a key file
-            using (VolumeFactory vf = new VolumeFactory(path))
-                vf.Create(vkey);
+            MemoryStream keyStream;
+            // create a volume key stream
+            using (VolumeFactory vf = new VolumeFactory())
+                keyStream = vf.Create(vkey);
 
             for (int i = 0; i < vkey.Count; i++)
             {
@@ -172,14 +171,12 @@ namespace VTDev.Projects.CEX.Tests
                 KeyParams kp1;
                 KeyParams kp2;
 
-                using (FileStream stream = new FileStream(path, FileMode.Open))
-                    kp1 = VolumeKey.AtIndex(stream, i);
-
+                kp1 = VolumeKey.AtIndex(keyStream, i);
                 int id = vkey.FileId[i];
 
-                // read the package
-                using (VolumeFactory vf = new VolumeFactory(path))
-                    vf.Extract(id, out desc2, out kp2);
+                // read the key
+                using (VolumeFactory vf = new VolumeFactory())
+                    vf.Extract(keyStream, id, out desc2, out kp2);
 
                 // compare key material
                 if (!Evaluate.AreEqual(kp1.Key, kp2.Key))
@@ -189,8 +186,6 @@ namespace VTDev.Projects.CEX.Tests
                 if (!desc.Equals(desc2))
                     throw new Exception();
             }
-            if (File.Exists(path))
-                File.Delete(path);
         }
 
         private static string GetTempPath()

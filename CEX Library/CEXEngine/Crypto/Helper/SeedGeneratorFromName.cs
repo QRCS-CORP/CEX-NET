@@ -13,14 +13,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
         /// Get a Seed Generator instance with default initialization parameters
         /// </summary>
         /// 
-        /// <param name="EngineType">The prng enumeration name</param>
+        /// <param name="SeedType">The prng enumeration name</param>
         /// 
         /// <returns>An initialized Seed Generator</returns>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if the enumeration name is not supported</exception>
-        public static ISeed GetInstance(SeedGenerators EngineType)
+        public static ISeed GetInstance(SeedGenerators SeedType)
         {
-            switch (EngineType)
+            switch (SeedType)
             {
                 case SeedGenerators.CSPRsg:
                     return new CSPRsg();

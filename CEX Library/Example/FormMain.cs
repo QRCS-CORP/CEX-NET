@@ -60,15 +60,15 @@ namespace VTDev.Projects.CEX
             // examples testing key factories and processors
             // adjust paths to your installation
 
-            //FactoryTests.KeyFactoryTest();
-            //FactoryTests.PackageFactoryTest();
-            //FactoryTests.VolumeFactoryTest();
-            //ProcessingTests.CompressionCipherTest(@"C:\Tests\Test", @"C:\Tests\Extract", @"C:\Tests\voltest.cep");
-            //ProcessingTests.PacketCipherTest();
-            //ProcessingTests.StreamCipherTest();
-            //ProcessingTests.StreamDigestTest();
-            //ProcessingTests.StreamMacTest();
-            //ProcessingTests.VolumeCipherTest(@"C:\Tests\Test");
+            //VTDev.Projects.CEX.Tests.FactoryTests.KeyFactoryTest();
+            //VTDev.Projects.CEX.Tests.FactoryTests.PackageFactoryTest();
+            //VTDev.Projects.CEX.Tests.FactoryTests.VolumeFactoryTest();
+            VTDev.Projects.CEX.Tests.ProcessingTests.VolumeCipherTest(@"C:\Tests\Test");
+            //VTDev.Projects.CEX.Tests.ProcessingTests.CompressionCipherTest(@"C:\Tests\Test", @"C:\Tests\Extract", @"C:\Tests\voltest.cep");
+            //VTDev.Projects.CEX.Tests.ProcessingTests.PacketCipherTest();
+            //VTDev.Projects.CEX.Tests.ProcessingTests.StreamCipherTest();
+            //VTDev.Projects.CEX.Tests.ProcessingTests.StreamDigestTest();
+            //VTDev.Projects.CEX.Tests.ProcessingTests.StreamMacTest();
         }
         #endregion
 

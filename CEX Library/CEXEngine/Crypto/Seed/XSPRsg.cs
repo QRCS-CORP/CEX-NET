@@ -86,12 +86,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         private ulong[] _stateSeed;
         private ulong[] _wrkBuffer;
         private static readonly UInt64[] JMP128 = new UInt64[] { 0x8a5cd789635d2dffUL, 0x121fd2155c472f96UL };
-        private static readonly UInt64[] JMP1024 = new UInt64[] { 0x84242f96eca9c41dUL,
-		        0xa3c65b8776f96855UL, 0x5b34a39f070b5837UL, 0x4489affce4f31a1eUL,
-		        0x2ffeeb0a48316f40UL, 0xdc2d9891fe68c022UL, 0x3659132bb12fea70UL,
-		        0xaac17d8efa43cab8UL, 0xc4cb815590989b13UL, 0x5ee975283d71c93bUL,
-		        0x691548c86c1bd540UL, 0x7910c41d10a1e6a5UL, 0x0b5fc64563b3e2a8UL,
-		        0x047f7684e9fc949dUL, 0xb99181f2d8f685caUL, 0x284600e3f30e38c3UL
+        private static readonly UInt64[] JMP1024 = new UInt64[] {
+            0x84242f96eca9c41dUL, 0xa3c65b8776f96855UL, 0x5b34a39f070b5837UL, 0x4489affce4f31a1eUL,
+            0x2ffeeb0a48316f40UL, 0xdc2d9891fe68c022UL, 0x3659132bb12fea70UL, 0xaac17d8efa43cab8UL,
+            0xc4cb815590989b13UL, 0x5ee975283d71c93bUL, 0x691548c86c1bd540UL, 0x7910c41d10a1e6a5UL,
+            0x0b5fc64563b3e2a8UL, 0x047f7684e9fc949dUL, 0xb99181f2d8f685caUL, 0x284600e3f30e38c3UL
                 };
         #endregion
 
