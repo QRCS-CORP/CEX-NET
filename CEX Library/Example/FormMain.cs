@@ -47,7 +47,7 @@ namespace VTDev.Projects.CEX
         private string _lastInputPath = "";
         private string _lastKeyPath = "";
         private string _lastOutputPath = "";
-        private int _macSize = 64;
+        private int _macSize = 0;
         private string _outputPath = "";
         #endregion
 
@@ -583,7 +583,14 @@ namespace VTDev.Projects.CEX
             cbVectorSize.Items.Clear();
             cbVectorSize.Items.Add(IVSizes.V128);
             cbVectorSize.SelectedIndex = 0;
-            cbVectorSize.Enabled = cbHkdf.Enabled = cbPaddingMode.Enabled = Engine != SymmetricEngines.ChaCha && Engine != SymmetricEngines.Salsa;
+            cbVectorSize.Enabled = cbHkdf.Enabled = Engine != SymmetricEngines.ChaCha && Engine != SymmetricEngines.Salsa;
+            if (Engine == SymmetricEngines.ChaCha && Engine == SymmetricEngines.Salsa)
+                cbPaddingMode.Enabled = false;
+
+            CipherModes mode = CipherModes.CTR;
+            Enum.TryParse<CipherModes>(cbCipherMode.Text, out mode);
+            if (mode != CipherModes.CTR)
+                cbPaddingMode.Enabled = true;
 
             switch (Engine)
             {
@@ -661,7 +668,8 @@ namespace VTDev.Projects.CEX
             Digests digest = Digests.Keccak512;
             Enum.TryParse<Digests>(((ComboBox)sender).Text, out digest);
             _container.Description.MacEngine = (int)digest;
-            _macSize = GetMacSize(digest);
+            if (chkSign.Checked)
+                _macSize = GetMacSize(digest);
         }
 
         private void OnInfoButtonClick(object sender, EventArgs e)
@@ -1035,7 +1043,7 @@ namespace VTDev.Projects.CEX
             _container = new SettingsContainer()
             {
                 Authority = new KeyAuthority(Utilities.GetDomainId(), origin, new byte[0], new byte[0], KeyPolicies.None),
-                Description = new CipherDescription(SymmetricEngines.RHX, (int)KeySizes.K2560, IVSizes.V128, CipherModes.CTR, PaddingModes.X923, BlockSizes.B128, RoundCounts.R22),
+                Description = new CipherDescription(SymmetricEngines.RHX, (int)KeySizes.K2560, IVSizes.V128, CipherModes.CTR, PaddingModes.X923, BlockSizes.B128, RoundCounts.R22, Digests.SHA512, 0),
                 DomainRestrictChecked = false,
                 NoNarrativeChecked = false,
                 PackageAuthChecked = false,
@@ -1101,7 +1109,7 @@ namespace VTDev.Projects.CEX
                 Array.Clear(_container.Authority.DomainId, 0, _container.Authority.DomainId.Length);
                 Array.Clear(_container.Authority.PackageId, 0, _container.Authority.PackageId.Length);
                 Array.Clear(_container.Authority.PackageTag, 0, _container.Authority.PackageTag.Length);
-                
+
                 _container.DomainRestrictChecked = chkDomainRestrict.Checked;
                 _container.NoExportChecked = chkNoExport.Checked;
                 _container.NoNarrativeChecked = chkNoNarrative.Checked;

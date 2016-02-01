@@ -11,3 +11,6 @@ C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEX Free\obj\x86
 C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEX Free\obj\x86\Release\Example.csproj.GenerateResource.Cache
 C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEX Free\obj\x86\Release\CEXFree.exe
 C:\Users\John\Documents\Visual Studio 2010\Projects\CEX Library\CEX Free\obj\x86\Release\CEXFree.pdb
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\Example\bin\Release\CEXFree.exe.config
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\Example\obj\x86\Release\CEXFree.exe
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\Example\obj\x86\Release\CEXFree.pdb
