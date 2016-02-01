@@ -8,9 +8,9 @@ using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Argument;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Flag;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode;
-using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.CryptoException;
 using VTDev.Libraries.CEXEngine.Networking;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 #region License Information
@@ -231,7 +231,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Support
                     int hdrSize = pktFi.GetHeaderSize();
                     int len = dec.Length - hdrSize;
                     // write to file
-                    outStream.Write(ArrayEx.GetRange(dec, hdrSize, len), 0, len);
+                    outStream.Write(ArrayUtils.GetRange(dec, hdrSize, len), 0, len);
                     // store length
                     streamLen = outStream.Length;
 
@@ -335,9 +335,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Support
 
                         // add data
                         if (bytesRead == ckSize)
-                            hdrArr = ArrayEx.Concat(hdrArr, inputBuffer);
+                            hdrArr = ArrayUtils.Concat(hdrArr, inputBuffer);
                         else
-                            hdrArr = ArrayEx.Concat(hdrArr, ArrayEx.GetRange(inputBuffer, 0, bytesRead));
+                            hdrArr = ArrayUtils.Concat(hdrArr, ArrayUtils.GetRange(inputBuffer, 0, bytesRead));
 
                         // encrypt the header and data
                         byte[] enc = SymmetricTransform(_fileSymProcessor, hdrArr);

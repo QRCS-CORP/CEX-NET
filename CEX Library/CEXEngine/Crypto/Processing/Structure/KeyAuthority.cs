@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
+using VTDev.Libraries.CEXEngine.Utility;
 
 #endregion
 
@@ -283,38 +284,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int code = 31;
+            int hash = ArrayUtils.GetHashCode(DomainId);
+            hash += ArrayUtils.GetHashCode(OriginId);
+            hash += ArrayUtils.GetHashCode(TargetId);
+            hash += ArrayUtils.GetHashCode(PackageId);
+            hash += ArrayUtils.GetHashCode(PackageTag);
+            hash += (int)(31 * KeyPolicy);
+            hash += (int)(31 * OptionFlag);
 
-            if (DomainId.Length != 0)
-            {
-                for (int i = 0; i < DomainId.Length; ++i)
-                    code *= DomainId[i];
-            }
-            if (OriginId.Length != 0)
-            {
-                for (int i = 0; i < OriginId.Length; ++i)
-                    code *= OriginId[i];
-            }
-            if (TargetId.Length != 0)
-            {
-                for (int i = 0; i < TargetId.Length; ++i)
-                    code *= TargetId[i];
-            }
-            if (PackageId.Length != 0)
-            {
-                for (int i = 0; i < PackageId.Length; ++i)
-                    code *= PackageId[i];
-            }
-            if (PackageTag.Length != 0)
-            {
-                for (int i = 0; i < PackageTag.Length; ++i)
-                    code *= PackageTag[i];
-            }
-
-            code += (int)(31 * KeyPolicy);
-            code += (int)(31 * OptionFlag);
-
-            return code;
+            return hash;
         }
 
         /// <summary>

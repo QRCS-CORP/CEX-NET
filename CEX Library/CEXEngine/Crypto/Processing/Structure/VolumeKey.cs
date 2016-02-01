@@ -307,8 +307,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
 
                 // adjust the header params
                 vkey.Count++;
-                ArrayEx.AddAt(ref vkey.FileId, Id, vkey.Count);
-                ArrayEx.AddAt(ref vkey.State, (byte)0, vkey.Count);
+                ArrayUtils.AddAt(ref vkey.FileId, Id, vkey.Count);
+                ArrayUtils.AddAt(ref vkey.State, (byte)0, vkey.Count);
                 // copy header to mem
                 vkey.ToStream().WriteTo(keyMem);
 
@@ -489,15 +489,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
                 // adjust the count
                 vkey.Count--;
                 // create reduced arrays
-                ArrayEx.RemoveAt(ref vkey.FileId, index);
-                ArrayEx.RemoveAt(ref vkey.State, index);
+                ArrayUtils.RemoveAt(ref vkey.FileId, index);
+                ArrayUtils.RemoveAt(ref vkey.State, index);
 
                 // get the key material
                 int klen = vkey.Description.KeySize + vkey.Description.IvSize;
                 int koff = klen * index;
                 byte[] data = new byte[klen * vkey.Count];
                 KeyStream.Read(data, 0, data.Length);
-                ArrayEx.RemoveRange(ref data, koff, koff + klen);
+                ArrayUtils.RemoveRange(ref data, koff, koff + klen);
                 keyMem.Write(data, 0, data.Length);
 
                 // overwrite stream w/ new key
@@ -515,28 +515,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int code = 31;
+            int hash = 31 * 31 * Count;
+            hash += Description.GetHashCode();
+            hash += ArrayUtils.GetHashCode(Tag);
+            hash += ArrayUtils.GetHashCode(FileId);
+            hash += ArrayUtils.GetHashCode(State);
 
-            if (Tag.Length != 0)
-            {
-                for (int i = 0; i < Tag.Length; ++i)
-                    code *= Tag[i];
-            }
-            if (FileId.Length != 0)
-            {
-                for (int i = 0; i < FileId.Length; ++i)
-                    code *= FileId[i];
-            }
-            if (State.Length != 0)
-            {
-                for (int i = 0; i < State.Length; ++i)
-                    code *= State[i];
-            }
-
-            code += 31 * Description.GetHashCode();
-            code += 31 * Count;
-
-            return code;
+            return hash;
         }
 
         /// <summary>

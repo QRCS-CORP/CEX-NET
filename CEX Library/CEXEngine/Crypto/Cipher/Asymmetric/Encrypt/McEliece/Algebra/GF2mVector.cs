@@ -171,8 +171,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The hsh code</returns>
         public override int GetHashCode()
         {
-            int hash = this._field.GetHashCode();
-            hash = hash * 31 + _vector.GetHashCode();
+            int hash = _field.GetHashCode();
+            hash += _vector.GetHashCode();
 
             return hash;
         }

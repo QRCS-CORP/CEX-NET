@@ -247,7 +247,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
             else
                 tBin = T.ToIntegerPolynomial().ToBinary3Tight();
 
-            return ArrayEx.Concat(ArrayEncoder.ToByteArray(N), ArrayEncoder.ToByteArray(Q), flagsByte, tBin);
+            return ArrayUtils.Concat(ArrayEncoder.ToByteArray(N), ArrayEncoder.ToByteArray(Q), flagsByte, tBin);
         }
 
         /// <summary>
@@ -334,18 +334,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int prime = 31;
-            int result = 1;
+            int hash = 31 * N;
+            hash += 31 * (_fastFp ? 1231 : 1237);
+            hash += 31 *  ((FP == null) ? 0 : FP.GetHashCode());
+            hash += 31 * (int)PolyType;
+            hash += 31 * Q;
+            hash += 31 * (_sparse ? 1231 : 1237);
+            hash += 31 * ((T == null) ? 0 : T.GetHashCode());
 
-            result = prime * result + N;
-            result = prime * result + (_fastFp ? 1231 : 1237);
-            result = prime * result + ((FP == null) ? 0 : FP.GetHashCode());
-            result = prime * result + PolyType.GetHashCode();
-            result = prime * result + Q;
-            result = prime * result + (_sparse ? 1231 : 1237);
-            result = prime * result + ((T == null) ? 0 : T.GetHashCode());
-
-            return result;
+            return hash;
         }
 
         /// <summary>

@@ -229,24 +229,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int code = 31;
-            if (_Key.Length != 0)
-            {
-                for (int i = 0; i < _Key.Length; ++i)
-                    code *= _Key[i];
-            }
-            if (_Iv.Length != 0)
-            {
-                for (int i = 0; i < _Iv.Length; ++i)
-                    code *= _Iv[i];
-            }
-            if (_Ikm.Length != 0)
-            {
-                for (int i = 0; i < _Ikm.Length; ++i)
-                    code *= _Ikm[i];
-            }
+            int hash =  Utility.ArrayUtils.GetHashCode(_Key);
+            hash += Utility.ArrayUtils.GetHashCode(_Iv);
+            hash += Utility.ArrayUtils.GetHashCode(_Ikm);
 
-            return code;
+            return hash;
         }
         #endregion
 

@@ -9,6 +9,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Helper;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 #region License Information
@@ -364,7 +365,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             // copy the main tree authentication path
             for (int j = 0; j < _numLayer; j++)
             {
-                _currentAuthPaths[j] = ArrayEx.CreateJagged<byte[][]>(helpCurrentAuthPaths[j].Length, _mdLength);
+                _currentAuthPaths[j] = ArrayUtils.CreateJagged<byte[][]>(helpCurrentAuthPaths[j].Length, _mdLength);
                 for (int i = 0; i < helpCurrentAuthPaths[j].Length; i++)
                     Array.Copy(helpCurrentAuthPaths[j][i], 0, _currentAuthPaths[j][i], 0, _mdLength);
             }
@@ -497,7 +498,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                     return false;
 
                 // get authentication path from the signature
-                authPath = ArrayEx.CreateJagged<byte[][]>(_gmssPS.HeightOfTrees[j], _mdLength);//new byte[gmssPS.GetHeightOfTrees()[j]][mdLength];
+                authPath = ArrayUtils.CreateJagged<byte[][]>(_gmssPS.HeightOfTrees[j], _mdLength);//new byte[gmssPS.GetHeightOfTrees()[j]][mdLength];
                 for (int i = 0; i < authPath.Length; i++)
                 {
                     Array.Copy(Signature, nextEntry, authPath[i], 0, _mdLength);

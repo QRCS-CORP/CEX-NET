@@ -245,11 +245,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// <returns>The hash code</returns>
         public override int GetHashCode()
         {
-            int code = 31;
-            for (int i = 0; i < _publicKey.Length; i++)
-                code += 31 * _publicKey[i];
-
-            return code;
+            return CEXEngine.Utility.ArrayUtils.GetHashCode(_publicKey);
         }
         #endregion
 

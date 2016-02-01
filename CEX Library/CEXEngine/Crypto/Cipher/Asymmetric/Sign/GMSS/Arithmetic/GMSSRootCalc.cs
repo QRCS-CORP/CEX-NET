@@ -2,8 +2,8 @@
 using System;
 using System.Collections.Generic;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Utility;
-using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmetic
@@ -95,7 +95,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             // decode statByte
             _treeRoot = StatByte[0];
 
-            _authPath = ArrayEx.CreateJagged<byte[][]>(_heightOfTree, _mdLength);
+            _authPath = ArrayUtils.CreateJagged<byte[][]>(_heightOfTree, _mdLength);
             for (int i = 0; i < _heightOfTree; i++)
                 _authPath[i] = StatByte[1 + i];
 
@@ -124,7 +124,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             _mdLength = _msgDigestTree.DigestSize;
             _K = K;
             _ndeIndex = new int[HeightOfTree];
-            _authPath = ArrayEx.CreateJagged<byte[][]>(HeightOfTree, _mdLength);
+            _authPath = ArrayUtils.CreateJagged<byte[][]>(HeightOfTree, _mdLength);
             _treeRoot = new byte[_mdLength];
             // _treehash = new Treehash[HeightOfTree - K];
             _ndeRetain = new List<byte[]>[_K - 1];
@@ -155,7 +155,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                 _treehash[i] = new Treehash(SharedStack, i, _msgDigestTree);
 
             _ndeIndex = new int[_heightOfTree];
-            _authPath = ArrayEx.CreateJagged<byte[][]>(_heightOfTree, _mdLength);
+            _authPath = ArrayUtils.CreateJagged<byte[][]>(_heightOfTree, _mdLength);
             _treeRoot = new byte[_mdLength];
             _tailStack = new List<byte[]>();
             _heightOfNodes = new List<int>();
@@ -361,7 +361,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         /// <returns>The finished root value</returns>
         public byte[] GetRoot()
         {
-            return ArrayEx.Clone(_treeRoot);
+            return ArrayUtils.Clone(_treeRoot);
         }
 
         /// <summary>
@@ -390,7 +390,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             if (_tailStack != null)
                 tailLength = _tailStack.Count;
 
-            byte[][] statByte = ArrayEx.CreateJagged<byte[][]>(1 + _heightOfTree + tailLength, _msgDigestTree.BlockSize);//FIXME: messDigestTree.getByteLength()
+            byte[][] statByte = ArrayUtils.CreateJagged<byte[][]>(1 + _heightOfTree + tailLength, _msgDigestTree.BlockSize);//FIXME: messDigestTree.getByteLength()
             statByte[0] = _treeRoot;
 
             for (int i = 0; i < _heightOfTree; i++)

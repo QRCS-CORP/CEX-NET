@@ -168,23 +168,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _a1Inv = ArrayEx.ToArray2x16(data);
+                _a1Inv = ArrayUtils.ToArray2x16(data);
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _B1 = ArrayEx.ToArray16(data);
+                _B1 = ArrayUtils.ToArray16(data);
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _a2Inv = ArrayEx.ToArray2x16(data);
+                _a2Inv = ArrayUtils.ToArray2x16(data);
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _B2 = ArrayEx.ToArray16(data);
+                _B2 = ArrayUtils.ToArray16(data);
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _VI = ArrayEx.ToArray32(data);
+                _VI = ArrayUtils.ToArray32(data);
 
                 len = reader.ReadInt32();
                 _layers = new MapLayer[len];
@@ -273,23 +273,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
             byte[] data;
 
-            data = ArrayEx.ToBytes(_a1Inv);
+            data = ArrayUtils.ToBytes(_a1Inv);
             writer.Write(data.Length);
             writer.Write(data);
 
-            data = ArrayEx.ToBytes(_B1);
+            data = ArrayUtils.ToBytes(_B1);
             writer.Write(data.Length);
             writer.Write(data);
 
-            data = ArrayEx.ToBytes(_a2Inv);
+            data = ArrayUtils.ToBytes(_a2Inv);
             writer.Write(data.Length);
             writer.Write(data);
 
-            data = ArrayEx.ToBytes(_B2);
+            data = ArrayUtils.ToBytes(_B2);
             writer.Write(data.Length);
             writer.Write(data);
 
-            data = ArrayEx.ToBytes(_VI);
+            data = ArrayUtils.ToBytes(_VI);
             writer.Write(data.Length);
             writer.Write(data);
 
@@ -371,15 +371,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
             RNBWPrivateKey other = (RNBWPrivateKey)Obj;
 
-            if (!Compare.IsEqual(ArrayEx.ToBytes(_a1Inv), ArrayEx.ToBytes(other.InvA1)))
+            if (!Compare.IsEqual(ArrayUtils.ToBytes(_a1Inv), ArrayUtils.ToBytes(other.InvA1)))
                 return false;
-            if (!Compare.IsEqual(ArrayEx.ToBytes(_B1), ArrayEx.ToBytes(other.B1)))
+            if (!Compare.IsEqual(ArrayUtils.ToBytes(_B1), ArrayUtils.ToBytes(other.B1)))
                 return false;
-            if (!Compare.IsEqual(ArrayEx.ToBytes(_a2Inv), ArrayEx.ToBytes(other.InvA2)))
+            if (!Compare.IsEqual(ArrayUtils.ToBytes(_a2Inv), ArrayUtils.ToBytes(other.InvA2)))
                 return false;
-            if (!Compare.IsEqual(ArrayEx.ToBytes(_B2), ArrayEx.ToBytes(other.B2)))
+            if (!Compare.IsEqual(ArrayUtils.ToBytes(_B2), ArrayUtils.ToBytes(other.B2)))
                 return false;
-            if (!Compare.IsEqual(ArrayEx.ToBytes(_VI), ArrayEx.ToBytes(other.VI)))
+            if (!Compare.IsEqual(ArrayUtils.ToBytes(_VI), ArrayUtils.ToBytes(other.VI)))
                 return false;
 
             return true;
@@ -392,11 +392,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         /// <returns>The hash code</returns>
         public override int GetHashCode()
         {
-            int hash = _a1Inv.GetHashCode() * 31;
-            hash += _B1.GetHashCode();
-            hash += _a2Inv.GetHashCode();
-            hash += _B2.GetHashCode();
-            hash += _VI.GetHashCode();
+            int hash = ArrayUtils.GetHashCode(_a1Inv);
+            hash += ArrayUtils.GetHashCode(_B1);
+            hash += ArrayUtils.GetHashCode(_a2Inv);
+            hash += ArrayUtils.GetHashCode(_B2);
+            hash += ArrayUtils.GetHashCode(_VI);
 
             return hash;
         }

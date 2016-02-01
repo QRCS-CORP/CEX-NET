@@ -414,9 +414,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         {
             int hash = N * 31;
             hash += K * 31;
-            hash += GF.GetHashCode() * 31;
-            hash += GP.GetHashCode() * 31;
-            hash += P1.GetHashCode() * 31;
+            hash += GF.GetHashCode();
+            hash += GP.GetHashCode();
+            hash += P1.GetHashCode();
 
             return hash;
         }

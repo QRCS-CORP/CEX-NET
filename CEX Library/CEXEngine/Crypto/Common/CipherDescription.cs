@@ -268,20 +268,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int result = 1;
+            int hash = 31 * EngineType;
+            hash += 31 * KeySize;
+            hash += 31 * IvSize;
+            hash += 31 * CipherType;
+            hash += 31 * PaddingType;
+            hash += 31 * BlockSize;
+            hash += 31 * RoundCount;
+            hash += 31 * KdfEngine;
+            hash += 31 * MacSize;
+            hash += 31 * MacEngine;
 
-            result += 31 * EngineType;
-            result += 31 * KeySize;
-            result += 31 * IvSize;
-            result += 31 * CipherType;
-            result += 31 * PaddingType;
-            result += 31 * BlockSize;
-            result += 31 * RoundCount;
-            result += 31 * KdfEngine;
-            result += 31 * MacSize;
-            result += 31 * MacEngine;
-
-            return result;
+            return hash;
         }
 
         /// <summary>

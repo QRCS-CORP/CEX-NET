@@ -1412,7 +1412,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            return Coeffs.GetHashCode();
+            return ArrayUtils.GetHashCode(Coeffs);
         }
 
         /// <summary>

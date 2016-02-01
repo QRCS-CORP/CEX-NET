@@ -466,10 +466,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int prime = 31;
-            int result = 1;
-            result = prime * result + Coeffs.GetHashCode();
-            return result;
+            return Coeffs.GetHashCode();
         }
 
         /// <summary>

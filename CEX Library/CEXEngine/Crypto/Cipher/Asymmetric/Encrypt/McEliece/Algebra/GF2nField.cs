@@ -90,7 +90,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The hash code</returns>
         public override int GetHashCode()
         {
-            return DegreeN + FieldPoly.GetHashCode();
+            return DegreeN * 31 + FieldPoly.GetHashCode();
         }
         #endregion
 

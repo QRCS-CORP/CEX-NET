@@ -48,7 +48,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <summary>
         /// Use Ternary type key
         /// </summary>
-        SIMPLE,
+        SIMPLE = 0,
         /// <summary>
         /// Use Product form type key
         /// </summary>
@@ -710,40 +710,37 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int prime = 31;
-            int result = 1;
+            int hash = 31 * N;
+            hash += 31 * BufferLenBits;
+            hash += 31 * _bufferLenTrits;
+            hash += 31 * CBits;
+            hash += 31 * Db;
+            hash += 31 * DF;
+            hash += 31 * DF1;
+            hash += 31 * DF2;
+            hash += 31 * DF3;
+            hash += 31 * Dg;
+            hash += 31 * Dm0;
+            hash += 31 * MaxM1;
+            hash += 31 * DR;
+            hash += 31 * DR1;
+            hash += 31 * DR2;
+            hash += 31 * DR3;
+            hash += 31 * (FastFp ? 1231 : 1237);
+            hash += 31 * (int)Digest;
+            hash += 31 * (int)RandomEngine;
+            hash += 31 * (HashSeed ? 1231 : 1237);
+            hash += 31 * Length;
+            hash += 31 * MessageMax;
+            hash += 31 * MinMGFHashCalls;
+            hash += 31 * MinIGFHashCalls;
+            hash += ArrayUtils.GetHashCode(OId);
+            hash += 31 * PkLen;
+            hash += 31 * (int)PolyType;
+            hash += 31 * Q;
+            hash += 31 * (Sparse ? 1231 : 1237);
 
-            result = prime * result + N;
-            result = prime * result + BufferLenBits;
-            result = prime * result + _bufferLenTrits;
-            result = prime * result + CBits;
-            result = prime * result + Db;
-            result = prime * result + DF;
-            result = prime * result + DF1;
-            result = prime * result + DF2;
-            result = prime * result + DF3;
-            result = prime * result + Dg;
-            result = prime * result + Dm0;
-            result = prime * result + MaxM1;
-            result = prime * result + DR;
-            result = prime * result + DR1;
-            result = prime * result + DR2;
-            result = prime * result + DR3;
-            result = prime * result + (FastFp ? 1231 : 1237);
-            result = prime * result + Digest.GetHashCode();
-            result = prime * result + RandomEngine.GetHashCode();
-            result = prime * result + (HashSeed ? 1231 : 1237);
-            result = prime * result + Length;
-            result = prime * result + MessageMax;
-            result = prime * result + MinMGFHashCalls;
-            result = prime * result + MinIGFHashCalls;
-            result = prime * result + OId.GetHashCode();
-            result = prime * result + PkLen;
-            result = prime * result + PolyType.GetHashCode();
-            result = prime * result + Q;
-            result = prime * result + (Sparse ? 1231 : 1237);
-
-            return result;
+            return hash;
         }
 
         /// <summary>

@@ -523,7 +523,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         /// <returns>Return statBytes</returns>
         public byte[][] GetStatByte()
         {
-            byte[][] statByte = ArrayEx.CreateJagged<byte[][]>(5, _mdSize);
+            byte[][] statByte = ArrayUtils.CreateJagged<byte[][]>(5, _mdSize);
             statByte[0] = _privateKeyOTS;
             statByte[1] = _otsSeed;
             statByte[2] = _msgHash;

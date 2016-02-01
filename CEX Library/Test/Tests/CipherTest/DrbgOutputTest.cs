@@ -55,6 +55,9 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             return HexConverter.ToString(output);
         }
 
+        /// <summary>
+        /// Outputs expected values for the PBKDF2
+        /// </summary>
         public string GetPBKDFVector(IDigest Engine, int Rounds = 100)
         {
             int keySize = Engine.BlockSize;

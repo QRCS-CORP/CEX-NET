@@ -45,9 +45,9 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             if (Engine.Name == "RHX")
                 return ((RHX)Engine).LegalKeySizes[4];
             else if (Engine.Name == "SHX")
-                return ((SHX)Engine).LegalKeySizes[0];
+                return ((SHX)Engine).LegalKeySizes[4];
             else if (Engine.Name == "THX")
-                return ((THX)Engine).LegalKeySizes[0];
+                return ((THX)Engine).LegalKeySizes[4];
             else
                 throw new Exception();
         }

@@ -411,15 +411,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int result = 1;
-            result += 31 * _N;
-            result += 31 * _Q;
-            result += 31 * _mFp;
-            result += (int)Math.Round(31 * _Sigma);
-            result += 31 * (int)_rndEngineType;
-            result += 31 * (int)_dgtEngineType;
+            int hash = 31 * _N;
+            hash += 31 * _Q;
+            hash += 31 * _mFp;
+            hash += (int)Math.Round(31 * _Sigma);
+            hash += 31 * (int)_rndEngineType;
+            hash += 31 * (int)_dgtEngineType;
 
-            return result;
+            return hash;
         }
 
         /// <summary>

@@ -139,9 +139,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             int n = 1 << m;
             int t = Gp.Degree;
             // create matrix H over GF(2^m)
-            int[][] hArray = ArrayEx.CreateJagged<int[][]>(t, n);
+            int[][] hArray = ArrayUtils.CreateJagged<int[][]>(t, n);
             // create matrix YZ
-            int[][] yz = ArrayEx.CreateJagged<int[][]>(t, n);
+            int[][] yz = ArrayUtils.CreateJagged<int[][]>(t, n);
 
             if (ParallelUtils.IsParallel)
             {
@@ -194,7 +194,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             }
 
             // convert to matrix over GF(2)
-            int[][] result = ArrayEx.CreateJagged<int[][]>(t * m, IntUtils.URShift((n + 31), 5));
+            int[][] result = ArrayUtils.CreateJagged<int[][]>(t * m, IntUtils.URShift((n + 31), 5));
 
             if (ParallelUtils.IsParallel)
             {

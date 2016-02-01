@@ -363,7 +363,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
             int maxIndex = 1 << BITS_PER_INDEX;
             byte[] bin1 = ArrayEncoder.EncodeModQ(_ones, maxIndex);//13l - (9,2048)
             byte[] bin2 = ArrayEncoder.EncodeModQ(_negOnes, maxIndex);
-            byte[] bin = ArrayEx.Concat(ArrayEncoder.ToByteArray(_ones.Length), ArrayEncoder.ToByteArray(_negOnes.Length), bin1, bin2);
+            byte[] bin = ArrayUtils.Concat(ArrayEncoder.ToByteArray(_ones.Length), ArrayEncoder.ToByteArray(_negOnes.Length), bin1, bin2);
 
             return bin;
         }
@@ -429,13 +429,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int prime = 31;
-            int result = 1;
-            result = prime * result + _N;
-            result = prime * result + _negOnes.GetHashCode();
-            result = prime * result + _ones.GetHashCode();
+            int hash = 31 * _N;
+            hash += ArrayUtils.GetHashCode(_negOnes);
+            hash += ArrayUtils.GetHashCode(_ones);
 
-            return result;
+            return hash;
         }
         #endregion
     }

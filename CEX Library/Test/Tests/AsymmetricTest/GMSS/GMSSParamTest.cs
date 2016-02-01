@@ -63,7 +63,9 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.GMSS
             using (GMSSParameters mpar2 = GMSSParameters.From(enc))
             {
                 if (!mpar.Equals(mpar2))
-                    throw new Exception("EncryptionKey: public key comparison test failed!");
+                    throw new Exception("Parameters: public key comparison test failed!");
+                if (mpar.GetHashCode() != mpar2.GetHashCode())
+                    throw new Exception("Parameters: parameters hash test failed!");
             }
             OnProgress(new TestEventArgs("Passed parameters byte serialization"));
 
@@ -71,7 +73,9 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.GMSS
             using (GMSSParameters mpar2 = GMSSParameters.From(mstr))
             {
                 if (!mpar.Equals(mpar2))
-                    throw new Exception("EncryptionKey: public key comparison test failed!");
+                    throw new Exception("Parameters: public key comparison test failed!");
+                if (mpar.GetHashCode() != mpar2.GetHashCode())
+                    throw new Exception("Parameters: parameters hash test failed!");
             }
             OnProgress(new TestEventArgs("Passed parameters stream serialization"));
         }

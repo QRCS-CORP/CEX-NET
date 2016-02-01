@@ -76,10 +76,15 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
             byte[] priv = ((NTRUPrivateKey)kp.PrivateKey).ToBytes();
             byte[] pub = ((NTRUPublicKey)kp.PublicKey).ToBytes();
             NTRUKeyPair kp2 = new NTRUKeyPair(new NTRUPublicKey(pub), new NTRUPrivateKey(priv));
+
             if (!Evaluate.Equals(kp.PublicKey, kp2.PublicKey))
                 throw new Exception("EncryptionKey: public key comparison test failed!");
+            if (kp.PublicKey.GetHashCode() != kp2.PublicKey.GetHashCode())
+                throw new Exception("EncryptionKey: public key hash test failed!");
             if (!Evaluate.Equals(kp.PrivateKey, kp2.PrivateKey))
                 throw new Exception("EncryptionKey: private key comparison test failed!");
+            if (kp.PrivateKey.GetHashCode() != kp2.PrivateKey.GetHashCode())
+                throw new Exception("EncryptionKey: private key hash test failed!");
 
             MemoryStream bos1 = new MemoryStream();
             MemoryStream bos2 = new MemoryStream();
@@ -90,8 +95,12 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
             NTRUKeyPair kp3 = new NTRUKeyPair(new NTRUPublicKey(bis2), new NTRUPrivateKey(bis1));
             if (!Evaluate.Equals(kp.PublicKey, kp3.PublicKey))
                 throw new Exception("EncryptionKey: public key comparison test failed!");
+            if (kp.PublicKey.GetHashCode() != kp3.PublicKey.GetHashCode())
+                throw new Exception("EncryptionKey: public key hash test failed!");
             if (!Evaluate.Equals(kp.PrivateKey, kp3.PrivateKey))
                 throw new Exception("EncryptionKey: private key comparison test failed!");
+            if (kp.PrivateKey.GetHashCode() != kp3.PrivateKey.GetHashCode())
+                throw new Exception("EncryptionKey: private key hash test failed!");
         }
         #endregion
     }

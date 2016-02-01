@@ -197,7 +197,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns></returns>
         public override int GetHashCode()
         {
-            return _perm.GetHashCode();
+            return ArrayUtils.GetHashCode(_perm);
         }
 
         /// <summary>

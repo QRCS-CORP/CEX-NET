@@ -68,7 +68,10 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.GMSS
             {
                 if (!pub.Equals(pub2))
                     throw new Exception("EncryptionKey: public key comparison test failed!");
+                if (pub.GetHashCode() != pub2.GetHashCode())
+                    throw new Exception("EncryptionKey: public key hash test failed!");
             }
+
             OnProgress(new TestEventArgs("Passed public key serialization"));
 
             MemoryStream pubstr = pub.ToStream();
@@ -76,6 +79,8 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.GMSS
             {
                 if (!pub.Equals(pub2))
                     throw new Exception("EncryptionKey: public key comparison test failed!");
+                if (pub.GetHashCode() != pub2.GetHashCode())
+                    throw new Exception("EncryptionKey: public key hash test failed!");
             }
             pubstr.Dispose();
             OnProgress(new TestEventArgs("Passed public key stream test"));
@@ -86,6 +91,8 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.GMSS
             {
                 if (!pri.Equals(pri2))
                     throw new Exception("EncryptionKey: private key comparison test failed!");
+                if (pri.GetHashCode() != pri2.GetHashCode())
+                    throw new Exception("EncryptionKey: private key hash test failed!");
             }
             OnProgress(new TestEventArgs("Passed private key serialization"));
 
@@ -94,10 +101,11 @@ namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.GMSS
             {
                 if (!pri.Equals(pri2))
                     throw new Exception("EncryptionKey: private key comparison test failed!");
+                if (pri.GetHashCode() != pri2.GetHashCode())
+                    throw new Exception("EncryptionKey: private key hash test failed!");
             }
             pristr.Dispose();
             OnProgress(new TestEventArgs("Passed private key stream test"));
-
 
             pri.Dispose();
             pub.Dispose();

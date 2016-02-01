@@ -422,8 +422,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The hash code</returns>
         public override int GetHashCode()
         {
-            int hash = Length;
-            hash = hash * 31 + _elements.GetHashCode();
+            int hash = Length * 31;
+            hash += _elements.GetHashCode();
+
             return hash;
         }
 

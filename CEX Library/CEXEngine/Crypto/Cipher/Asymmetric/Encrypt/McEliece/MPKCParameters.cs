@@ -465,17 +465,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int result = 1;
+            int hash = 31 * (int)Digest;
+            hash += 31 * (int)CCA2Engine;
+            hash += 31 * (int)RandomEngine;
+            hash += 31 * M;
+            hash += 31 * N;
+            hash += 31 * T;
+            hash += 31 * FieldPolynomial;
 
-            result += 31 * (int)Digest;
-            result += 31 * (int)CCA2Engine;
-            result += 31 * (int)RandomEngine;
-            result += 31 * M;
-            result += 31 * N;
-            result += 31 * T;
-            result += 31 * FieldPolynomial;
-
-            return result;
+            return hash;
         }
 
         /// <summary>

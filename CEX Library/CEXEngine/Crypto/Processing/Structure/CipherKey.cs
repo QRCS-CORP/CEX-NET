@@ -272,13 +272,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int result = 1;
+            int hash = Description.GetHashCode();
+            hash += KeyID.GetHashCode();
+            hash += ExtensionKey.GetHashCode();
 
-            result += 31 * Description.GetHashCode();
-            result += 31 * KeyID.GetHashCode();
-            result += 31 * ExtensionKey.GetHashCode();
-
-            return result;
+            return hash;
         }
 
         /// <summary>

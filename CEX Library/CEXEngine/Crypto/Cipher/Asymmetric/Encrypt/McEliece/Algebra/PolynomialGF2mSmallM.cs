@@ -652,8 +652,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public override int GetHashCode()
         {
             int hash = _field.GetHashCode();
-            for (int j = 0; j < _coefficients.Length; j++)
-                hash = hash * 31 + _coefficients[j];
+            hash += ArrayUtils.GetHashCode(_coefficients);
             
             return hash;
         }

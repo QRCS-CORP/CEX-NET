@@ -1,7 +1,6 @@
 ﻿#region Directives
 using System;
 using Test.Tests;
-using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Projects.CEX.Test;
 using VTDev.Projects.CEX.Test.Tests;
 using VTDev.Projects.CEX.Test.Tests.Asymmetric.GMSS;
@@ -19,18 +18,6 @@ using VTDev.Projects.CEX.Test.Tests.SeedTest;
 using VTDev.Projects.CEX.Test.Tests.Tools;
 #endregion
 
-// RSM, TSM, and Fusion have been removed. Nothing wrong with them afaik, just they were only meant as experiments, 
-// and not as serious ciphers (too 'over the top', and really not necessary -use X ciphers instead).
-//
-// ToDo:
-// Merge RDX/RHX..                      -done
-// Remove/test GMSS?                    -done
-// Finish XSP, ISC                      -done
-// Seed engine options in KeyGenerator  -done
-// Add object 'type' property           -done
-// Test and fix examples                -
-// Convert to vs2015                    -
-// Update article and github            -
 namespace Test
 {
     class Program
@@ -41,13 +28,12 @@ namespace Test
             ConsoleUtils.CenterConsole();
             Console.Title = "CEX Test Suite";
             Console.BufferHeight = 600;
-            
 
             Console.WriteLine("**********************************************");
             Console.WriteLine("* CEX Version 1.5                            *");
             Console.WriteLine("*                                            *");
             Console.WriteLine("* Release:   v1.5                            *");
-            Console.WriteLine("* Date:      Jan 20, 2016                    *");
+            Console.WriteLine("* Date:      Feb 1, 2016                     *");
             Console.WriteLine("* Contact:   develop@vtdev.com               *");
             Console.WriteLine("**********************************************");
             Console.WriteLine("");
@@ -264,17 +250,18 @@ namespace Test
             DrbgOutputTest t = new DrbgOutputTest();
             Console.WriteLine("Get the test vector for the CTRDrbg implementation");
             Console.WriteLine("");
+
             string s = t.GetCTRVector();
             // k:32, r:14 -result: b621dbd634714c11d9e72953d580474b37780e36b74edbd5c4b3a506e5a41018
             Console.WriteLine("RHX: r14, k256: " + s);
             Console.WriteLine("Get the test vectors for the SP20Drbg implementation");
             s = t.GetSP20Vector(24);
-            // k:16, r:20 -result: 0323103b248efe859cd4ca57559a1c4aa4f9320635bac3807d93b7bcfbad14d1
+            // k:16, r:20 -result: a29a83f8607860361e180eab1de0832f1529ea1c72fc501bd37df9d4e15cff1f
             Console.WriteLine("Salsa20: r20, k128: " + s);
             Console.WriteLine("");
             s = t.GetSP20Vector(40);
             // k:32, r:20 -result: d00b46e37495862e642c35be3a1149a8562ee50cdafe3a5f4b26a5c579a45c36
-            Console.WriteLine("Salsa20: r120, k256: " + s);
+            Console.WriteLine("Salsa20: r20, k256: " + s);
             Console.WriteLine("");
 
             s = t.GetPBKDFVector(new VTDev.Libraries.CEXEngine.Crypto.Digest.SHA256());
@@ -286,7 +273,6 @@ namespace Test
             // SHA512, n:100 -result: cc46b9de43b3e3eac0685e5f945458e5da835851645c520f9c8edc91a5da28ee
             Console.WriteLine("SHA512: n100: " + s);
             Console.WriteLine("");
-
         }
 
         private static void GetHXVectors()
@@ -326,17 +312,6 @@ namespace Test
                 VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests.SHA512,
                 VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts.R20);
             Console.WriteLine("THX: r20, sha512: " + s);
-        }
-
-        private static void TestKeyGen()
-        {
-            KeyGenerator kg = new KeyGenerator();
-            byte[] d = kg.GetBytes(100);
-            KeyParams kp = kg.GetKeyParams(32, 0, 0);
-            kp = kg.GetKeyParams(32, 0, 16);
-            kp = kg.GetKeyParams(32, 16, 16);
-            kp = kg.GetKeyParams(0, 16, 16);
-            kp = kg.GetKeyParams(0, 0, 16);
         }
     }
 }

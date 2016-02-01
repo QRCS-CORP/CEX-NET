@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmetic;
-using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Utility
@@ -53,7 +53,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Utility
             byte[][] copy = new byte[Data.Length][];
 
             for (int i = 0; i != Data.Length; i++)
-                copy[i] = ArrayEx.Clone(Data[i]);
+                copy[i] = ArrayUtils.Clone(Data[i]);
 
             return copy;
         }

@@ -133,15 +133,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _coeffQuadratic = ArrayEx.ToArray2x16(data);
+                _coeffQuadratic = ArrayUtils.ToArray2x16(data);
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _coeffSingular = ArrayEx.ToArray2x16(data);
+                _coeffSingular = ArrayUtils.ToArray2x16(data);
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _coeffScalar = ArrayEx.ToArray16(data);
+                _coeffScalar = ArrayUtils.ToArray16(data);
             }
             catch (Exception ex)
             {
@@ -221,15 +221,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
             writer.Write(_docLength);
 
-            data = ArrayEx.ToBytes(_coeffQuadratic);
+            data = ArrayUtils.ToBytes(_coeffQuadratic);
             writer.Write(data.Length);
             writer.Write(data);
 
-            data = ArrayEx.ToBytes(_coeffSingular);
+            data = ArrayUtils.ToBytes(_coeffSingular);
             writer.Write(data.Length);
             writer.Write(data);
 
-            data = ArrayEx.ToBytes(_coeffScalar);
+            data = ArrayUtils.ToBytes(_coeffScalar);
             writer.Write(data.Length);
             writer.Write(data);
 
@@ -305,11 +305,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
             if (!_docLength.Equals(other.DocLength))
                 return false;
-            if (!Compare.IsEqual(ArrayEx.ToBytes(_coeffQuadratic), ArrayEx.ToBytes(other.CoeffQuadratic)))
+            if (!Compare.IsEqual(ArrayUtils.ToBytes(_coeffQuadratic), ArrayUtils.ToBytes(other.CoeffQuadratic)))
                 return false;
-            if (!Compare.IsEqual(ArrayEx.ToBytes(_coeffSingular), ArrayEx.ToBytes(other.CoeffSingular)))
+            if (!Compare.IsEqual(ArrayUtils.ToBytes(_coeffSingular), ArrayUtils.ToBytes(other.CoeffSingular)))
                 return false;
-            if (!Compare.IsEqual(ArrayEx.ToBytes(_coeffScalar), ArrayEx.ToBytes(other.CoeffScalar)))
+            if (!Compare.IsEqual(ArrayUtils.ToBytes(_coeffScalar), ArrayUtils.ToBytes(other.CoeffScalar)))
                 return false;
 
             return true;
@@ -322,12 +322,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         /// <returns>The hash code</returns>
         public override int GetHashCode()
         {
-            int code = _docLength * 31;
-            code += _coeffQuadratic.GetHashCode() * 31;
-            code += _coeffSingular.GetHashCode() * 31;
-            code += _coeffScalar.GetHashCode() * 31;
+            int hash = _docLength * 31;
+            hash += ArrayUtils.GetHashCode(_coeffQuadratic);
+            hash += ArrayUtils.GetHashCode(_coeffSingular);
+            hash += ArrayUtils.GetHashCode(_coeffScalar);
 
-            return code;
+            return hash;
         }
         #endregion
 

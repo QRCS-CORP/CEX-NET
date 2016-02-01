@@ -1,8 +1,8 @@
 ﻿#region Directives
 using System;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Utility;
-using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmetic
@@ -137,15 +137,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             _mdsize = original._mdsize;
             _keysize = original._keysize;
             _gmssRandom = original._gmssRandom;
-            _leaf = ArrayEx.Clone(original._leaf);
-            _concHashs = ArrayEx.Clone(original._concHashs);
+            _leaf = ArrayUtils.Clone(original._leaf);
+            _concHashs = ArrayUtils.Clone(original._concHashs);
             _ctr1 = original._ctr1;
             _ctr2 = original._ctr2;
             _twoPowerW = original._twoPowerW;
             _W = original._W;
             _steps = original._steps;
-            _seed = ArrayEx.Clone(original._seed);
-            _privateKeyOTS = ArrayEx.Clone(original._privateKeyOTS);
+            _seed = ArrayUtils.Clone(original._seed);
+            _privateKeyOTS = ArrayUtils.Clone(original._privateKeyOTS);
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         /// <returns>The leaf value</returns>
         public byte[] GetLeaf()
         {
-            return ArrayEx.Clone(_leaf);
+            return ArrayUtils.Clone(_leaf);
         }
 
         /// <summary>

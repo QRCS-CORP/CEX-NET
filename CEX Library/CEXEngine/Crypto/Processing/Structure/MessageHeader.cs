@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
@@ -316,19 +317,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int result = 1;
-            for (int i = 0; i < KeyID.Length; i++)
-                result += 31 * KeyID[i];
-            for (int i = 0; i < Extension.Length; i++)
-                result += 31 * Extension[i];
+            int hash = ArrayUtils.GetHashCode(KeyID);
+            hash += ArrayUtils.GetHashCode(Extension);
+            hash += ArrayUtils.GetHashCode(MessageMac);
 
-            if (MessageMac != null)
-            {
-                for (int i = 0; i < MessageMac.Length; i++)
-                    result += 31 * MessageMac[i];
-            }
-
-            return result;
+            return hash;
         }
 
         /// <summary>

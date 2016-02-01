@@ -530,7 +530,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The hash code</returns>
         public override int GetHashCode()
         {
-            return Degree + _coeff.GetHashCode();
+            return Degree * 31 + _coeff.GetHashCode();
         }
         #endregion
     }

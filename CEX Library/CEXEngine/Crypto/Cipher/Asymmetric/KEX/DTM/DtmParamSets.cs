@@ -429,70 +429,70 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             {
                 // x1
                 case DtmParamNames.X11RNS1R2:
-                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1931),
                         new byte[] { (byte)BlockCiphers.SHX, 0, (byte)BlockCiphers.RHX, (byte)Digests.Keccak512, 1, 1, 0, 0 });
                 case DtmParamNames.X12RNR1R2:
-                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1931),
                         new byte[] { (byte)BlockCiphers.RHX, 0, (byte)BlockCiphers.RHX, (byte)Digests.Keccak512, 1, 2, 0, 0 });
                 case DtmParamNames.X13RNS1S2:
-                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1931),
                         new byte[] { (byte)BlockCiphers.SHX, 0, (byte)BlockCiphers.SHX, (byte)Digests.Keccak512, 1, 3, 0, 0 });
                 case DtmParamNames.X14RNT1T2:
-                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.CX1931),
                         new byte[] { (byte)BlockCiphers.THX, 0, (byte)BlockCiphers.THX, (byte)Digests.Keccak512, 1, 4, 0, 0 });
                 // x2
                 case DtmParamNames.X21RNS1R2:
-                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1499EP1),
                         new byte[] { (byte)BlockCiphers.SHX, 0, (byte)BlockCiphers.RHX, (byte)Digests.Skein512, 2, 1, 0, 0 });
                 case DtmParamNames.X22RNR1R2:
-                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1499EP1),
                         new byte[] { (byte)BlockCiphers.RHX, 0, (byte)BlockCiphers.RHX, (byte)Digests.Skein512, 2, 2, 0, 0 });
                 case DtmParamNames.X23RNS1S2:
-                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1499EP1),
                         new byte[] { (byte)BlockCiphers.SHX, 0, (byte)BlockCiphers.SHX, (byte)Digests.Skein512, 2, 3, 0, 0 });
                 case DtmParamNames.X24RNT1T2:
-                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1499EP1),
                         new byte[] { (byte)BlockCiphers.THX, 0, (byte)BlockCiphers.THX, (byte)Digests.Skein512, 2, 4, 0, 0 });
                 // x3
                 case DtmParamNames.X31RNS1R1:
-                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1087EP2),
                         new byte[] { (byte)BlockCiphers.SHX, 0, (byte)BlockCiphers.RHX, 0, 3, 1, 0, 0 });
                 case DtmParamNames.X32RNR1R1:
-                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1087EP2),
                         new byte[] { (byte)BlockCiphers.RHX, 0, (byte)BlockCiphers.RHX, 0, 3, 2, 0, 0 });
                 case DtmParamNames.X33RNS1S1:
-                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1087EP2),
                         new byte[] { (byte)BlockCiphers.SHX, 0, (byte)BlockCiphers.SHX, 0, 3, 3, 0, 0 });
                 case DtmParamNames.X34RNT1T1:
-                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FE1087EP2),
                         new byte[] { (byte)BlockCiphers.THX, 0, (byte)BlockCiphers.THX, 0, 3, 4, 0, 0 });
                 // x4
                 case DtmParamNames.X41RNS1R1:
-                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FA2011743),
                         new byte[] { (byte)BlockCiphers.SHX, 0, (byte)BlockCiphers.RHX, 0, 4, 1, 0, 0 });
                 case DtmParamNames.X42RNR1R1:
-                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FA2011743),
                         new byte[] { (byte)BlockCiphers.RHX, 0, (byte)BlockCiphers.RHX, 0, 4, 2, 0, 0 });
                 case DtmParamNames.X43RNS1S1:
-                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FA2011743),
                         new byte[] { (byte)BlockCiphers.SHX, 0, (byte)BlockCiphers.SHX, 0, 4, 3, 0, 0 });
                 case DtmParamNames.X44RNT1T1:
-                    return ArrayEx.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
+                    return ArrayUtils.Concat(RLWEParamSets.GetID(RLWEParamSets.RLWEParamNames.N512Q12289),
                         NTRUParamSets.GetID(NTRUParamSets.NTRUParamNames.FA2011743),
                         new byte[] { (byte)BlockCiphers.THX, 0, (byte)BlockCiphers.THX, 0, 4, 4, 0, 0 });
                 default:

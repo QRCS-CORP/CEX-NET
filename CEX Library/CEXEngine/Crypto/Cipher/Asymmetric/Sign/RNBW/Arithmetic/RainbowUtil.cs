@@ -1,5 +1,5 @@
 ﻿#region Directives
-using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmetic
@@ -52,7 +52,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
         /// <returns>A short-matrix that corresponds the input</returns>
         public static short[][] ConvertArray(byte[][] Input)
         {
-            short[][] output = ArrayEx.CreateJagged<short[][]>(Input.Length, Input[0].Length);
+            short[][] output = ArrayUtils.CreateJagged<short[][]>(Input.Length, Input[0].Length);
 
             for (int i = 0; i < Input.Length; i++)
             {
@@ -72,7 +72,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
         /// <returns>A short-array that corresponds the input</returns>
         public static short[][][] ConvertArray(byte[][][] Input)
         {
-            short[][][] output = ArrayEx.CreateJagged<short[][][]>(Input.Length, Input[0].Length, Input[0][0].Length);
+            short[][][] output = ArrayUtils.CreateJagged<short[][][]>(Input.Length, Input[0].Length, Input[0][0].Length);
 
             for (int i = 0; i < Input.Length; i++)
             {
@@ -128,7 +128,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
         /// <returns>The byte-matrix that corresponds the input</returns>
         public static byte[][] ConvertArray(short[][] Input)
         {
-            byte[][] output = ArrayEx.CreateJagged<byte[][]>(Input.Length, Input[0].Length);
+            byte[][] output = ArrayUtils.CreateJagged<byte[][]>(Input.Length, Input[0].Length);
 
             for (int i = 0; i < Input.Length; i++)
             {
@@ -148,7 +148,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
         /// <returns>The byte-array that corresponds the input</returns>
         public static byte[][][] ConvertArray(short[][][] Input)
         {
-            byte[][][] output = ArrayEx.CreateJagged<byte[][][]>(Input.Length, Input[0].Length, Input[0][0].Length);
+            byte[][][] output = ArrayUtils.CreateJagged<byte[][][]>(Input.Length, Input[0].Length, Input[0][0].Length);
 
             for (int i = 0; i < Input.Length; i++)
             {

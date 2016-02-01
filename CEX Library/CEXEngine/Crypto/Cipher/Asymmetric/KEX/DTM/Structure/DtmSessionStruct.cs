@@ -255,15 +255,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int result = 1;
+            int hash = 31 * EngineType;
+            hash += 31 * KeySize;
+            hash += 31 * IvSize;
+            hash += 31 * RoundCount;
+            hash += 31 * KdfEngine;
 
-            result += 31 * EngineType;
-            result += 31 * KeySize;
-            result += 31 * IvSize;
-            result += 31 * RoundCount;
-            result += 31 * KdfEngine;
-
-            return result;
+            return hash;
         }
 
         /// <summary>

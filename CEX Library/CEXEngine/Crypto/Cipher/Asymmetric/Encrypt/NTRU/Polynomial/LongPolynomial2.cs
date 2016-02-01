@@ -276,7 +276,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            return this.GetHashCode();
+            return 98761234;
         }
         #endregion
     }

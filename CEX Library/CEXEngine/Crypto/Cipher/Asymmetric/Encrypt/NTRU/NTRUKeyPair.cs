@@ -297,13 +297,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int prime = 31;
-            int result = 1;
+            int hash = ((PrivateKey == null) ? 0 : PrivateKey.GetHashCode());
+            hash += ((PublicKey == null) ? 0 : PublicKey.GetHashCode());
 
-            result = prime * result + ((PrivateKey == null) ? 0 : PrivateKey.GetHashCode());
-            result = prime * result + ((PublicKey == null) ? 0 : PublicKey.GetHashCode());
-
-            return result;
+            return hash;
         }
 
         /// <summary>

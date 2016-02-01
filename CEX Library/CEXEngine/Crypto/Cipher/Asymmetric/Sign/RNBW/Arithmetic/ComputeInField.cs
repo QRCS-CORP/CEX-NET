@@ -1,7 +1,7 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmetic
@@ -51,7 +51,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
             if (M1.Length != M2.Length || M1[0].Length != M2[0].Length)
                 throw new CryptoAsymmetricSignException("ComputeInField:AddSquareMatrix", "Addition is not possible!", new ArgumentException());
 
-            short[][] rslt = ArrayEx.CreateJagged<short[][]>(M1.Length, M1.Length);
+            short[][] rslt = ArrayUtils.CreateJagged<short[][]>(M1.Length, M1.Length);
 
             for (int i = 0; i < M1.Length; i++)
             {
@@ -102,7 +102,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
                 short factor;
                 short[][] inverse;
 
-                _A = ArrayEx.CreateJagged<short[][]>(Coef.Length, 2 * Coef.Length);
+                _A = ArrayUtils.CreateJagged<short[][]>(Coef.Length, 2 * Coef.Length);
 
                 if (Coef.Length != Coef[0].Length)
                     throw new CryptoAsymmetricSignException("ComputeInField:Inverse", "The matrix is not invertible!", new ArgumentException());
@@ -136,7 +136,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
                 ComputeZerosAbove();
 
                 // copy the result (the second half of A) in the matrix inverse
-                inverse = ArrayEx.CreateJagged<short[][]>(_A.Length, _A.Length);
+                inverse = ArrayUtils.CreateJagged<short[][]>(_A.Length, _A.Length);
 
                 for (int i = 0; i < _A.Length; i++)
                 {
@@ -172,7 +172,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
                 throw new CryptoAsymmetricSignException("ComputeInField:MultiplyMatrix", "Multiplication is not possible!", new ArgumentException());
             
             short tmp = 0;
-            _A = ArrayEx.CreateJagged<short[][]>(M1.Length, M2[0].Length);
+            _A = ArrayUtils.CreateJagged<short[][]>(M1.Length, M2[0].Length);
 
             for (int i = 0; i < M1.Length; i++)
             {
@@ -229,7 +229,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
         /// <returns>Returns matrix multiplied with scalar</returns>
         public short[][] MultMatrix(short Scalar, short[][] Matrix)
         {
-            short[][] res = ArrayEx.CreateJagged<short[][]>(Matrix.Length, Matrix[0].Length);
+            short[][] res = ArrayUtils.CreateJagged<short[][]>(Matrix.Length, Matrix[0].Length);
 
             for (int i = 0; i < Matrix.Length; i++)
             {
@@ -273,7 +273,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
             if (V1.Length != V2.Length)
                 throw new CryptoAsymmetricSignException("ComputeInField:MultVects", "Multiplication is not possible!", new ArgumentException());
 
-            short[][] rslt = ArrayEx.CreateJagged<short[][]>(V1.Length, V2.Length);
+            short[][] rslt = ArrayUtils.CreateJagged<short[][]>(V1.Length, V2.Length);
 
             for (int i = 0; i < V1.Length; i++)
             {
@@ -303,7 +303,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
 
                 // initialize this matrix stores B and b from the equation B*x = b, b is stored as the last column.
                 // B contains one column more than rows, In this column we store a free coefficient that should be later subtracted from b
-                _A = ArrayEx.CreateJagged<short[][]>(B.Length, B.Length + 1);
+                _A = ArrayUtils.CreateJagged<short[][]>(B.Length, B.Length + 1);
                 // stores the solution of the LES
                 _X = new short[B.Length];
 

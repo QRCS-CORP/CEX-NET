@@ -4,6 +4,7 @@ using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmetic
@@ -133,9 +134,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
             _OI = ViNext - Vi;
 
             // the coefficients of all polynomials in this layer  
-            _coeffAlpha = ArrayEx.CreateJagged<short[][][]>(_OI, _OI, _VI);
-            _coeffBeta = ArrayEx.CreateJagged<short[][][]>(_OI, _VI, _VI);
-            _coeffGamma = ArrayEx.CreateJagged<short[][]>(_OI, _viNext);
+            _coeffAlpha = ArrayUtils.CreateJagged<short[][][]>(_OI, _OI, _VI);
+            _coeffBeta = ArrayUtils.CreateJagged<short[][][]>(_OI, _VI, _VI);
+            _coeffGamma = ArrayUtils.CreateJagged<short[][]>(_OI, _viNext);
             _coeffEta = new short[_OI];
 
             int numOfPoly = _OI; // number of polynomials per layer
@@ -192,19 +193,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _coeffAlpha = ArrayEx.ToArray3x16(data);
+                _coeffAlpha = ArrayUtils.ToArray3x16(data);
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _coeffBeta = ArrayEx.ToArray3x16(data);
+                _coeffBeta = ArrayUtils.ToArray3x16(data);
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _coeffGamma = ArrayEx.ToArray2x16(data);
+                _coeffGamma = ArrayUtils.ToArray2x16(data);
 
                 len = reader.ReadInt32();
                 data = reader.ReadBytes(len);
-                _coeffEta = ArrayEx.ToArray16(data);
+                _coeffEta = ArrayUtils.ToArray16(data);
                 
             }
             catch (IOException ex)
@@ -250,7 +251,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
             // temporary variable needed for the multiplication
             short tmpMult = 0;
             // coeff: 1st index = which polynomial, 2nd index=which variable
-            short[][] coeff = ArrayEx.CreateJagged<short[][]>(_OI, _OI + 1);
+            short[][] coeff = ArrayUtils.CreateJagged<short[][]>(_OI, _OI + 1);
             // free coefficient per polynomial
             short[] sum = new short[_OI];
 
@@ -371,19 +372,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
             writer.Write(_VI);
             writer.Write(_viNext);
 
-            data = ArrayEx.ToBytes(_coeffAlpha);
+            data = ArrayUtils.ToBytes(_coeffAlpha);
             writer.Write(data.Length);
             writer.Write(data);
 
-            data = ArrayEx.ToBytes(_coeffBeta);
+            data = ArrayUtils.ToBytes(_coeffBeta);
             writer.Write(data.Length);
             writer.Write(data);
 
-            data = ArrayEx.ToBytes(_coeffGamma);
+            data = ArrayUtils.ToBytes(_coeffGamma);
             writer.Write(data.Length);
             writer.Write(data);
 
-            data = ArrayEx.ToBytes(_coeffEta);
+            data = ArrayUtils.ToBytes(_coeffEta);
             writer.Write(data.Length);
             writer.Write(data);
 
@@ -426,13 +427,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
         /// <returns>The hash code</returns>
         public override int GetHashCode()
         {
-            int hash = _VI;
-            hash = hash * 37 + _viNext;
-            hash = hash * 37 + _OI;
-            hash = hash * 37 + _coeffAlpha.GetHashCode();
-            hash = hash * 37 + _coeffBeta.GetHashCode();
-            hash = hash * 37 + _coeffGamma.GetHashCode();
-            hash = hash * 37 + _coeffEta.GetHashCode();
+            int hash = 31 * _VI;
+            hash += 31 * _viNext;
+            hash += 31 * _OI;
+            hash += ArrayUtils.GetHashCode(_coeffAlpha);
+            hash += ArrayUtils.GetHashCode(_coeffBeta);
+            hash += ArrayUtils.GetHashCode(_coeffGamma);
+            hash += ArrayUtils.GetHashCode(_coeffEta);
 
             return hash;
         }

@@ -6,6 +6,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.CryptoException;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 #region License Information
@@ -355,39 +356,33 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int result = 1;
+            int hash = ArrayUtils.GetHashCode(OId);
+            hash += ArrayUtils.GetHashCode(AuthPkeId);
+            hash += ArrayUtils.GetHashCode(PrimaryPkeId);
+            hash += 31 * PrimarySession.EngineType;
+            hash += 31 * PrimarySession.IvSize;
+            hash += 31 * PrimarySession.KdfEngine;
+            hash += 31 * PrimarySession.KeySize;
+            hash += 31 * PrimarySession.RoundCount;
+            hash += 31 * AuthSession.EngineType;
+            hash += 31 * AuthSession.IvSize;
+            hash += 31 * AuthSession.KdfEngine;
+            hash += 31 * AuthSession.KeySize;
+            hash += 31 * AuthSession.RoundCount;
+            hash += 31 * (int)RandomEngine;
+            hash += 31 * MaxAsmKeyAppend;
+            hash += 31 * MaxAsmKeyPrePend;
+            hash += 31 * MaxAsmParamsAppend;
+            hash += 31 * MaxAsmParamsPrePend;
+            hash += 31 * MaxSymKeyAppend;
+            hash += 31 * MaxSymKeyPrePend;
+            hash += 31 * MaxMessageAppend;
+            hash += 31 * MaxMessagePrePend;
+            hash += 31 * MaxAsmKeyDelayMS;
+            hash += 31 * MaxSymKeyDelayMS;
+            hash += 31 * MaxMessageDelayMS;
 
-            for (int i = 0; i < OId.Length; i++)
-                result += 31 * OId[i];
-            for (int i = 0; i < AuthPkeId.Length; i++)
-                result += 31 * AuthPkeId[i];
-            for (int i = 0; i < PrimaryPkeId.Length; i++)
-                result += 31 * PrimaryPkeId[i];
-
-            result += 31 * PrimarySession.EngineType;
-            result += 31 * PrimarySession.IvSize;
-            result += 31 * PrimarySession.KdfEngine;
-            result += 31 * PrimarySession.KeySize;
-            result += 31 * PrimarySession.RoundCount;
-            result += 31 * AuthSession.EngineType;
-            result += 31 * AuthSession.IvSize;
-            result += 31 * AuthSession.KdfEngine;
-            result += 31 * AuthSession.KeySize;
-            result += 31 * AuthSession.RoundCount;
-            result += 31 * (int)RandomEngine;
-            result += 31 * MaxAsmKeyAppend;
-            result += 31 * MaxAsmKeyPrePend;
-            result += 31 * MaxAsmParamsAppend;
-            result += 31 * MaxAsmParamsPrePend;
-            result += 31 * MaxSymKeyAppend;
-            result += 31 * MaxSymKeyPrePend;
-            result += 31 * MaxMessageAppend;
-            result += 31 * MaxMessagePrePend;
-            result += 31 * MaxAsmKeyDelayMS;
-            result += 31 * MaxSymKeyDelayMS;
-            result += 31 * MaxMessageDelayMS;
-
-            return result;
+            return hash;
         }
 
         /// <summary>

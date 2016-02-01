@@ -284,7 +284,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         public override int GetHashCode()
         {
             int hash = N * 31;
-            hash += R2.GetHashCode();
+            hash += Utility.ArrayUtils.GetHashCode(R2);
 
             return hash;
         }

@@ -11,6 +11,8 @@ namespace VTDev.Libraries.CEXEngine.Utility
     /// </summary>
     public static class ArrayUtils
     {
+        private const int PRIME = 31;
+
         #region AddAt
         /// <summary>
         /// Add a new value member to an array
@@ -505,6 +507,508 @@ namespace VTDev.Libraries.CEXEngine.Utility
                 offset += array.Length;
             }
             return rv;
+        }
+        #endregion
+
+        #region GetHashCode
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        public static int GetHashCode(byte[] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+                code += PRIME * Source[i];
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        [CLSCompliant(false)]
+        public static int GetHashCode(byte[][] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+            {
+                if (Source[i] != null)
+                {
+                    for (int j = 0; j < Source[i].Length; ++j)
+                        code += PRIME * Source[i][j];
+                }
+            }
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        [CLSCompliant(false)]
+        public static int GetHashCode(byte[][][] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+            {
+                if (Source[i] != null)
+                {
+                    for (int j = 0; j < Source[i].Length; ++j)
+                    {
+                        if (Source[i][j] != null)
+                        {
+                            for (int k = 0; k < Source[i][j].Length; ++k)
+                                code += PRIME * Source[i][j][k];
+                        }
+                    }
+                }
+            }
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        public static int GetHashCode(short[] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+                code += PRIME * Source[i];
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        [CLSCompliant(false)]
+        public static int GetHashCode(short[][] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+            {
+                if (Source[i] != null)
+                {
+                    for (int j = 0; j < Source[i].Length; ++j)
+                        code += PRIME * Source[i][j];
+                }
+            }
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        [CLSCompliant(false)]
+        public static int GetHashCode(short[][][] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+            {
+                if (Source[i] != null)
+                {
+                    for (int j = 0; j < Source[i].Length; ++j)
+                    {
+                        if (Source[i][j] != null)
+                        {
+                            for (int k = 0; k < Source[i][j].Length; ++k)
+                                code += PRIME * Source[i][j][k];
+                        }
+                    }
+                }
+            }
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        [CLSCompliant(false)]
+        public static int GetHashCode(ushort[] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+                code += PRIME * Source[i];
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        [CLSCompliant(false)]
+        public static int GetHashCode(ushort[][] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+            {
+                if (Source[i] != null)
+                {
+                    for (int j = 0; j < Source[i].Length; ++j)
+                        code += PRIME * Source[i][j];
+                }
+            }
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        [CLSCompliant(false)]
+        public static int GetHashCode(ushort[][][] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+            {
+                if (Source[i] != null)
+                {
+                    for (int j = 0; j < Source[i].Length; ++j)
+                    {
+                        if (Source[i][j] != null)
+                        {
+                            for (int k = 0; k < Source[i][j].Length; ++k)
+                                code += PRIME * Source[i][j][k];
+                        }
+                    }
+                }
+            }
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        public static int GetHashCode(int[] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+                code += PRIME * Source[i];
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        [CLSCompliant(false)]
+        public static int GetHashCode(int[][] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+            {
+                if (Source[i] != null)
+                {
+                    for (int j = 0; j < Source[i].Length; ++j)
+                        code += PRIME * Source[i][j];
+                }
+            }
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        [CLSCompliant(false)]
+        public static int GetHashCode(int[][][] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+            {
+                if (Source[i] != null)
+                {
+                    for (int j = 0; j < Source[i].Length; ++j)
+                    {
+                        if (Source[i][j] != null)
+                        {
+                            for (int k = 0; k < Source[i][j].Length; ++k)
+                                code += PRIME * Source[i][j][k];
+                        }
+                    }
+                }
+            }
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        [CLSCompliant(false)]
+        public static int GetHashCode(uint[] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+                code += PRIME * (int)Source[i];
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        [CLSCompliant(false)]
+        public static int GetHashCode(uint[][] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+            {
+                if (Source[i] != null)
+                {
+                    for (int j = 0; j < Source[i].Length; ++j)
+                        code += PRIME * (int)Source[i][j];
+                }
+            }
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        [CLSCompliant(false)]
+        public static int GetHashCode(uint[][][] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+            {
+                if (Source[i] != null)
+                {
+                    for (int j = 0; j < Source[i].Length; ++j)
+                    {
+                        if (Source[i][j] != null)
+                        {
+                            for (int k = 0; k < Source[i][j].Length; ++k)
+                                code += PRIME * (int)Source[i][j][k];
+                        }
+                    }
+                }
+            }
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        public static int GetHashCode(long[] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int hash = 31;
+            for (int i = 0; i < Source.Length; ++i)
+                hash += (int)Source[i];
+            return hash;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        [CLSCompliant(false)]
+        public static int GetHashCode(long[][] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+            {
+                if (Source[i] != null)
+                {
+                    for (int j = 0; j < Source[i].Length; ++j)
+                        code += PRIME * (int)Source[i][j];
+                }
+            }
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        [CLSCompliant(false)]
+        public static int GetHashCode(long[][][] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+            {
+                if (Source[i] != null)
+                {
+                    for (int j = 0; j < Source[i].Length; ++j)
+                    {
+                        if (Source[i][j] != null)
+                        {
+                            for (int k = 0; k < Source[i][j].Length; ++k)
+                                code += PRIME * (int)Source[i][j][k];
+                        }
+                    }
+                }
+            }
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        [CLSCompliant(false)]
+        public static int GetHashCode(ulong[] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+                code += PRIME * (int)Source[i];
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        [CLSCompliant(false)]
+        public static int GetHashCode(ulong[][] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+            {
+                if (Source[i] != null)
+                {
+                    for (int j = 0; j < Source[i].Length; ++j)
+                        code += PRIME * (int)Source[i][j];
+                }
+            }
+            return code;
+        }
+
+        /// <summary>
+        /// Get the hash code from an array
+        /// </summary>
+        /// <param name="Source">The Source array</param>
+        /// <returns>The hash code</returns>
+        [CLSCompliant(false)]
+        public static int GetHashCode(ulong[][][] Source)
+        {
+            if (Source == null)
+                return 0;
+            if (Source.Length == 0)
+                return -1;
+            int code = 1;
+            for (int i = 0; i < Source.Length; ++i)
+            {
+                if (Source[i] != null)
+                {
+                    for (int j = 0; j < Source[i].Length; ++j)
+                    {
+                        if (Source[i][j] != null)
+                        {
+                            for (int k = 0; k < Source[i][j].Length; ++k)
+                                code += PRIME * (int)Source[i][j][k];
+                        }
+                    }
+                }
+            }
+            return code;
         }
         #endregion
 

@@ -232,7 +232,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         {
             // dimension = n-v1 = vi[last] - vi[first]
             int dim = _VI[_VI.Length - 1] - _VI[0];
-            _A1 = ArrayEx.CreateJagged<short[][]>(dim, dim);
+            _A1 = ArrayUtils.CreateJagged<short[][]>(dim, dim);
             _A1Inv = null;
             using (ComputeInField cif = new ComputeInField())
             {
@@ -264,7 +264,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         {
             // dimension = n = vi[last]
             int dim = _VI[_VI.Length - 1];
-            _A2 = ArrayEx.CreateJagged<short[][]>(dim, dim);
+            _A2 = ArrayUtils.CreateJagged<short[][]>(dim, dim);
             _A2Inv = null;
 
             using (ComputeInField cif = new ComputeInField())
@@ -310,8 +310,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
             int rows = _VI[_VI.Length - 1] - _VI[0];
             int vars = _VI[_VI.Length - 1];
             // Fpub
-            short[][][] coeffQuadratic3d = ArrayEx.CreateJagged<short[][][]>(rows, vars, vars);
-            _pubSingular = ArrayEx.CreateJagged<short[][]>(rows, vars);
+            short[][][] coeffQuadratic3d = ArrayUtils.CreateJagged<short[][][]>(rows, vars, vars);
+            _pubSingular = ArrayUtils.CreateJagged<short[][]>(rows, vars);
             _pubScalar = new short[rows];
             // Coefficients of layers of Private Key F
             short[][][] coeffAlpha;
@@ -400,8 +400,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
             // Apply L1 = A1*x+b1 to composition of F and L2
             // temporary coefficient arrays
-            short[][][] tmpQuad = ArrayEx.CreateJagged<short[][][]>(rows, vars, vars);
-            short[][] tmpSing = ArrayEx.CreateJagged<short[][]>(rows, vars);
+            short[][][] tmpQuad = ArrayUtils.CreateJagged<short[][][]>(rows, vars, vars);
+            short[][] tmpSing = ArrayUtils.CreateJagged<short[][]>(rows, vars);
             short[] tmpScal = new short[rows];
 
             for (int r = 0; r < rows; r++)
@@ -438,7 +438,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
             int polynomials = Quadratic.Length;
             int n = Quadratic[0].Length;
             int entries = n * (n + 1) / 2;// the small gauss
-            _pubQuadratic = ArrayEx.CreateJagged<short[][]>(polynomials, entries);
+            _pubQuadratic = ArrayUtils.CreateJagged<short[][]>(polynomials, entries);
             int offset = 0;
 
             for (int p = 0; p < polynomials; p++)

@@ -77,16 +77,22 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
             NTRUParameters param2 = (NTRUParameters)param.DeepCopy();
             if (!Evaluate.Equals(param, param2))
                 throw new Exception("NtruParameters: cloned copy is not equal!");
+            if (param.GetHashCode() != param.GetHashCode())
+                throw new Exception("Parameters: parameters hash test failed!");
 
             param = NTRUParamSets.APR2011439FAST;
             param2 = (NTRUParameters)param.DeepCopy();
 
             if (!Evaluate.Equals(param, param2)) 
                 throw new Exception("NtruParameters: cloned copy is not equal!");
+            if (param.GetHashCode() != param.GetHashCode())
+                throw new Exception("Parameters: parameters hash test failed!");
 
             param2.Digest = Digests.Blake512;
             if (Evaluate.Equals(param, param2))
                 throw new Exception("NtruParameters: cloned copy is not equal!");
+            if (param.GetHashCode() != param.GetHashCode())
+                throw new Exception("Parameters: parameters hash test failed!");
         }
         #endregion
     }

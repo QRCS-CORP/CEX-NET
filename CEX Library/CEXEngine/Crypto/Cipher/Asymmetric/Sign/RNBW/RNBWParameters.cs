@@ -198,7 +198,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
                 len = reader.ReadInt32();
                 _VI = new int[len];
                 data = reader.ReadBytes(len * 4);
-                _VI = ArrayEx.ToArray32(data);
+                _VI = ArrayUtils.ToArray32(data);
             }
             catch (Exception ex)
             {
@@ -276,7 +276,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
             writer.Write((int)_rndEngine);
             writer.Write(_oId);
             writer.Write(_VI.Length);
-            byte[] data = ArrayEx.ToBytes(_VI);
+            byte[] data = ArrayUtils.ToBytes(_VI);
             writer.Write(data);
             writer.Seek(0, SeekOrigin.Begin);
 
@@ -357,14 +357,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int result = 1;
-
-            for (int i = 0; i < _VI.Length; i++)
-                result += 31 * _VI[i];
-
-            result += 31 * (int)_rndEngine;
-
-            return result;
+            int  hash = ArrayUtils.GetHashCode(_VI);
+            hash += 31 * (int)_rndEngine;
+            return hash;
         }
 
         /// <summary>

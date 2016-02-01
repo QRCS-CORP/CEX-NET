@@ -1002,7 +1002,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         }
 
         /// <summary>
-        /// Executes the client portion the key exchange
+        /// Executes the client portion of the key exchange
         /// </summary>
         private void ClientExchange()
         {
@@ -2102,7 +2102,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             KeyParams fileKey = GenerateSymmetricKey(_srvIdentity.Session);
             MemoryStream keyStrm = (MemoryStream)KeyParams.Serialize(fileKey);
             // add the key
-            btInfo = ArrayEx.Concat(btInfo, keyStrm.ToArray());
+            btInfo = ArrayUtils.Concat(btInfo, keyStrm.ToArray());
 
             // wrap the request
             btInfo = WrapMessage(btInfo, _dtmParameters.MaxMessageAppend, _dtmParameters.MaxMessagePrePend);
@@ -3187,7 +3187,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             id = UnwrapMessage(id);
 
             // compare to stored id
-            if (!ArrayEx.AreEqual(id, _cltIdentity.Identity))
+            if (!ArrayUtils.AreEqual(id, _cltIdentity.Identity))
             {
                 // resync failed, abort connection
                 DtmErrorArgs args = new DtmErrorArgs(new InvalidDataException("The data stream could not be resynced, connection aborted!"), DtmErrorSeverityFlags.Critical);
@@ -3585,10 +3585,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         {
             int len = 0;
             if ((len = ContainsDelimiter(Message, PREDELIM)) > 0)
-                ArrayEx.RemoveRange(ref Message, 0, len + (PREDELIM.Length - 1));
+                ArrayUtils.RemoveRange(ref Message, 0, len + (PREDELIM.Length - 1));
 
             if ((len = ContainsDelimiter(Message, POSTDELIM)) > 0)
-                ArrayEx.RemoveRange(ref Message, len, Message.Length - 1);
+                ArrayUtils.RemoveRange(ref Message, len, Message.Length - 1);
 
             return Message;
         }
@@ -3652,16 +3652,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
 
                 if (ppl > 0 && apl > 0)
                 {
-                    byte[][] rds = ArrayEx.Split(rand, ppl);
-                    Message = ArrayEx.Concat(rds[0], PREDELIM, Message, POSTDELIM, rds[1]);
+                    byte[][] rds = ArrayUtils.Split(rand, ppl);
+                    Message = ArrayUtils.Concat(rds[0], PREDELIM, Message, POSTDELIM, rds[1]);
                 }
                 else if (apl > 0)
                 {
-                    Message = ArrayEx.Concat(Message, POSTDELIM, rand);
+                    Message = ArrayUtils.Concat(Message, POSTDELIM, rand);
                 }
                 else if (ppl > 0)
                 {
-                    Message = ArrayEx.Concat(rand, PREDELIM, Message);
+                    Message = ArrayUtils.Concat(rand, PREDELIM, Message);
                 }
             }
 

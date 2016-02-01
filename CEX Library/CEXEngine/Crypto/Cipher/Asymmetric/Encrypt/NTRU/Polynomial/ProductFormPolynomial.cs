@@ -28,9 +28,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <param name="F3">F3 polynomial</param>
         public ProductFormPolynomial(SparseTernaryPolynomial F1, SparseTernaryPolynomial F2, SparseTernaryPolynomial F3)
         {
-            this._f1 = F1;
-            this._f2 = F2;
-            this._f3 = F3;
+            _f1 = F1;
+            _f2 = F2;
+            _f3 = F3;
         }
         #endregion
 
@@ -204,13 +204,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int prime = 31;
-            int result = 1;
-            result = prime * result + ((_f1 == null) ? 0 : _f1.GetHashCode());
-            result = prime * result + ((_f2 == null) ? 0 : _f2.GetHashCode());
-            result = prime * result + ((_f3 == null) ? 0 : _f3.GetHashCode());
+            int hash = ((_f1 == null) ? 0 : _f1.GetHashCode());
+            hash += ((_f2 == null) ? 0 : _f2.GetHashCode());
+            hash += ((_f3 == null) ? 0 : _f3.GetHashCode());
 
-            return result;
+            return hash;
         }
 
         /// <summary>

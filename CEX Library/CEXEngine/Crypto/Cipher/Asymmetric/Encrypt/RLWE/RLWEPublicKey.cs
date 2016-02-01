@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
 using VTDev.Libraries.CEXEngine.CryptoException;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 #region License Information
@@ -307,11 +308,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <returns>The hash code</returns>
         public override int GetHashCode()
         {
-            int code = N * 31;
-            code += A.GetHashCode() * 31;
-            code += P.GetHashCode() * 31;
+            int hash = N * 31;
+            hash += ArrayUtils.GetHashCode(A);
+            hash += ArrayUtils.GetHashCode(P);
 
-            return code;
+            return hash;
         }
         #endregion
 

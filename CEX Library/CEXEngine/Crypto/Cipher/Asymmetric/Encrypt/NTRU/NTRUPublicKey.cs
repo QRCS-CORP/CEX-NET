@@ -183,7 +183,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <returns>The encoded NTRUPublicKey</returns>
         public byte[] ToBytes()
         {
-            return ArrayEx.Concat(ArrayEncoder.ToByteArray(N), ArrayEncoder.ToByteArray(Q), H.ToBinary(Q));
+            return ArrayUtils.Concat(ArrayEncoder.ToByteArray(N), ArrayEncoder.ToByteArray(Q), H.ToBinary(Q));
         }
 
         /// <summary>
@@ -254,14 +254,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int prime = 31;
-            int result = 1;
+            int hash = 31 * N;
+            hash += ((H == null) ? 0 : H.GetHashCode());
+            hash += 31 * Q;
 
-            result = prime * result + N;
-            result = prime * result + ((H == null) ? 0 : H.GetHashCode());
-            result = prime * result + Q;
-
-            return result;
+            return hash;
         }
 
         /// <summary>

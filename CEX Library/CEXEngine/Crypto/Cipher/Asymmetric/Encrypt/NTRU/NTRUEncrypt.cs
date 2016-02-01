@@ -638,7 +638,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
                     writer.SetLength(0);
                     writer.SetLength(hashLen);
                     // get the hash
-                    byte[] hash = _dgtEngine.ComputeHash(ArrayEx.Concat(Z, IntUtils.IntToBytes(counter)));
+                    byte[] hash = _dgtEngine.ComputeHash(ArrayUtils.Concat(Z, IntUtils.IntToBytes(counter)));
                     writer.Write(hash, 0, hash.Length);
                     counter++;
                 }

@@ -358,8 +358,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The hash code</returns>
         public override int GetHashCode()
         {
-            const int prime = 31;
-            return _polynomial ^ prime + _degree ^ prime;
+            return _polynomial * 31 + _degree * 31;
         }
 
         /// <summary>

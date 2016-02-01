@@ -7,6 +7,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.CryptoException;
 using VTDev.Libraries.CEXEngine.Tools;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
@@ -821,37 +822,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int code = 31;
+            int hash = 31 * (int)KeyPolicy;
+            hash += 31 * (int)CreatedOn;
+            hash += 31 * SubKeyCount;
+            hash += Authority.GetHashCode();
+            hash += Description.GetHashCode();
+            hash += ArrayUtils.GetHashCode(ExtensionKey);
+            hash += ArrayUtils.GetHashCode(SubKeyPolicy);
+            hash += ArrayUtils.GetHashCode(SubKeyID);
 
-            code *= (int)KeyPolicy;
-            code *= (int)CreatedOn;
-            code *= SubKeyCount;
-            code *= Authority.GetHashCode();
-            code += 31 * Description.GetHashCode();
-
-            if (ExtensionKey.Length != 0)
-            {
-                for (int i = 0; i < ExtensionKey.Length; ++i)
-                    code *= ExtensionKey[i];
-            }
-            if (SubKeyPolicy.Length != 0)
-            {
-                for (int i = 0; i < SubKeyPolicy.Length; ++i)
-                    code *= (int)SubKeyPolicy[i];
-            }
-            if (SubKeyID.Length != 0)
-            {
-                for (int i = 0; i < SubKeyID[i].Length; ++i)
-                {
-                    if (SubKeyID[i].Length != 0)
-                    {
-                        for (int j = 0; j < SubKeyID[i].Length; ++j)
-                            code *= SubKeyID[i][j];
-                    }
-                }
-            }
-
-            return code;
+            return hash;
         }
 
         /// <summary>
