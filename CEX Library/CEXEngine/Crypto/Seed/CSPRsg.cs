@@ -40,7 +40,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 {
     /// <summary>
     /// CSPRsg: An implementation of a Cryptographically Secure seed generator using the RNGCryptoServiceProvider class.
-    /// <para>Implements a random byte generator using the RNGCryptoServiceProvider<cite>RNGCryptoServiceProvider</cite> class.</para>
+    /// <para>Implements a random byte generator using the RNGCryptoServiceProvider: <see href="http://msdn.microsoft.com/en-us/library/system.security.cryptography.rngcryptoserviceprovider.aspx"/> class.</para>
     /// </summary>
     /// 
     /// <example>
@@ -58,10 +58,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
     /// <remarks>
     /// <description><h4>Guiding Publications:</h4>:</description>
     /// <list type="number">
-    /// <item><description>RNGCryptoServiceProvider<cite>RNGCryptoServiceProvider</cite> class documentation.</description></item>
-    /// <item><description>NIST SP800-90B: <cite>SP800-90B</cite>Recommendation for the Entropy Sources Used for Random Bit Generation.</description></item>
-    /// <item><description>NIST Fips 140-2: <cite>Fips 140-2</cite>Security Requirments For Cryptographic Modules.</description></item>
-    /// <item><description>RFC 4086: <cite>RFC 4086</cite>Randomness Requirements for Security.</description></item>
+    /// <item><description>RNGCryptoServiceProvider: <see href="http://msdn.microsoft.com/en-us/library/system.security.cryptography.rngcryptoserviceprovider.aspx"/> class documentation.</description></item>
+    /// <item><description>NIST SP800-90B: : <see href="http://csrc.nist.gov/publications/drafts/800-90/draft-sp800-90b.pdf"/>Recommendation for the Entropy Sources Used for Random Bit Generation.</description></item>
+    /// <item><description>NIST Fips 140-2: : <see href="http://csrc.nist.gov/publications/fips/fips140-2/fips1402.pdf"/>Security Requirments For Cryptographic Modules.</description></item>
+    /// <item><description>RFC 4086: : <see href="http://www.ietf.org/rfc/rfc4086.txt"/>, Randomness Requirements for Security.</description></item>
     /// </list> 
     /// </remarks>
     public sealed class CSPRsg : ISeed

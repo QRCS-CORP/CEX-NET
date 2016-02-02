@@ -41,7 +41,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 {
     /// <summary>
     /// CBC: Implements a Cipher Block Chaining Mode: CBC.
-    /// <para>CBC as outlined in the NIST document: SP800-38A<cite>SP800-38A</cite></para>
+    /// <para>CBC as outlined in the NIST document: SP800-38A: <see href="http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf"/></para>
     /// </summary> 
     /// 
     /// <example>

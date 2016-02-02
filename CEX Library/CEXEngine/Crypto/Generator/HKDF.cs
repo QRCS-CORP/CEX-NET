@@ -49,7 +49,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 {
     /// <summary>
     /// HKDF: An implementation of an Hash based Key Derivation Function.
-    /// <para>HKDF as outlined in RFC 5869<cite>RFC 5869</cite></para>
+    /// <para>HKDF as outlined in RFC 5869: <see href="http://tools.ietf.org/html/rfc5869"/></para>
     /// </summary> 
     /// 
     /// <example>

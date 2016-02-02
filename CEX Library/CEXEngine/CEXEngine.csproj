@@ -383,11 +383,6 @@
     <Content Include="license.txt" />
     <Content Include="Patents.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="bibliography.xml">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

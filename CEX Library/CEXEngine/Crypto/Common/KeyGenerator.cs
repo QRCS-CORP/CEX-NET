@@ -47,10 +47,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
     /// <description><h4>Implementation Notes:</h4></description>
     /// <list type="bullet">
     /// <item><description>SHA-2 Generates key material using a two stage Hmac_k(Prng()) process.</description></item>
-    /// <item><description>Blake<cite>Blake</cite>, Keccak<cite>Keccak</cite>, and Skein<cite>Skein</cite> also use a two stage generation method; Hash(Prng()).</description></item>
+    /// <item><description>Blake: <see href="https://131002.net/blake/blake.pdf"/>, : <see href="http://keccak.noekeon.org/Keccak-submission-3.pdf"/>, and Skein: <see href="http://www.skein-hash.info/sites/default/files/skein1.1.pdf"/> also use a two stage generation method; Hash(Prng()).</description></item>
     /// <item><description>Seed Generator can be any of the <see cref="SeedGenerators"/>.</description></item>
     /// <item><description>Hash can be any of the <see cref="Digests"/> digests.</description></item>
-    /// <item><description>Default Seed Generator is CSPRsg<cite>RNGCryptoServiceProvider</cite>, default digest is SHA512.</description></item>
+    /// <item><description>Default Seed Generator is CSPRsg: <see href="http://msdn.microsoft.com/en-us/library/system.security.cryptography.rngcryptoserviceprovider.aspx"/>, default digest is SHA512.</description></item>
     /// <item><description>Resources are disposed of automatically.</description></item>
     /// </list>
     /// </remarks>

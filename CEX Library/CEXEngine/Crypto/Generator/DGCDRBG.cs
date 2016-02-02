@@ -43,7 +43,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 {
     /// <summary>
     /// DGTDRBG: An implementation of a Digest Counter based Deterministic Random Byte Generator.
-    /// <para>A Digest Counter DRBG as outlined in NIST document: SP800-90A<cite>SP800-90A</cite></para>
+    /// <para>A Digest Counter DRBG as outlined in NIST document: SP800-90A: <see href="http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90Ar1.pdf"/></para>
     /// </summary> 
     /// 
     /// <example>

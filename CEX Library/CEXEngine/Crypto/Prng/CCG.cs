@@ -39,7 +39,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 {
     /// <summary>
     /// CCG: An implementation of the Cubic Congruential Generator II random number generator: CCG
-    /// <para>Implements CCG as defined in the NIST document: SP800-22 1a<cite>SP800-22A</cite>, Section D.4</para>
+    /// <para>Implements CCG as defined in the NIST document: SP800-22 1a: <see href="http://csrc.nist.gov/groups/ST/toolkit/rng/documents/SP800-22rev1a.pdf"/>, Section D.4</para>
     /// </summary>
     /// 
     /// <example>
@@ -59,9 +59,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
     /// <description><h4>Guiding Publications:</h4></description>
     /// <list type="number">
     /// <item><description>NIST SP800-22 1a, Section D.3: A Statistical Test Suite for Random and Pseudorandom Number Generators for Cryptographic Applications.</description></item>
-    /// <item><description>NIST SP800-90B: <cite>SP800-90B</cite>Recommendation for the Entropy Sources Used for Random Bit Generation.</description></item>
-    /// <item><description>NIST Fips 140-2: <cite>Fips 140-2</cite>Security Requirments For Cryptographic Modules.</description></item>
-    /// <item><description>RFC 4086: <cite>RFC 4086</cite>Randomness Requirements for Security.</description></item>
+    /// <item><description>NIST SP800-90B: : <see href="http://csrc.nist.gov/publications/drafts/800-90/draft-sp800-90b.pdf"/>Recommendation for the Entropy Sources Used for Random Bit Generation.</description></item>
+    /// <item><description>NIST Fips 140-2: : <see href="http://csrc.nist.gov/publications/fips/fips140-2/fips1402.pdf"/>Security Requirments For Cryptographic Modules.</description></item>
+    /// <item><description>RFC 4086: : <see href="http://www.ietf.org/rfc/rfc4086.txt"/>, Randomness Requirements for Security.</description></item>
     /// </list> 
     /// 
     /// <description><h4>Code Base Guides:</h4></description>

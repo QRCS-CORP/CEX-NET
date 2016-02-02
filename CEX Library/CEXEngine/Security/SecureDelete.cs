@@ -45,7 +45,7 @@ namespace VTDev.Libraries.CEXEngine.Security
     /// <remarks>
     /// <description><h4>Guiding Publications:</h4></description>
     /// <list type="number">
-    /// <item><description>NIST SP800-88R1<cite>SP800-88R1</cite>: Table A-5 clear and purge on an ATA drive.</description></item>
+    /// <item><description>NIST SP800-88R1: <see href="http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-88r1.pdf"/>, Table A-5 clear and purge on an ATA drive.</description></item>
     /// </list> 
     /// </remarks>
     public sealed class SecureDelete : IDisposable

@@ -15,8 +15,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Arithm
     /// <remarks>
     /// <description><h4>Guiding Publications:</h4></description>
     /// <list type="number">
-    /// <item><description>Arnold Schönhage und Volker Strassen: Schnelle Multiplikation großer Zahlen<cite>Schnelle Multiplikation großer Zahlen</cite>.</description></item>
-    /// <item><description>Eine verstandliche Beschreibung des Schonhage-Strassen-Algorithmus<cite>Eine verstandliche Beschreibung des Schonhage-Strassen-Algorithmus</cite>.</description></item>
+    /// <item><description>Arnold Schönhage und Volker Strassen: Schnelle Multiplikation großer Zahlen: <see href="http://www.scribd.com/doc/68857222/Schnelle-Multiplikation-gro%C3%9Fer-Zahlen"/>.</description></item>
+    /// <item><description>Eine verstandliche Beschreibung des Schonhage-Strassen-Algorithmus: <see href="http://malte-leip.net/beschreibung_ssa.pdf"/>.</description></item>
     /// </list>
     /// 
     /// Numbers are internally represented as <c>int</c> arrays; the <c>int</c>s are interpreted as unsigned numbers.

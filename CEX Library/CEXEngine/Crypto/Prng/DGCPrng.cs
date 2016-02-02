@@ -10,7 +10,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 {
     /// <summary>
     /// DGCPrng: An implementation of a Digest Counter based Random Number Generator.
-    /// <para>Uses a Digest Counter DRBG as outlined in NIST document: SP800-90A<cite>SP800-90A</cite></para>
+    /// <para>Uses a Digest Counter DRBG as outlined in NIST document: SP800-90A: <see href="http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90Ar1.pdf"/></para>
     /// </summary> 
     /// 
     /// <example>

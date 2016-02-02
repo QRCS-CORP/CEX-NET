@@ -39,8 +39,8 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 {
     /// <summary>
-    /// HMAC: An implementation of a Hash based Message Authentication Code: HMAC<cite>Fips 198-1</cite>.
-    /// <para>A HMAC as outlined in the NIST document: Fips 198-1<cite>Fips 198-1</cite></para>
+    /// HMAC: An implementation of a Hash based Message Authentication Code: HMAC: <see href="http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf"/>.
+    /// <para>A HMAC as outlined in the NIST document: Fips 198-1: <see href="http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf"/></para>
     /// </summary>
     /// 
     /// <example>
@@ -69,7 +69,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
     /// <list type="bullet">
-    /// <item><description>Key size should be equal to digest output size<cite>RFC 2104</cite>.</description></item>
+    /// <item><description>Key size should be equal to digest output size: <see href="http://tools.ietf.org/html/rfc2104"/>.</description></item>
     /// <item><description>Block size is the Digests engines block size.</description></item>
     /// <item><description>Digest size is the Digest engines digest return size.</description></item>
     /// <item><description>The <see cref="HMAC(IDigest, bool)">Constructors</see> DisposeEngine parameter determines if Digest engine is destroyed when <see cref="Dispose()"/> is called on this class; default is <c>true</c>.</description></item>

@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
+using VTDev.Libraries.CEXEngine.Crypto.Helper;
 using VTDev.Libraries.CEXEngine.Crypto.Mac;
 using VTDev.Libraries.CEXEngine.Crypto.Processing;
 using VTDev.Libraries.CEXEngine.Crypto.Processing.Factory;
@@ -47,7 +48,6 @@ namespace VTDev.Projects.CEX
         private string _lastInputPath = "";
         private string _lastKeyPath = "";
         private string _lastOutputPath = "";
-        private int _macSize = 0;
         private string _outputPath = "";
         #endregion
 
@@ -161,7 +161,9 @@ namespace VTDev.Projects.CEX
                     {
                         if (keyFactory.AccessScope == KeyScope.NoAccess)
                         {
-                            MessageBox.Show(keyFactory.LastError);
+                            Invoke(new MethodInvoker(() => {
+                                MessageBox.Show(this, keyFactory.LastError);
+                            }));
                             return;
                         }
                         keyFactory.Extract(keyId, out cipherDesc, out keyParam, out extKey);
@@ -182,7 +184,8 @@ namespace VTDev.Projects.CEX
 
                         // get the hmac for the encrypted file; this could be made selectable
                         // via the KeyHeaderStruct MacDigest and MacSize members.
-                        using (MacStream mstrm = new MacStream(new HMAC(new SHA512(), keyParam.IKM)))
+                        IDigest dgt = DigestFromName.GetInstance((Digests)_container.Description.MacEngine);
+                        using (MacStream mstrm = new MacStream(new HMAC(dgt, keyParam.IKM)))
                         {
                             // get the message header mac
                             byte[] chksum = MessageHeader.GetMessageMac(inStream, cipherDesc.MacSize);
@@ -199,7 +202,9 @@ namespace VTDev.Projects.CEX
                             // compare, notify and abort on failure
                             if (!Evaluate.AreEqual(chksum, hash))
                             {
-                                MessageBox.Show("Message hash does not match! The file has been tampered with.");
+                                Invoke(new MethodInvoker(() => {
+                                    MessageBox.Show(this, "Message hash does not match! The file has been tampered with.");
+                                }));
                                 return;
                             }
                         }
@@ -236,7 +241,9 @@ namespace VTDev.Projects.CEX
                     File.Delete(_outputPath);
 
                 string message = ex.Message == null ? "" : ex.Message;
-                MessageBox.Show("An error occured, the file could not be encrypted! " + message);
+                Invoke(new MethodInvoker(() => {
+                    MessageBox.Show(this, "An error occured, the file could not be encrypted! " + message);
+                }));
             }
             finally
             {
@@ -262,14 +269,23 @@ namespace VTDev.Projects.CEX
                 // get the keyheader and key material from the key file
                 using (PackageFactory keyFactory = new PackageFactory(new FileStream(_keyFilePath, FileMode.Open, FileAccess.ReadWrite), _container.Authority))
                 {
-                    // get the key info
-                    PackageInfo pki = keyFactory.KeyInfo();
-
                     if (!keyFactory.AccessScope.Equals(KeyScope.Creator))
                     {
-                        MessageBox.Show(keyFactory.LastError);
+                        Invoke(new MethodInvoker(() => {
+                            MessageBox.Show(this, keyFactory.LastError);
+                        }));
                         return;
                     }
+                    else if (keyFactory.AccessScope.Equals(KeyScope.NoAccess))
+                    {
+                        Invoke(new MethodInvoker(() => {
+                            MessageBox.Show(this, keyFactory.LastError);
+                        }));
+                        return;
+                    }
+
+                    // get the key info
+                    PackageInfo pki = keyFactory.KeyInfo();
                     keyId = (byte[])keyFactory.NextKey(out keyHeader, out keyParam, out extKey).Clone();
                 }
                 // offset start position is base header + Mac size
@@ -285,7 +301,9 @@ namespace VTDev.Projects.CEX
                         using (FileStream outStream = new FileStream(_outputPath, FileMode.Create, FileAccess.ReadWrite))
                         {
                             if (lblStatus.InvokeRequired)
-                                lblStatus.Invoke(new MethodInvoker(delegate { lblStatus.Text = "Encrypting the file.."; }));
+                                lblStatus.Invoke(new MethodInvoker(delegate {
+                                    lblStatus.Text = "Encrypting the file..";
+                                }));
 
                             // start at an output offset equal to the message header + MAC length
                             outStream.Seek(hdrOffset, SeekOrigin.Begin);
@@ -306,15 +324,16 @@ namespace VTDev.Projects.CEX
                             if (keyHeader.MacSize > 0)
                             {
                                 if (lblStatus.InvokeRequired)
-                                    lblStatus.Invoke(new MethodInvoker(delegate { lblStatus.Text = "Generating the MAC code.."; }));
+                                    lblStatus.Invoke(new MethodInvoker(delegate {
+                                        lblStatus.Text = "Generating the MAC code..";
+                                    }));
 
+                                // This is where you would select and initialize the correct Digest via the
+                                // CipherDescription member, and initialize the corresponding digest. 
+                                IDigest dgt = DigestFromName.GetInstance((Digests)_container.Description.MacEngine);
                                 // Get the mac for the encrypted file; Mac engine is SHA512 by default, 
                                 // configurable via the CipherDescription MacSize and MacEngine members.
-                                // This is where you would select and initialize the correct Digest via the
-                                // CipherDescription members, and initialize the corresponding digest. 
-                                // For expedience, this example is fixed on the default SHA512.
-                                // An optional progress event is available in the MacStream class.
-                                using (MacStream mstrm = new MacStream(new HMAC(new SHA512(), keyParam.IKM)))
+                                using (MacStream mstrm = new MacStream(new HMAC(dgt, keyParam.IKM)))
                                 {
                                     mstrm.ProgressPercent -= OnMacProgress;
                                     mstrm.ProgressPercent += OnMacProgress;
@@ -340,7 +359,9 @@ namespace VTDev.Projects.CEX
                     File.Delete(_outputPath);
 
                 string message = ex.Message == null ? "" : ex.Message;
-                MessageBox.Show("An error occured, the file could not be encrypted! " + message);
+                Invoke(new MethodInvoker(() => {
+                    MessageBox.Show(this, "An error occured, the file could not be encrypted! " + message);
+                }));
             }
             finally
             {
@@ -403,7 +424,7 @@ namespace VTDev.Projects.CEX
                     File.Delete(_keyFilePath);
 
                 string message = ex.Message == null ? "" : ex.Message;
-                MessageBox.Show("An error occured, the key could not be created! " + message);
+                MessageBox.Show(this, "An error occured, the key could not be created! " + message);
             }
         }
 
@@ -493,7 +514,6 @@ namespace VTDev.Projects.CEX
 
         private void Reset()
         {
-            dtVolatileTime.Value = DateTime.Now.AddDays(1);
             tsMain.Enabled = true;
             btnEncrypt.Enabled = false;
             btnKeyFile.Enabled = false;
@@ -584,12 +604,10 @@ namespace VTDev.Projects.CEX
             cbVectorSize.Items.Add(IVSizes.V128);
             cbVectorSize.SelectedIndex = 0;
             cbVectorSize.Enabled = cbHkdf.Enabled = Engine != SymmetricEngines.ChaCha && Engine != SymmetricEngines.Salsa;
+
             if (Engine == SymmetricEngines.ChaCha && Engine == SymmetricEngines.Salsa)
                 cbPaddingMode.Enabled = false;
-
-            CipherModes mode = CipherModes.CTR;
-            Enum.TryParse<CipherModes>(cbCipherMode.Text, out mode);
-            if (mode != CipherModes.CTR)
+            else if ((CipherModes)_container.Description.CipherType != CipherModes.CTR)
                 cbPaddingMode.Enabled = true;
 
             switch (Engine)
@@ -669,7 +687,7 @@ namespace VTDev.Projects.CEX
             Enum.TryParse<Digests>(((ComboBox)sender).Text, out digest);
             _container.Description.MacEngine = (int)digest;
             if (chkSign.Checked)
-                _macSize = GetMacSize(digest);
+                _container.Description.MacSize = GetMacSize(digest);
         }
 
         private void OnInfoButtonClick(object sender, EventArgs e)
@@ -700,7 +718,7 @@ namespace VTDev.Projects.CEX
                 if (!chk.Checked)
                     _container.Description.MacSize = 0;
                 else
-                    _container.Description.MacSize = _macSize;
+                    _container.Description.MacSize = GetMacSize((Digests)_container.Description.MacEngine);
             }
             else if (chk.Name.Equals("chkDomainRestrict"))
                 flag = KeyPolicies.DomainRestrict;
@@ -766,10 +784,9 @@ namespace VTDev.Projects.CEX
             Enum.TryParse<Digests>(cbHmac.Text, out digest);
 
             if (!chk.Checked)
-                _macSize = 0;
+                _container.Description.MacSize = 0;
             else
-                _macSize = GetMacSize(digest);
-            _container.Description.MacSize = _macSize;
+                _container.Description.MacSize = GetMacSize(digest);
         }
 
         private void OnSubKeyCountKeyPress(object sender, KeyPressEventArgs e)
@@ -807,7 +824,7 @@ namespace VTDev.Projects.CEX
 
             if (!Utilities.DirectoryIsWritable(Path.GetDirectoryName(filePath)))
             {
-                MessageBox.Show("You do not have permission to create files in this directory! Choose a different path..");
+                MessageBox.Show(this, "You do not have permission to create files in this directory! Choose a different path..");
                 _keyFilePath = string.Empty;
             }
             else
@@ -815,6 +832,7 @@ namespace VTDev.Projects.CEX
                 _keyFilePath = Utilities.GetUniquePath(filePath);
                 SaveKey();
             }
+            dtVolatileTime.Value = DateTime.Now.AddDays(1);
         }
 
         private void OnEncryptFileClick(object sender, EventArgs e)
@@ -941,7 +959,7 @@ namespace VTDev.Projects.CEX
                         if (keyFactory.AccessScope == KeyScope.NoAccess)
                         {
                             Array.Clear(_container.Authority.PackageId, 0, _container.Authority.PackageId.Length);
-                            MessageBox.Show("Passphrase does not match! This key requires authentication.");
+                            MessageBox.Show(this, "Passphrase does not match! This key requires authentication.");
                             txtKeyFile.Text = KEY_DEFN;
                             btnEncrypt.Enabled = false;
                             return;
@@ -950,7 +968,7 @@ namespace VTDev.Projects.CEX
                 }
                 else
                 {
-                    MessageBox.Show("Access denied! This key requires authentication.");
+                    MessageBox.Show(this, "Access denied! This key requires authentication.");
                     txtKeyFile.Text = KEY_DEFN;
                     btnEncrypt.Enabled = false;
                     return;
@@ -971,7 +989,7 @@ namespace VTDev.Projects.CEX
                     _keyFilePath = string.Empty;
                     txtKeyFile.Text = KEY_DEFN;
                     btnEncrypt.Enabled = false;
-                    MessageBox.Show("Key does not match the message! Choose a different key..");
+                    MessageBox.Show(this, "Key does not match the message! Choose a different key..");
                 }
             }
             else
@@ -993,7 +1011,7 @@ namespace VTDev.Projects.CEX
 
             if (!Utilities.DirectoryIsWritable(Path.GetDirectoryName(filePath)))
             {
-                MessageBox.Show("You do not have permission to create files in this directory! Choose a different path..");
+                MessageBox.Show(this, "You do not have permission to create files in this directory! Choose a different path..");
                 txtOutputFile.Text = SAVE_DEFN;
                 _outputPath = string.Empty;
                 btnKeyFile.Enabled = false;

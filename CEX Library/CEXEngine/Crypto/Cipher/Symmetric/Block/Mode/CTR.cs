@@ -41,7 +41,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 {
     /// <summary>
     /// CTR: Implements a Parallel Segmented Counter Mode: CTR.
-    /// <para>CTR as outlined in the NIST document: SP800-38A<cite>SP800-38A</cite></para>
+    /// <para>CTR as outlined in the NIST document: SP800-38A: <see href="http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf"/></para>
     /// </summary> 
     /// 
     /// <example>

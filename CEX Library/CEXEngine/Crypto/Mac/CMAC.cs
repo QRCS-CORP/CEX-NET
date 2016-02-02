@@ -42,7 +42,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 {
     /// <summary>
     /// CMAC: An implementation of a Cipher based Message Authentication Code: CMAC.
-    /// <para>A CMAC as outlined in the NIST document: SP800-38B<cite>SP800-38B</cite></para>
+    /// <para>A CMAC as outlined in the NIST document: SP800-38B: <see href="http://csrc.nist.gov/publications/nistpubs/800-38B/SP_800-38B.pdf"/></para>
     /// </summary>
     /// 
     /// <example>

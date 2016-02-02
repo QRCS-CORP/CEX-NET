@@ -207,7 +207,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
     /// <summary>
     /// Skein256: An implementation of the Skein digest with a 256 bit digest return size.
-    /// <para>SHA-3 finalist<cite>NIST IR7896</cite>: The Skein<cite>Skein</cite> digest</para>
+    /// <para>SHA-3 finalist: <see href="http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf"/>: The Skein: <see href="http://www.skein-hash.info/sites/default/files/skein1.1.pdf"/> digest</para>
     /// </summary>
     /// 
     /// <example>

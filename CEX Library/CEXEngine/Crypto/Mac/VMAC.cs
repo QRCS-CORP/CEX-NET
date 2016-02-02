@@ -39,7 +39,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 {
     /// <summary>
     /// VMAC: An implementation of a Variably Modified Permutation Composition based Message Authentication Code: VMPC-MAC.
-    /// <para>A VMPC-MAC as outlined in the VMPC-MAC Specification<cite>VMPC-MAC</cite></para>
+    /// <para>A VMPC-MAC as outlined in the VMPC-MAC Specification: <see href="http://www.vmpcfunction.com/vmpc_mac.pdf"/></para>
     /// </summary>
     /// 
     /// <example>

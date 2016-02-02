@@ -9,7 +9,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 {
     /// <summary>
     /// KDF2Drbg: An implementation of an Hash based Key Derivation Function.
-    /// <para>KDF2Drbg as outlined in ISO 18033-2 <cite>ISO 18033</cite>.</para>
+    /// <para>KDF2Drbg as outlined in ISO 18033-2 : <see href="http://www.shoup.net/iso/std6.pdf"/>.</para>
     /// </summary> 
     /// 
     /// <example>

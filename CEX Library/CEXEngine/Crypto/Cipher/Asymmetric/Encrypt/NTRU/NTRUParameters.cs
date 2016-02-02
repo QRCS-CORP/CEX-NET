@@ -94,12 +94,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
     /// 
     /// <description><h4>Guiding Publications:</h4></description>
     /// <list type="number">
-    /// <item><description>NTRU: A Ring Based Public Key Crypto System<cite>NTRU Crypto</cite>.</description></item>
-    /// <item><description>Optimizations for NTRU<cite>NTRU Optimizations</cite>.</description></item>
-    /// <item><description>Adaptive Key Recovery Attacks on NTRU-based Somewhat Homomorphic Encryption Schemes<cite>NTRU Adaptive</cite>.</description></item>
-    /// <item><description>Efficient Embedded Security Standards (EESS)<cite>NTRU EESS</cite>.</description></item>
-    /// <item><description>Practical lattice-based cryptography: NTRUEncrypt and NTRUSign<cite>NTRU Practical</cite>.</description></item>
-    /// <item><description>NTRU Cryptosystems Technical Report<cite>NTRU Technical</cite>.</description></item>
+    /// <item><description>NTRU: A Ring Based Public Key Crypto System: <see href="http://binary.cr.yp.to/mcbits-20130616.pdf"/>.</description></item>
+    /// <item><description>Optimizations for NTRU: <see href="https://www.securityinnovation.com/uploads/Crypto/TECH_ARTICLE_OPT.pdf"/>.</description></item>
+    /// <item><description>Adaptive Key Recovery Attacks on NTRU-based Somewhat Homomorphic Encryption Schemes: <see href="https://eprint.iacr.org/2015/127.pdf"/>.</description></item>
+    /// <item><description>Efficient Embedded Security Standards (EESS): <see href="http://grouper.ieee.org/groups/1363/lattPK/submissions/EESS1v2.pdf"/>.</description></item>
+    /// <item><description>Practical lattice-based cryptography: NTRUEncrypt and NTRUSign: <see href="https://www.securityinnovation.com/uploads/Crypto/lll25.pdf"/>.</description></item>
+    /// <item><description>NTRU Cryptosystems Technical Report: <see href="https://www.securityinnovation.com/uploads/Crypto/NTRUTech016.pdf"/>.</description></item>
     /// </list>
     /// 
     /// <description><h4>Code Base Guides:</h4></description>

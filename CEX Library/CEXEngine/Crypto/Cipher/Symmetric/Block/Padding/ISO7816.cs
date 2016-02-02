@@ -6,7 +6,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
 {
     /// <summary>
-    /// ISO7816: The <cite>ISO 7816</cite> Padding Scheme
+    /// ISO7816: The : <see href="http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=36134"/> Padding Scheme
     /// </summary>
     public sealed class ISO7816 : IPadding
     {

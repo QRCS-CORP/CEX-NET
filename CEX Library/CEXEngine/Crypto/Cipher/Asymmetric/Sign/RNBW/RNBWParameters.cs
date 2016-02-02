@@ -83,7 +83,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
     /// 
     /// <description><h4>Guiding Publications:</h4></description>
     /// <list type="number">
-    /// <item><description>Selecting Parameters for the Rainbow Signature Scheme<cite>Rainbow Parameters</cite>.</description></item>
+    /// <item><description>Selecting Parameters for the Rainbow Signature Scheme: <see href="http://eprint.iacr.org/2010/437.pdf"/>.</description></item>
     /// </list> 
     /// </remarks>
     public sealed class RNBWParameters : IAsymmetricParameters

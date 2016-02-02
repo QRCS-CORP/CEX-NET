@@ -44,7 +44,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 {
     /// <summary>
     /// Keccak256: An implementation of the SHA-3 Keccak digest.
-    /// <para>SHA-3 competition winner<cite>SHA-3 Standardization</cite>: The Keccak<cite>Keccak</cite> digest</para>
+    /// <para>SHA-3 competition winner: <see href="http://csrc.nist.gov/groups/ST/hash/sha-3/documents/Keccak-slides-at-NIST.pdf"/>: The : <see href="http://keccak.noekeon.org/Keccak-submission-3.pdf"/> digest</para>
     /// </summary>
     /// 
     /// <example>

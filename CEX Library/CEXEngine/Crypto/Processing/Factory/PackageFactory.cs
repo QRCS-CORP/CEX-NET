@@ -136,13 +136,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// 
         /// <param name="KeyStream">The stream used to create or extract the key file</param>
         /// <param name="Authority">The local KeyAuthority credentials structure</param>
-        /// 
-        /// <exception cref="CryptoProcessingException">Thrown if an empty KeyPath is used</exception>
         public PackageFactory(Stream KeyStream, KeyAuthority Authority)
         {
             // store authority
             _keyOwner = Authority;
-            // file path or destination
+            // file or memory stream
             _keyStream = KeyStream;
 
             if (_keyStream.Length > 0)
@@ -325,7 +323,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             {
                 // store the auth struct and policy
                 _keyOwner = Package.Authority;
-                this.KeyPolicy = Package.KeyPolicy;
+                KeyPolicy = Package.KeyPolicy;
                 // get the serialized header
                 byte[] header = Package.ToBytes();
                 // size key buffer
@@ -694,7 +692,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 BinaryWriter keyWriter = new BinaryWriter(keymem);
 
                 // add policy flags
-                this.KeyPolicy = keyReader.ReadInt64();
+                KeyPolicy = keyReader.ReadInt64();
                 keyWriter.Write(KeyPolicy);
                 // get the data
                 byte[] data = keyReader.ReadBytes((int)(keyReader.BaseStream.Length - PackageKey.GetPolicyOffset()));
@@ -808,16 +806,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             byte[] iv = new byte[16];
             Buffer.BlockCopy(kvm, 0, key, 0, key.Length);
             Buffer.BlockCopy(kvm, key.Length, iv, 0, iv.Length);
+            byte[] outData = new byte[KeyData.Length];
 
             using (KeyParams keyparam = new KeyParams(key, iv))
             {
-                // 40 rounds of serpent
-                using (CTR cipher = new CTR(new SHX(40)))
+                // 32 rounds of serpent
+                using (CTR cipher = new CTR(new SHX()))
                 {
                     cipher.Initialize(true, keyparam);
-                    cipher.Transform(KeyData, KeyData);
+                    cipher.Transform(KeyData, outData);
                 }
             }
+            Buffer.BlockCopy(outData, 0, KeyData, 0, KeyData.Length);
         }
 
         /// <remarks>

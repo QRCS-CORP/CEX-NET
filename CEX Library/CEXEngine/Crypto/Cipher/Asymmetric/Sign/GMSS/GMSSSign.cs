@@ -96,7 +96,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
     /// <remarks>
     /// <description><h4>Guiding Publications:</h4></description>
     /// <list type="number">
-    /// <item><description>Selecting Parameters for the Generalized Merkle Signature Scheme Signature Scheme<cite>Generalized Merkle Signature Scheme Parameters</cite>.</description></item>
+    /// <item><description>Selecting Parameters for the Generalized Merkle Signature Scheme Signature Scheme: <see href="https://www.cdc.informatik.tu-darmstadt.de/reports/reports/BDKOV07.pdf"/>.</description></item>
     /// </list>
     /// </remarks>
     public sealed class GMSSSign : IAsymmetricSign

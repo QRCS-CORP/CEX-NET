@@ -39,7 +39,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 {
     /// <summary>
     /// OFB: Implements a Output FeedBack Mode: OFB.
-    /// <para>OFB as outlined in the NIST document: SP800-38A<cite>SP800-38A</cite></para>
+    /// <para>OFB as outlined in the NIST document: SP800-38A: <see href="http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf"/></para>
     /// </summary>
     /// 
     /// <example>

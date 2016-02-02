@@ -40,7 +40,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
     /// <summary>
     /// SecureRandom: An implementation of a Cryptographically Secure Pseudo Random Number Generator: SecureRandom. 
     /// 
-    /// <para>Uses the RNGCryptoServiceProvider<cite>RNGCryptoServiceProvider</cite> class to generate non-negative random numbers.</para>
+    /// <para>Uses the RNGCryptoServiceProvider: <see href="http://msdn.microsoft.com/en-us/library/system.security.cryptography.rngcryptoserviceprovider.aspx"/> class to generate non-negative random numbers.</para>
     /// </summary>
     /// 
     /// <example>

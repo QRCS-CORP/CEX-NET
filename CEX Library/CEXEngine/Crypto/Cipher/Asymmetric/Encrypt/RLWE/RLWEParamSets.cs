@@ -66,10 +66,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
     /// 
     /// <description><h4>Guiding Publications:</h4></description>
     /// <list type="number">
-    /// <item><description>Efficient Software Implementation of Ring-LWE Encryption<cite>Ring-LWE Encryption</cite>.</description></item>
-    /// <item><description>Compact Ring-LWE Cryptoprocessor<cite>Ring-LWE Cryptoprocessor</cite>.</description></item>
-    /// <item><description>A Simple Provably Secure Key Exchange Scheme Based on the Learning with Errors Problem<cite>RLWE Scheme</cite>.</description></item>
-    /// <item><description>The Knuth-Yao Quadrangle-Inequality Speedup is a Consequence of Total-Monotonicity<cite>Knuth-Yao Quadrangle-Inequality Speedup</cite>.</description></item>
+    /// <item><description>Efficient Software Implementation of Ring-LWE Encryption: <see href="https://eprint.iacr.org/2014/725.pdf"/>.</description></item>
+    /// <item><description>Compact Ring-LWE Cryptoprocessor: <see href="http://www.cosic.esat.kuleuven.be/publications/article-2444.pdf"/>.</description></item>
+    /// <item><description>A Simple Provably Secure Key Exchange Scheme Based on the Learning with Errors Problem: <see href="http://eprint.iacr.org/2012/688.pdf"/>.</description></item>
+    /// <item><description>The Knuth-Yao Quadrangle-Inequality Speedup is a Consequence of Total-Monotonicity: <see href="http://www.egr.unlv.edu/~bein/pubs/knuthyaotalg.pdf"/>.</description></item>
     /// </list>
     /// </remarks>
     public static class RLWEParamSets

@@ -42,7 +42,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 {
     /// <summary>
     /// Blake512: An implementation of the Blake digest with a 512 bit return size.
-    /// <para>SHA-3 finalist<cite>NIST IR7896</cite>: The Blake<cite>Blake</cite> digest</para>
+    /// <para>SHA-3 finalist: <see href="http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf"/>: The Blake: <see href="https://131002.net/blake/blake.pdf"/> digest</para>
     /// </summary> 
     /// 
     /// <example>

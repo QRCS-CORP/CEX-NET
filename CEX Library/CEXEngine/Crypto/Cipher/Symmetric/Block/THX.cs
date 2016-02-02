@@ -50,7 +50,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 {
     /// <summary>
     /// THX: A Twofish Cipher extended with an (optional) HKDF powered Key Schedule.
-    /// <para>THX is a Twofish<cite>Twofish</cite> implementation that can use a standard configuration on key sizes up to 256 bits, 
+    /// <para>THX is a Twofish: <see href="https://www.schneier.com/paper-twofish-paper.pdf"/> implementation that can use a standard configuration on key sizes up to 256 bits, 
     /// an extended key size of 512 bits, or unlimited key sizes greater than 64 bytes. 
     /// On <see cref="LegalKeySizes"/> larger than 64 bytes, an HKDF bytes generator is used to expand the <c>working key</c> integer array.
     /// In extended mode, the number of <c>transformation rounds</c> can be user assigned (through the constructor) to between 16 and 32 rounds.</para>
@@ -97,15 +97,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// 
     /// <para>The number of transformation rounds processed is also user definable; from the standard 16 rounds, to a full 32 rounds of transformation.</para>
     /// 
-    /// <para>The key schedule in THX powered by an HKDF<cite>RFC 5869</cite> generator, using a Digest HMAC<cite>RFC 2104</cite> (Hash based Message Authentication Code) as its random engine. 
-    /// This is one of the strongest<cite>Fips 198-1</cite> methods available for generating pseudo-random keying material, and far superior in entropy dispersion to Rijndael, or even the Twofish key schedule. HKDF uses up to three inputs; a nonce value called an information string, an Ikm (Input keying material), and a Salt value. 
+    /// <para>The key schedule in THX powered by an HKDF: <see href="http://tools.ietf.org/html/rfc5869"/> generator, using a Digest HMAC: <see href="http://tools.ietf.org/html/rfc2104"/> (Hash based Message Authentication Code) as its random engine. 
+    /// This is one of the strongest: <see href="http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf"/> methods available for generating pseudo-random keying material, and far superior in entropy dispersion to Rijndael, or even the Twofish key schedule. HKDF uses up to three inputs; a nonce value called an information string, an Ikm (Input keying material), and a Salt value. 
     /// The HMAC RFC 2104, recommends a key size equal to the digest output, in the case of SHA512, 64 bytes, anything larger gets passed through the hash function to get the required 512 bit key size. 
     /// The Salt size is a minimum of the hash functions block size, with SHA-2 512 that is 128 bytes.</para>
     /// 
     /// <para>When using SHA-2 512, a minimum key size for THX is 192 bytes, further blocks of salt can be added to the key so long as they align; ikm + (n * blocksize), ex. 192, 320, 448 bytes.. there is no upper maximum. 
     /// This means that you can create keys as large as you like so long as it falls on these boundaries, this effectively eliminates brute force as a means of attack on the cipher, even in quantum terms.</para> 
     /// 
-    /// <para>The Digest that powers HKDF, can be any one of the Hash Digests implemented in the CEX library; Blake<cite>Blake</cite>, Keccak<cite>Keccak</cite>, SHA-2<cite>Fips 180-4</cite>, or Skein<cite>Skein</cite>.
+    /// <para>The Digest that powers HKDF, can be any one of the Hash Digests implemented in the CEX library; Blake: <see href="https://131002.net/blake/blake.pdf"/>, 
+    /// Keccak: <see href="http://keccak.noekeon.org/Keccak-submission-3.pdf"/>, SHA-2: <see href="http://keccak.noekeon.org/Keccak-submission-3.pdf"/>, 
+    /// or Skein: <see href="http://www.skein-hash.info/sites/default/files/skein1.1.pdf"/>.
     /// The default Digest Engine is SHA-2 512.</para>
     /// 
     /// <para>The legal key sizes are determined by a combination of the (Hash Size + a Multiplier * the Digest State Size); <math>klen = h + (n * s)</math>, this will vary between Digest implementations. 

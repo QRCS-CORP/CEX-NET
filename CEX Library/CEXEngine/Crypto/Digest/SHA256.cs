@@ -44,7 +44,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 {
     /// <summary>
     /// SHA256: An implementation of the SHA-2 digest with a 256 bit digest return size.
-    /// <para>The SHA-2<cite>Fips 180-4</cite> 256 digest</para>
+    /// <para>The SHA-2: <see href="http://keccak.noekeon.org/Keccak-submission-3.pdf"/> 256 digest</para>
     /// </summary> 
     /// 
     /// <example>

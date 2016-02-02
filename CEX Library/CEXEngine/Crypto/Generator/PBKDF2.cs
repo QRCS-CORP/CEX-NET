@@ -10,7 +10,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 {
     /// <summary>
     /// PBKDF2 V2: An implementation of an Hash based Key Derivation Function.
-    /// <para>PBKDF2 Version 2, as outlined in RFC 2898<cite>RFC 2898</cite></para>
+    /// <para>PBKDF2 Version 2, as outlined in RFC 2898: <see href="http://tools.ietf.org/html/rfc2898"/></para>
     /// </summary> 
     /// 
     /// <example>

@@ -12,7 +12,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 {
     /// <summary>
     /// CTRPrng: An implementation of a Encryption Counter based Deterministic Random Number Generator.
-    /// <para>A Block Cipher Counter DRBG as outlined in NIST document: SP800-90A<cite>SP800-90B</cite></para>
+    /// <para>A Block Cipher Counter DRBG as outlined in NIST document: SP800-90A: <see href="http://csrc.nist.gov/publications/drafts/800-90/draft-sp800-90b.pdf"/></para>
     /// </summary> 
     /// 
     /// <example>
