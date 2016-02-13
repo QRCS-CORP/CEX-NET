@@ -70,7 +70,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         /// Initialize the Cipher
         /// </summary>
         /// 
-        /// <param name="Encryption">Using Encryption or Decryption mode</param>
+        /// <param name="Encryption">True if cipher is used for encryption, false to decrypt</param>
         /// <param name="KeyParam">Cipher key and Vector</param>
         void Initialize(bool Encryption, KeyParams KeyParam);
 
@@ -78,17 +78,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         /// Transform a block of bytes
         /// </summary>
         /// 
-        /// <param name="Input">Bytes to Encrypt</param>
-        /// <param name="Output">Encrypted bytes</param>
+        /// <param name="Input">Bytes to Transform</param>
+        /// <param name="Output">Transformed bytes</param>
         void Transform(byte[] Input, byte[] Output);
 
         /// <summary>
         /// Transform a block of bytes within an array
         /// </summary>
         /// 
-        /// <param name="Input">Bytes to Encrypt</param>
+        /// <param name="Input">Bytes to Transform</param>
         /// <param name="InOffset">Offset in the Input array</param>
-        /// <param name="Output">Encrypted bytes</param>
+        /// <param name="Output">Transformed bytes</param>
         /// <param name="OutOffset">Offset in the Output array</param>
         void Transform(byte[] Input, int InOffset, byte[] Output, int OutOffset);
     }

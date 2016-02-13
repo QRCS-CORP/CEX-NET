@@ -51,17 +51,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2016/01/09" version="1.5.0.0">Initial release</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Prng">VTDev.Libraries.CEXEngine.Crypto Prng Classes</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Prng"/>
     /// 
     /// <remarks>
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>ISAAC: a fast cryptographic random number generator: <see href="http://www.burtleburtle.net/bob/rand/isaacafa.html"/>.</description></item>
-    /// <item><description>Rossettacode example implementations: <see href="http://rosettacode.org/wiki/The_ISAAC_Cipher"/>.</description></item>
+    /// <item><description>ISAAC a fast cryptographic <a href="http://www.burtleburtle.net/bob/rand/isaacafa.html">Random Number Generator</a>.</description></item>
+    /// <item><description>Rossettacode <a href="http://rosettacode.org/wiki/The_ISAAC_Cipher">Example implementations</a>.</description></item>
     /// </list>
     /// </remarks>
     public sealed class ISCRsg : ISeed

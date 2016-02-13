@@ -21,13 +21,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
     /// </code>
     /// </example>
     ///
-    /// <revisionHistory>
-    /// <revision date="2015/05/22" version="1.3.6.0">Initial release</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Factory.PackageFactory">VTDev.Libraries.CEXEngine.Crypto KeyFactory class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription">VTDev.Libraries.CEXEngine.Crypto.Processing.Structures CipherDescription structure</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.CipherStream">VTDev.Libraries.CEXEngine.Crypto.Processing CipherStream class</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Factory.PackageFactory"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.CipherStream"/>
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public struct CipherKey

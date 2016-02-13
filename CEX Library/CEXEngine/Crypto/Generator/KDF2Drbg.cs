@@ -8,8 +8,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 {
     /// <summary>
-    /// KDF2Drbg: An implementation of an Hash based Key Derivation Function.
-    /// <para>KDF2Drbg as outlined in ISO 18033-2 : <see href="http://www.shoup.net/iso/std6.pdf"/>.</para>
+    /// KDF2Drbg: An implementation of an Hash based Key Derivation Function
     /// </summary> 
     /// 
     /// <example>
@@ -25,17 +24,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2015/28/15" version="1.3.1.1">Initial release</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Mac.HMAC">VTDev.Libraries.CEXEngine.Crypto.Mac HMAC</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Mac.HMAC"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>
     /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
+    /// <description>Implementation Notes:</description>
     /// <list type="bullet">
     /// <item><description>Can be initialized with a <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> or a <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Macs">Mac</see>.</description></item>
     /// <item><description>The <see cref="HKDF(IDigest, bool)">Constructors</see> DisposeEngine parameter determines if Digest engine is destroyed when <see cref="Dispose()"/> is called on this class; default is <c>true</c>.</description></item>
@@ -44,10 +38,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// <item><description>Nonce and Ikm are optional, (but recommended).</description></item>
     /// </list>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="table">
-    /// <item><description>ISO-18033-2: <see href="http://www.shoup.net/iso/std6.pdf">Specification</see>.</description></item>
-    /// <item><description>RFC 2898: <see href="http://tools.ietf.org/html/rfc2898">Specification</see>.</description></item>
+    /// <item><description>RFC 2898: <a href="http://tools.ietf.org/html/rfc2898">Password-Based Cryptography Specification Version 2.0</a>.</description></item>
     /// </list>
     /// </remarks>
     public class KDF2Drbg : IGenerator

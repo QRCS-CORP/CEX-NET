@@ -38,8 +38,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 {
     /// <summary>
-    /// VMAC: An implementation of a Variably Modified Permutation Composition based Message Authentication Code: VMPC-MAC.
-    /// <para>A VMPC-MAC as outlined in the VMPC-MAC Specification: <see href="http://www.vmpcfunction.com/vmpc_mac.pdf"/></para>
+    /// VMAC: An implementation of a Variably Modified Permutation Composition based Message Authentication Code
     /// </summary>
     /// 
     /// <example>
@@ -55,28 +54,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2015/01/23" version="1.3.0.0">Initial release</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
-    /// </revisionHistory>
-    /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
+    /// <description>Implementation Notes:</description>
     /// <list type="bullet">
     /// <item><description>No fixed block size is used.</description></item>
     /// <item><description>MAC return size is 20 bytes.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>VMPC-MAC Specification: <see href="http://www.vmpcfunction.com/vmpc_mac.pdf">VMPC-MAC: A Stream Cipher Based Authenticated Encryption Scheme</see>.</description></item>
-    /// <item><description>VMPC Paper: <see href="http://www.vmpcfunction.com/vmpcmac.htm>VMPC-MAC">VMPC-MAC Authenticated Encryption Scheme</see>.</description></item>
-    /// <item><description>IETF: <see href="http://www.okna.wroc.pl/vmpc.pdf">VMPC One-Way Function and Stream Cipher</see>.</description></item>
+    /// <item><description>VMPC <a href="http://www.vmpcfunction.com/vmpc_mac.pdf">MAC Specification</a>:  VMPC-MAC: A Stream Cipher Based Authenticated Encryption Scheme.</description></item>
+    /// <item><description>VMPC <a href="http://www.vmpcfunction.com/vmpcmac.htm">VMPC-MAC</a> Authenticated Encryption Scheme.</description></item>
+    /// <item><description>IETF <a href="http://www.okna.wroc.pl/vmpc.pdf">VMPC One-Way Function</a> and Stream Cipher.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Code Base Guides:</h4></description>
+    /// <description>Code Base Guides:</description>
     /// <list type="table">
-    /// <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
+    /// <item><description>Based on the Bouncy Castle Java <a href="http://bouncycastle.org/latest_releases.html">Release 1.51</a> version.</description></item>
     /// </list> 
     /// </remarks>
     public sealed class VMAC : IMac
@@ -342,8 +336,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 
         #region Private Methods
         /// <remarks>
-        /// Section 3.2, table 2 <see href="http://vmpcfunction.com/vmpc_mac.pdf">VMPC-MAC: 
-        /// A Stream Cipher Based Authenticated Encryption Scheme</see>
+        /// Section 3.2, table 2 <a href="http://vmpcfunction.com/vmpc_mac.pdf">VMPC-MAC</a>: 
+        /// A Stream Cipher Based Authenticated Encryption Scheme
         /// </remarks>
 		private void InitKey(byte[] Key, byte[] Iv)
 		{

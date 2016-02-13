@@ -42,7 +42,7 @@ using VTDev.Libraries.CEXEngine.Utility;
 // 
 // Code Base Guides:
 // Portions of this code based on the Bouncy Castle Based on the Bouncy Castle Java 
-// <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.
+// <a href="http://bouncycastle.org/latest_releases.html">Release 1.51</a> version.
 // 
 // Implementation Details:
 // An implementation of an Generalized Merkle Signature Scheme. 

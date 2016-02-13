@@ -29,7 +29,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 // SOFTWARE.
 // 
 // Principal Algorithms:
-// The Skein Hash Function Family: <see href="http://www.skein-hash.info/sites/default/files/skein1.1.pdf">Skein V1.1</see>.
+// The Skein Hash Function Family: <a href="http://www.skein-hash.info/sites/default/files/skein1.1.pdf">Skein V1.1</a>.
 // Implementation Details:
 // An implementation of the Skein digest. 
 // Written by John Underhill, January 13, 2015
@@ -39,8 +39,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 {
     /// <summary>
-    /// Skein512: An implementation of the Skein digest with a 512 bit digest return size.
-    /// <para>SHA-3 finalist: <see href="http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf"/>: The Skein: <see href="http://www.skein-hash.info/sites/default/files/skein1.1.pdf"/> digest</para>
+    /// Skein512: An implementation of the Skein digest with a 512 bit digest return size
     /// </summary> 
     /// 
     /// <example>
@@ -54,17 +53,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2015/01/23" version="1.3.0.0">Initial release</revision>
-    /// <revision date="2015/03/10" version="1.3.0.0">Added Initialize call to Ctor</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>
     /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
+    /// <description>Implementation Notes:</description>
     /// <list type="bullet">
     /// <item><description>Block size is 64 bytes, (512 bits).</description></item>
     /// <item><description>Digest size is 64 bytes, (512 bits).</description></item>
@@ -72,16 +65,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     /// <item><description>The <see cref="DoFinal(byte[], int)"/> method does NOT reset the internal state; call <see cref="Reset()"/> to reinitialize.</description></item>
     /// </list> 
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>The Skein Hash Function Family: <see href="http://www.skein-hash.info/sites/default/files/skein1.1.pdf">Skein V1.1</see>.</description></item>
-    /// <item><description>Skein <see href="http://www.skein-hash.info/sites/default/files/skein-proofs.pdf">Provable Security</see> Support for the Skein Hash Family.</description></item>
-    /// <item><description>SHA3: <see href="http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf">Third-Round Report of the SHA-3 Cryptographic Hash Algorithm Competition</see>.</description></item>
+    /// <item><description>Skein <a href="http://www.skein-hash.info/sites/default/files/skein1.1.pdf">The Skein digest</a>.</description></item>
+    /// <item><description>The Skein Hash Function Family <a href="http://www.skein-hash.info/sites/default/files/skein1.1.pdf">Skein V1.1</a>.</description></item>
+    /// <item><description>Skein <a href="http://www.skein-hash.info/sites/default/files/skein-proofs.pdf">Provable Security</a> Support for the Skein Hash Family.</description></item>
+    /// <item><description>NIST <a href="http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf">SHA3 Third-Round Report</a> of the SHA-3 Cryptographic Hash Algorithm Competition>.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Code Base Guides:</h4></description>
+    /// <description>Code Base Guides:</description>
     /// <list type="table">
-    /// <item><description>Adapted from the excellent project by Alberto Fajardo: <see href="http://code.google.com/p/skeinfish/">Skeinfish Release 0.50</see>.</description></item>
+    /// <item><description>Adapted from the excellent project by Alberto Fajardo: <a href="http://code.google.com/p/skeinfish/">Skeinfish Release 0.50</a>.</description></item>
     /// </list> 
     /// </remarks>
     public sealed class Skein512 : IDigest

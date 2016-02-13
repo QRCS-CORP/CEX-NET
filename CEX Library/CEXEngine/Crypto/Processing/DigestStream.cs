@@ -63,17 +63,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2015/01/23" version="1.3.0.0">Initial release</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest">VTDev.Libraries.CEXEngine.Crypto.Digest Namespace</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>
     /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
+    /// <description>Implementation Notes:</description>
     /// <list type="bullet">
     /// <item><description>Uses any of the implemented <see cref="Digests">Digests</see> using either the <see cref="IDigest">interface, or a Digests enumeration member</see>.</description></item>
     /// <item><description>Digest can be Disposed when this class is <see cref="Dispose()">Disposed</see>, set the DisposeEngine parameter in the class Constructor to true to dispose automatically.</description></item>
@@ -295,8 +290,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
                 {
                     buffer = new byte[Length - bytesTotal];
                     bytesRead = _inStream.Read(buffer, 0, buffer.Length);
-                    _digestEngine.BlockUpdate(buffer, 0, buffer.Length);
-                    bytesTotal += buffer.Length;
+                    _digestEngine.BlockUpdate(buffer, 0, bytesRead);
+                    bytesTotal += bytesRead;
                 }
             }
             else

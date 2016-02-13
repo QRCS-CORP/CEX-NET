@@ -41,8 +41,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 {
     /// <summary>
-    /// CMAC: An implementation of a Cipher based Message Authentication Code: CMAC.
-    /// <para>A CMAC as outlined in the NIST document: SP800-38B: <see href="http://csrc.nist.gov/publications/nistpubs/800-38B/SP_800-38B.pdf"/></para>
+    /// CMAC: An implementation of a Cipher based Message Authentication Code
     /// </summary>
     /// 
     /// <example>
@@ -58,17 +57,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2015/01/23" version="1.3.0.0">Initial release</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block Namespace</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">VTDev.Libraries.CEXEngine.Crypto.Engines Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines"/>
     /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
+    /// <description>Implementation Notes:</description>
     /// <list type="bullet">
     /// <item><description>MAC return size must be a divisible of 8.</description></item>
     /// <item><description>MAC return size can be no longer than the Cipher Block size.</description></item>
@@ -76,17 +70,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
     /// <item><description>The <see cref="CMAC(IBlockCipher, int, bool)">Constructors</see> DisposeEngine parameter determines if Cipher engine is destroyed when <see cref="Dispose()"/> is called on this class; default is <c>true</c>.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>NIST SP800-38B: <see href="http://csrc.nist.gov/publications/nistpubs/800-38B/SP_800-38B.pdf">The CMAC Mode for Authentication</see>.</description></item>
-    /// <item><description>RFC 4493: <see href="http://tools.ietf.org/html/rfc4493">The AES-CMAC Algorithm</see>.</description></item>
-    /// <item><description>RFC 4494: <see href="http://tools.ietf.org/html/rfc4494">The AES-CMAC-96 Algorithm and Its Use with IPsec</see>.</description></item>
-    /// <item><description>RFC 4493: <see href="http://tools.ietf.org/html/rfc4615">The AES-CMAC-PRF-128 Algorithm for the Internet Key Exchange Protocol (IKE)</see>.</description></item>
+    /// <item><description>NIST <a href="http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf">Rijndael ammended</a>.</description></item>
+    /// <item><description>NIST <a href="http://csrc.nist.gov/publications/nistpubs/800-38B/SP_800-38B.pdf">SP800-38B</a>: The CMAC Mode for Authentication.</description></item>
+    /// <item><description>RFC <a href="http://tools.ietf.org/html/rfc4493">4493</a>: The AES-CMAC Algorithm.</description></item>
+    /// <item><description>RFC <a href="http://tools.ietf.org/html/rfc4494">4494</a>: The AES-CMAC-96 Algorithm and Its Use with IPsec.</description></item>
+    /// <item><description>RFC <a href="http://tools.ietf.org/html/rfc4615">4493</a>: The AES-CMAC-PRF-128 Algorithm for the Internet Key Exchange Protocol (IKE).</description></item>
     /// </list>
     /// 
-    /// <description><h4>Code Base Guides:</h4></description>
+    /// <description>Code Base Guides:</description>
     /// <list type="table">
-    /// <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
+    /// <item><description>Based on the Bouncy Castle Java <a href="http://bouncycastle.org/latest_releases.html">Release 1.51</a> version.</description></item>
     /// </list> 
     /// </remarks>
     public sealed class CMAC : IMac

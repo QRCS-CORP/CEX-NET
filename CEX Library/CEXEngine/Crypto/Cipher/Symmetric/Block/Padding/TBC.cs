@@ -6,7 +6,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding
 {
     /// <summary>
-    /// TBC: The Trailing Bit Compliment Padding Scheme.
+    /// TBC: The Trailing Bit Compliment Padding Scheme
     /// </summary>
     public sealed class TBC : IPadding
     {

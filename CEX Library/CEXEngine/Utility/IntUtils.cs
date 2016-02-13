@@ -276,6 +276,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <returns>Long value representation</returns>
         public static long DoubleToLong(double X)
         {
+            #pragma warning disable 1718
             if (X != X)
                 return 0L;
             if (X >= 9.2233720368547758E+18)

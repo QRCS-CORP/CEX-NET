@@ -86,22 +86,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             _sgnCode = StatByte[3];
 
             _test8 = ((StatByte[4][0] & 0xff)) | 
-                ((long)(StatByte[4][1] & 0xff) << 8) | 
-                ((long)(StatByte[4][2] & 0xff) << 16) | 
-                ((long)(StatByte[4][3] & 0xff)) << 24 | 
-                ((long)(StatByte[4][4] & 0xff)) << 32 | 
-                ((long)(StatByte[4][5] & 0xff)) << 40 | 
-                ((long)(StatByte[4][6] & 0xff)) << 48 | 
-                ((long)(StatByte[4][7] & 0xff)) << 56;
+                ((byte)(StatByte[4][1] & 0xff) << 8) | 
+                ((byte)(StatByte[4][2] & 0xff) << 16) | 
+                ((byte)(StatByte[4][3] & 0xff)) << 24 | 
+                ((byte)(StatByte[4][4] & 0xff)) << 32 | 
+                ((byte)(StatByte[4][5] & 0xff)) << 40 | 
+                ((byte)(StatByte[4][6] & 0xff)) << 48 | 
+                ((byte)(StatByte[4][7] & 0xff)) << 56;
 
             _big8 = ((StatByte[4][8] & 0xff)) | 
-                ((long)(StatByte[4][9] & 0xff) << 8) | 
-                ((long)(StatByte[4][10] & 0xff) << 16) | 
-                ((long)(StatByte[4][11] & 0xff)) << 24 | 
-                ((long)(StatByte[4][12] & 0xff)) << 32 | 
-                ((long)(StatByte[4][13] & 0xff)) << 40 | 
-                ((long)(StatByte[4][14] & 0xff)) << 48 | 
-                ((long)(StatByte[4][15] & 0xff)) << 56;
+                ((byte)(StatByte[4][9] & 0xff) << 8) | 
+                ((byte)(StatByte[4][10] & 0xff) << 16) | 
+                ((byte)(StatByte[4][11] & 0xff)) << 24 | 
+                ((byte)(StatByte[4][12] & 0xff)) << 32 | 
+                ((byte)(StatByte[4][13] & 0xff)) << 40 | 
+                ((byte)(StatByte[4][14] & 0xff)) << 48 | 
+                ((byte)(StatByte[4][15] & 0xff)) << 56;
         }
 
         /// <summary>

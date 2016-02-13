@@ -13,7 +13,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
     /// </summary>
     /// 
     /// <remarks>
-    /// <description><h4>Parameter OId:</h4></description>
+    /// <description>Parameter OId:</description>
     /// <list type="bullet">
     /// <item><description>A Parameter Set OId (uniquely identifies the parameter set), is always the first four bytes of a serialized parameter set.</description></item>
     /// <item><description>The OId format is ordered as: <c>Family</c>, <c>Set</c>, <c>SubSet</c>, and <c>Unique</c>.</description></item>
@@ -23,12 +23,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
     /// <item><description>The fourth byte can be a unique designator.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>McEliece Handbook of Applied Cryptography: Chapter 8: <see href="http://cacr.uwaterloo.ca/hac/about/chap8.pdf"/>.</description></item>
-    /// <item><description>Selecting Parameters for Secure McEliece-based Cryptosystems: <see href="https://eprint.iacr.org/2010/271.pdf"/></item>
-    /// <item><description>Weak keys in the McEliece public-key cryptosystem: <see href="http://perso.univ-rennes1.fr/pierre.loidreau/articles/ieee-it/Cles_Faibles.pdf"/>.</description></item>
-    /// <item><description>McBits: fast constant-time code-based cryptography: <see href="http://binary.cr.yp.to/mcbits-20130616.pdf"/>.</description></item>
+    /// <item><description>McEliece Handbook of Applied Cryptography: <a href="http://cacr.uwaterloo.ca/hac/about/chap8.pdf">Chapter 8</a></description></item>
+    /// <item><description>Selecting Parameters for <a href="https://eprint.iacr.org/2010/271.pdf">Secure McEliece-based Cryptosystems</a></description></item>
+    /// <item><description>Weak keys in the <a href="http://perso.univ-rennes1.fr/pierre.loidreau/articles/ieee-it/Cles_Faibles.pdf">McEliece Public-Key Crypto System</a></description></item>
+    /// <item><description><a href="http://binary.cr.yp.to/mcbits-20130616.pdf">McBits</a>: fast constant-time code-based cryptography: </description></item>
     /// </list>
     /// </remarks>
     public static class MPKCParamSets

@@ -38,13 +38,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
 {
     /// <summary>
     /// A set of pre-defined EES encryption parameter sets 
-    /// based on <see href="https://github.com/tbuktu/ntru/blob/master/src/main/java/net/sf/ntru/encrypt/EncryptionParameters.java">EncryptionParameters.java</see>.
+    /// based on <a href="https://github.com/tbuktu/ntru/blob/master/src/main/java/net/sf/ntru/encrypt/EncryptionParameters.java">EncryptionParameters.java</a>.
     /// <para>Note: Sets names starting with 'A' (ex. A2011439), are the recommended sets from the original author (T. Buktu). Sets pre-fixed with 'F' (ex. FE1087EP2) are the fast polynomial versions. 
     /// Sets prefixed with 'CX' (ex. CX1931) are experimental, they use larger N, df, and dm values, and a 512 bit digest for the IGF and mask.</para>
     /// </summary>
     /// 
     /// <remarks>
-    /// <description><h4>Parameter OId:</h4></description>
+    /// <description>Parameter OId:</description>
     /// <list type="bullet">
     /// <item><description>A Parameter Set OId (uniquely identifies the parameter set), is always the first four bytes of a serialized parameter set.</description></item>
     /// <item><description>The OId format is ordered as: <c>Family</c>, <c>Set</c>, <c>SubSet</c>, and <c>Unique</c>.</description></item>

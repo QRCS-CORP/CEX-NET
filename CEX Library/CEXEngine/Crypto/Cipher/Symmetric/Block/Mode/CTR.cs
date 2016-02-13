@@ -40,8 +40,7 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 {
     /// <summary>
-    /// CTR: Implements a Parallel Segmented Counter Mode: CTR.
-    /// <para>CTR as outlined in the NIST document: SP800-38A: <see href="http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf"/></para>
+    /// CTR: Implements a Parallel Segmented Counter Mode: CTR
     /// </summary> 
     /// 
     /// <example>
@@ -57,19 +56,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2014/11/11" version="1.2.0.0">Initial release</revision>
-    /// <revision date="2015/01/23" version="1.3.0.0">Changes to formatting and documentation</revision>
-    /// <revision date="2015/07/01" version="1.4.0.a">Added library exceptions</revision>
-    /// <revision date="2015/09/15" version="1.4.0.b">Added the ParallelOption property</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block Namespace</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">VTDev.Libraries.CEXEngine.Crypto.Engines Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines"/>
     /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
+    /// <description>Implementation Notes:</description>
     /// <list type="bullet">
     /// <item><description>In CTR mode, both encryption and decryption can be processed in parallel.</description></item>
     /// <item><description>Parallel processing is enabled by passing a block size of <see cref="ParallelBlockSize"/> to the transform.</description></item>
@@ -78,9 +70,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
     /// <item><description>Cipher Engine is automatically disposed of unless DisposeEngine is set to <c>false</c> in the class constructor <see cref="CTR(IBlockCipher, bool)"/></description></item>
     /// </list>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>NIST: <see href="http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf">SP800-38A</see>.</description></item>
+    /// <item><description>NIST <a href="http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf">SP800-38A</a>.</description></item>
     /// </list>
     /// </remarks>
     public sealed class CTR : ICipherMode
@@ -295,10 +287,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 
         #region Public Methods
         /// <summary>
-        /// Initialize the Cipher with a key
+        /// Initialize the Cipher
         /// </summary>
         /// 
-        /// <param name="Encryption">Cipher is used. for encryption, false to decrypt</param>
+        /// <param name="Encryption">True if cipher is used for encryption, false to decrypt</param>
         /// <param name="KeyParam">The KeyParams containing key and vector</param>
         /// 
         /// <exception cref="CryptoSymmetricException">Thrown if a null Key or IV is used</exception>

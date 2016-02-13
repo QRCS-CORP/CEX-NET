@@ -5,3 +5,11 @@ C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMServer\obj\Release\DTMServer.csprojResolveAssemblyReference.cache
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMServer\obj\Release\DTMTest.exe
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMServer\obj\Release\DTMTest.pdb
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\DTMServer\bin\Release\DTMTest.exe
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\DTMServer\bin\Release\DTMTest.pdb
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\DTMServer\bin\Release\CEXEngine.dll
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\DTMServer\bin\Release\CEXEngine.pdb
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\DTMServer\bin\Release\CEXEngine.xml
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\DTMServer\obj\Release\DTMServer.csprojResolveAssemblyReference.cache
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\DTMServer\obj\Release\DTMTest.exe
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\DTMServer\obj\Release\DTMTest.pdb

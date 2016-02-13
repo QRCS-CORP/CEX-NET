@@ -30,7 +30,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 // 
 // Principal Algorithms:
 // An implementation of the SHA3 digest finalist, Blake, designed by Jean-Philippe Aumasson, Luca Henzen, Willi Meier, and Raphael C.-W. Phan. 
-// SHA3 Proposal <see href="https://131002.net/blake/blake.pdf">Blake</see>.
+// SHA3 Proposal <a href="https://131002.net/blake/blake.pdf">Blake</a>.
 // 
 // Implementation Details:
 // An implementation of the Blake digest with a 512 bit digest size.
@@ -41,8 +41,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 {
     /// <summary>
-    /// Blake512: An implementation of the Blake digest with a 512 bit return size.
-    /// <para>SHA-3 finalist: <see href="http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf"/>: The Blake: <see href="https://131002.net/blake/blake.pdf"/> digest</para>
+    /// Blake512: An implementation of the Blake digest with a 512 bit return size
     /// </summary> 
     /// 
     /// <example>
@@ -56,16 +55,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2015/01/23" version="1.3.0.0">Initial release</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>
     /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
+    /// <description>Implementation Notes:</description>
     /// <list type="bullet">
     /// <item><description>Block size is 64 bytes, (512 bits).</description></item>
     /// <item><description>Digest size is 64 bytes, (512 bits).</description></item>
@@ -73,17 +67,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     /// <item><description>The <see cref="DoFinal(byte[], int)"/> method resets the internal state.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>SHA3 Proposal <see href="https://131002.net/blake">Blake</see>.</description></item>
-    /// <item><description>SHA3: <see href="http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf">Third-Round Report of the SHA-3 Cryptographic Hash Algorithm Competition</see>.</description></item>
-    /// <item><description>SHA3 Submission in C: <see href="https://131002.net/blake/blake_ref.c">blake_ref.c</see>.</description></item>
-    /// <item><description>The: <see href="http://hashlib.codeplex.com/">HashLib</see> Project (test vectors).</description></item>
+    /// <item><description>NIST <a href="https://131002.net/blake">SHA3 Proposal Blake</a>.</description></item>
+    /// <item><description>NIST <a href="http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf">SHA3: Third-Round Report</a> of the SHA-3 Cryptographic Hash Algorithm Competition.</description></item>
+    /// <item><description>SHA3 Submission in C: <a href="https://131002.net/blake/blake_ref.c">blake_ref.c</a>.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Code Base Guides:</h4></description>
+    /// <description>Code Base Guides:</description>
     /// <list type="table">
-    /// <item><description>Inspired by the excellent project by Dominik Reichl: <see href="http://www.codeproject.com/Articles/286937/BlakeSharp-A-Csharp-Implementation-of-the-BLAKE-Ha">Blake Sharp</see>.</description></item>
+    /// <item><description>Inspired by the excellent project by Dominik Reichl: <a href="http://www.codeproject.com/Articles/286937/BlakeSharp-A-Csharp-Implementation-of-the-BLAKE-Ha">Blake Sharp</a>.</description></item>
     /// </list> 
     /// </remarks>
     public sealed class Blake512 : IDigest

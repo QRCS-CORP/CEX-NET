@@ -31,26 +31,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2014/11/11" version="1.2.0.0">Initial release</revision>
-    /// <revision date="2015/01/23" version="1.3.0.0">Assignable digests and Prng parameters added</revision>
-    /// <revision date="2016/01/09" version="1.5.0.0">Rework of counter/generator mechanisms</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Prng ">VTDev.Libraries.CEXEngine.Crypto.Prng Namespace</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Prng.IRandom ">VTDev.Libraries.CEXEngine.Crypto.Prng.IRandom Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Prng "/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Prng.IRandom "/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs"/>
     /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
+    /// <description>Implementation Notes:</description>
     /// <list type="bullet">
     /// <item><description>SHA-2 Generates key material using a two stage Hmac_k(Prng()) process.</description></item>
-    /// <item><description>Blake: <see href="https://131002.net/blake/blake.pdf"/>, : <see href="http://keccak.noekeon.org/Keccak-submission-3.pdf"/>, and Skein: <see href="http://www.skein-hash.info/sites/default/files/skein1.1.pdf"/> also use a two stage generation method; Hash(Prng()).</description></item>
+    /// <item><description>Blake, Keccak, and Skein also use a two stage generation method; Hash(Prng()).</description></item>
     /// <item><description>Seed Generator can be any of the <see cref="SeedGenerators"/>.</description></item>
     /// <item><description>Hash can be any of the <see cref="Digests"/> digests.</description></item>
-    /// <item><description>Default Seed Generator is CSPRsg: <see href="http://msdn.microsoft.com/en-us/library/system.security.cryptography.rngcryptoserviceprovider.aspx"/>, default digest is SHA512.</description></item>
+    /// <item><description>Default Seed Generator is CSPRsg: <a href="http://msdn.microsoft.com/en-us/library/system.security.cryptography.rngcryptoserviceprovider.aspx">RngCrypto</a>, default digest is SHA512.</description></item>
     /// <item><description>Resources are disposed of automatically.</description></item>
     /// </list>
     /// </remarks>

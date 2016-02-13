@@ -84,20 +84,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     /// </code>
     /// </example>
     /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParameters">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM DtmParameters class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure.DtmClientStruct">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure DtmClientStruct structure</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure.DtmIdentityStruct">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure DtmIdentityStruct structure</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure.DtmPacketStruct">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure DtmPacket structure</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure.DtmSessionStruct">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure DtmSessionStruct</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Argument.DtmErrorArgs">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Argument DtmErrorArgs class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Argument.DtmEstablishedArgs">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Argument DtmEstablishedArgs class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Argument.DtmPacketArgs">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Argument DtmPacketArgs class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Flag.DtmErrorFlags">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Flag DtmErrorFlags enumeration</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Flag.DtmServiceFlags">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Flag DtmPacketFlags enumeration</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Flag.DtmPacketFlags">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Flag DtmPacketFlags enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.DtmParameters"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure.DtmClientStruct"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure.DtmIdentityStruct"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure.DtmPacketStruct"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure.DtmSessionStruct"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Argument.DtmErrorArgs"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Argument.DtmEstablishedArgs"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Argument.DtmPacketArgs"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Flag.DtmErrorFlags"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Flag.DtmServiceFlags"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Flag.DtmPacketFlags"/>
     /// 
     /// <remarks>
-    /// <description><h4>Overview:</h4></description>
+    /// <description>Overview:</description>
     /// <para>DTM is designed for maximum flexibility, for this reason authentication between hosts is 'deferred' to another layer of software, whereby the users actions and settings can at 
     /// least in part determine the level of security, authentication, repudiation, and how an exchange is transacted.</para>
     /// 
@@ -120,7 +120,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     /// <para>Both channels (Send and Receive) are encrypted with seperate keys; data Bob sends to Alice is encrypted with the symmetric key that Bob generated and exchanged, and data Bob receives
     /// from Alice is decrypted with the symmetric key that Alice generated. In this way each actor defines the security context for the channel that they transmit data on.</para>
     /// 
-    /// <description><h4>Exchange States:</h4></description>
+    /// <description>Exchange States:</description>
     /// <list type="table">
     ///     <listheader>
     ///         <term>Phase</term>
@@ -164,7 +164,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     ///     </item>
     /// </list>
     /// 
-    /// <description><h4>Key Forwarding Sequence:</h4></description>
+    /// <description>Key Forwarding Sequence:</description>
     /// 
     /// <list type="table">
     ///     <listheader>
@@ -202,7 +202,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     /// factors such as the amount of data sent/received or the channels up-time.
     /// The ratchet flag triggers the immediate re-keying of the crypto stream (once the new keys have been exchanged).</para>
     /// 
-    /// <description><h4>Structures:</h4></description>
+    /// <description>Structures:</description>
     /// <list type="table">
     ///     <listheader>
     ///         <term>Structure</term>
@@ -238,7 +238,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     ///     </item>
     /// </list>
     /// 
-    /// <description><h4>Enumerations:</h4></description>
+    /// <description>Enumerations:</description>
     /// <list type="table">
     ///     <listheader>
     ///         <term>Enumeration</term>
@@ -278,7 +278,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     ///     </item>
     /// </list>
     /// 
-    /// <description><h4>Arguments:</h4></description>
+    /// <description>Arguments:</description>
     /// <list type="table">
     ///     <listheader>
     ///         <term>Argument</term>
@@ -318,7 +318,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     ///     </item>
     /// </list>
     /// 
-    /// <description><h4>Events:</h4></description>
+    /// <description>Events:</description>
     /// <list type="table">
     ///     <listheader>
     ///         <term>Event</term>

@@ -71,16 +71,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2015/01/23" version="1.0.0.0">Initial release</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.NTRUEncrypt">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU NTRUEncrypt Class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.NTRUEncrypt"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs"/>
     /// 
     /// <remarks>
-    /// <description><h4>NTRU Parameter Description:</h4></description>
+    /// <description>NTRU Parameter Description:</description>
     /// <list type="table">
     /// <item><description><c>OId</c> - Unique identifier; <c>Family</c>, <c>Set</c>, <c>SubSet</c>, and <c>Designator</c>. The NTRU family must be <c>2</c> corresponding with the <see cref="AsymmetricEngines"/> enumeration.</description></item>
     /// <item><description><c>N</c> - Degree Parameter. A positive integer. The associated NTRU lattice has dimension 2N.</description></item>
@@ -92,20 +88,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
     /// <item><description><c>Center</c> - Centering Method. A means of performing mod q reduction on decryption.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>NTRU: A Ring Based Public Key Crypto System: <see href="http://binary.cr.yp.to/mcbits-20130616.pdf"/>.</description></item>
-    /// <item><description>Optimizations for NTRU: <see href="https://www.securityinnovation.com/uploads/Crypto/TECH_ARTICLE_OPT.pdf"/>.</description></item>
-    /// <item><description>Adaptive Key Recovery Attacks on NTRU-based Somewhat Homomorphic Encryption Schemes: <see href="https://eprint.iacr.org/2015/127.pdf"/>.</description></item>
-    /// <item><description>Efficient Embedded Security Standards (EESS): <see href="http://grouper.ieee.org/groups/1363/lattPK/submissions/EESS1v2.pdf"/>.</description></item>
-    /// <item><description>Practical lattice-based cryptography: NTRUEncrypt and NTRUSign: <see href="https://www.securityinnovation.com/uploads/Crypto/lll25.pdf"/>.</description></item>
-    /// <item><description>NTRU Cryptosystems Technical Report: <see href="https://www.securityinnovation.com/uploads/Crypto/NTRUTech016.pdf"/>.</description></item>
+    /// <item><description>NTRU: A Ring Based <a href="http://binary.cr.yp.to/mcbits-20130616.pdf">Public Key Crypto System</a>.</description></item>
+    /// <item><description><a href="https://www.securityinnovation.com/uploads/Crypto/TECH_ARTICLE_OPT.pdf">Optimizations</a> for NTRU.</description></item>
+    /// <item><description>Adaptive Key Recovery Attacks on NTRU-based Somewhat <a href="https://eprint.iacr.org/2015/127.pdf">Homomorphic Encryption Schemes</a>.</description></item>
+    /// <item><description>Efficient Embedded Security Standards <a href="http://grouper.ieee.org/groups/1363/lattPK/submissions/EESS1v2.pdf">EESS</a>.</description></item>
+    /// <item><description>Practical lattice-based cryptography: <a href="https://www.securityinnovation.com/uploads/Crypto/lll25.pdf">NTRUEncrypt and NTRUSign</a>.</description></item>
+    /// <item><description>NTRU Cryptosystems <a href="https://www.securityinnovation.com/uploads/Crypto/NTRUTech016.pdf">Technical Report</a>.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Code Base Guides:</h4></description>
+    /// <description>Code Base Guides:</description>
     /// <list type="table">
-    /// <item><description>Inspired by the excellent java project NTRU Encrypt by Tim Buktu: <see href="https://github.com/tbuktu/ntru/description">Release 1.2</see>, and
-    /// the NTRUOpenSourceProject/ntru-crypto project provided by Security Innovation, Inc <see href="https://github.com/NTRUOpenSourceProject/ntru-crypto">NTRU Encrypt</see>.</description></item>
+    /// <item><description>Inspired by the excellent java project NTRU Encrypt by Tim Buktu: <a href="https://github.com/tbuktu/ntru/description">Release 1.2</a>, and
+    /// the NTRUOpenSourceProject/ntru-crypto project provided by Security Innovation, Inc <a href="https://github.com/NTRUOpenSourceProject/ntru-crypto">NTRU Encrypt</a>.</description></item>
     /// </list> 
     /// </remarks>
     public sealed class NTRUParameters : IAsymmetricParameters

@@ -25,16 +25,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2015/01/23" version="1.0.1.0">Initial release</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCEncrypt">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece MPKCEncrypt Class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs">VTDev.Libraries.CEXEngine.Crypto.McElieceCiphers Enumeration</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCEncrypt"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>
     /// 
     /// <remarks>
-    /// <description><h4>MPKC Parameter Description:</h4></description>
+    /// <description>MPKC Parameter Description:</description>
     /// <list type="table">
     /// <item><description><c>OId</c> - Unique identifier; <c>Family</c>, <c>Set</c>, <c>SubSet</c>, and <c>Designator</c>. The McEliece family must be <c>1</c> corresponding with the <see cref="AsymmetricEngines"/> enumeration.</description></item>
     /// <item><description><c>M</c> - The degree of the finite field GF(2^m).</description></item>
@@ -43,17 +39,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
     /// <item><description><c>Digest</c> - The digest used by the cipher engine.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>McEliece Handbook of Applied Cryptography: Chapter 8<see href="http://cacr.uwaterloo.ca/hac/about/chap8.pdf"/>.</description></item>
-    /// <item><description>Selecting Parameters for Secure McEliece-based Cryptosystems: <see href="https://eprint.iacr.org/2010/271.pdf"/></item>
-    /// <item><description>Weak keys in the McEliece public-key cryptosystem: <see href="http://perso.univ-rennes1.fr/pierre.loidreau/articles/ieee-it/Cles_Faibles.pdf"/>.</description></item>
-    /// <item><description>McBits: fast constant-time code-based cryptography: <see href="http://binary.cr.yp.to/mcbits-20130616.pdf"/>.</description></item>
+    /// <item><description>McEliece Handbook of Applied Cryptography: <a href="http://cacr.uwaterloo.ca/hac/about/chap8.pdf">Chapter 8</a></description></item>
+    /// <item><description>Selecting Parameters for <a href="https://eprint.iacr.org/2010/271.pdf">Secure McEliece-based Cryptosystems</a></description></item>
+    /// <item><description>Weak keys in the <a href="http://perso.univ-rennes1.fr/pierre.loidreau/articles/ieee-it/Cles_Faibles.pdf">McEliece Public-Key Crypto System</a></description></item>
+    /// <item><description><a href="http://binary.cr.yp.to/mcbits-20130616.pdf">McBits</a>: fast constant-time code-based cryptography: </description></item>
     /// </list>
     /// 
-    /// <description><h4>Code Base Guides:</h4></description>
+    /// <description>Code Base Guides:</description>
     /// <list type="table">
-    /// <item><description>Inspired by the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> versions McEliece implementation.</description></item>
+    /// <item><description>Inspired by the Bouncy Castle Java <a href="http://bouncycastle.org/latest_releases.html">Release 1.51</a> versions McEliece implementation.</description></item>
     /// </list> 
     /// </remarks>
     public sealed class MPKCParameters : IAsymmetricParameters

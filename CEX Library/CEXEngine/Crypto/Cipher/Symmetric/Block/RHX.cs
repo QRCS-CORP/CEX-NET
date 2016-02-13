@@ -35,8 +35,8 @@ using VTDev.Libraries.CEXEngine.Utility;
 // 
 // Principal Algorithms:
 // Cipher implementation based on the Rijndael block cipher designed by Joan Daemen and Vincent Rijmen:
-// Rijndael <see href="http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf">Specification</see>.
-// AES specification <see href="http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf">Fips 197</see>.
+// Rijndael <a href="http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf">Specification</a>.
+// AES specification <a href="http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf">Fips 197</a>.
 // 
 // Implementation Details:
 // An implementation based on the Rijndael block cipher, 
@@ -50,7 +50,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 {
     /// <summary>
     /// RHX: A Rijndael Cipher extended with an (optional) HKDF powered Key Schedule.
-    /// <para>RHX is a Rijndael: <see href="http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf"/> implementation that can use a standard configuration on key sizes up to 256 bits, 
+    /// <para>RHX is a Rijndael implementation that can use a standard configuration on key sizes up to 256 bits, 
     /// an extended key size of 512 bits, or unlimited key sizes greater than 64 bytes. 
     /// On <see cref="LegalKeySizes"/> larger than 64 bytes, an HKDF bytes generator is used to expand the <c>working key</c> integer array.
     /// In extended mode, the number of <c>transformation rounds</c> can be user assigned (through the constructor) to between 10 and 38 rounds.</para>
@@ -69,24 +69,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2014/09/18" version="1.2.0.0">Initial release using a fixed Digest key schedule generator</revision>
-    /// <revision date="2015/01/23" version="1.3.0.0">Secondary release using an assignable Digest in the HKDF engine</revision>
-    /// <revision date="2015/03/15" version="1.3.2.0">Added the IkmSize optional parameter to the constructor, and the DistributionCode property</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
-    /// <revision date="2016/01/21" version="1.5.0.0">Merged RDX and RHX implementations</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockCiphers">VTDev.Libraries.CEXEngine.Crypto.Enumeration BlockCiphers Enumeration</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.CipherModes">VTDev.Libraries.CEXEngine.Crypto.Enumeration CipherModes Enumeration</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration Digests Enumeration</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Generator.HKDF">VTDev.Libraries.CEXEngine.Crypto.Generator HKDF Generator</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode ICipherMode Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest IDigest Interface</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockCiphers"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.CipherModes"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Generator.HKDF"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest"/>
     /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
-    /// <para>The key schedule in RHX is the defining difference between this and a standard version of Rijndael: <see href="http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf"/>.
+    /// <description>Implementation Notes:</description>
+    /// <para>The key schedule in RHX is the defining difference between this and a standard version of Rijndael.
     /// If the cipher key input is beyond the standard lengths used in Rijndael (128-512 bits), instead of using an inline function to expand the user supplied key into a larger working array, 
     /// RHX uses a hash based pseudo-random generator to create the internal working key array.
     /// When using a non-standard key size, the number of diffusion rounds can be set by the user (through the class constructor). RHX can run between 10 and 38 rounds.
@@ -101,9 +93,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// <item><description>Rounds are determined automatically when using standard key sizes, and user assignable in extended mode to between 10 and 38 rounds in steps of two, (default is 22).</description></item>
     /// </list>
     /// 
-    /// <description><h4>HKDF Bytes Generator:</h4></description>
-    /// <para>HKDF: <see href="http://tools.ietf.org/html/rfc5869"/> is a key derivation function that uses a Digest HMAC: <see href="http://tools.ietf.org/html/rfc2104"/> (Hash based Message Authentication Code) as its random engine. 
-    /// This is one of the strongest: <see href="http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf"/> methods available for generating pseudo-random keying material, and far superior in entropy dispersion to Rijndael, or even Serpents key schedule. 
+    /// <description>HKDF Bytes Generator:</description>
+    /// <para>HKDF: is a key derivation function that uses a Digest HMAC (Hash based Message Authentication Code) as its random engine. 
+    /// This is one of the strongest methods available for generating pseudo-random keying material, and far superior in entropy dispersion to Rijndael, or even Serpents key schedule. 
     /// HKDF uses up to three inputs; a nonce value called an information string, an Ikm (Input keying material), and a Salt value. 
     /// The HMAC RFC 2104, recommends a key size equal to the digest output, in the case of SHA512, 64 bytes, anything larger gets passed through the hash function to get the required 512 bit key size. 
     /// The Salt size is a minimum of the hash functions block size, with SHA-2 512 that is 128 bytes.</para>
@@ -111,9 +103,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// <para>When using SHA-2 512, a minimum key size for RHX is 192 bytes, further blocks of salt can be added to the key so long as they align; ikm + (n * blocksize), ex. 192, 320, 448 bytes.. there is no upper maximum. 
     /// This means that you can create keys as large as you like so long as it falls on these boundaries, this effectively eliminates brute force as a means of attack on the cipher, even in post-quantum terms.</para> 
     /// 
-    /// <para>The Digest that powers HKDF, can be any one of the Hash Digests implemented in the CEX library; Blake: <see href="https://131002.net/blake/blake.pdf"/>, 
-    /// Keccak: <see href="http://keccak.noekeon.org/Keccak-submission-3.pdf"/>, SHA-2: <see href="http://keccak.noekeon.org/Keccak-submission-3.pdf"/>, 
-    /// or Skein: <see href="http://www.skein-hash.info/sites/default/files/skein1.1.pdf"/>.
+    /// <para>The Digest that powers HKDF, can be any one of the Hash Digests implemented in the CEX library; Blake, Keccak, SHA-2 or Skein.
     /// The default Digest Engine is SHA-2 512.</para>
     /// 
     /// <para>The legal key sizes are determined by a combination of the (Hash Size + a Multiplier * the Digest State Size); <math>klen = h + (n * s)</math>, this will vary between Digest implementations. 
@@ -123,20 +113,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// RHX is capable of processing up to 38 rounds, that is twenty-four rounds more than the fourteen rounds used in an implementation of AES-256. 
     /// Valid rounds assignments can be found in the <see cref="LegalRounds"/> static property.</para>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>NIST: <see href="http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf">AES Fips 197</see>.</description></item>
-    /// <item><description>HMAC: <see href="http://tools.ietf.org/html/rfc2104">RFC 2104</see>.</description></item>
-    /// <item><description>Fips: <see href="http://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf">198.1</see>.</description></item>
-    /// <item><description>HKDF: <see href="http://tools.ietf.org/html/rfc5869">RFC 5869</see>.</description></item>
-    /// <item><description>NIST: <see href="http://csrc.nist.gov/publications/drafts/800-90/draft-sp800-90b.pdf">SP800-90B</see>.</description></item>
+    /// <item><description>NIST <a href="http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf">AES Fips 197</a>.</description></item>
+    /// <item><description>NIST <a href="http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf">Rijndael ammended</a>.</description></item>
+    /// <item><description>HMAC <a href="http://tools.ietf.org/html/rfc2104">RFC 2104</a>.</description></item>
+    /// <item><description>Fips <a href="http://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf">198.1</a>.</description></item>
+    /// <item><description>HKDF <a href="http://tools.ietf.org/html/rfc5869">RFC 5869</a>.</description></item>
+    /// <item><description>NIST <a href="http://csrc.nist.gov/publications/drafts/800-90/draft-sp800-90b.pdf">SP800-90B</a>.</description></item>
+    /// <item><description>SHA3 <a href="https://131002.net/blake/blake.pdf">The Blake digest</a>.</description></item>
+    /// <item><description>SHA3 <a href="http://keccak.noekeon.org/Keccak-submission-3.pdf">The Keccak digest</a>.</description></item>
+    /// <item><description>SHA3 <a href="http://www.skein-hash.info/sites/default/files/skein1.1.pdf">The Skein digest</a>.</description></item>
     /// </list>
-    /// 
-    /// <description><h4>Code Base Guides:</h4></description>
-    /// <list type="table">
-    /// <item><description>Inspired in part by the Mono: <see href="https://github.com/mono/mono/blob/effa4c07ba850bedbe1ff54b2a5df281c058ebcb/mcs/class/corlib/System.Security.Cryptography/RijndaelManagedTransform.cs">RijndaelManagedTransform</see> class, 
-    /// and the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see>.</description></item>
-    /// </list> 
     /// </remarks>
     public sealed class RHX : IBlockCipher
     {

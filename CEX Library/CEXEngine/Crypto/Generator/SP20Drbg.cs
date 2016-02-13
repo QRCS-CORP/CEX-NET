@@ -38,8 +38,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 {
     /// <summary>
-    /// SP20Drbg: A parallelized Salsa20 deterministic random byte generator implementation.
-    /// <para>A Salsa20 key stream, parallelized and extended to use up to 30 rounds of diffusion.</para>
+    /// SP20Drbg: A parallelized Salsa20 deterministic random byte generator implementation
     /// </summary>
     /// 
     /// <example>
@@ -55,13 +54,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2015/06/14" version="1.4.0.0">Initial release</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
-    /// </revisionHistory>
-    /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
+    /// <description>Implementation Notes:</description>
     /// <list type="bullet">
     /// <item><description>Valid Key sizes are 128, 256 (16 and 32 bytes).</description></item>
     /// <item><description>Block size is 64 bytes wide.</description></item>
@@ -69,16 +63,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// <item><description>Parallel block size is 64,000 bytes by default; but is configurable.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>Salsa20 <see href="http://www.ecrypt.eu.org/stream/salsa20pf.html">Specification</see>.</description></item>
-    /// <item><description>Salsa20 <see href="http://cr.yp.to/snuffle/design.pdf">Design</see>.</description></item>
-    /// <item><description>Salsa20 <see href="http://cr.yp.to/snuffle/security.pdf">Security</see>.</description></item>
+    /// <item><description>Salsa20 <a href="http://www.ecrypt.eu.org/stream/salsa20pf.html">Specification</a>.</description></item>
+    /// <item><description>Salsa20 <a href="http://cr.yp.to/snuffle/design.pdf">Design</a>.</description></item>
+    /// <item><description>Salsa20 <a href="http://cr.yp.to/snuffle/security.pdf">Security</a>.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Code Base Guides:</h4></description>
+    /// <description>Code Base Guides:</description>
     /// <list type="table">
-    /// <item><description>Inspired in part by the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see>.</description></item>
+    /// <item><description>Inspired in part by the Bouncy Castle Java <a href="http://bouncycastle.org/latest_releases.html">Release 1.51</a>.</description></item>
     /// </list> 
     /// </remarks>
     public sealed class SP20Drbg : IGenerator

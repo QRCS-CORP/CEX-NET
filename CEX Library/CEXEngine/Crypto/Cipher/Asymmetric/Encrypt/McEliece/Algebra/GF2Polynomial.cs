@@ -1222,8 +1222,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             {
                 for (i = _blocks - 1; i >= 0; i--)
                 {
-                    _value[(i << 1) + 1] = GF2Polynomial._squaringTable[IntUtils.URShift((_value[i] & 0x00ff0000), 16)] | (GF2Polynomial._squaringTable[IntUtils.URShift((_value[i] & 0xff000000), 24)] << 16);
-                    _value[i << 1] = GF2Polynomial._squaringTable[_value[i] & 0x000000ff] | (GF2Polynomial._squaringTable[IntUtils.URShift((_value[i] & 0x0000ff00), 8)] << 16);
+
+                    _value[(i << 1) + 1] = (int)GF2Polynomial._squaringTable[IntUtils.URShift((_value[i] & 0x00ff0000), 16)] | (GF2Polynomial._squaringTable[IntUtils.URShift((_value[i] & 0xff000000), 24)] << 16);
+                    _value[i << 1] = (int)GF2Polynomial._squaringTable[_value[i] & 0x000000ff] | (GF2Polynomial._squaringTable[IntUtils.URShift((_value[i] & 0x0000ff00), 8)] << 16);
                 }
                 _blocks <<= 1;
                 _length = (_length << 1) - 1;
@@ -1233,8 +1234,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 int[] result = new int[_blocks << 1];
                 for (i = 0; i < _blocks; i++)
                 {
-                    result[i << 1] = GF2Polynomial._squaringTable[_value[i] & 0x000000ff] | (GF2Polynomial._squaringTable[IntUtils.URShift((_value[i] & 0x0000ff00), 8)] << 16);
-                    result[(i << 1) + 1] = GF2Polynomial._squaringTable[IntUtils.URShift((_value[i] & 0x00ff0000), 16)] | (GF2Polynomial._squaringTable[IntUtils.URShift((_value[i] & 0xff000000), 24)] << 16);
+                    result[i << 1] = (int)GF2Polynomial._squaringTable[_value[i] & 0x000000ff] | (GF2Polynomial._squaringTable[IntUtils.URShift((_value[i] & 0x0000ff00), 8)] << 16);
+                    result[(i << 1) + 1] = (int)GF2Polynomial._squaringTable[IntUtils.URShift((_value[i] & 0x00ff0000), 16)] | (GF2Polynomial._squaringTable[IntUtils.URShift((_value[i] & 0xff000000), 24)] << 16);
                 }
                 _value = null;
                 _value = result;

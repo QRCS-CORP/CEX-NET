@@ -31,8 +31,8 @@ using VTDev.Libraries.CEXEngine.Utility;
 // SOFTWARE.
 // 
 // Code Base Guides:
-// Based on the Deveel Math library by Antonello Provenzano: <see href="https://github.com/deveel/deveel-math/tree/master/src/Deveel.Math/Deveel.Math">BigDecimal class, 
-// and Open JDK <see href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/8-b132/java/math/BigInteger.java#BigInteger">BigDecimal.java</see>.
+// Based on the <a href="https://github.com/deveel/deveel-math/tree/master/src/Deveel.Math/Deveel.Math">Deveel Math</a> library by Antonello Provenzano: BigDecimal class, 
+// and Open JDK <a href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/8-b132/java/math/BigInteger.java#BigInteger">BigDecimal.java</a>.
 // 
 // Implementation Details:
 // An implementation of a BigDecimal class. 
@@ -59,10 +59,6 @@ namespace VTDev.Libraries.CEXEngine.Numeric
     /// BigDecimal p = BigDecimal(bigInt);
     /// </code>
     /// </example>
-    /// 
-    /// <revisionHistory>
-    /// <revision date="2015/01/23" version="1.3.2.0">Initial release</revision>
-    /// </revisionHistory>
     /// 
     /// <remarks>
     /// <para>The BigDecimal class provides operations for arithmetic, scale manipulation, rounding, comparison, hashing, and format conversion.  
@@ -2957,6 +2953,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>True if NaN, otherwise false</returns>
         private static bool IsNaN(double Value)
         {
+            #pragma warning disable 1718
             return Value != Value;
         }
 
@@ -3250,9 +3247,6 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         public override bool Equals(object Obj)
         {
-            if (this == Obj)
-                return true;
-
             if (Obj is BigDecimal)
             {
                 BigDecimal x1 = (BigDecimal)Obj;

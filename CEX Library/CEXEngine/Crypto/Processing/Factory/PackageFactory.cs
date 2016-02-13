@@ -58,26 +58,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2015/01/23" version="1.3.0.0">Initial release</revision>
-    /// <revision date="2015/02/23" version="1.3.2.0">Reconstructed and expanded to process CipherDescription, KeyAuthority, and PackageKey structures</revision>
-    /// <revision date="2015/05/18" version="1.3.5.0">Renamed to PackageFactory</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.PackageKey">VTDev.Libraries.CEXEngine.Crypto.Processing.Structures PackageKey Structure</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.KeyAuthority">VTDev.Libraries.CEXEngine.Crypto.Processing.Structures KeyAuthority structure</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription">VTDev.Libraries.CEXEngine.Crypto.Processing.Structures CipherDescription Structure</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies">VTDev.Libraries.CEXEngine.Crypto.Enumeration KeyPolicies Enumeration</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.PackageKeyStates">VTDev.Libraries.CEXEngine.Crypto KeyStates Enumeration</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs Enumeration</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.KeyGenerator">VTDev.Libraries.CEXEngine.Crypto.KeyGenerator class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.KeyParams">VTDev.Libraries.CEXEngine.Crypto.Processing.Structure KeyParams class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.CipherStream">VTDev.Libraries.CEXEngine.Crypto.Processing CipherStream class</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.PackageKey"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.KeyAuthority"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.PackageKeyStates"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.KeyGenerator"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.KeyParams"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.CipherStream"/>
     /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
+    /// <description>Implementation Notes:</description>
     /// <para>A PackageKey file contains a <see cref="KeyAuthority"/> structure that defines its identity and security settings, 
     /// a <see cref="CipherDescription"/> that contains the settings required to create a specific cipher instance, and the 'subkey set', an array of unique subkey id strings and 
     /// policy flags that identify and control each subkey.</para>
@@ -432,7 +425,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 {
                     int keySize = Description.KeySize + Description.IvSize + Description.MacSize;
                     // overwrite the region within file
-                    Erase(keyPos, keySize);
+                    Erase(keyStream, keyPos, keySize);
                     // clear this section of the key
                     keyStream.Seek(keyPos, SeekOrigin.Begin);
                     keyStream.Write(new byte[keySize], 0, keySize);
@@ -598,7 +591,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// 4 stage overwrite: random, reverse random, ones, zeros. 
         /// Last overwrite stage is zeros in Extract() method.
         /// </remarks>
-        private void Erase(long Offset, long Length)
+        private void Erase(MemoryStream KeyStream, long Offset, long Length)
         {
             byte[] buffer =  new byte[Length];
 
@@ -607,14 +600,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 csp.GetBytes(buffer);
 
             // rand
-            Overwrite(buffer, Offset, Length);
+            Overwrite(KeyStream, buffer, Offset, Length);
             // reverse rand
             Array.Reverse(buffer);
-            Overwrite(buffer, Offset, Length);
+            Overwrite(KeyStream, buffer, Offset, Length);
             // ones
             for (int i = 0; i < buffer.Length; i++)
                 buffer[i] = (byte)255;
-            Overwrite(buffer, Offset, Length);
+
+            Overwrite(KeyStream, buffer, Offset, Length);
         }
 
         /// <remarks>
@@ -632,49 +626,31 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// <remarks>
         /// Returns the populated KeyParams class
         /// </remarks>
-        private KeyParams GetKeySet(MemoryStream KeyStream, CipherDescription Description, long Position)
+        private KeyParams GetKeySet(MemoryStream InputStream, CipherDescription Description, long Position)
         {
-            KeyParams keyParam;
-            KeyStream.Seek(Position, SeekOrigin.Begin);
+            InputStream.Seek(Position, SeekOrigin.Begin);
 
-            // create the keyparams class
-            if (Description.MacSize > 0 && Description.IvSize > 0)
+            byte[] key = null;
+            byte[] iv = null;
+            byte[] ikm = null;
+
+            if (Description.KeySize > 0)
             {
-                byte[] key = new byte[Description.KeySize];
-                byte[] iv = new byte[Description.IvSize];
-                byte[] ikm = new byte[Description.MacSize];
-
-                KeyStream.Read(key, 0, key.Length);
-                KeyStream.Read(iv, 0, iv.Length);
-                KeyStream.Read(ikm, 0, ikm.Length);
-                keyParam = new KeyParams(key, iv, ikm);
+                key = new byte[Description.KeySize];
+                InputStream.Read(key, 0, key.Length);
             }
-            else if (Description.IvSize > 0)
+            if (Description.IvSize > 0)
             {
-                byte[] key = new byte[Description.KeySize];
-                byte[] iv = new byte[Description.IvSize];
-
-                KeyStream.Read(key, 0, key.Length);
-                KeyStream.Read(iv, 0, iv.Length);
-                keyParam = new KeyParams(key, iv);
+                iv = new byte[Description.IvSize];
+                InputStream.Read(iv, 0, iv.Length);
             }
-            else if (Description.MacSize > 0)
+            if (Description.MacSize > 0)
             {
-                byte[] key = new byte[Description.KeySize];
-                byte[] ikm = new byte[Description.MacSize];
-
-                KeyStream.Read(key, 0, key.Length);
-                KeyStream.Read(ikm, 0, ikm.Length);
-                keyParam = new KeyParams(key, null, ikm);
-            }
-            else
-            {
-                byte[] key = new byte[Description.KeySize];
-                KeyStream.Read(key, 0, key.Length);
-                keyParam = new KeyParams(key);
+                ikm = new byte[Description.MacSize];
+                InputStream.Read(ikm, 0, ikm.Length);
             }
 
-            return keyParam;
+            return new KeyParams(key, iv, ikm);
         }
 
         /// <remarks>
@@ -785,10 +761,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// <remarks>
         /// Overwrite a section of the key file, used by the PostOverwrite policy
         /// </remarks>
-        private void Overwrite(byte[] KeyData, long Offset, long Length)
+        private void Overwrite(MemoryStream InputStream, byte[] KeyData, long Offset, long Length)
         {
-            _keyStream.Seek(Offset, SeekOrigin.Begin);
-            _keyStream.Write(KeyData, 0, KeyData.Length);
+            InputStream.Seek(Offset, SeekOrigin.Begin);
+            InputStream.Write(KeyData, 0, KeyData.Length);
         }
 
         /// <remarks>
@@ -823,40 +799,36 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// <remarks>
         /// Writes a memorystream to the key package file
         /// </remarks>
-        private void WriteKeyStream(MemoryStream InStream)
+        private void WriteKeyStream(MemoryStream InputStream)
         {
-            InStream.Seek(0, SeekOrigin.Begin);
+            InputStream.Seek(0, SeekOrigin.Begin);
 
             try
             {
-                using (BinaryWriter keyWriter = new BinaryWriter(_keyStream))
+                BinaryWriter keyWriter = new BinaryWriter(_keyStream);
+                BinaryReader keyReader = new BinaryReader(InputStream);
+                // policy flag is not encrypted
+                long policies = keyReader.ReadInt64();
+                keyWriter.Write(policies);
+                // get the header and keying material
+                byte[] data = new byte[InputStream.Length - PackageKey.GetPolicyOffset()];
+                InputStream.Read(data, 0, data.Length);
+
+                if (IsEncrypted(policies))
                 {
-                    using (BinaryReader keyReader = new BinaryReader(InStream))
-                    {
-                        // policy flag is not encrypted
-                        long policies = keyReader.ReadInt64();
-                        keyWriter.Write(policies);
-                        // get the header and keying material
-                        byte[] data = new byte[InStream.Length - PackageKey.GetPolicyOffset()];
-                        InStream.Read(data, 0, data.Length);
-
-                        if (IsEncrypted(policies))
-                        {
-                            // get the salt
-                            byte[] salt = GetSalt();
-                            // decrypt the key and header
-                            TransformBuffer(data, salt);
-                            Array.Clear(salt, 0, salt.Length);
-                        }
-
-                        // copy to file
-                        keyWriter.Write(data, 0, data.Length);
-                        // clean up
-                        Array.Clear(data, 0, data.Length);
-                    }
+                    // get the salt
+                    byte[] salt = GetSalt();
+                    // decrypt the key and header
+                    TransformBuffer(data, salt);
+                    Array.Clear(salt, 0, salt.Length);
                 }
 
-                InStream.Dispose();
+                // copy to file
+                keyWriter.Write(data, 0, data.Length);
+                _keyStream.SetLength(_keyStream.Position);
+                // clean up
+                Array.Clear(data, 0, data.Length);
+                InputStream.Dispose();
             }
             catch
             {

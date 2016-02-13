@@ -30,8 +30,8 @@ using VTDev.Libraries.CEXEngine.Utility;
 // SOFTWARE.
 // 
 // Code Base Guides:
-// Based on the Deveel Math library by Antonello Provenzano: <see href="https://github.com/deveel/deveel-math/tree/master/src/Deveel.Math/Deveel.Math">BigInteger class, 
-// and Open JDK <see href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/8-b132/java/math/BigInteger.java#BigInteger">BigInteger.java</see>.
+// Based on the Deveel Math library by Antonello Provenzano: <a href="https://github.com/deveel/deveel-math/tree/master/src/Deveel.Math/Deveel.Math">BigInteger</a> class, 
+// and Open JDK <a href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/8-b132/java/math/BigInteger.java#BigInteger">BigInteger.java</a>.
 // 
 // Implementation Details:
 // An implementation of a BigInteger class. 
@@ -55,11 +55,6 @@ namespace VTDev.Libraries.CEXEngine.Numeric
     /// BigInteger p = BigInteger.ProbablePrime(BitLength, new SecureRandom());
     /// </code>
     /// </example>
-    /// 
-    /// <revisionHistory>
-    /// <revision date="2015/01/23" version="1.3.0.0">Initial release</revision>
-    /// <revision date="2015/01/23" version="1.3.2.0">Updated and expanded the implementation</revision>
-    /// </revisionHistory>
     /// 
     /// <remarks>
     /// <para>Semantics of arithmetic operations exactly mimic those of Java's integer arithmetic operators, as defined in The Java Language Specification.
@@ -1706,9 +1701,6 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>Returns true if Obj is a BigInteger and this == Obj,  false otherwise</returns>
         public override bool Equals(Object Obj)
         {
-            if (this == Obj)
-                return true;
-
             if (Obj is BigInteger)
             {
                 BigInteger x1 = (BigInteger)Obj;

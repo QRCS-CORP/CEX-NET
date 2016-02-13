@@ -30,7 +30,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 // 
 // Implementation Details:
 // An implementation of a Cryptographically Secure Pseudo Random Number Generator (SecureRandom). 
-// Uses the <see href="http://msdn.microsoft.com/en-us/library/system.security.cryptography.rngcryptoserviceprovider.aspx">RNGCryptoServiceProvider</see> class to produce pseudo random output.
+// Uses the <a href="http://msdn.microsoft.com/en-us/library/system.security.cryptography.rngcryptoserviceprovider.aspx">RNGCryptoServiceProvider</a> class to produce pseudo random output.
 // Written by John Underhill, January 6, 2014
 // contact: develop@vtdev.com
 #endregion
@@ -40,7 +40,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
     /// <summary>
     /// SecureRandom: An implementation of a Cryptographically Secure Pseudo Random Number Generator: SecureRandom. 
     /// 
-    /// <para>Uses the RNGCryptoServiceProvider: <see href="http://msdn.microsoft.com/en-us/library/system.security.cryptography.rngcryptoserviceprovider.aspx"/> class to generate non-negative random numbers.</para>
+    /// <para>Uses the <a href="http://msdn.microsoft.com/en-us/library/system.security.cryptography.rngcryptoserviceprovider.aspx">RNGCryptoServiceProvider</a>: class to generate non-negative random numbers.</para>
     /// </summary>
     /// 
     /// <example>
@@ -50,12 +50,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
     ///     x = rnd.NextInt32();
     /// </c>
     /// </example>
-    /// 
-    /// <revisionHistory>
-    /// <revision date="2015/01/23" version="1.3.0.0">Initial release</revision>
-    /// <revision date="2015/04/28" version="1.4.0.0">Added thread safety</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
-    /// </revisionHistory>
     public sealed class SecureRandom : IDisposable
     {
         #region Constants

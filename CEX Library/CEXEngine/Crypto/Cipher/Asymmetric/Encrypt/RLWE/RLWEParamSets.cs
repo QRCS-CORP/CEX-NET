@@ -46,7 +46,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
     /// </summary>
     /// 
     /// <remarks>
-    /// <description><h4>Parameter OId:</h4></description>
+    /// <description>Parameter OId:</description>
     /// <list type="bullet">
     /// <item><description>A Parameter Set OId (uniquely identifies the parameter set), is always the first four bytes of a serialized parameter set.</description></item>
     /// <item><description>The OId format is ordered as: <c>Family</c>, <c>Set</c>, <c>SubSet</c>, and <c>Unique</c>.</description></item>
@@ -54,7 +54,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
     /// <item><description>The remaining bytes can be a unique designator.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Ring-LWE Parameter Description:</h4></description>
+    /// <description>Ring-LWE Parameter Description:</description>
     /// <list type="table">
     /// <item><description>N - The number of coefficients.</description></item>
     /// <item><description>Q - The Q modulus.</description></item>
@@ -64,12 +64,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
     /// <item><description>Engine - The Prng engine.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>Efficient Software Implementation of Ring-LWE Encryption: <see href="https://eprint.iacr.org/2014/725.pdf"/>.</description></item>
-    /// <item><description>Compact Ring-LWE Cryptoprocessor: <see href="http://www.cosic.esat.kuleuven.be/publications/article-2444.pdf"/>.</description></item>
-    /// <item><description>A Simple Provably Secure Key Exchange Scheme Based on the Learning with Errors Problem: <see href="http://eprint.iacr.org/2012/688.pdf"/>.</description></item>
-    /// <item><description>The Knuth-Yao Quadrangle-Inequality Speedup is a Consequence of Total-Monotonicity: <see href="http://www.egr.unlv.edu/~bein/pubs/knuthyaotalg.pdf"/>.</description></item>
+    /// <item><description>Efficient Software Implementation of <a href="https://eprint.iacr.org/2014/725.pdf">Ring-LWE Encryption</a></description></item>
+    /// <item><description>Compact Ring-LWE <a href="http://www.cosic.esat.kuleuven.be/publications/article-2444.pdf">Cryptoprocessor</a></description></item>
+    /// <item><description>A Simple <a href="http://eprint.iacr.org/2012/688.pdf">Provably Secure Key Exchange</a> Scheme Based on the Learning with Errors Problem</description></item>
+    /// <item><description>The <a href="http://www.egr.unlv.edu/~bein/pubs/knuthyaotalg.pdf">Knuth-Yao Quadrangle-Inequality Speedup</a> is a Consequence of Total-Monotonicity</description></item>
     /// </list>
     /// </remarks>
     public static class RLWEParamSets

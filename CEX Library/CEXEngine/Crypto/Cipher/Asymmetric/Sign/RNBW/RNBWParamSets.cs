@@ -33,7 +33,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 // 
 // Code Base Guides:
 // Portions of this code based on the Bouncy Castle Based on the Bouncy Castle Java 
-// <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.
+// <a href="http://bouncycastle.org/latest_releases.html">Release 1.51</a> version.
 // 
 // Implementation Details:
 // An implementation of an Rainbow Asymmetric Signature Scheme. 
@@ -48,20 +48,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
     /// <para>Use the FromId(byte[]) or FromName(RNBWParamSets) to return a deep copy of a parameter set.</para>
     /// </summary>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2015/06/07" version="1.0.1.0">Initial release</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.RNBWSign">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW RNBWSign Class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.RNBWPublicKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW RNBWPublicKey Class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.RNBWPrivateKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW RNBWPrivateKey Class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKeyPair">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces IAsymmetricKeyPair Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces IAsymmetricKey Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Prng.IRandom">VTDev.Libraries.CEXEngine.Crypto.Prng.IRandom Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs">VTDev.Libraries.CEXEngine.Crypto.Enumeration Prngs Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.RNBWSign"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.RNBWPublicKey"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.RNBWPrivateKey"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKeyPair"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKey"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Prng.IRandom"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs"/>
     /// 
     /// <remarks>
-    /// <description><h4>Parameter Sets:</h4></description>
+    /// <description>Parameter Sets:</description>
     /// <list type="table">
     /// <listheader>
     ///     <term>Strength</term>
@@ -98,9 +94,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
     /// <item><description>27, 35, 43, 54</description></item>
     /// </list>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>Selecting Parameters for the Rainbow Signature Scheme: <see href="http://eprint.iacr.org/2010/437.pdf"/>.</description></item>
+    /// <item><description>Selecting Parameters for the <a href="http://eprint.iacr.org/2010/437.pdf">Rainbow Signature Scheme</a></description></item>
     /// </list>
     /// </remarks>
     public static class RNBWParamSets

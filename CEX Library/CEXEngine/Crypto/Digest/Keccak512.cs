@@ -30,7 +30,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 // 
 // Principal Algorithms:
 // An implementation of the SHA-3 digest based on Keccak, designed by Guido Bertoni, Joan Daemen, Michaël Peeters, and Gilles Van Assche. 
-// SHA3 <see href="http://keccak.noekeon.org/Keccak-submission-3.pdf">Keccak Submission</see>.
+// SHA3 <a href="http://keccak.noekeon.org/Keccak-submission-3.pdf">Keccak Submission</a>.
 // 
 // Implementation Details:
 // An implementation of the SHA-3 digest. 
@@ -43,8 +43,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 {
     /// <summary>
-    /// Keccak512: An implementation of the SHA-3 Keccak digest.
-    /// <para>SHA-3 competition winner: <see href="http://csrc.nist.gov/groups/ST/hash/sha-3/documents/Keccak-slides-at-NIST.pdf"/>: The : <see href="http://keccak.noekeon.org/Keccak-submission-3.pdf"/> digest</para>
+    /// Keccak512: An implementation of the SHA-3 Keccak digest
     /// </summary>
     /// 
     /// <example>
@@ -58,18 +57,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2014/11/11" version="1.2.0.0">Initial release</revision>
-    /// <revision date="2015/01/23" version="1.3.0.0">Changes to formatting and documentation</revision>
-    /// <revision date="2015/01/23" version="1.3.5.0">Rewritten for improvements to security and speed</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>
     /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
+    /// <description>Implementation Notes:</description>
     /// <list type="bullet">
     /// <item><description>Hash sizes are 48 and 64 bytes (384 and 512 bits).</description></item>
     /// <item><description>Block sizes are 104, and 72 bytes (832, 576 bits).</description></item>
@@ -78,16 +70,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     /// <item><description>The <see cref="DoFinal(byte[], int)"/> method resets the internal state.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>SHA3 <see href="http://keccak.noekeon.org/Keccak-submission-3.pdf">Keccak Submission</see>.</description></item>
-    /// <item><description>SHA3: <see href="http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf">Third-Round Report of the SHA-3 Cryptographic Hash Algorithm Competition</see>.</description></item>
+    /// <item><description>SHA3 <a href="http://keccak.noekeon.org/Keccak-submission-3.pdf">Keccak Submission</a>.</description></item>
+    /// <item><description>SHA3 <a href="http://csrc.nist.gov/groups/ST/hash/sha-3/documents/Keccak-slides-at-NIST.pdf">Keccak Slides</a>.</description></item>
+    /// <item><description>SHA3 <a href="http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf">Third-Round Report</a> of the SHA-3 Cryptographic Hash Algorithm Competition.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Code Base Guides:</h4></description>
+    /// <description>Code Base Guides:</description>
     /// <list type="table">
-    /// <item><description>Inspired by the excellent HashLib project implementation <see href="http://hashlib.codeplex.com/">Keccak.cs</see> class, 
-    /// and the <see href="https://github.com/gvanas/KeccakCodePackage">Keccak Code Package</see>.</description></item>
+    /// <item><description>Inspired by the excellent HashLib project implementation <a href="http://hashlib.codeplex.com/">Keccak.cs</a> class, 
+    /// and the <a href="https://github.com/gvanas/KeccakCodePackage">Keccak Code Package</a>.</description></item>
     /// </list> 
     /// </remarks>
     public sealed class Keccak512 : IDigest

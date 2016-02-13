@@ -1,9 +1,7 @@
 ﻿#region Directives
 using System;
-using System.Collections;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
-using System.Runtime.InteropServices;
 using System.Security.Principal;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.CryptoException;
@@ -56,14 +54,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2015/07/01" version="1.5.0.0">Initial version</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.Keccak512">VTDev.Libraries.CEXEngine.Crypto.Digest.Keccak512 Digest</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator">VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Prng.IRandom">VTDev.Libraries.CEXEngine.Crypto.Prng.IRandom Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Seed.ISeed">VTDev.Libraries.CEXEngine.Crypto.Seed.ISeed Interface</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.Keccak512"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Prng.IRandom"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Seed.ISeed"/>
     /// 
     /// <remarks>
     ///
@@ -82,7 +76,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
     /// <para>Once the state sizes are obtained, the state is compressed into an entropy pool member (64 bytes) using Keccak 512.
     /// The entropy pool members are treated as columns, with each column emptying completely before moving up to the next queue member.</para>
     /// 
-    /// <description><h4>State Information:</h4></description>
+    /// <description>State Information:</description>
     /// <list type="table">
     ///     <listheader>
     ///         <term>Group</term>
@@ -98,19 +92,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
     ///     </item>
     ///     <item>
     ///         <description>Network Statistics</description>
-    ///         <description><para>Collects the interface id, MAC address, IP address, BytesReceived, BytesSent, UnicastPacketsReceived, UnicastPacketsSent, 
-    ///         NonUnicastPacketsReceived, NonUnicastPacketsSent, and IncomingPacketsDiscarded information from each available network interface.</para></description>
-    ///     </item>
-    ///     <item>
-    ///         <description>Process Statistics</description>
-    ///         <description><para>Collects statistics from all running processes for HandleCount, Id, NonpagedSystemMemorySize64, PagedMemorySize64, 
-    ///         PeakPagedMemorySize64, PeakVirtualMemorySize64, PeakWorkingSet64, PrivateMemorySize64, VirtualMemorySize64, WorkingSet64. 
-    ///         From each running thread, collects the CurrentPriority, Id, and StartAddress. The local process contributes each thread Handle, StartAddress, 
-    ///         StartTime, TotalProcessorTime and UserProcessorTime statistics.</para></description>
+    ///         <description>Collects the interface id, MAC address, IP address, BytesReceived, BytesSent, UnicastPacketsReceived, UnicastPacketsSent, 
+    ///         NonUnicastPacketsReceived, NonUnicastPacketsSent, and IncomingPacketsDiscarded information from each available network interface.</description>
     ///     </item>
     ///     <item>
     ///         <description>Registry Info</description>
-    ///         <description>Adds all of the systems application Clsid's from the registry.</description>
+    ///         <description>>Adds all of the systems application Clsid's from the registry.</description>
     ///     </item>
     ///     <item>
     ///         <description>Time Stamps</description>
@@ -123,6 +110,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
     ///     <item>
     ///         <description>Crypto Provider</description>
     ///         <description>A minimum of two digest input blocks (144 bytes) per pool member is taken from the local random provider; RNGCryptoServiceProvider.</description>
+    ///     </item>
+    ///     <item>
+    ///         <description>Process Statistics</description>
+    ///         <description>Collects statistics from all running processes for HandleCount, Id, NonpagedSystemMemorySize64, PagedMemorySize64, 
+    ///         PeakPagedMemorySize64, PeakVirtualMemorySize64, PeakWorkingSet64, PrivateMemorySize64, VirtualMemorySize64, WorkingSet64. 
+    ///         From each running thread, collects the CurrentPriority, Id, and StartAddress. The local process contributes each thread Handle, StartAddress, 
+    ///         StartTime, TotalProcessorTime and UserProcessorTime statistics.</description>
     ///     </item>
     /// </list>
     /// </remarks>

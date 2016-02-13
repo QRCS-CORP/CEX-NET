@@ -58,16 +58,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
     /// 
     /// <note>This implementation currently supports only the N256Q7681 and N512Q12289 parameter sets.</note>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2015/06/07" version="1.4.0.0">Initial release</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEEncrypt">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE RLWEEncrypt Class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs Enumeration</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEEncrypt"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>
     /// 
     /// <remarks>
-    /// <description><h4>RLWE Parameter Description:</h4></description>
+    /// <description>RLWE Parameter Description:</description>
     /// <para>The current implementation uses pre-generated lookup tables for speed, 
     /// because of this only two base parameter sets are currently supported: N256Q7681 and N512Q12289.
     /// </para>
@@ -81,17 +77,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
     /// <item><description>Engine - The Prng engine.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>Efficient Software Implementation of Ring-LWE Encryption: <see href="https://eprint.iacr.org/2014/725.pdf"/>.</description></item>
-    /// <item><description>Compact Ring-LWE Cryptoprocessor: <see href="http://www.cosic.esat.kuleuven.be/publications/article-2444.pdf"/>.</description></item>
-    /// <item><description>A Simple Provably Secure Key Exchange Scheme Based on the Learning with Errors Problem: <see href="http://eprint.iacr.org/2012/688.pdf"/>.</description></item>
-    /// <item><description>The Knuth-Yao Quadrangle-Inequality Speedup is a Consequence of Total-Monotonicity: <see href="http://www.egr.unlv.edu/~bein/pubs/knuthyaotalg.pdf"/>.</description></item>
+    /// <item><description>Efficient Software Implementation of <a href="https://eprint.iacr.org/2014/725.pdf">Ring-LWE Encryption</a></description></item>
+    /// <item><description>Compact Ring-LWE <a href="http://www.cosic.esat.kuleuven.be/publications/article-2444.pdf">Cryptoprocessor</a></description></item>
+    /// <item><description>A Simple <a href="http://eprint.iacr.org/2012/688.pdf">Provably Secure Key Exchange</a> Scheme Based on the Learning with Errors Problem</description></item>
+    /// <item><description>The <a href="http://www.egr.unlv.edu/~bein/pubs/knuthyaotalg.pdf">Knuth-Yao Quadrangle-Inequality Speedup</a> is a Consequence of Total-Monotonicity</description></item>
     /// </list>
     /// 
-    /// <description><h4>Code Base Guides:</h4></description>
+    /// <description>Code Base Guides:</description>
     /// <list type="table">
-    /// <item><description>Based on the Ring-LWE-Encryption C version: <see href="https://github.com/ruandc/Ring-LWE-Encryption">ruandc/Ring-LWE-Encryption</see>.</description></item>
+    /// <item><description>Based on the Ring-LWE-Encryption C version: <a href="https://github.com/ruandc/Ring-LWE-Encryption">ruandc/Ring-LWE-Encryption</a>.</description></item>
     /// </list> 
     /// </remarks>
     public sealed class RLWEParameters : IAsymmetricParameters

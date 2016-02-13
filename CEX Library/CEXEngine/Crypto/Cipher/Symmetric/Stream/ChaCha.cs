@@ -33,7 +33,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 // 
 // Principal Algorithms:
 // Portions of this cipher based on the ChaCha stream cipher designed by Daniel J. Bernstein:
-// ChaCha20 <see href="http://cr.yp.to/chacha/chacha-20080128.pdf">Specification</see>.
+// ChaCha20 <a href="http://cr.yp.to/chacha/chacha-20080128.pdf">Specification</a>.
 // 
 // Implementation Details:
 // ChaCha20+
@@ -48,8 +48,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
 {
     /// <summary>
-    /// ChaCha+: A parallelized ChaCha stream cipher implementation.
-    /// <para>A ChaCha cipher extended to use up to 30 rounds.</para>
+    /// ChaCha+: A parallelized ChaCha stream cipher implementation
     /// </summary>
     /// 
     /// <example>
@@ -65,32 +64,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2014/11/14" version="1.2.0.0">Initial release</revision>
-    /// <revision date="2015/01/23" version="1.3.0.0">Secondary release; updates to layout and documentation</revision>
-    /// <revision date="2015/06/14" version="1.4.0.0">Added parallel processing</revision>
-    /// <revision date="2015/07/01" version="1.4.0.a">Added library exceptions</revision>
-    /// <revision date="2015/09/15" version="1.4.0.b">Added the ParallelOption property</revision>
-    /// </revisionHistory>
-    /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
+    /// <description>Implementation Notes:</description>
     /// <list type="bullet">
     /// <item><description>Valid Key sizes are 128 and 256 (16 and 32 bytes).</description></item>
     /// <item><description>Block size is 64 bytes wide.</description></item>
     /// <item><description>Valid rounds are 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28 and 30.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>ChaCha20 <see href="http://cr.yp.to/chacha/chacha-20080128.pdf">Specification</see>.</description></item>
-    /// <item><description>Salsa20 <see href="http://cr.yp.to/snuffle/design.pdf">Design</see>.</description></item>
-    /// <item><description>Salsa20 <see href="http://cr.yp.to/snuffle/security.pdf">Security</see>.</description></item>
+    /// <item><description>ChaCha20 <a href="http://cr.yp.to/chacha/chacha-20080128.pdf">Specification</a>.</description></item>
+    /// <item><description>Salsa20 <a href="http://cr.yp.to/snuffle/design.pdf">Design</a>.</description></item>
+    /// <item><description>Salsa20 <a href="http://cr.yp.to/snuffle/security.pdf">Security</a>.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Code Base Guides:</h4></description>
+    /// <description>Code Base Guides:</description>
     /// <list type="table">
-    /// <item><description>Inspired in part by the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see>.</description></item>
+    /// <item><description>Inspired in part by the Bouncy Castle Java <a href="http://bouncycastle.org/latest_releases.html">Release 1.51</a>.</description></item>
     /// </list> 
     /// </remarks>
     public sealed class ChaCha : IStreamCipher

@@ -6,3 +6,12 @@ C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMClient\obj\Release\DTMClient.csprojResolveAssemblyReference.cache
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMClient\obj\Release\SocketAsyncClient.exe
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMClient\obj\Release\SocketAsyncClient.pdb
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\DTMClient\bin\Release\SocketAsyncClient.exe.config
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\DTMClient\bin\Release\SocketAsyncClient.exe
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\DTMClient\bin\Release\SocketAsyncClient.pdb
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\DTMClient\bin\Release\CEXEngine.dll
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\DTMClient\bin\Release\CEXEngine.pdb
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\DTMClient\bin\Release\CEXEngine.xml
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\DTMClient\obj\Release\DTMClient.csprojResolveAssemblyReference.cache
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\DTMClient\obj\Release\SocketAsyncClient.exe
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\CEX .NET\CEX Library\DTMClient\obj\Release\SocketAsyncClient.pdb

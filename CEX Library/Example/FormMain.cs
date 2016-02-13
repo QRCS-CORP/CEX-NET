@@ -16,6 +16,7 @@ using VTDev.Libraries.CEXEngine.Tools;
 using VTDev.Projects.CEX.Helper;
 #endregion
 
+// v1.5, Feb. 05, 2016
 namespace VTDev.Projects.CEX
 {
     public partial class FormMain : Form
@@ -171,7 +172,6 @@ namespace VTDev.Projects.CEX
 
                     // offset start position is base header + Mac size
                     int hdrOffset = MessageHeader.GetHeaderSize + cipherDesc.MacSize;
-
                     // decrypt file extension and create a unique path
                     byte[] ext = MessageHeader.GetExtension(inStream);
                     _outputPath = Utilities.GetUniquePath(_outputPath + MessageHeader.DecryptExtension(ext, extKey));

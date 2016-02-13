@@ -13,10 +13,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Arithm
     /// </summary>
     /// 
     /// <remarks>
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>Arnold Schönhage und Volker Strassen: Schnelle Multiplikation großer Zahlen: <see href="http://www.scribd.com/doc/68857222/Schnelle-Multiplikation-gro%C3%9Fer-Zahlen"/>.</description></item>
-    /// <item><description>Eine verstandliche Beschreibung des Schonhage-Strassen-Algorithmus: <see href="http://malte-leip.net/beschreibung_ssa.pdf"/>.</description></item>
+    /// <item><description>Arnold Schönhage und Volker Strassen: <a href="http://www.scribd.com/doc/68857222/Schnelle-Multiplikation-gro%C3%9Fer-Zahlen">Schnelle Multiplikation großer Zahlen</a>.</description></item>
+    /// <item><description>Eine verstandliche Beschreibung des <a href="http://malte-leip.net/beschreibung_ssa.pdf">Schonhage-Strassen-Algorithmus</a>.</description></item>
     /// </list>
     /// 
     /// Numbers are internally represented as <c>int</c> arrays; the <c>int</c>s are interpreted as unsigned numbers.

@@ -63,19 +63,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2015/01/23" version="1.3.0.0">Initial release</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Mac">VTDev.Libraries.CEXEngine.Crypto Mac Namespace</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Macs">VTDev.Libraries.CEXEngine.Crypto.Enumeration Macs Enumeration</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest">VTDev.Libraries.CEXEngine.Crypto Digest Namespace</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Mac"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Macs"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>
     /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
+    /// <description>Implementation Notes:</description>
     /// <list type="bullet">
     /// <item><description>Uses any of the implemented <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Macs">Macs</see> using the <see cref="IMac">interface</see>.</description></item>
     /// <item><description>Mac must be fully initialized before passed to the constructor.</description></item>
@@ -287,8 +282,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
                 {
                     buffer = new byte[Length - bytesTotal];
                     bytesRead = _inStream.Read(buffer, 0, buffer.Length);
-                    _macEngine.BlockUpdate(buffer, 0, buffer.Length);
-                    bytesTotal += buffer.Length;
+                    _macEngine.BlockUpdate(buffer, 0, bytesRead);
+                    bytesTotal += bytesRead;
                 }
             }
             else

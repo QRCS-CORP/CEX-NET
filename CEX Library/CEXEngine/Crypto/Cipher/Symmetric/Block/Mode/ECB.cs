@@ -38,8 +38,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 {
     /// <summary>
-    /// ECB: Implements an Electronic Cookbook Mode: ECB (Not Recommended).
-    /// <para>ECB as outlined in the NIST document: SP800-38A: <see href="http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf"/></para>
+    /// ECB: Implements an Electronic Cookbook Mode: ECB (Not Recommended)
     /// </summary> 
     /// 
     /// <example>
@@ -55,26 +54,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2014/11/11" version="1.2.0.0">Initial release</revision>
-    /// <revision date="2015/01/23" version="1.3.0.0">Changes to formatting and documentation</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block Namespace</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">VTDev.Libraries.CEXEngine.Crypto.Engines Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines"/>
     /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
+    /// <description>Implementation Notes:</description>
     /// <list type="bullet">
     /// <item><description>ECB is not a secure mode, and should only be used for testing.</description></item>
     /// <item><description>Cipher Engine is automatically disposed of unless DisposeEngine is set to <c>false</c> in the class constructor <see cref="ECB(IBlockCipher, bool)"/></description></item>
     /// </list>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>NIST: <see href="http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf">SP800-38A</see>.</description></item>
+    /// <item><description>NIST <a href="http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf">SP800-38A</a>.</description></item>
     /// </list>
     /// </remarks>
     public sealed class ECB : ICipherMode
@@ -227,7 +220,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         /// Initialize the Cipher
         /// </summary>
         /// 
-        /// <param name="Encryption">Using Encryption or Decryption mode</param>
+        /// <param name="Encryption">True if cipher is used for encryption, false to decrypt</param>
         /// <param name="KeyParam">KeyParam containing key and vector</param>
         /// 
         /// <exception cref="CryptoSymmetricException">Thrown if a null Key is used</exception>
@@ -242,8 +235,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         }
 
         /// <summary>
-        /// <para>Decrypt a single block of bytes.
-        /// <see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
+        /// Decrypt a single block of bytes.
+        /// <para><see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
         /// 
         /// <param name="Input">Encrypted bytes</param>
@@ -254,8 +247,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         }
 
         /// <summary>
-        /// <para>Decrypt a block of bytes with offset parameters.
-        /// <see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
+        /// Decrypt a block of bytes with offset parameters.
+        /// <para><see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
         /// 
         /// <param name="Input">Encrypted bytes</param>
@@ -268,8 +261,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         }
 
         /// <summary>
-        /// <para>Encrypt a block of bytes. 
-        /// <see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
+        /// Encrypt a block of bytes. 
+        /// <para><see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
         /// 
         /// <param name="Input">Bytes to Encrypt</param>
@@ -280,8 +273,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         }
 
         /// <summary>
-        /// <para>Encrypt a block of bytes with offset parameters. 
-        /// <see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
+        /// Encrypt a block of bytes with offset parameters. 
+        /// <para><see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
         /// 
         /// <param name="Input">Bytes to Encrypt</param>
@@ -294,11 +287,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         }
 
         /// <summary>
-        /// <para>Transform a block of bytes. 
-        /// <see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
+        /// Transform a block of bytes. 
+        /// <para><see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
-        /// <param name="Input">Bytes to Encrypt/Decrypt</param>
-        /// <param name="Output">Encrypted or Decrypted bytes</param>
+        /// <param name="Input">Bytes to Transform</param>
+        /// <param name="Output">Transformed bytes</param>
         public void Transform(byte[] Input, byte[] Output)
         {
             if (_isEncryption)
@@ -308,13 +301,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         }
 
         /// <summary>
-        /// <para>Transform a block of bytes with offset parameters. 
-        /// <see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
+        /// Transform a block of bytes with offset parameters. 
+        /// <para><see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
         /// 
-        /// <param name="Input">Bytes to Encrypt</param>
+        /// <param name="Input">Bytes to Transform</param>
         /// <param name="InOffset">Offset in the Input array</param>
-        /// <param name="Output">Encrypted bytes</param>
+        /// <param name="Output">Transformed bytes</param>
         /// <param name="OutOffset">Offset in the Output array</param>
         public void Transform(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {

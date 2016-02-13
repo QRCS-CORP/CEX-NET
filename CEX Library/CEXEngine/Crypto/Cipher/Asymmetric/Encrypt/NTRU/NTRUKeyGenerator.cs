@@ -60,19 +60,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2015/01/23" version="1.0.0.0">Initial release</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.NTRUKeyPair">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU NTRUKeyPair Class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.NTRUPublicKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU NTRUPublicKey Class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.NTRUPrivateKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU NTRUPrivateKey Class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.NTRUParameters">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU NTRUParameters Class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricCipher">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces IAsymmetricCipher Class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKeyPair">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces IAsymmetricKeyPair Class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces IAsymmetricKey Class</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.NTRUKeyPair"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.NTRUPublicKey"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.NTRUPrivateKey"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.NTRUParameters"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricCipher"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKeyPair"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKey"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs"/>
     /// 
     /// <remarks>
     /// <description>Key Generation:</description>
@@ -82,20 +78,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
     /// <item><description>The public key h = p ∗ g ∗ fq (mod q). The private key is the pair (f, fp).</description></item>
     /// </list>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>NTRU: A Ring Based Public Key Crypto System: <see href="http://binary.cr.yp.to/mcbits-20130616.pdf"/>.</description></item>
-    /// <item><description>Optimizations for NTRU: <see href="https://www.securityinnovation.com/uploads/Crypto/TECH_ARTICLE_OPT.pdf"/>.</description></item>
-    /// <item><description>Adaptive Key Recovery Attacks on NTRU-based Somewhat Homomorphic Encryption Schemes: <see href="https://eprint.iacr.org/2015/127.pdf"/>.</description></item>
-    /// <item><description>Efficient Embedded Security Standards (EESS): <see href="http://grouper.ieee.org/groups/1363/lattPK/submissions/EESS1v2.pdf"/>.</description></item>
-    /// <item><description>Practical lattice-based cryptography: NTRUEncrypt and NTRUSign: <see href="https://www.securityinnovation.com/uploads/Crypto/lll25.pdf"/>.</description></item>
-    /// <item><description>NTRU Cryptosystems Technical Report: <see href="https://www.securityinnovation.com/uploads/Crypto/NTRUTech016.pdf"/>.</description></item>
+    /// <item><description>NTRU: A Ring Based <a href="http://binary.cr.yp.to/mcbits-20130616.pdf">Public Key Crypto System</a></description></item>
+    /// <item><description><a href="https://www.securityinnovation.com/uploads/Crypto/TECH_ARTICLE_OPT.pdf">Optimizations</a> for NTRU</description></item>
+    /// <item><description>Adaptive <a href="https://eprint.iacr.org/2015/127.pdf">Key Recovery Attacks</a> on NTRU-based Somewhat Homomorphic Encryption Schemes: </description></item>
+    /// <item><description>Efficient Embedded Security Standards: <a href="http://grouper.ieee.org/groups/1363/lattPK/submissions/EESS1v2.pdf">EESS</a></description></item>
+    /// <item><description><a href="https://www.securityinnovation.com/uploads/Crypto/lll25.pdf">Practical lattice-based cryptography</a>: NTRUEncrypt and NTRUSign: </description></item>
+    /// <item><description>NTRU Cryptosystems <a href="https://www.securityinnovation.com/uploads/Crypto/NTRUTech016.pdf">Technical Report</a></description></item>
     /// </list>
     /// 
-    /// <description><h4>Code Base Guides:</h4></description>
+    /// <description>Code Base Guides:</description>
     /// <list type="table">
-    /// <item><description>Inspired by the excellent java project NTRU Encrypt by Tim Buktu: <see href="https://github.com/tbuktu/ntru/description">Release 1.2</see>, and
-    /// the NTRUOpenSourceProject/ntru-crypto project provided by Security Innovation, Inc: <see href="https://github.com/NTRUOpenSourceProject/ntru-crypto">Release 1.2</see>.</description></item>
+    /// <item><description>Inspired by the excellent java project NTRU Encrypt by Tim Buktu: <a href="https://github.com/tbuktu/ntru/description">Release 1.2</a>, and
+    /// the NTRUOpenSourceProject/ntru-crypto project provided by Security Innovation, Inc: <a href="https://github.com/NTRUOpenSourceProject/ntru-crypto">Release 1.</a>.</description></item>
     /// </list>
     /// </remarks>
     public sealed class NTRUKeyGenerator : IAsymmetricGenerator

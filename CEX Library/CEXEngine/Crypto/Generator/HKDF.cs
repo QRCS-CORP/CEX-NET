@@ -33,11 +33,11 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 // 
 // Principal Algorithms:
 // An implementation of the SHA-2 digest with a 512 bit return size.
-// SHA-2 <see href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf">Specification</see>.
+// SHA-2 <a href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf">Specification</a>.
 // 
 // Code Base Guides:
 // Portions of this code based on the Bouncy Castle 
-// <see href="http://grepcode.com/file/repo1.maven.org/maven2/org.bouncycastle/bcprov-ext-jdk15on/1.48/org/bouncycastle/crypto/generators/HKDFBytesGenerator.java">SHA512</see> class.
+// <a href="http://grepcode.com/file/repo1.maven.org/maven2/org.bouncycastle/bcprov-ext-jdk15on/1.48/org/bouncycastle/crypto/generators/HKDFBytesGenerator.java">SHA512</a> class.
 // 
 // Implementation Details:
 // An implementation of an Hash based Key Derivation Function (HKDF). 
@@ -48,8 +48,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 {
     /// <summary>
-    /// HKDF: An implementation of an Hash based Key Derivation Function.
-    /// <para>HKDF as outlined in RFC 5869: <see href="http://tools.ietf.org/html/rfc5869"/></para>
+    /// HKDF: An implementation of an Hash based Key Derivation Function
     /// </summary> 
     /// 
     /// <example>
@@ -65,19 +64,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2014/11/11" version="1.2.0.0">Initial release</revision>
-    /// <revision date="2015/01/23" version="1.3.0.0">Changes to formatting and documentation</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Mac.HMAC">VTDev.Libraries.CEXEngine.Crypto.Mac.HMAC HMAC</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest">VTDev.Libraries.CEXEngine.Crypto.Digest Namespace</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Mac.HMAC"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>
     /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
+    /// <description>Implementation Notes:</description>
     /// <list type="bullet">
     /// <item><description>Can be initialized with a <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> or a <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Macs">Mac</see>.</description></item>
     /// <item><description>The <see cref="HKDF(IDigest, bool)">Constructors</see> DisposeEngine parameter determines if Digest engine is destroyed when <see cref="Dispose()"/> is called on this class; default is <c>true</c>.</description></item>
@@ -86,15 +79,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// <item><description>Nonce and Ikm are optional, (but recommended).</description></item>
     /// </list>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>RFC 5869: <see href="http://tools.ietf.org/html/rfc5869">Specification</see>.</description></item>
-    /// <item><description>HKDF Scheme: <see href="http://tools.ietf.org/html/rfc5869">Whitepaper</see>.</description></item>
+    /// <item><description>RFC <a href="http://tools.ietf.org/html/rfc2104">2104</a>: HMAC: Keyed-Hashing for Message Authentication.</description></item>
+    /// <item><description>RFC <a href="http://tools.ietf.org/html/rfc5869">5869</a>: HMAC-based Extract-and-Expand Key Derivation Function.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Code Base Guides:</h4></description>
+    /// <description>Code Base Guides:</description>
     /// <list type="table">
-    /// <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
+    /// <item><description>Based on the Bouncy Castle Java <a href="http://bouncycastle.org/latest_releases.html">Release 1.51</a> version.</description></item>
     /// </list> 
     /// </remarks>
     public sealed class HKDF : IGenerator

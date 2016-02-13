@@ -86,19 +86,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2015/05/22" version="1.3.6.0">Initial release</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription">VTDev.Libraries.CEXEngine.Crypto.Processing.Structures CipherDescription Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block">VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block Namespace</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">VTDev.Libraries.CEXEngine.Crypto.Engines Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines"/>
     /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
+    /// <description>Implementation Notes:</description>
     /// <list type="bullet">
     /// <item><description>Uses any of the implemented <see cref="ICipherMode">Cipher Mode</see> wrapped <see cref="SymmetricEngines">Block Ciphers</see>, or any of the implemented <see cref="IStreamCipher">Stream Ciphers</see>.</description></item>
     /// <item><description>Cipher Engine can be Disposed when this class is Disposed, set the DisposeEngine parameter in the class Constructor to true to dispose automatically.</description></item>
@@ -289,7 +284,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
                 FileStream inpStream;
                 FileStream outStream;
                 KeyParams key;
-                int hash = FilePaths[i].GetHashCode();
+                int hash = GetFileNameHash(FilePaths[i]);//TODO: check this..
                 inpStream = GetStream(FilePaths[i]);
                 outStream = GetStream(FilePaths[i]);
 
@@ -368,6 +363,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
                 ProgressPercent(this, new System.ComponentModel.ProgressChangedEventArgs((int)progress, (object)Size));
             }
         }
+        private int GetFileNameHash(string FileName)
+        {
+            // remove root for portable drives
+            string trnName = FileName.Substring(0, FileName.Length - Path.GetPathRoot(FileName).Length);
+            byte[] hash;
+            using (Digest.SHA256 eng = new Digest.SHA256())
+                hash = eng.ComputeHash(System.Text.Encoding.Unicode.GetBytes(trnName));
+
+            while (hash.Length > 4)
+                hash = Reduce(hash);
+
+            int[] ret = new int[1];
+            Buffer.BlockCopy(hash, 0, ret, 0, 4);
+            return ret[0];
+        }
 
         private FileStream GetStream(string FilePath)
         {
@@ -385,6 +395,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         {
             for (int i = 0; i < FilePaths.Length; i++)
                 _progressTotal += FileTools.GetSize(FilePaths[i]);
+        }
+
+        private byte[] Reduce(byte[] Seed)
+        {
+            int len = Seed.Length / 2;
+            byte[] data = new byte[len];
+
+            for (int i = 0; i < len; i++)
+                data[i] = (byte)(Seed[i] ^ Seed[len + i]);
+
+            return data;
         }
         #endregion
 

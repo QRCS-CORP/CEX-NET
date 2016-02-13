@@ -52,17 +52,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2016/01/09" version="1.5.0.0">Initial release</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Prng">VTDev.Libraries.CEXEngine.Crypto Prng Classes</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Prng"/>
     /// 
     /// <remarks>
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>Further scramblings of Marsaglia’s xorshift generators <see href="http://vigna.di.unimi.it/ftp/papers/xorshiftplus.pdf"/>.</description></item>
-    /// <item><description>Xorshift+ generators and the PRNG shootout: <see href="http://xorshift.di.unimi.it/"/>.</description></item>
+    /// <item><description>Further scramblings of Marsaglia’s <a href="http://vigna.di.unimi.it/ftp/papers/xorshiftplus.pdf">Xorshift Generators</a>.</description></item>
+    /// <item><description><a href="http://xorshift.di.unimi.it/">Xorshift+ generators</a> and the PRNG shootout.</description></item>
     /// </list>
     /// </remarks>
     public sealed class XSPRsg : ISeed

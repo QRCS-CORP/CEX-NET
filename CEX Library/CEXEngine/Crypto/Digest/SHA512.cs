@@ -30,7 +30,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 // 
 // Principal Algorithms:
 // An implementation of the SHA-2 digest with a 512 bit return size.
-// SHA-2 <see href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf">Specification</see>.
+// SHA-2 <a href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf">Specification</a>.
 // 
 // Implementation Details:
 // An implementation of the SHA-2 digest with a 512 bit return size. 
@@ -43,8 +43,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 {
     /// <summary>
-    /// SHA512: An implementation of the SHA-2 digest with a 512 bit digest return size.
-    /// <para>The SHA-2: <see href="http://keccak.noekeon.org/Keccak-submission-3.pdf"/> 512 digest</para>
+    /// SHA512: An implementation of the SHA-2 digest with a 512 bit digest return size
     /// </summary> 
     /// 
     /// <example>
@@ -58,17 +57,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     /// </code>
     /// </example>
     /// 
-    /// <revisionHistory>
-    /// <revision date="2014/11/11" version="1.2.0.0">Initial release</revision>
-    /// <revision date="2015/01/23" version="1.3.0.0">Changes to formatting and documentation</revision>
-    /// <revision date="2015/07/01" version="1.4.0.0">Added library exceptions</revision>
-    /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>
     /// 
     /// <remarks>
-    /// <description><h4>Implementation Notes:</h4></description>
+    /// <description>Implementation Notes:</description>
     /// <list type="bullet">
     /// <item><description>Block size is 128 bytes, (1024 bits).</description></item>
     /// <item><description>Digest size is 64 bytes, (512 bits).</description></item>
@@ -76,14 +69,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     /// <item><description>The <see cref="DoFinal(byte[], int)"/> method resets the internal state.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Guiding Publications:</h4></description>
+    /// <description>Guiding Publications:</description>
     /// <list type="number">
-    /// <item><description>SHA-2 <see href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf">Specification</see>.</description></item>
+    /// <item><description>NIST <a href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf">SHA-2 Specification</a>.</description></item>
     /// </list>
     /// 
-    /// <description><h4>Code Base Guides:</h4></description>
+    /// <description>Code Base Guides:</description>
     /// <list type="table">
-    /// <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
+    /// <item><description>Based on the Bouncy Castle Java <a href="http://bouncycastle.org/latest_releases.html">Release 1.51</a> version.</description></item>
     /// </list> 
     /// </remarks>
     public sealed class SHA512 : IDigest

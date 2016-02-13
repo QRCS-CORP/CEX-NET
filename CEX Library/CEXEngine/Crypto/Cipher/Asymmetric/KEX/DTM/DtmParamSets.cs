@@ -53,7 +53,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     /// The HX ciphers also use an increased number of diffusion rounds. HX cipher round counts are 22 for Rijndael, 40 for Serpent, and 20 with Twofish in the X1 and X2 parameter sets. 
     /// The increased number of rounds adds security by creating a more diffused output, strongly mitigating differential and algebraic based attack vectors.</para>
     /// 
-    /// <description><h4>Security Classification Definitions:</h4></description>
+    /// <description>Security Classification Definitions:</description>
     /// <list type="bullet">
     /// <item><description>X1: Asymmetric ciphers are Ring-LWE/NTRU, symmetric ciphers using a 256 bit key (auth-phase), and an HKDF/Keccak-512 strengthened HX series cipher (primary-phase).</description></item>
     /// <item><description>X2: Asymmetric ciphers are Ring-LWE/NTRU, symmetric ciphers are a standard series cipher (256 bit key), and an HX/Skein-512 symmetric cipher implementation.</description></item>
@@ -61,7 +61,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
     /// <item><description>X4: Asymmetric ciphers are Ring-LWE/NTRU, and standard symmetric cipher configurations using 256 bit keys.</description></item>
     /// </list>
     /// 
-    /// <description><h4>The 16 byte Parameter OId configuration:</h4></description>
+    /// <description>The 16 byte Parameter OId configuration:</description>
     /// <list type="bullet">
     /// <item><description>The bytes <c>0</c> through <c>3</c> are the Auth-Stage asymmetric parameters OId.</description></item>
     /// <item><description>The bytes <c>4</c> through <c>7</c> are the Primary-Stage asymmetric parameters OId.</description></item>

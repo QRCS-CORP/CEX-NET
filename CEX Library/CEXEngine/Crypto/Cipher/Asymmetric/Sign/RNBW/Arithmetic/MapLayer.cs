@@ -22,7 +22,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
     /// <para>Each layer is a part of the private key.</para>
     /// <para>More information about the layer can be found in the paper of Jintai Ding,
     /// Dieter Schmidt: Rainbow, a New Multivariable Polynomial Signature Scheme.
-    /// ACNS 2005: 164-175 <see href="http://dx.doi.org/10.1007/11496137_12"/></para>
+    /// ACNS 2005: <a href="http://dx.doi.org/10.1007/11496137_12">164-175</a>.</para>
     /// </remarks>
     public class MapLayer : IDisposable
     {

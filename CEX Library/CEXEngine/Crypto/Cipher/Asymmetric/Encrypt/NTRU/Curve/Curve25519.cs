@@ -33,10 +33,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Curve
     /// Generic 64-bit integer implementation of Curve25519 ECDH.
     /// <para>Written by Matthijs van Duin, 200608242056
     /// Based on work by Daniel J Bernstein; 
-    /// A state of the art Diffie-Hellman function: <see href="http://cr.yp.to/ecdh.html"/>
+    /// A state of the art <a href="http://cr.yp.to/ecdh.html">Diffie-Hellman</a> function: 
     /// Ported from C to Java by Dmitry Skiba [sahn0], 23/02/08.
     /// Ported to C# by John Underhill, 14/03/15.
-    /// Original: <see href="http://cds.xs4all.nl:8081/ecdh/"/></para>
+    /// Original: <a href="http://cds.xs4all.nl:8081/ecdh/">version</a>.</para>
     /// </summary>
     /// 
     /// <remarks>
