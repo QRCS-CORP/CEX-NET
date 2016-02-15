@@ -12,7 +12,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Argument
     {
         #region Fields
         /// <summary>
-        /// The <see cref="DtmServiceFlags">Exchange State</see> (Auth or Primary), from which this message originated
+        /// The DtmServiceFlags Exchange State (Auth or Primary), from which this message originated
         /// </summary>
         public Exception Message;
         /// <summary>

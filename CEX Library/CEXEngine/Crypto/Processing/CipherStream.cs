@@ -104,17 +104,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     /// </example>
     /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription"/>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream.IStreamCipher"/>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode"/>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.IBlockCipher"/>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.CipherModes"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.PaddingModes"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding.IPadding"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.KeyParams"/>
     /// 
     /// <remarks>
     /// <description>Implementation Notes:</description>
     /// <list type="bullet">
-    /// <item><description>Uses any of the implemented <see cref="ICipherMode">Cipher Mode</see> wrapped <see cref="SymmetricEngines">Block Ciphers</see>, or any of the implemented <see cref="IStreamCipher">Stream Ciphers</see>.</description></item>
+    /// <item><description>Uses any of the implemented <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode">Cipher Mode</see> wrapped <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">Block Ciphers</see>, or any of the implemented <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream.IStreamCipher">Stream Ciphers</see>.</description></item>
     /// <item><description>Cipher Engine can be Disposed when this class is <see cref="Dispose()">Disposed</see>, set the DisposeEngine parameter in the class Constructor to true to dispose automatically.</description></item>
-    /// <item><description>Streams can be Disposed when the class is <see cref="Dispose()">Disposed</see>, set the DisposeStream parameter in the <see cref="Initialize(bool, KeyParams)"/> call to true to dispose automatically.</description></item>
+    /// <item><description>Streams can be Disposed when the class is <see cref="Dispose()">Disposed</see>, set the DisposeStream parameter in the <see cref="Initialize(bool, VTDev.Libraries.CEXEngine.Crypto.Common.KeyParams)"/> call to true to dispose automatically.</description></item>
     /// <item><description>Implementation has a Progress counter that returns total sum of bytes processed per either of the <see cref="Write(Stream, Stream)">Write()</see> calls.</description></item>
     /// <item><description>Changes to the Cipher or CipherStream <see cref="ParallelBlockSize">ParallelBlockSize</see> must be set after initialization.</description></item>
     /// </list>
@@ -302,7 +306,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         #region Constructor 
         /// <summary>
-	    /// Initialize the class with a CipherDescription Structure; containing the cipher implementation details, and a <see cref="KeyParams"/> class containing the Key material.
+	    /// Initialize the class with a CipherDescription Structure; containing the cipher implementation details, and a <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.KeyParams"/> class containing the Key material.
 	    /// <para>This constructor creates and configures cryptographic instances based on the cipher description contained in a CipherDescription. 
 	    /// Cipher modes, padding, and engines are destroyed automatically through this classes Dispose() method.</para>
 	    /// </summary>
@@ -314,7 +318,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 	    /// <param name="BlockSize">The cipher blocksize</param>
 	    /// <param name="KdfEngine">The HX ciphers key schedule engine</param>
 	    /// 
-	    /// <exception cref="CryptoProcessingException">Thrown if an invalid <see cref="CipherDescription">CipherDescription</see> or <see cref="KeyParams">KeyParams</see> is used</exception>
+	    /// <exception cref="CryptoProcessingException">Thrown if an invalid configuration or is used</exception>
 	    public CipherStream(SymmetricEngines EngineType, int RoundCount = 22, CipherModes CipherType = CipherModes.CTR, PaddingModes PaddingType = PaddingModes.PKCS7, int BlockSize = 16, Digests KdfEngine = Digests.SHA512)
 	    {
 		    _destroyEngine = true;
@@ -359,9 +363,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 	    /// Cipher modes, padding, and engines are destroyed automatically through this classes Destruct() method.</para>
 	    /// </summary>
 	    /// 
-	    /// <param name="Header">A <see cref="CipherDescription"/> containing the cipher description</param>
+	    /// <param name="Header">A <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription"/> containing the cipher description</param>
 	    /// 
-	    /// <exception cref="CryptoProcessingException">Thrown if an invalid <see cref="CipherDescription">CipherDescription</see> is used</exception>
+	    /// <exception cref="CryptoProcessingException">Thrown if an invalid CipherDescription is used</exception>
         public CipherStream(CipherDescription Header)
 	    {
 		    _destroyEngine = true;
@@ -404,16 +408,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 		    }
 	    }
 
-	    /// <summary>
-	    /// Initialize the class with a Block <see cref="ICipherMode">Cipher</see> and optional <see cref="IPadding">Padding</see> instances.
-	    /// <para>This constructor requires a fully initialized <see cref="CipherModes">CipherMode</see> instance.
-	    /// If the <see cref="PaddingModes">PaddingMode</see> parameter is null, X9.23 padding will be used if required.</para>
-	    /// </summary>
-	    /// 
-	    /// <param name="Cipher">The <see cref="SymmetricEngines">Block Cipher</see> wrapped in a <see cref="ICipherMode">Cipher</see> mode</param>
-	    /// <param name="Padding">The <see cref="IPadding">Padding</see> instance</param>
-	    /// 
-	    /// <exception cref="CryptoProcessingException">Thrown if a null or uninitialized <see cref="ICipherMode">Cipher</see> is used</exception>
+        /// <summary>
+        /// Initialize the class with a Block <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode">Cipher</see> and optional <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Padding.IPadding">Padding</see> instances.
+        /// <para>This constructor requires a fully initialized <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.CipherModes">CipherMode</see> instance.
+        /// If the <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.PaddingModes">PaddingMode</see> parameter is null, X9.23 padding will be used if required.</para>
+        /// </summary>
+        /// 
+        /// <param name="Cipher">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">Block Cipher</see> wrapped in a Cipher mode</param>
+        /// <param name="Padding">The Padding instance</param>
+        /// 
+        /// <exception cref="CryptoProcessingException">Thrown if a null or initialized Cipher is used</exception>
         public CipherStream(ICipherMode Cipher, IPadding Padding = null)
 	    {
 		    _cipherEngine = Cipher;
@@ -435,13 +439,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 	    }
 
 	    /// <summary>
-	    /// Initialize the class with a <see cref="IStreamCipher">Stream Cipher</see> instance.
-	    /// <para>This constructor requires a fully initialized <see cref="SymmetricEngines">CipherStream</see> instance.</para>
+	    /// Initialize the class with a <see cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream.IStreamCipher">Stream Cipher</see> instance.
+	    /// <para>This constructor requires a fully initialized <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">CipherStream</see> instance.</para>
 	    /// </summary>
 	    /// 
-	    /// <param name="Cipher">The initialized <see cref="IStreamCipher">Stream Cipher</see> instance</param>
+	    /// <param name="Cipher">The uninitialized Stream Cipher instance</param>
 	    /// 
-	    /// <exception cref="CryptoProcessingException">Thrown if a null or uninitialized <see cref="IStreamCipher">Stream Cipher</see> is used</exception>
+	    /// <exception cref="CryptoProcessingException">Thrown if a null or initialized Stream Cipher is used</exception>
         public CipherStream(IStreamCipher Cipher)
 	    {
 		    _destroyEngine = false;
@@ -472,7 +476,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// </summary>
         /// 
         /// <param name="Encryption">The cipher is used for encryption</param>
-        /// <param name="KeyParam">The KeyParams containing the cipher key and initialization vector</param>
+        /// <param name="KeyParam">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.KeyParams">KeyParams</see> containing the cipher key and initialization vector</param>
         public void Initialize(bool Encryption, KeyParams KeyParam)
         {
 	        try

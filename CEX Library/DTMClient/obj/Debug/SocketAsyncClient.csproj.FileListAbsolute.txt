@@ -1,6 +1,0 @@
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\SocketAsyncClient\bin\Debug\SocketAsyncClient.exe.config
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\SocketAsyncClient\bin\Debug\SocketAsyncClient.exe
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\SocketAsyncClient\bin\Debug\SocketAsyncClient.pdb
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\SocketAsyncClient\obj\Debug\SocketAsyncClient.exe
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\SocketAsyncClient\obj\Debug\SocketAsyncClient.pdb
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\SocketAsyncClient\obj\Debug\SocketAsyncClient.csprojResolveAssemblyReference.cache

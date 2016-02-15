@@ -72,35 +72,35 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
 
         #region Public Fields
         /// <summary>
-        /// The Cryptographic <see cref="SymmetricEngines">Engine</see> type
+        /// The Cryptographic <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">Engine</see> type
         /// </summary>
         public Int32 EngineType;
         /// <summary>
-        /// The cipher <see cref="KeySizes">Key Size</see>
+        /// The cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeySizes">Key Size</see>
         /// </summary>
         public Int32 KeySize;
         /// <summary>
-        /// Size of the cipher <see cref="IVSizes">Initialization Vector</see>
+        /// Size of the cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.IVSizes">Initialization Vector</see>
         /// </summary>
         public Int32 IvSize;
         /// <summary>
-        /// The type of <see cref="CipherModes">Cipher Mode</see>
+        /// The type of <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.CipherModes">Cipher Mode</see>
         /// </summary>
         public Int32 CipherType;
         /// <summary>
-        /// The type of cipher <see cref="PaddingModes">Padding Mode</see>
+        /// The type of cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.PaddingModes">Padding Mode</see>
         /// </summary>
         public Int32 PaddingType;
         /// <summary>
-        /// The cipher <see cref="BlockSizes">Block Size</see>
+        /// The cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockSizes">Block Size</see>
         /// </summary>
         public Int32 BlockSize;
         /// <summary>
-        /// The number of diffusion <see cref="RoundCounts">Rounds</see>
+        /// The number of diffusion <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts">Rounds</see>
         /// </summary>
         public Int32 RoundCount;
         /// <summary>
-        /// The <see cref="Digests">Digest</see> engine used to power the key schedule Key Derivation Function in HX and M series ciphers
+        /// The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to power the key schedule Key Derivation Function in HX and M series ciphers
         /// </summary>
         public Int32 KdfEngine;
         /// <summary>
@@ -108,7 +108,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// </summary>
         public Int32 MacSize;
         /// <summary>
-        /// The HMAC <see cref="Digests">Digest</see> engine used to authenticate a message file encrypted with this key
+        /// The HMAC <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to authenticate a message file encrypted with this key
         /// </summary>
         public Int32 MacEngine;
         #endregion
@@ -118,16 +118,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// CipherDescription constructor
         /// </summary>
         /// 
-        /// <param name="EngineType">The Cryptographic <see cref="SymmetricEngines">Engine</see> type</param>
+        /// <param name="EngineType">The Cryptographic <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">Engine</see> type</param>
         /// <param name="KeySize">The cipher Key Size in bytes</param>
-        /// <param name="IvSize">Size of the cipher <see cref="IVSizes">Initialization Vector</see></param>
-        /// <param name="CipherType">The type of <see cref="CipherModes">Cipher Mode</see></param>
-        /// <param name="PaddingType">The type of cipher <see cref="PaddingModes">Padding Mode</see></param>
-        /// <param name="BlockSize">The cipher <see cref="BlockSizes">Block Size</see></param>
-        /// <param name="RoundCount">The number of diffusion <see cref="RoundCounts">Rounds</see></param>
-        /// <param name="KdfEngine">The <see cref="Digests">Digest</see> engine used to power the key schedule Key Derivation Function in HX and M series ciphers</param>
+        /// <param name="IvSize">Size of the cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.IVSizes">Initialization Vector</see></param>
+        /// <param name="CipherType">The type of <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.CipherModes">Cipher Mode</see></param>
+        /// <param name="PaddingType">The type of cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.PaddingModes">Padding Mode</see></param>
+        /// <param name="BlockSize">The cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockSizes">Block Size</see></param>
+        /// <param name="RoundCount">The number of diffusion <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts">Rounds</see></param>
+        /// <param name="KdfEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to power the key schedule Key Derivation Function in HX and M series ciphers</param>
         /// <param name="MacSize">The size of the HMAC message authentication code; a zeroed parameter means authentication is not enabled with this key</param>
-        /// <param name="MacEngine">The HMAC <see cref="Digests">Digest</see> engine used to authenticate a message file encrypted with this key</param>
+        /// <param name="MacEngine">The HMAC <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to authenticate a message file encrypted with this key</param>
         /// 
         /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid KeyId, MessageKey, or ExtensionKey is used</exception>
         public CipherDescription(SymmetricEngines EngineType, int KeySize, IVSizes IvSize, CipherModes CipherType, PaddingModes PaddingType,

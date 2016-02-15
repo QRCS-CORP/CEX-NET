@@ -34,7 +34,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         internal static readonly BigInteger[] bigTenPows = new BigInteger[32];
 
         /// <summary>
-        /// An array with the first powers of five in {@code BigInteger} version: (5^0,5^1,...,5^31)
+        /// An array with the first powers of five in BigInteger version: (5^0,5^1,...,5^31)
         /// </summary>
         internal static readonly BigInteger[] bigFivePows = new BigInteger[32];
         #endregion
@@ -131,7 +131,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         }
 
         /// <summary>
-        /// Multiplies a number by a positive integer.
+        /// Multiplies a number by a positive integer
         /// </summary>
         /// 
         /// <param name="X">An arbitrary BigInteger</param>
@@ -225,7 +225,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// 
         /// <param name="Exponent">The exponent of power of ten, it must be positive</param>
         /// 
-        /// <returns>BigInteger with value 10<sup>exp</sup>.</returns>
+        /// <returns>BigInteger with value 10exp</returns>
         internal static BigInteger PowerOf10(long Exponent)
         {
             // PRE: exp >= 0

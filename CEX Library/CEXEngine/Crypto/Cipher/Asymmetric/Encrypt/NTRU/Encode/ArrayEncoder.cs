@@ -170,7 +170,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Encode
         /// <summary>
         /// Encodes an <c>int</c> array whose elements are between <c>-1</c> and <c>1</c>, to a byte array.
         /// <para><c>coeffs[2*i]</c> and <c>coeffs[2*i+1]</c> must not both equal -1 for any integer <c>i</c>,
-        /// so this method is only safe to use with arrays produced by {@link #decodeMod3Sves(byte[], int, boolean)}.
+        /// so this method is only safe to use with arrays produced by DecodeMod3Sves(byte[], int, boolean).
         /// See P1363.1 section 9.2.3.</para>
         /// </summary>
         /// 

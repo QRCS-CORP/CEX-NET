@@ -545,8 +545,8 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// </summary>
         /// 
         /// <param name="FileName">The full path to the file</param>
-        /// <param name="Paramaters">The open command parameters</param
-        /// >
+        /// <param name="Paramaters">The open command parameters</param>
+        /// 
         /// <returns>True on success</returns>
         public bool ShellOpen(string FileName, SHOW_COMMANDS Paramaters)
         {

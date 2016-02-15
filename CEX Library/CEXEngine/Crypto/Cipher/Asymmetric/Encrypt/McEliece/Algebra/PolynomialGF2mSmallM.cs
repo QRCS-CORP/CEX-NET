@@ -27,7 +27,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         // the degree of this polynomial
         private int _degree;
         /* For the polynomial representation the map f: R->Z*, <c>poly(X) -> [coef_0, coef_1, ...]</c> is used, where
-           <c>coef_i</c> is the <c>i</c>th coefficient of the polynomial represented as int (see {@link GF2mField}). 
+           <c>coef_i</c> is the <c>i</c>th coefficient of the polynomial represented as int (see GF2mField). 
            The polynomials are stored as int arrays. */
         private int[] _coefficients;
         #endregion

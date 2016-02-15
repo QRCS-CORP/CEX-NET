@@ -1,7 +1,0 @@
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMClient\bin\x86\Release\SocketAsyncClient.exe.config
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMClient\bin\x86\Release\SocketAsyncClient.exe
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMClient\bin\x86\Release\SocketAsyncClient.pdb
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMClient\bin\x86\Release\CEXEngine.dll
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMClient\bin\x86\Release\CEXEngine.pdb
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMClient\obj\x86\Release\SocketAsyncClient.exe
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMClient\obj\x86\Release\SocketAsyncClient.pdb

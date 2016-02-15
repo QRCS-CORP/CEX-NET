@@ -80,13 +80,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         #region Public Methods
         /// <summary>
         /// Create a volume key file using automatic key material generation.
-        /// <para>The Key, and IV sets are generated automatically using the cipher description contained in the <see cref="CipherDescription"/>.
+        /// <para>The Key, and IV sets are generated automatically using the cipher description contained in the <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription"/>.
         /// This overload creates keying material using the seed and digest engines specified with the <see cref="KeyGenerator"/> class</para>
         /// </summary>
         /// 
-        /// <param name="Key">The <see cref="VolumeKey">VolumeKey</see> containing the cipher and key implementation details</param>
-        /// <param name="SeedEngine">The <see cref="SeedGenerators">Random Generator</see> used to create the stage I seed material during key generation.</param>
-        /// <param name="HashEngine">The <see cref="Digests">Digest Engine</see> used in the stage II phase of key generation.</param>
+        /// <param name="Key">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.VolumeKey">VolumeKey</see> containing the cipher and key implementation details</param>
+        /// <param name="SeedEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SeedGenerators">Random Generator</see> used to create the stage I seed material during key generation.</param>
+        /// <param name="HashEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest Engine</see> used in the stage II phase of key generation.</param>
         /// 
         /// <returns>A populated VolumeKey</returns>
         public MemoryStream Create(VolumeKey Key, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, Digests HashEngine = Digests.SHA512)
@@ -107,10 +107,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         }
 
         /// <summary>
-        /// Create a volume key file using a <see cref="CipherDescription"/> containing the cipher implementation details, and a key count size
+        /// Create a volume key file using a <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription"/> containing the cipher implementation details, and a key count size
         /// </summary>
         /// 
-        /// <param name="Description">The <see cref="CipherDescription">Cipher Description</see> containing the cipher details</param>
+        /// <param name="Description">The >Cipher Description containing the cipher details</param>
         /// <param name="KeyCount">The number of key sets associated with this volume key</param>
         /// 
         /// <exception cref="System.IO.FileLoadException">A key file exists at the path specified</exception>
@@ -127,16 +127,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// </summary>
         /// 
         /// <param name="KeyCount">The number of key sets associated with this volume key</param>
-        /// <param name="EngineType">The Cryptographic <see cref="SymmetricEngines">Engine</see> type</param>
+        /// <param name="EngineType">The Cryptographic <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">Engine</see> type</param>
         /// <param name="KeySize">The cipher Key Size in bytes</param>
-        /// <param name="IvSize">Size of the cipher <see cref="IVSizes">Initialization Vector</see></param>
-        /// <param name="CipherType">The type of <see cref="CipherModes">Cipher Mode</see></param>
-        /// <param name="PaddingType">The type of cipher <see cref="PaddingModes">Padding Mode</see></param>
-        /// <param name="BlockSize">The cipher <see cref="BlockSizes">Block Size</see></param>
-        /// <param name="Rounds">The number of diffusion <see cref="RoundCounts">Rounds</see></param>
-        /// <param name="KdfEngine">The <see cref="Digests">Digest</see> engine used to power the key schedule Key Derivation Function in HX and M series ciphers</param>
+        /// <param name="IvSize">Size of the cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.IVSizes">Initialization Vector</see></param>
+        /// <param name="CipherType">The type of <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.CipherModes">Cipher Mode</see></param>
+        /// <param name="PaddingType">The type of cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.PaddingModes">Padding Mode</see></param>
+        /// <param name="BlockSize">The cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockSizes">Block Size</see></param>
+        /// <param name="Rounds">The number of diffusion <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts">Rounds</see></param>
+        /// <param name="KdfEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to power the key schedule Key Derivation Function in HX and M series ciphers</param>
         /// <param name="MacSize">The size of the HMAC message authentication code; a zeroed parameter means authentication is not enabled with this key</param>
-        /// <param name="MacEngine">The HMAC <see cref="Digests">Digest</see> engine used to authenticate a message file encrypted with this key</param>
+        /// <param name="MacEngine">The HMAC <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to authenticate a message file encrypted with this key</param>
         /// 
         /// <returns>A populated VolumeKey</returns>
         public MemoryStream Create(int KeyCount, SymmetricEngines EngineType, int KeySize, IVSizes IvSize, CipherModes CipherType,

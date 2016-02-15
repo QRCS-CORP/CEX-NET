@@ -10,7 +10,7 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polynomial
 {
     /// <summary>
-    /// A polynomial with {@link BigInteger} coefficients.
+    /// A polynomial with BigInteger coefficients.
     /// <para>Some methods (like <c>add</c>) change the polynomial, others (like <c>mult</c>) do not,
     /// but return the result as a new polynomial.</para>
     /// </summary>

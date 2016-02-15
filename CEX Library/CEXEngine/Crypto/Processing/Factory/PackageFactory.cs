@@ -9,15 +9,14 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Crypto.Processing.Structure;
 using VTDev.Libraries.CEXEngine.CryptoException;
-using VTDev.Libraries.CEXEngine.Tools;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
 {
     /// <summary>
     /// PackageFactory: Used to create or extract a Key Package file.
-    /// <para>This class works in conjunction with the <see cref="PackageKey"/> structure to create and manage key package files; encryption key bundles, that contain cipher Key and IV material, 
-    /// and optionally an HMAC key used for message authentication.</para>
+    /// <para>This class works in conjunction with the <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.PackageKey"/> structure to create and manage key package files; 
+    /// encryption key bundles, that contain cipher Key and IV material, and optionally an HMAC key used for message authentication.</para>
     /// </summary>
     /// 
     /// <example>
@@ -63,7 +62,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription"/>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies"/>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.PackageKeyStates"/>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SeedGenerators"/>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.KeyGenerator"/>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.KeyParams"/>
@@ -71,8 +70,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     /// 
     /// <remarks>
     /// <description>Implementation Notes:</description>
-    /// <para>A PackageKey file contains a <see cref="KeyAuthority"/> structure that defines its identity and security settings, 
-    /// a <see cref="CipherDescription"/> that contains the settings required to create a specific cipher instance, and the 'subkey set', an array of unique subkey id strings and 
+    /// <para>A PackageKey file contains a <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.KeyAuthority"/> structure that defines its identity and security settings, 
+    /// a <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription"/> that contains the settings required to create a specific cipher instance, and the 'subkey set', an array of unique subkey id strings and 
     /// policy flags that identify and control each subkey.</para>
     /// <para>A PackageKey can contain one subkey, or many thousands of subkeys. Each subkey provides a unique keying material, and can only be used once for encryption; 
     /// guaranteeing a unique Key, IV, and HMAC key is used for every single encryption cycle.</para>
@@ -80,7 +79,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     /// of a specific subkey after the key is read for decryption using the <see cref="Extract(byte[], out CipherDescription, out KeyParams, out byte[])"/> function.</para>
     /// 
     /// <list type="bullet">
-    /// <item><description>Constructors may use either a memory or file stream, and a <see cref="KeyAuthority"/> structure.</description></item>
+    /// <item><description>Constructors may use either a memory or file stream, and a <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.KeyAuthority"/> structure.</description></item>
     /// <item><description>The <see cref="Create(PackageKey, SeedGenerators, Digests)"/> method auto-generates the keying material.</description></item>
     /// <item><description>The Extract() method retrieves a populated cipher description (CipherDescription), key material (KeyParams), and the file extension key from the key file.</description></item>
     /// </list>
@@ -101,7 +100,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
 
         #region Properties
         /// <summary>
-        /// The access rights available to the current user of this <see cref="PackageKey"/>
+        /// The access rights available to the current user of this <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.PackageKey"/>
         /// </summary>
         public KeyScope AccessScope { private set; get; }
 
@@ -111,7 +110,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         public bool IsCreator { private set; get; }
 
         /// <summary>
-        /// The PackageKey <see cref="KeyPolicies">policy flags</see>
+        /// The PackageKey <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies">policy flags</see>
         /// </summary>
         public long KeyPolicy { private set; get; }
 
@@ -279,12 +278,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         }
 
         /// <summary>
-        /// Create a key file using a <see cref="PackageKey"/> structure; containing the cipher description and operating ids and flags.
+        /// Create a key file using a <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.PackageKey"/> structure; containing the cipher description and operating ids and flags.
         /// </summary>
         /// 
-        /// <param name="Package">The <see cref="PackageKey">Key Header</see> containing the cipher description and operating ids and flags</param>
-        /// <param name="SeedEngine">The <see cref="SeedGenerators">Random Generator</see> used to create the stage 1 seed material during key generation.</param>
-        /// <param name="DigestEngine">The <see cref="Digests">Digest Engine</see> used in the stage II phase of key generation.</param>
+        /// <param name="Package">The PackageKeyKey containing the cipher description and operating ids and flags</param>
+        /// <param name="SeedEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription">Random Generator</see> used to create the stage 1 seed material during key generation.</param>
+        /// <param name="DigestEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription">Digest Engine</see> used in the stage II phase of key generation.</param>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if a key file exists at the path specified, the path is read only, the CipherDescription or KeyAuthority structures are invalid, or
         /// number of SubKeys specified is either less than 1 or more than the maximum allowed (100,000)</exception>

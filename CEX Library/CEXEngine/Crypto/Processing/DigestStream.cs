@@ -70,7 +70,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     /// <remarks>
     /// <description>Implementation Notes:</description>
     /// <list type="bullet">
-    /// <item><description>Uses any of the implemented <see cref="Digests">Digests</see> using either the <see cref="IDigest">interface, or a Digests enumeration member</see>.</description></item>
+    /// <item><description>Uses any of the implemented <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digests</see> using either the <see cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">interface, or a Digests enumeration member</see>.</description></item>
     /// <item><description>Digest can be Disposed when this class is <see cref="Dispose()">Disposed</see>, set the DisposeEngine parameter in the class Constructor to true to dispose automatically.</description></item>
     /// <item><description>Input Stream can be Disposed when this class is Disposed, set the DisposeStream parameter in the <see cref="Initialize(Stream, bool)"/> call to true to dispose automatically.</description></item>
     /// <item><description>Implementation has a Progress counter that returns total sum of bytes processed per either <see cref="ComputeHash(long, long)">ComputeHash([InOffset], [OutOffset])</see> calls.</description></item>
@@ -128,10 +128,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// <para>Digest must be fully initialized before calling this method.</para>
         /// </summary>
         /// 
-        /// <param name="Digest">The initialized <see cref="IDigest"/> instance</param>
+        /// <param name="Digest">The initialized <see cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest"/> instance</param>
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called; default is false</param>
         /// 
-        /// <exception cref="CryptoProcessingException">Thrown if a null <see cref="IDigest">Digest</see> is used</exception>
+        /// <exception cref="CryptoProcessingException">Thrown if a null Digest is used</exception>
         public DigestStream(IDigest Digest, bool DisposeEngine = false)
         {
             if (Digest == null)
@@ -149,7 +149,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// <param name="Digest">The digest enumeration member</param>
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called; default is false</param>
         /// 
-        /// <exception cref="System.ArgumentNullException">Thrown if a null <see cref="IDigest">Digest</see> is used</exception>
+        /// <exception cref="System.ArgumentNullException">Thrown if a null Digest is used</exception>
         public DigestStream(Digests Digest, bool DisposeEngine = false)
         {
             _digestEngine = GetDigest(Digest);

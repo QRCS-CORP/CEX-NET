@@ -110,6 +110,7 @@
     <Compile Include="Crypto\Helper\StreamCipherFromName.cs" />
     <Compile Include="Crypto\Seed\EntropyPool.cs" />
     <Compile Include="Crypto\Seed\ISCRsg.cs" />
+    <Compile Include="Documentation.cs" />
     <Compile Include="Networking\PacketBuffer.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmerticGenerator.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmetricCipher.cs" />

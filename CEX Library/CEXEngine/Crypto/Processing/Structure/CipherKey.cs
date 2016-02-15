@@ -49,7 +49,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = EXTKEY_SIZE)]
         public byte[] ExtensionKey;
         /// <summary>
-        /// The <see cref="CipherDescription">CipherDescription</see> structure containing a complete description of the cipher instance
+        /// The <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription">CipherDescription</see> structure containing a complete description of the cipher instance
         /// </summary>
         [MarshalAs(UnmanagedType.Struct, SizeConst = DESC_SIZE)]
         public CipherDescription Description;
@@ -62,7 +62,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// If they are not specified they will be populated automatically.</para>
         /// </summary>
         /// 
-        /// <param name="Description">The <see cref="CipherDescription">CipherDescription</see> structure containing a complete description of the cipher instance</param>
+        /// <param name="Description">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription">CipherDescription</see> structure containing a complete description of the cipher instance</param>
         /// <param name="KeyId">The unique 16 byte ID field used to identify this key. A null value auto generates this field</param>
         /// <param name="ExtensionKey">An array of random bytes used to encrypt a message file extension. A null value auto generates this field</param>
         /// 

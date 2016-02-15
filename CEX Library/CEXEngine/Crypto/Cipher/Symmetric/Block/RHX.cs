@@ -69,12 +69,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// </code>
     /// </example>
     /// 
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest"/>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockCiphers"/>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.CipherModes"/>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Generator.HKDF"/>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode"/>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest"/>
     /// 
     /// <remarks>
     /// <description>Implementation Notes:</description>
@@ -86,8 +86,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// 
     /// <list type="bullet">
     /// <item><description>When using a standard cipher key length the rounds calculation is done automatically: 10, 12, 14, and 22, for key sizes 128, 192, 256, and 512 bits.</description></item>
-    /// <item><description><see cref="HKDF">HKDF</see> Digest <see cref="Digests">engine</see> is definable through the <see cref="RHX(int, int, Digests)">Constructor</see> parameter: KeyEngine.</description></item>
-    /// <item><description>Key Schedule is (optionally) powered by a Hash based Key Derivation Function using a user definable <see cref="IDigest">Digest</see>.</description></item>
+    /// <item><description><see cref="VTDev.Libraries.CEXEngine.Crypto.Generator.HKDF">HKDF</see> Digest <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">engine</see> is definable through the <see cref="RHX(int, int, Digests)">Constructor</see> parameter: KeyEngine.</description></item>
+    /// <item><description>Key Schedule is (optionally) powered by a Hash based Key Derivation Function using a user definable <see cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">Digest</see>.</description></item>
     /// <item><description>Minimum key size is (IKm + Salt) (N * Digest State Size) + (Digest Hash Size) in bytes.</description></item>
     /// <item><description>Valid block sizes are 16 and 32 byte wide.</description></item>
     /// <item><description>Rounds are determined automatically when using standard key sizes, and user assignable in extended mode to between 10 and 38 rounds in steps of two, (default is 22).</description></item>
@@ -106,7 +106,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// <para>The Digest that powers HKDF, can be any one of the Hash Digests implemented in the CEX library; Blake, Keccak, SHA-2 or Skein.
     /// The default Digest Engine is SHA-2 512.</para>
     /// 
-    /// <para>The legal key sizes are determined by a combination of the (Hash Size + a Multiplier * the Digest State Size); <math>klen = h + (n * s)</math>, this will vary between Digest implementations. 
+    /// <para>The legal key sizes are determined by a combination of the (Hash Size + a Multiplier * the Digest State Size); klen = h + (n * s), this will vary between Digest implementations. 
     /// Correct key sizes can be determined at runtime using the <see cref="LegalKeySizes"/> property.</para>
     /// 
     /// <para>The number of diffusion rounds processed within the ciphers rounds function can also be defined; adding rounds creates a more diffused cipher output, making the resulting cipher-text more difficult to cryptanalyze. 

@@ -12,7 +12,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Argument
     {
         #region Fields
         /// <summary>
-        /// The <see cref="DtmServiceFlags">Exchange State</see> (Auth or Primary), from which this message originated
+        /// The DtmServiceFlags Exchange State  (Auth or Primary), from which this message originated
         /// </summary>
         public short Message = 1;
         /// <summary>
@@ -30,7 +30,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Argument
         /// The DTM packet event args constructor; contains the current exchange state
         /// </summary>
         /// 
-        /// <param name="Message">The <see cref="DtmServiceFlags">Exchange State</see> (Auth or Primary), from which this message originated</param>
+        /// <param name="Message">The DtmServiceFlags Exchange State (Auth or Primary), from which this message originated</param>
         /// <param name="OptionFlag">The option flag containing optional state information</param>
         public DtmPacketArgs(short Message, long OptionFlag)
         {

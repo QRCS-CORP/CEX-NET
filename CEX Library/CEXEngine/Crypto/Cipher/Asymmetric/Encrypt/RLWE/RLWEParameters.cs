@@ -56,8 +56,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
     /// </code>
     /// </example>
     /// 
-    /// <note>This implementation currently supports only the N256Q7681 and N512Q12289 parameter sets.</note>
-    /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEEncrypt"/>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Prngs"/>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>

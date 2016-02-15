@@ -72,7 +72,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     /// <remarks>
     /// <description>Implementation Notes:</description>
     /// <list type="bullet">
-    /// <item><description>Uses any of the implemented <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Macs">Macs</see> using the <see cref="IMac">interface</see>.</description></item>
+    /// <item><description>Uses any of the implemented <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Macs">Macs</see> using the <see cref="VTDev.Libraries.CEXEngine.Crypto.Mac.IMac">interface</see>.</description></item>
     /// <item><description>Mac must be fully initialized before passed to the constructor.</description></item>
     /// <item><description>Mac can be Disposed when this class is <see cref="Dispose()">Disposed</see>, set the DisposeEngine parameter in the class Constructor to true to dispose automatically.</description></item>
     /// <item><description>Input Stream can be Disposed when this class is Disposed, set the DisposeStream parameter in the <see cref="Initialize(Stream, bool)"/> call to true to dispose automatically.</description></item>
@@ -130,7 +130,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// Initialize the class with an initialized Mac instance
         /// </summary>
         /// 
-        /// <param name="Mac">The initialized <see cref="IMac"/> instance</param>
+        /// <param name="Mac">The initialized <see cref="VTDev.Libraries.CEXEngine.Crypto.Mac.IMac"/> instance</param>
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called; default is false</param>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if an uninitialized Mac is used</exception>

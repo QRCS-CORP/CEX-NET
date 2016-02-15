@@ -6,7 +6,6 @@ using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.CryptoException;
-using VTDev.Libraries.CEXEngine.Tools;
 using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
@@ -15,8 +14,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
     #region PackageKey
     /// <summary>
     /// The PackageKey structure. 
-    /// <para>Contains the <see cref="KeyAuthority"/> structure with identity and origin, attached policies, a description of the sub-key sets, 
-    /// and the <see cref="CipherDescription"/> structure containing the description of the cipher.</para>
+    /// <para>Contains the <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.KeyAuthority"/> structure with identity and origin, attached policies, a description of the sub-key sets, 
+    /// and the <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription"/> structure containing the description of the cipher.</para>
     /// <para>Used to create a key file that contains a series of Key, and optional Vector and Ikm sets. 
     /// A key set; the keying material assigned to a subkey, is valid for only one cycle of encryption, 
     /// guaranteeing that unique key material is used for every encryption cycle, but allowing for a key that can perform many
@@ -79,7 +78,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         [MarshalAs(UnmanagedType.Struct, SizeConst = KEYAUT_SIZE)]
         public KeyAuthority Authority;
         /// <summary>
-        /// The <see cref="CipherDescription">CipherDescription</see> structure containing a complete description of the cipher instance.
+        /// The <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription">CipherDescription</see> structure containing a complete description of the cipher instance.
         /// </summary>
         [MarshalAs(UnmanagedType.Struct, SizeConst = DESC_SIZE)]
         public CipherDescription Description;
@@ -108,7 +107,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// </summary>
         /// 
         /// <param name="Authority">The <see cref="KeyAuthority">KeyAuthority</see> structure containing the key authorization schema.</param>
-        /// <param name="Cipher">The <see cref="CipherDescription">CipherDescription</see> structure containing a complete description of the cipher instance.</param>
+        /// <param name="Cipher">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription">CipherDescription</see> structure containing a complete description of the cipher instance.</param>
         /// <param name="SubKeyCount">The number of Key Sets contained in this key package file.</param>
         /// <param name="ExtensionKey">An array of random bytes used to encrypt a message file extension. A null value auto generates this field.</param>
         /// 

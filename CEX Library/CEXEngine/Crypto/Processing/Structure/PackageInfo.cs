@@ -43,7 +43,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// </summary>
         public Int32 SubKeyCount;
         /// <summary>
-        /// A <see cref="KeyPolicies">Policies</see> array that contains the set of policy flags
+        /// A <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies">Policies</see> array that contains the set of policy flags
         /// </summary>
         public List<KeyPolicies> Policies;
         /// <summary>

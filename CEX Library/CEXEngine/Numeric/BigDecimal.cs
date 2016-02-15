@@ -2569,7 +2569,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <para>The amount of a rounding error in the evaluation of a floating-point operation is 
         /// often expressed in ULPs. An error of 1 ULP is often seen as a tolerable error.
         /// For class BigDecimal, the ULP of a number is simply 10^(-scale).
-        /// For example, {@code new BigDecimal(0.1).ulp()} returns {@code 1E-55}.</para>
+        /// For example, new BigDecimal(0.1).ulp() returns 1E-55.</para>
         /// </remarks>
         public BigDecimal Ulp()
         {
@@ -2586,7 +2586,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// 1000000000000000055511151231257827021181583404541015625}and the scale 55.</para>
         /// </summary>
         /// 
-        /// <param name="Value">Double value to be converted to a {@code BigDecimal</param>
+        /// <param name="Value">Double value to be converted to a BigDecimal</param>
         /// 
         /// <returns>
         /// BigDecimal instance with the value 
@@ -3771,9 +3771,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>A new BigDecimal instance</returns>
         /// 
         /// <remarks>
-        /// For example, <c>new BigDecimal(0.1)</c> is equal to <c>0.1000000000000000055511151231257827021181583404541015625</c>. 
+        /// <para>For example, <c>new BigDecimal(0.1)</c> is equal to <c>0.1000000000000000055511151231257827021181583404541015625</c>. 
         /// This happens as <c>0.1</c> cannot be represented exactly in binary.
-        /// <para>To generate a big decimal instance which is equivalent to <c>0.1</c> use the <see cref="BigDecimal(string)"/> constructor.</para>
+        /// To generate a big decimal instance which is equivalent to <c>0.1</c> use the <see cref="BigDecimal(string)"/> constructor.</para>
         /// </remarks>
         /// 
         /// <exception cref="FormatException">Thown if <paramref name="Value"/> is infinity or not a number.</exception>

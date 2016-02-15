@@ -1,6 +1,0 @@
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMServer\bin\Release\DTMTest.exe
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMServer\bin\Release\DTMTest.pdb
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMServer\bin\Release\CEXEngine.dll
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMServer\bin\Release\CEXEngine.pdb
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMServer\obj\x86\Release\DTMTest.exe
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\CEX\CEX Library\DTMServer\obj\x86\Release\DTMTest.pdb

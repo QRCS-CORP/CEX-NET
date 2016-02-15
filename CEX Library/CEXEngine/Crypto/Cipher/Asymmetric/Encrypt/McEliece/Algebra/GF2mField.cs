@@ -221,16 +221,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             return RandomDegree.NextInt(SecRnd, 1 << _degree);
         }
 
-        /*/// <summary>
-        /// Create a random non-zero field element
-        /// </summary>
-        /// 
-        /// <returns>A random non zero element</returns>
-        public int GetRandomNonZeroElement(IRandom SecRnd)
-        {
-            return GetRandomNonZeroElement(SecRnd);
-        }*/
-
         /// <summary>
         /// Create a random non-zero field element
         /// </summary>

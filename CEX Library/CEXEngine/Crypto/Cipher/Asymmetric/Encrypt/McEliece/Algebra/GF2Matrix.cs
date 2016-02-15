@@ -99,17 +99,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             _matrix = Matrix;
         }
 
-        /*/// <summary>
-        /// Create an nxn matrix of the given type
-        /// </summary>
-        /// 
-        /// <param name="N">The number of rows (and columns)</param>
-        /// <param name="MatrixType">The martix type (see <see cref="Matrix"/> for predefined constants)</param>
-        public GF2Matrix(int N, char MatrixType) :
-            this(N, MatrixType, new IRandom())
-        {
-        }*/
-
         /// <summary>
         /// Create an nxn matrix of the given type
         /// </summary>

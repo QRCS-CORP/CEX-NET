@@ -43,10 +43,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
     /// <list type="bullet">
     /// <item><description>The <see cref="KeyAuthority.DomainId"/> 32 byte field can be used to authenticate a domain when used with the <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies"/> DomainAuth policy flag.</description></item>
     /// <item><description>The <see cref="KeyAuthority.OriginId"/> is used to identify the creator of the key and is unique to each installation. This id can be used as a secret id in a trust relationship.</description></item>
-    /// <item><description>A <see cref="KeyAuthority.PackageId"/> 32 byte field can be used as a software id, or as an authentication string if using the <see cref="KeyPolicies.PackageAuth"/> policy flag.</description></item>
+    /// <item><description>A <see cref="KeyAuthority.PackageId"/> 32 byte field can be used as a software id, or as an authentication string if using the <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies.PackageAuth"/> policy flag.</description></item>
     /// <item><description>A <see cref="KeyAuthority.PackageTag"/> field is a 32 byte description field that can contain a package or creator description string.</description></item>
-    /// <item><description>The <see cref="KeyAuthority.KeyPolicy"/> is a master flag; all subkeys in this package will use the <see cref="KeyPolicies"/> defined by this flag.</description></item>
-    /// <item><description>The <see cref="KeyAuthority.OptionFlag"/> when used with the <see cref="KeyPolicies.Volatile"/> policy flag, stores the date/time in Ticks, after which this key must be expired or destroyed.</description></item>
+    /// <item><description>The <see cref="KeyAuthority.KeyPolicy"/> is a master flag; all subkeys in this package will use the <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies"/> defined by this flag.</description></item>
+    /// <item><description>The <see cref="KeyAuthority.OptionFlag"/> when used with the <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies.Volatile"/> policy flag, stores the date/time in Ticks, after which this key must be expired or destroyed.</description></item>
     /// </list>
     /// </remarks>
     [Serializable]
@@ -101,11 +101,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = PACKGTAG_SIZE)]
         public byte[] PackageTag;
         /// <summary>
-        /// A <see cref="KeyPolicies">KeyPolicy</see> master flag that contains the policy flags applied to each sub key set
+        /// A <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies">KeyPolicy</see> master flag that contains the policy flags applied to each sub key set
         /// </summary>
         public Int64 KeyPolicy;
         /// <summary>
-        /// Used by KeyPolicy if the flag is set to <see cref="KeyPolicies.Volatile">Volatile</see>, set as the expiration date/time in Ticks
+        /// Used by KeyPolicy if the flag is set to <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies.Volatile">Volatile</see>, set as the expiration date/time in Ticks
         /// </summary>
         public Int64 OptionFlag;
         #endregion
@@ -119,8 +119,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <param name="OriginId">Origin identity; a unique 16 byte value identifying the node that created this key</param>
         /// <param name="PackageId">A unique 16 byte field used for storage or as identity of this package</param>
         /// <param name="PackageTag">A 32 byte field containing an optional package description or authentication code</param>
-        /// <param name="KeyPolicy">A <see cref="KeyPolicies">KeyPolicy</see> master flag that contains the policy flags applied to each subkey set</param>
-        /// <param name="OptionFlag">Used by KeyPolicy if the flag is set to <see cref="KeyPolicies.Volatile">Volatile</see>, set as the key expiration date/time in Ticks</param>
+        /// <param name="KeyPolicy">A <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies">KeyPolicy</see> master flag that contains the policy flags applied to each subkey set</param>
+        /// <param name="OptionFlag">Used by KeyPolicy if the flag is set to <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies.Volatile">Volatile</see>, set as the key expiration date/time in Ticks</param>
         /// <param name="TargetId">The hashed value of the targets origin id field, used to authenticate a target installation. A null value generates zeros.</param>
         public KeyAuthority(byte[] DomainId, byte[] OriginId, byte[] PackageId, byte[] PackageTag, KeyPolicies KeyPolicy, int OptionFlag = 0, byte[] TargetId = null)
         {

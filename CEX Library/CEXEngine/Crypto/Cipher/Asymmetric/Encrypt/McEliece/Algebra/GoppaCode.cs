@@ -23,7 +23,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         }
 
         /// <summary>
-        /// This class is a container for two instances of {@link GF2Matrix} and one instance of Permutation. 
+        /// This class is a container for two instances of GF2Matrix and one instance of Permutation. 
         /// <para>It is used to hold the systematic form <c>S*H*P = (Id|M)</c> of the check matrix <c>H</c> as
         /// returned by GoppaCode.ComputeSystematicForm(GF2Matrix, IRandom).</para>
         /// </summary>

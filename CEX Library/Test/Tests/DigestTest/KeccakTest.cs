@@ -278,8 +278,8 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
 
             DoFinalTest(Digest);
         
-            /*// very long test (passes)
-            for (int i = 0; i != 16384; i++)
+            // very long test (passes)
+            /*for (int i = 0; i != 16384; i++)
             {
                 for (int j = 0; j != 1024; j++)
                     Digest.BlockUpdate(_xtremeData, 0, _xtremeData.Length);
