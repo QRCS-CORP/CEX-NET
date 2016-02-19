@@ -217,16 +217,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Common
             else
             {
                 writer.Write(_idTag.Length);
-                writer.Write(_idTag.Length);
+                writer.Write(_idTag);
             }
 
             // family
             writer.Write((byte)_asmEngine);
 
             // parameters
-            data = _publicKey.ToBytes();
+            data = _asmParameters.ToBytes();
             writer.Write(data.Length);
-            writer.Write(data.Length);
+            writer.Write(data);
 
             // public key
             if (_publicKey == null)
@@ -237,7 +237,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Common
             {
                 data = _publicKey.ToBytes();
                 writer.Write(data.Length);
-                writer.Write(data.Length);
+                writer.Write(data);
             }
 
             // private key
@@ -249,7 +249,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Common
             {
                 data = _privateKey.ToBytes();
                 writer.Write(data.Length);
-                writer.Write(data.Length);
+                writer.Write(data);
             }
             writer.BaseStream.Seek(0, SeekOrigin.Begin);
 
