@@ -79,7 +79,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
     {
         #region Constants
         private const string ALG_NAME = "CBC";
-        private const Int32 PARALLEL_DEFBLOCK = 64000;
+        private const int PARALLEL_DEFBLOCK = 64000;
         private const int MAXALLOC_MB100 = 100000000;
         #endregion
 

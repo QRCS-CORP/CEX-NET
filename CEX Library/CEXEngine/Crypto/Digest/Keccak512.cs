@@ -170,7 +170,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             else
                 _digestSize = 512 / 8;
 
-            _blockSize = 200 - (_digestSize * 2);
+            _blockSize = 200 - (_digestSize * 2);//64=72
             Initialize();
         }
 
@@ -300,12 +300,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             Array.Clear(_state, 0, 25);
             _buffer = new byte[_blockSize];
             _bufferIndex = 0;
-            _state[1] = UInt64.MaxValue;
-            _state[2] = UInt64.MaxValue;
-            _state[8] = UInt64.MaxValue;
-            _state[12] = UInt64.MaxValue;
-            _state[17] = UInt64.MaxValue;
-            _state[20] = UInt64.MaxValue;
+            _state[1] = ulong.MaxValue;
+            _state[2] = ulong.MaxValue;
+            _state[8] = ulong.MaxValue;
+            _state[12] = ulong.MaxValue;
+            _state[17] = ulong.MaxValue;
+            _state[20] = ulong.MaxValue;
         }
 
         private void TransformBlock(byte[] Data, int Index)

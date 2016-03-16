@@ -103,11 +103,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <summary>
         /// A <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies">KeyPolicy</see> master flag that contains the policy flags applied to each sub key set
         /// </summary>
-        public Int64 KeyPolicy;
+        public long KeyPolicy;
         /// <summary>
         /// Used by KeyPolicy if the flag is set to <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies.Volatile">Volatile</see>, set as the expiration date/time in Ticks
         /// </summary>
-        public Int64 OptionFlag;
+        public long OptionFlag;
         #endregion
 
         #region Constructor
@@ -237,7 +237,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
             KeyPolicy = 0;
             OptionFlag = 0;
         }
-
 
         /// <summary>
         /// Convert the KeyAuthority structure as a byte array

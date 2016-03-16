@@ -109,7 +109,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                             else
                                 rem = (int)longR;
 
-                        } while ((leftHand ^ Int64.MinValue) > (rightHand ^ Int64.MinValue));
+                        } while ((leftHand ^ long.MinValue) > (rightHand ^ long.MinValue));
                     }
                 }
                 // Step D4: multiply normB by guessDigit and subtract the production from normA.

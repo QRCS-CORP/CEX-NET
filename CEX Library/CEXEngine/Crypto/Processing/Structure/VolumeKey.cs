@@ -64,11 +64,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <summary>
         /// The number of key/vector pairs in this container
         /// </summary>
-        public Int32 Count;
+        public int Count;
         /// <summary>
         /// The unique id array identifying each file in a set
         /// </summary>
-        public Int32[] FileId;
+        public int[] FileId;
         /// <summary>
         /// The current state of the file associated with a key
         /// </summary>
@@ -87,7 +87,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
             this.Tag = new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPPrng().GetBytes(32);
             this.Description = Description;
             this.Count = Count;
-            this.FileId = new Int32[Count];
+            this.FileId = new int[Count];
             this.State = new byte[Count];
             for (int i = 0; i < Count; ++i)
                 this.State[i] = (byte)VolumeKeyStates.Unassigned;
@@ -106,7 +106,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
             Array.Copy(Tag, this.Tag, Math.Min(Tag.Length, TAG_SIZE));
             this.Description = Description;
             this.Count = Count;
-            this.FileId = new Int32[Count];
+            this.FileId = new int[Count];
             this.State = new byte[Count];
             for (int i = 0; i < Count; ++i)
                 this.State[i] = (byte)VolumeKeyStates.Unassigned;
@@ -126,7 +126,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
             Tag = reader.ReadBytes(TAG_SIZE);
             Description = new CipherDescription(KeyStream);
             Count = reader.ReadInt32();
-            FileId = new Int32[Count];
+            FileId = new int[Count];
 
             for (int i = 0; i < Count; i++)
                 FileId[i] = reader.ReadInt32();

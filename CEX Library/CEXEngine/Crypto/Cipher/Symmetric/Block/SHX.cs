@@ -119,7 +119,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// <list type="number">
     /// <item><description>Serpent: <a href="http://www.cl.cam.ac.uk/~rja14/Papers/serpent.pdf">Specification</a>.</description></item>
     /// <item><description>HMAC <a href="http://tools.ietf.org/html/rfc2104">RFC 2104</a>.</description></item>
-    /// <item><description>Fips <a href="http://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf">198.1</a>.</description></item>
+    /// <item><description>NIST <a href="http://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf">198.1</a>.</description></item>
     /// <item><description>HKDF <a href="http://tools.ietf.org/html/rfc5869">RFC 5869</a>.</description></item>
     /// <item><description>NIST <a href="http://csrc.nist.gov/publications/drafts/800-90/draft-sp800-90b.pdf">SP800-90B</a>.</description></item>
     /// <item><description>SHA3 <a href="https://131002.net/blake/blake.pdf">The Blake digest</a>.</description></item>
@@ -137,12 +137,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         private const int MAX_ROUNDS = 128;
         private const int MAX_STDKEY = 64;
         private const int MIN_ROUNDS = 32;
-        private const UInt32 PHI = 0x9E3779B9;
+        private const uint PHI = 0x9E3779B9;
         #endregion
 
         #region Fields
         private int _dfnRounds = MIN_ROUNDS;
-        private UInt32[] _expKey;
+        private uint[] _expKey;
         // configurable nonce can create a unique distribution, can be byte(0)
         private byte[] _hkdfInfo = System.Text.Encoding.ASCII.GetBytes("SHX version 1 information string");
         private IDigest _keyEngine;
@@ -446,7 +446,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         #endregion
 
         #region Key Schedule
-        private UInt32[] ExpandKey(byte[] Key)
+        private uint[] ExpandKey(byte[] Key)
         {
             if (Key.Length > MAX_STDKEY)
             {
@@ -460,7 +460,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             }
         }
 
-        private UInt32[] SecureExpand(byte[] Key)
+        private uint[] SecureExpand(byte[] Key)
         {
             // expanded key size
             int keySize = 4 * (_dfnRounds + 1);
@@ -497,7 +497,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             return expKey;
         }
 
-        private UInt32[] StandardExpand(byte[] Key)
+        private uint[] StandardExpand(byte[] Key)
         {
             int cnt = 0;
             int index = 0;
@@ -527,14 +527,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 // 32 byte key
                 // step 2: rotate k into w(k) ints
                 for (int i = 8; i < 16; i++)
-                    tmpKey[i] = IntUtils.RotateLeft((UInt32)(tmpKey[i - 8] ^ tmpKey[i - 5] ^ tmpKey[i - 3] ^ tmpKey[i - 1] ^ PHI ^ (i - 8)), 11);
+                    tmpKey[i] = IntUtils.RotateLeft((uint)(tmpKey[i - 8] ^ tmpKey[i - 5] ^ tmpKey[i - 3] ^ tmpKey[i - 1] ^ PHI ^ (i - 8)), 11);
 
                 // copy to expanded key
                 Array.Copy(tmpKey, 8, expKey, 0, 8);
 
                 // step 3: calculate remainder of rounds with rotating primitive
                 for (int i = 8; i < keySize; i++)
-                    expKey[i] = IntUtils.RotateLeft((UInt32)(expKey[i - 8] ^ expKey[i - 5] ^ expKey[i - 3] ^ expKey[i - 1] ^ PHI ^ i), 11);
+                    expKey[i] = IntUtils.RotateLeft((uint)(expKey[i - 8] ^ expKey[i - 5] ^ expKey[i - 3] ^ expKey[i - 1] ^ PHI ^ i), 11);
             }
             else
             {
@@ -542,14 +542,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 // step 3: rotate k into w(k) ints, with extended polynominal
                 // Wp := (Wp-16 ^ Wp-13 ^ Wp-11 ^ Wp-10 ^ Wp-8 ^ Wp-5 ^ Wp-3 ^ Wp-1 ^ PHI ^ i) <<< 11
                 for (int i = 16; i < 32; i++)
-                    tmpKey[i] = IntUtils.RotateLeft((UInt32)(tmpKey[i - 16] ^ tmpKey[i - 13] ^ tmpKey[i - 11] ^ tmpKey[i - 10] ^ tmpKey[i - 8] ^ tmpKey[i - 5] ^ tmpKey[i - 3] ^ tmpKey[i - 1] ^ PHI ^ (i - 16)), 11);
+                    tmpKey[i] = IntUtils.RotateLeft((uint)(tmpKey[i - 16] ^ tmpKey[i - 13] ^ tmpKey[i - 11] ^ tmpKey[i - 10] ^ tmpKey[i - 8] ^ tmpKey[i - 5] ^ tmpKey[i - 3] ^ tmpKey[i - 1] ^ PHI ^ (i - 16)), 11);
 
                 // copy to expanded key
                 Array.Copy(tmpKey, 16, expKey, 0, 16);
 
                 // step 3: calculate remainder of rounds with rotating primitive
                 for (int i = 16; i < keySize; i++)
-                    expKey[i] = IntUtils.RotateLeft((UInt32)(expKey[i - 16] ^ expKey[i - 13] ^ expKey[i - 11] ^ expKey[i - 10] ^ expKey[i - 8] ^ expKey[i - 5] ^ expKey[i - 3] ^ expKey[i - 1] ^ PHI ^ i), 11);
+                    expKey[i] = IntUtils.RotateLeft((uint)(expKey[i - 16] ^ expKey[i - 13] ^ expKey[i - 11] ^ expKey[i - 10] ^ expKey[i - 8] ^ expKey[i - 5] ^ expKey[i - 3] ^ expKey[i - 1] ^ PHI ^ i), 11);
             }
 
             // step 4: create the working keys by processing with the Sbox and IP
@@ -741,224 +741,224 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         #endregion
 
         #region SBox Calculations
-        private void Sb0(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
+        private void Sb0(ref uint R0, ref uint R1, ref uint R2, ref uint R3)
         {
-            UInt32 t1 = R0 ^ R3;
-            UInt32 t2 = R2 ^ t1;
-            UInt32 t3 = R1 ^ t2;
+            uint t1 = R0 ^ R3;
+            uint t2 = R2 ^ t1;
+            uint t3 = R1 ^ t2;
             R3 = (R0 & R3) ^ t3;
-            UInt32 t4 = R0 ^ (R1 & t1);
+            uint t4 = R0 ^ (R1 & t1);
             R2 = t3 ^ (R2 | t4);
             R0 = R3 & (t2 ^ t4);
             R1 = (~t2) ^ R0;
             R0 ^= (~t4);
         }
 
-        private void Ib0(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
+        private void Ib0(ref uint R0, ref uint R1, ref uint R2, ref uint R3)
         {
-            UInt32 t1 = ~R0;
-            UInt32 t2 = R0 ^ R1;
-            UInt32 t3 = R3 ^ (t1 | t2);
-            UInt32 t4 = R2 ^ t3;
+            uint t1 = ~R0;
+            uint t2 = R0 ^ R1;
+            uint t3 = R3 ^ (t1 | t2);
+            uint t4 = R2 ^ t3;
             R2 = t2 ^ t4;
-            UInt32 t5 = t1 ^ (R3 & t2);
+            uint t5 = t1 ^ (R3 & t2);
             R1 = t3 ^ (R2 & t5);
             R3 = (R0 & t3) ^ (t4 | R1);
             R0 = R3 ^ (t4 ^ t5);
         }
 
-        private void Sb1(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
+        private void Sb1(ref uint R0, ref uint R1, ref uint R2, ref uint R3)
         {
-            UInt32 t1 = R1 ^ (~R0);
-            UInt32 t2 = R2 ^ (R0 | t1);
+            uint t1 = R1 ^ (~R0);
+            uint t2 = R2 ^ (R0 | t1);
             R2 = R3 ^ t2;
-            UInt32 t3 = R1 ^ (R3 | t1);
-            UInt32 t4 = t1 ^ R2;
+            uint t3 = R1 ^ (R3 | t1);
+            uint t4 = t1 ^ R2;
             R3 = t4 ^ (t2 & t3);
-            UInt32 t5 = t2 ^ t3;
+            uint t5 = t2 ^ t3;
             R1 = R3 ^ t5;
             R0 = t2 ^ (t4 & t5);
         }
 
-        private void Ib1(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
+        private void Ib1(ref uint R0, ref uint R1, ref uint R2, ref uint R3)
         {
-            UInt32 t1 = R1 ^ R3;
-            UInt32 t2 = R0 ^ (R1 & t1);
-            UInt32 t3 = t1 ^ t2;
+            uint t1 = R1 ^ R3;
+            uint t2 = R0 ^ (R1 & t1);
+            uint t3 = t1 ^ t2;
             R3 = R2 ^ t3;
-            UInt32 t4 = R1 ^ (t1 & t2);
+            uint t4 = R1 ^ (t1 & t2);
             R1 = t2 ^ (R3 | t4);
-            UInt32 t5 = ~R1;
-            UInt32 t6 = R3 ^ t4;
+            uint t5 = ~R1;
+            uint t6 = R3 ^ t4;
             R0 = t5 ^ t6;
             R2 = t3 ^ (t5 | t6);
         }
 
-        private void Sb2(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
+        private void Sb2(ref uint R0, ref uint R1, ref uint R2, ref uint R3)
         {
-            UInt32 t1 = ~R0;
-            UInt32 t2 = R1 ^ R3;
-            UInt32 t3 = t2 ^ (R2 & t1);
-            UInt32 t4 = R2 ^ t1;
-            UInt32 t5 = R1 & (R2 ^ t3);
-            UInt32 t6 = t4 ^ t5;
+            uint t1 = ~R0;
+            uint t2 = R1 ^ R3;
+            uint t3 = t2 ^ (R2 & t1);
+            uint t4 = R2 ^ t1;
+            uint t5 = R1 & (R2 ^ t3);
+            uint t6 = t4 ^ t5;
             R2 = R0 ^ ((R3 | t5) & (t3 | t4));
             R1 = (t2 ^ t6) ^ (R2 ^ (R3 | t1));
             R0 = t3;
             R3 = t6;
         }
 
-        private void Ib2(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
+        private void Ib2(ref uint R0, ref uint R1, ref uint R2, ref uint R3)
         {
-            UInt32 t1 = R1 ^ R3;
-            UInt32 t2 = R0 ^ R2;
-            UInt32 t3 = R2 ^ t1;
-            UInt32 t4 = R0 | ~t1;
+            uint t1 = R1 ^ R3;
+            uint t2 = R0 ^ R2;
+            uint t3 = R2 ^ t1;
+            uint t4 = R0 | ~t1;
             R0 = t2 ^ (R1 & t3);
-            UInt32 t5 = t1 ^ (t2 | (R3 ^ t4));
-            UInt32 t6 = ~t3;
-            UInt32 t7 = R0 | t5;
+            uint t5 = t1 ^ (t2 | (R3 ^ t4));
+            uint t6 = ~t3;
+            uint t7 = R0 | t5;
             R1 = t6 ^ t7;
             R2 = (R3 & t6) ^ (t2 ^ t7);
             R3 = t5;
         }
 
-        private void Sb3(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
+        private void Sb3(ref uint R0, ref uint R1, ref uint R2, ref uint R3)
         {
-            UInt32 t1 = R0 ^ R1;
-            UInt32 t2 = R0 | R3;
-            UInt32 t3 = R2 ^ R3;
-            UInt32 t4 = (R0 & R2) | (t1 & t2);
+            uint t1 = R0 ^ R1;
+            uint t2 = R0 | R3;
+            uint t3 = R2 ^ R3;
+            uint t4 = (R0 & R2) | (t1 & t2);
             R2 = t3 ^ t4;
-            UInt32 t5 = t4 ^ (R1 ^ t2);
+            uint t5 = t4 ^ (R1 ^ t2);
             R0 = t1 ^ (t3 & t5);
-            UInt32 t6 = R2 & R0;
+            uint t6 = R2 & R0;
             R3 = (R1 | R3) ^ (t3 ^ t6);
             R1 = t5 ^ t6;
         }
 
-        private void Ib3(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
+        private void Ib3(ref uint R0, ref uint R1, ref uint R2, ref uint R3)
         {
-            UInt32 t1 = R1 ^ R2;
-            UInt32 t2 = R0 ^ (R1 & t1);
-            UInt32 t3 = R3 | t2;
-            UInt32 t4 = R3 ^ (t1 | t3);
+            uint t1 = R1 ^ R2;
+            uint t2 = R0 ^ (R1 & t1);
+            uint t3 = R3 | t2;
+            uint t4 = R3 ^ (t1 | t3);
             R2 = (R2 ^ t2) ^ t4;
-            UInt32 t5 = (R0 | R1) ^ t4;
+            uint t5 = (R0 | R1) ^ t4;
             R0 = t1 ^ t3;
             R3 = t2 ^ (R0 & t5);
             R1 = R3 ^ (R0 ^ t5);
         }
 
-        private void Sb4(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
+        private void Sb4(ref uint R0, ref uint R1, ref uint R2, ref uint R3)
         {
-            UInt32 t1 = R0 ^ R3;
-            UInt32 t2 = R2 ^ (R3 & t1);
-            UInt32 t3 = R1 | t2;
+            uint t1 = R0 ^ R3;
+            uint t2 = R2 ^ (R3 & t1);
+            uint t3 = R1 | t2;
             R3 = t1 ^ t3;
-            UInt32 t4 = ~R1;
-            UInt32 t5 = t2 ^ (t1 | t4);
-            UInt32 t6 = t1 ^ t4;
-            UInt32 t7 = (R0 & t5) ^ (t3 & t6);
+            uint t4 = ~R1;
+            uint t5 = t2 ^ (t1 | t4);
+            uint t6 = t1 ^ t4;
+            uint t7 = (R0 & t5) ^ (t3 & t6);
             R1 = (R0 ^ t2) ^ (t6 & t7);
             R0 = t5;
             R2 = t7;
         }
 
-        private void Ib4(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
+        private void Ib4(ref uint R0, ref uint R1, ref uint R2, ref uint R3)
         {
-            UInt32 t1 = R1 ^ (R0 & (R2 | R3));
-            UInt32 t2 = R2 ^ (R0 & t1);
-            UInt32 t3 = R3 ^ t2;
-            UInt32 t4 = ~R0;
-            UInt32 t5 = t1 ^ (t2 & t3);
-            UInt32 t6 = R3 ^ (t3 | t4);
+            uint t1 = R1 ^ (R0 & (R2 | R3));
+            uint t2 = R2 ^ (R0 & t1);
+            uint t3 = R3 ^ t2;
+            uint t4 = ~R0;
+            uint t5 = t1 ^ (t2 & t3);
+            uint t6 = R3 ^ (t3 | t4);
             R1 = t3;
             R0 = t5 ^ t6;
             R2 = (t1 & t6) ^ (t3 ^ t4);
             R3 = t5;
         }
 
-        private void Sb5(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
+        private void Sb5(ref uint R0, ref uint R1, ref uint R2, ref uint R3)
         {
-            UInt32 t1 = ~R0;
-            UInt32 t2 = R0 ^ R1;
-            UInt32 t3 = R0 ^ R3;
-            UInt32 t4 = (R2 ^ t1) ^ (t2 | t3);
-            UInt32 t5 = R3 & t4;
-            UInt32 t6 = t5 ^ (t2 ^ t4);
-            UInt32 t7 = t3 ^ (t1 | t4);
+            uint t1 = ~R0;
+            uint t2 = R0 ^ R1;
+            uint t3 = R0 ^ R3;
+            uint t4 = (R2 ^ t1) ^ (t2 | t3);
+            uint t5 = R3 & t4;
+            uint t6 = t5 ^ (t2 ^ t4);
+            uint t7 = t3 ^ (t1 | t4);
             R2 = (t2 | t5) ^ t7;
             R3 = (R1 ^ t5) ^ (t6 & t7);
             R0 = t4;
             R1 = t6;
         }
 
-        private void Ib5(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
+        private void Ib5(ref uint R0, ref uint R1, ref uint R2, ref uint R3)
         {
-            UInt32 t1 = ~R2;
-            UInt32 t2 = R3 ^ (R1 & t1);
-            UInt32 t3 = R0 & t2;
-            UInt32 t4 = t3 ^ (R1 ^ t1);
-            UInt32 t5 = R1 | t4;
-            UInt32 t6 = t2 ^ (R0 & t5);
-            UInt32 t7 = R0 | R3;
+            uint t1 = ~R2;
+            uint t2 = R3 ^ (R1 & t1);
+            uint t3 = R0 & t2;
+            uint t4 = t3 ^ (R1 ^ t1);
+            uint t5 = R1 | t4;
+            uint t6 = t2 ^ (R0 & t5);
+            uint t7 = R0 | R3;
             R2 = (R1 & t7) ^ (t3 | (R0 ^ R2));
             R0 = t7 ^ (t1 ^ t5);
             R1 = t6;
             R3 = t4;
         }
 
-        private void Sb6(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
+        private void Sb6(ref uint R0, ref uint R1, ref uint R2, ref uint R3)
         {
-            UInt32 t1 = R0 ^ R3;
-            UInt32 t2 = R1 ^ t1;
-            UInt32 t3 = R2 ^ (~R0 | t1);
+            uint t1 = R0 ^ R3;
+            uint t2 = R1 ^ t1;
+            uint t3 = R2 ^ (~R0 | t1);
             R1 ^= t3;
-            UInt32 t4 = R3 ^ (t1 | R1);
+            uint t4 = R3 ^ (t1 | R1);
             R2 = t2 ^ (t3 & t4);
-            UInt32 t5 = t3 ^ t4;
+            uint t5 = t3 ^ t4;
             R0 = R2 ^ t5;
             R3 = (~t3) ^ (t2 & t5);
         }
 
-        private void Ib6(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
+        private void Ib6(ref uint R0, ref uint R1, ref uint R2, ref uint R3)
         {
-            UInt32 t1 = ~R0;
-            UInt32 t2 = R0 ^ R1;
-            UInt32 t3 = R2 ^ t2;
-            UInt32 t4 = R3 ^ (R2 | t1);
-            UInt32 t5 = t3 ^ t4;
-            UInt32 t6 = t2 ^ (t3 & t4);
-            UInt32 t7 = t4 ^ (R1 | t6);
-            UInt32 t8 = R1 | t7;
+            uint t1 = ~R0;
+            uint t2 = R0 ^ R1;
+            uint t3 = R2 ^ t2;
+            uint t4 = R3 ^ (R2 | t1);
+            uint t5 = t3 ^ t4;
+            uint t6 = t2 ^ (t3 & t4);
+            uint t7 = t4 ^ (R1 | t6);
+            uint t8 = R1 | t7;
             R0 = t6 ^ t8;
             R2 = (R3 & t1) ^ (t3 ^ t8);
             R1 = t5;
             R3 = t7;
         }
 
-        private void Sb7(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
+        private void Sb7(ref uint R0, ref uint R1, ref uint R2, ref uint R3)
         {
-            UInt32 t1 = R1 ^ R2;
-            UInt32 t2 = R3 ^ (R2 & t1);
-            UInt32 t3 = R0 ^ t2;
+            uint t1 = R1 ^ R2;
+            uint t2 = R3 ^ (R2 & t1);
+            uint t3 = R0 ^ t2;
             R1 ^= (t3 & (R3 | t1));
-            UInt32 t4 = t1 ^ (R0 & t3);
-            UInt32 t5 = t3 ^ (t2 | R1);
+            uint t4 = t1 ^ (R0 & t3);
+            uint t5 = t3 ^ (t2 | R1);
             R2 = t2 ^ (t4 & t5);
             R0 = (~t5) ^ (t4 & R2);
             R3 = t4;
         }
 
-        private void Ib7(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
+        private void Ib7(ref uint R0, ref uint R1, ref uint R2, ref uint R3)
         {
-            UInt32 t1 = R2 | (R0 & R1);
-            UInt32 t2 = R3 & (R0 | R1);
-            UInt32 t3 = t1 ^ t2;
-            UInt32 t4 = R1 ^ t2;
+            uint t1 = R2 | (R0 & R1);
+            uint t2 = R3 & (R0 | R1);
+            uint t3 = t1 ^ t2;
+            uint t4 = R1 ^ t2;
             R1 = R0 ^ (t4 | (t3 ^ ~R3));
-            UInt32 t8 = (R2 ^ t4) ^ (R3 | R1);
+            uint t8 = (R2 ^ t4) ^ (R3 | R1);
             R2 = (t1 ^ R1) ^ (t8 ^ (R0 & t3));
             R0 = t8;
             R3 = t3;
@@ -967,12 +967,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// <remarks>
         /// Apply the linear transformation to the register set
         /// </remarks>
-        private void LinearTransform(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
+        private void LinearTransform(ref uint R0, ref uint R1, ref uint R2, ref uint R3)
         {
-            UInt32 x0 = IntUtils.RotateLeft(R0, 13);
-            UInt32 x2 = IntUtils.RotateLeft(R2, 3);
-            UInt32 x1 = R1 ^ x0 ^ x2;
-            UInt32 x3 = R3 ^ x2 ^ x0 << 3;
+            uint x0 = IntUtils.RotateLeft(R0, 13);
+            uint x2 = IntUtils.RotateLeft(R2, 3);
+            uint x1 = R1 ^ x0 ^ x2;
+            uint x3 = R3 ^ x2 ^ x0 << 3;
 
             R1 = IntUtils.RotateLeft(x1, 1);
             R3 = IntUtils.RotateLeft(x3, 7);
@@ -983,12 +983,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// <remarks>
         /// Apply the inverse of the linear transformation to the register set
         /// </remarks>
-        private void InverseTransform(ref UInt32 R0, ref UInt32 R1, ref UInt32 R2, ref UInt32 R3)
+        private void InverseTransform(ref uint R0, ref uint R1, ref uint R2, ref uint R3)
         {
-            UInt32 x2 = IntUtils.RotateRight(R2, 22) ^ R3 ^ (R1 << 7);
-            UInt32 x0 = IntUtils.RotateRight(R0, 5) ^ R1 ^ R3;
-            UInt32 x3 = IntUtils.RotateRight(R3, 7);
-            UInt32 x1 = IntUtils.RotateRight(R1, 1);
+            uint x2 = IntUtils.RotateRight(R2, 22) ^ R3 ^ (R1 << 7);
+            uint x0 = IntUtils.RotateRight(R0, 5) ^ R1 ^ R3;
+            uint x3 = IntUtils.RotateRight(R3, 7);
+            uint x1 = IntUtils.RotateRight(R1, 1);
 
             R3 = x3 ^ x2 ^ x0 << 3;
             R1 = x1 ^ x0 ^ x2;

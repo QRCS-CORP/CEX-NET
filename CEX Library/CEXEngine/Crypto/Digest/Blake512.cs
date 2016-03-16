@@ -2,6 +2,7 @@
 using System;
 using VTDev.Libraries.CEXEngine.CryptoException;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 #region License Information
@@ -87,22 +88,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         private const int DIGEST_SIZE = 64;
         private const int PAD_LENGTH = 111;
         private const int ROUNDS = 16;
-        private const UInt64 TN_888 = 888;
-        private const UInt64 TN_1024 = 1024;
+        private const ulong TN_888 = 888;
+        private const ulong TN_1024 = 1024;
         #endregion
 
         #region Fields
         private int _dataLen = 0;
         private byte[] _digestState = new byte[128];
-        private UInt64[] _hashVal = new UInt64[8];
+        private ulong[] _hashVal = new ulong[8];
         private bool _isDisposed = false;
         private bool _isNullT;
-        private UInt64[] _salt64 = new UInt64[4];
-        private UInt64[] _M = new UInt64[16];
-        private UInt64 _T;
-        private UInt64[] _V = new UInt64[16];
+        private ulong[] _salt64 = new ulong[4];
+        private ulong[] _M = new ulong[16];
+        private ulong _T;
+        private ulong[] _V = new ulong[16];
 
-        private static readonly UInt64[] _C64 = new UInt64[16] 
+        private static readonly ulong[] _C64 = new ulong[16] 
         {
 			0x243F6A8885A308D3UL, 0x13198A2E03707344UL, 0xA4093822299F31D0UL, 0x082EFA98EC4E6C89UL, 
             0x452821E638D01377UL, 0xBE5466CF34E90C6CUL, 0xC0AC29B7C97C50DDUL, 0x3F84D5B5B5470917UL, 
@@ -110,7 +111,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 			0xBA7C9045F12C7F99UL, 0x24A19947B3916CF7UL, 0x0801F2E2858EFC16UL, 0x636920D871574E69UL
 		};
 
-        private static Int32[] _ftSigma;
+        private static uint[] _ftSigma;
 
         private static readonly byte[] _Padding = new byte[128] 
         {
@@ -173,7 +174,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// </summary>
         /// 
         /// <param name="Salt">The optional salt value; must be 4 ulong in length</param>
-        public Blake512(Int64[] Salt)
+        public Blake512(long[] Salt)
         {
             if (Salt.Length != 4)
                 throw new CryptoHashException("Blake512:Ctor", "The Salt array length must be 4!", new ArgumentOutOfRangeException());
@@ -274,7 +275,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
             byte[] msgLen = new byte[16];
 
-            UInt64ToBytes(_T + ((UInt64)_dataLen << 3), msgLen, 8);
+            IntUtils.Be64ToBytes(_T + ((ulong)_dataLen << 3), msgLen, 8);
 
             // special case of one padding byte
             if (_dataLen == PAD_LENGTH)
@@ -290,18 +291,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
                     if (_dataLen == 0) 
                         _isNullT = true;
 
-                    _T -= TN_888 - ((UInt64)_dataLen << 3);
+                    _T -= TN_888 - ((ulong)_dataLen << 3);
                     BlockUpdate(_Padding, 0, PAD_LENGTH - _dataLen);
                 }
                 else
                 {
                     // not enough space, need 2 compressions 
-                    _T -= TN_1024 - ((UInt64)_dataLen << 3);
+                    _T -= TN_1024 - ((ulong)_dataLen << 3);
                     BlockUpdate(_Padding, 0, 128 - _dataLen);
-
                     _T -= TN_888;
                     BlockUpdate(_Padding, 1, PAD_LENGTH);
-
                     _isNullT = true;
                 }
 
@@ -311,14 +310,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
             _T -= 128;
             BlockUpdate(msgLen, 0, 16);
-
             byte[] digest = new byte[64];
 
-            for (int i = 0; i < 8; ++i)
-                UInt64ToBytes(_hashVal[i], digest, i << 3);
+            IntUtils.Be64ToBytes(_hashVal[0], digest, 0);
+            IntUtils.Be64ToBytes(_hashVal[1], digest, 8);
+            IntUtils.Be64ToBytes(_hashVal[2], digest, 16);
+            IntUtils.Be64ToBytes(_hashVal[3], digest, 24);
+            IntUtils.Be64ToBytes(_hashVal[4], digest, 32);
+            IntUtils.Be64ToBytes(_hashVal[5], digest, 40);
+            IntUtils.Be64ToBytes(_hashVal[6], digest, 48);
+            IntUtils.Be64ToBytes(_hashVal[7], digest, 56);
 
             Buffer.BlockCopy(digest, 0, Output, OutOffset, digest.Length);
-
             Reset();
 
             return Output.Length;
@@ -344,22 +347,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         #endregion
 
         #region Private Methods
-        private static UInt64 BytesToUInt64(byte[] Input, int InOffset)
+        private void Compress64(byte[] Block, int Offset)
         {
-            return ((UInt64)Input[InOffset + 7] | 
-                ((UInt64)Input[InOffset + 6] << 8) |
-                ((UInt64)Input[InOffset + 5] << 16) | 
-                ((UInt64)Input[InOffset + 4] << 24) |
-                ((UInt64)Input[InOffset + 3] << 32) | 
-                ((UInt64)Input[InOffset + 2] << 40) |
-                ((UInt64)Input[InOffset + 1] << 48) | 
-                ((UInt64)Input[InOffset] << 56));
-        }
-
-        private void Compress64(byte[] pbBlock, int iOffset)
-        {
-            for (int i = 0; i < 16; ++i)
-                _M[i] = BytesToUInt64(pbBlock, iOffset + (i << 3));
+            _M[0] = IntUtils.BytesToBe64(Block, Offset);
+            _M[1] = IntUtils.BytesToBe64(Block, Offset + 8);
+            _M[2] = IntUtils.BytesToBe64(Block, Offset + 16);
+            _M[3] = IntUtils.BytesToBe64(Block, Offset + 24);
+            _M[4] = IntUtils.BytesToBe64(Block, Offset + 32);
+            _M[5] = IntUtils.BytesToBe64(Block, Offset + 40);
+            _M[6] = IntUtils.BytesToBe64(Block, Offset + 48);
+            _M[7] = IntUtils.BytesToBe64(Block, Offset + 56);
+            _M[8] = IntUtils.BytesToBe64(Block, Offset + 64);
+            _M[9] = IntUtils.BytesToBe64(Block, Offset + 72);
+            _M[10] = IntUtils.BytesToBe64(Block, Offset + 80);
+            _M[11] = IntUtils.BytesToBe64(Block, Offset + 88);
+            _M[12] = IntUtils.BytesToBe64(Block, Offset + 96);
+            _M[13] = IntUtils.BytesToBe64(Block, Offset + 104);
+            _M[14] = IntUtils.BytesToBe64(Block, Offset + 112);
+            _M[15] = IntUtils.BytesToBe64(Block, Offset + 120);
 
             Array.Copy(_hashVal, _V, 8);
 
@@ -379,55 +384,79 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             }
 
             //  do 16 rounds
-            for (int cnt = 0; cnt < ROUNDS; ++cnt)
+            uint index = 0;
+            do
             {
-                G64(0, 4, 8, 12, cnt, 0);
-                G64(1, 5, 9, 13, cnt, 2);
-                G64(2, 6, 10, 14, cnt, 4);
-                G64(3, 7, 11, 15, cnt, 6);
-                G64(3, 4, 9, 14, cnt, 14);
-                G64(2, 7, 8, 13, cnt, 12);
-                G64(0, 5, 10, 15, cnt, 8);
-                G64(1, 6, 11, 12, cnt, 10);
-            }
+                G64BLK(index);
+                index++;
+
+            } while (index != ROUNDS);
 
             // finalization
-            for (int i = 0; i < 8; ++i) 
-                _hashVal[i] ^= _V[i];
-            for (int i = 0; i < 8; ++i) 
-                _hashVal[i] ^= _V[i + 8];
-            for (int i = 0; i < 4; ++i) 
-                _hashVal[i] ^= _salt64[i];
-            for (int i = 0; i < 4; ++i)
-                _hashVal[i + 4] ^= _salt64[i];
+            _hashVal[0] ^= _V[0];
+            _hashVal[1] ^= _V[1];
+            _hashVal[2] ^= _V[2];
+            _hashVal[3] ^= _V[3];
+            _hashVal[4] ^= _V[4];
+            _hashVal[5] ^= _V[5];
+            _hashVal[6] ^= _V[6];
+            _hashVal[7] ^= _V[7];
+            _hashVal[0] ^= _V[8];
+            _hashVal[1] ^= _V[9];
+            _hashVal[2] ^= _V[10];
+            _hashVal[3] ^= _V[11];
+            _hashVal[4] ^= _V[12];
+            _hashVal[5] ^= _V[13];
+            _hashVal[6] ^= _V[14];
+            _hashVal[7] ^= _V[15];
+            _hashVal[0] ^= _salt64[0];
+            _hashVal[1] ^= _salt64[1];
+            _hashVal[2] ^= _salt64[2];
+            _hashVal[3] ^= _salt64[3];
+            _hashVal[4] ^= _salt64[0];
+            _hashVal[5] ^= _salt64[1];
+            _hashVal[6] ^= _salt64[2];
+            _hashVal[7] ^= _salt64[3];
         }
 
-        private void G64(int A, int B, int C, int D, int R, int I)
+        private void G64(uint A, uint B, uint C, uint D, uint R, uint I)
         {
-            int P = (R << 4) + I;
-            int P0 = _ftSigma[P];
-            int P1 = _ftSigma[P + 1];
+            uint P = (R << 4) + I;
+            uint P0 = _ftSigma[P];
+            uint P1 = _ftSigma[P + 1];
 
             // initialization
             _V[A] += _V[B] + (_M[P0] ^ _C64[P1]);
-            _V[D] = RotateRight(_V[D] ^ _V[A], 32);
+            _V[D] = IntUtils.RotateRight(_V[D] ^ _V[A], 32);
             _V[C] += _V[D];
-            _V[B] = RotateRight(_V[B] ^ _V[C], 25);
+            _V[B] = IntUtils.RotateRight(_V[B] ^ _V[C], 25);
             _V[A] += _V[B] + (_M[P1] ^ _C64[P0]);
-            _V[D] = RotateRight(_V[D] ^ _V[A], 16);
+            _V[D] = IntUtils.RotateRight(_V[D] ^ _V[A], 16);
             _V[C] += _V[D];
-            _V[B] = RotateRight(_V[B] ^ _V[C], 11);
+            _V[B] = IntUtils.RotateRight(_V[B] ^ _V[C], 11);
+        }
+
+        void G64BLK(uint Index)
+        {
+            G64(0, 4, 8, 12, Index, 0);
+            G64(1, 5, 9, 13, Index, 2);
+            G64(2, 6, 10, 14, Index, 4);
+            G64(3, 7, 11, 15, Index, 6);
+            G64(3, 4, 9, 14, Index, 14);
+            G64(2, 7, 8, 13, Index, 12);
+            G64(0, 5, 10, 15, Index, 8);
+            G64(1, 6, 11, 12, Index, 10);
         }
 
         private void Initialize()
         {
-            _hashVal = new UInt64[] 
+            _hashVal = new ulong[] 
             { 
                 0x6A09E667F3BCC908UL, 0xBB67AE8584CAA73BUL, 0x3C6EF372FE94F82BUL, 0xA54FF53A5F1D36F1UL, 
                 0x510E527FADE682D1UL, 0x9B05688C2B3E6C1FUL, 0x1F83D9ABFB41BD6BUL, 0x5BE0CD19137E2179UL
             };
 
-            _ftSigma = new int[ROUNDS * 16] 
+            _ftSigma = new uint[ROUNDS * 16] 
             {
 			    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
 			    14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3,
@@ -454,20 +483,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             _isNullT = false;
 
             Array.Clear(_digestState, 0, _digestState.Length);
-        }
-
-        private static UInt64 RotateRight(UInt64 Input, int Bits)
-        {
-            return ((Input >> Bits) | (Input << (64 - Bits)));
-        }
-
-        private static void UInt64ToBytes(UInt64 Input, byte[] Output, int OutOffset)
-        {
-            for (int i = 7; i >= 0; --i)
-            {
-                Output[OutOffset + i] = (byte)(Input & 0xFF);
-                Input >>= 8;
-            }
         }
         #endregion
 

@@ -299,7 +299,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
                 _msgDigest.DoFinal(_inputPad, 0);
                 keyLength = _digestSize;
             }
-            else if (keyLength > _blockSize) // compress to digest size
+            else if (keyLength > _blockSize) // compress to block size
             {
                 _msgDigest.BlockUpdate(tmpKey, 0, tmpKey.Length);
                 _msgDigest.DoFinal(_inputPad, 0);

@@ -67,11 +67,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <summary>
         /// The master key policy flags, used to determine encryption state
         /// </summary>
-        public Int64 KeyPolicy;
+        public long KeyPolicy;
         /// <summary>
         /// The creation date/time of this key in milliseconds
         /// </summary>
-        public Int64 CreatedOn;
+        public long CreatedOn;
         /// <summary>
         /// The <see cref="KeyAuthority">KeyAuthority</see> structure containing the key authorization schema.
         /// </summary>
@@ -90,11 +90,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <summary>
         /// The number of Key Sets contained in this key package file.
         /// </summary>
-        public Int32 SubKeyCount;
+        public int SubKeyCount;
         /// <summary>
         /// A <see cref="SubKeyPolicy">KeyPolicy</see> array that contains the policy flags for each sub key set
         /// </summary>
-        public Int64[] SubKeyPolicy;
+        public long[] SubKeyPolicy;
         /// <summary>
         /// An array of unique 16 byte fields that identify each sub key set
         /// </summary>

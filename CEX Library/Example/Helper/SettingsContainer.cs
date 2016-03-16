@@ -146,6 +146,7 @@ namespace VTDev.Projects.CEX.Helper
             writer.Write(Settings.PackageAuthChecked);
             writer.Write(Settings.NoNarrativeChecked);
             writer.Write(Settings.NoExportChecked);
+            stream.Seek(0, SeekOrigin.Begin);
 
             return stream;
         }

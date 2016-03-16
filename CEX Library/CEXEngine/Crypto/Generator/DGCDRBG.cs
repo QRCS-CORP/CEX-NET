@@ -194,7 +194,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
             if (Salt.Length < COUNTER_SIZE)
                 throw new CryptoGeneratorException("DGCDrbg:Initialize", "Salt must be at least 8 bytes!", new ArgumentOutOfRangeException());
 
-            Int64[] counter = new Int64[1];
+            long[] counter = new long[1];
             int keyLen = (Salt.Length - COUNTER_SIZE) < 0 ? 0 : Salt.Length - COUNTER_SIZE;
             byte[] key = new byte[keyLen];
             int ctrLen = Math.Min(COUNTER_SIZE, Salt.Length);
@@ -322,7 +322,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
             else if (Seed.Length == COUNTER_SIZE)
             {
                 // update counter only
-                Int64[] counter = new Int64[1];
+                long[] counter = new long[1];
                 Buffer.BlockCopy(Seed, 0, counter, 0, COUNTER_SIZE);
                 UpdateCounter(counter[0]);
             }

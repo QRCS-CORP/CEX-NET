@@ -355,7 +355,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         }
 
         /// <summary>
-        /// Create a deep copy of a Int32 array
+        /// Create a deep copy of a int array
         /// </summary>
         /// 
         /// <param name="A">The array to copy</param>
@@ -370,7 +370,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         }
 
         /// <summary>
-        /// Create a deep copy of a Int64 array
+        /// Create a deep copy of a long array
         /// </summary>
         /// 
         /// <param name="A">The array to copy</param>
@@ -1558,12 +1558,12 @@ namespace VTDev.Libraries.CEXEngine.Utility
         }
 
         /// <summary>
-        /// Convert a byte array to a 2 dimensional Int32 jagged array
+        /// Convert a byte array to a 2 dimensional int jagged array
         /// </summary>
         /// 
         /// <param name="Data">Array to convert</param>
         /// 
-        /// <returns>2 dimensional Int32 jagged array</returns>
+        /// <returns>2 dimensional int jagged array</returns>
         [CLSCompliant(false)]
         public static int[][] ToArray2x32(byte[] Data)
         {
@@ -1591,12 +1591,12 @@ namespace VTDev.Libraries.CEXEngine.Utility
         }
 
         /// <summary>
-        /// Convert a byte array to a 2 dimensional Int64 jagged array
+        /// Convert a byte array to a 2 dimensional long jagged array
         /// </summary>
         /// 
         /// <param name="Data">Array to convert</param>
         /// 
-        /// <returns>2 dimensional Int64 jagged array</returns>
+        /// <returns>2 dimensional long jagged array</returns>
         [CLSCompliant(false)]
         public static long[][] ToArray2x64(byte[] Data)
         {
@@ -1698,12 +1698,12 @@ namespace VTDev.Libraries.CEXEngine.Utility
         }
 
         /// <summary>
-        /// Convert a byte array to a 3 dimensional Int32 jagged array
+        /// Convert a byte array to a 3 dimensional int jagged array
         /// </summary>
         /// 
         /// <param name="Data">Array to convert</param>
         /// 
-        /// <returns>3 dimensional Int32 jagged array</returns>
+        /// <returns>3 dimensional int jagged array</returns>
         [CLSCompliant(false)]
         public static int[][][] ToArray3x32(byte[] Data)
         {
@@ -1735,12 +1735,12 @@ namespace VTDev.Libraries.CEXEngine.Utility
         }
 
         /// <summary>
-        /// Convert a byte array to a 3 dimensional Int64 jagged array
+        /// Convert a byte array to a 3 dimensional long jagged array
         /// </summary>
         /// 
         /// <param name="Data">Array to convert</param>
         /// 
-        /// <returns>3 dimensional Int64 jagged array</returns>
+        /// <returns>3 dimensional long jagged array</returns>
         [CLSCompliant(false)]
         public static long[][][] ToArray3x64(byte[] Data)
         {
@@ -1982,12 +1982,12 @@ namespace VTDev.Libraries.CEXEngine.Utility
         }
 
         /// <summary>
-        /// Copy a 2 dimensional Int32 jagged array to a byte array
+        /// Copy a 2 dimensional int jagged array to a byte array
         /// </summary>
         /// 
         /// <param name="Data">Array to convert</param>
         /// 
-        /// <returns>2 dimensional Int32 jagged array converted to bytes</returns>
+        /// <returns>2 dimensional int jagged array converted to bytes</returns>
         [CLSCompliant(false)]
         public static byte[] ToBytes(int[][] Data)
         {
@@ -2010,12 +2010,12 @@ namespace VTDev.Libraries.CEXEngine.Utility
         }
 
         /// <summary>
-        /// Copy a 2 dimensional Int64 jagged array to a byte array
+        /// Copy a 2 dimensional long jagged array to a byte array
         /// </summary>
         /// 
         /// <param name="Data">Array to convert</param>
         /// 
-        /// <returns>2 dimensional Int64 jagged array converted to bytes</returns>
+        /// <returns>2 dimensional long jagged array converted to bytes</returns>
         [CLSCompliant(false)]
         public static byte[] ToBytes(long[][] Data)
         {
@@ -2070,7 +2070,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         }
 
         /// <summary>
-        /// Copy a 3 dimensional Int32 jagged array to a byte array
+        /// Copy a 3 dimensional int jagged array to a byte array
         /// </summary>
         /// 
         /// <param name="Data">Array to convert</param>
@@ -2102,12 +2102,12 @@ namespace VTDev.Libraries.CEXEngine.Utility
         }
 
         /// <summary>
-        /// Copy a 3 dimensional Int64 jagged array to a byte array
+        /// Copy a 3 dimensional long jagged array to a byte array
         /// </summary>
         /// 
         /// <param name="Data">Array to convert</param>
         /// 
-        /// <returns>3 dimensional Int64 jagged array converted to bytes</returns>
+        /// <returns>3 dimensional long jagged array converted to bytes</returns>
         [CLSCompliant(false)]
         public static byte[] ToBytes(long[][][] Data)
         {

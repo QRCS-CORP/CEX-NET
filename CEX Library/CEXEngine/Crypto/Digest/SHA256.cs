@@ -2,6 +2,7 @@
 using System;
 using VTDev.Libraries.CEXEngine.CryptoException;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 #region License Information
@@ -83,18 +84,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     {
         #region Constants
         private const string ALG_NAME = "SHA256";
-        private Int32 BLOCK_SIZE = 64;
-        private Int32 DIGEST_SIZE = 32;
+        private int BLOCK_SIZE = 64;
+        private int DIGEST_SIZE = 32;
         #endregion
 
         #region Fields
-        private Int32 _bufferOffset = 0;
-        private Int64 _byteCount = 0;
+        private int _bufferOffset = 0;
+        private long _byteCount = 0;
         private byte[] _processBuffer = new byte[4];
-        private UInt32 _H0, _H1, _H2, _H3, _H4, _H5, _H6, _H7;
+        private uint _H0, _H1, _H2, _H3, _H4, _H5, _H6, _H7;
         private bool _isDisposed = false;
-        private UInt32[] _wordBuffer = new UInt32[64];
-        private Int32 _wordOffset = 0;
+        private uint[] _wordBuffer = new uint[64];
+        private int _wordOffset = 0;
         #endregion
 
         #region Properties
@@ -219,21 +220,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <returns>Size of Hash value, Always 32 bytes</returns>
         /// 
         /// <exception cref="CryptoHashException">Thrown if Output array is too small</exception>
-        public Int32 DoFinal(byte[] Output, Int32 OutOffset)
+        public int DoFinal(byte[] Output, int OutOffset)
         {
             if (Output.Length - OutOffset < DigestSize)
                 throw new CryptoHashException("SHA256:DoFinal", "The Output buffer is too short!", new ArgumentOutOfRangeException());
 
             Finish();
 
-            UInt32ToBE((UInt32)_H0, Output, OutOffset);
-            UInt32ToBE((UInt32)_H1, Output, OutOffset + 4);
-            UInt32ToBE((UInt32)_H2, Output, OutOffset + 8);
-            UInt32ToBE((UInt32)_H3, Output, OutOffset + 12);
-            UInt32ToBE((UInt32)_H4, Output, OutOffset + 16);
-            UInt32ToBE((UInt32)_H5, Output, OutOffset + 20);
-            UInt32ToBE((UInt32)_H6, Output, OutOffset + 24);
-            UInt32ToBE((UInt32)_H7, Output, OutOffset + 28);
+            IntUtils.Be32ToBytes(_H0, Output, OutOffset);
+            IntUtils.Be32ToBytes(_H1, Output, OutOffset + 4);
+            IntUtils.Be32ToBytes(_H2, Output, OutOffset + 8);
+            IntUtils.Be32ToBytes(_H3, Output, OutOffset + 12);
+            IntUtils.Be32ToBytes(_H4, Output, OutOffset + 16);
+            IntUtils.Be32ToBytes(_H5, Output, OutOffset + 20);
+            IntUtils.Be32ToBytes(_H6, Output, OutOffset + 24);
+            IntUtils.Be32ToBytes(_H7, Output, OutOffset + 28);
 
             Reset();
 
@@ -274,7 +275,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         #region Private Methods
         private void Finish()
         {
-            Int64 bitLength = (_byteCount << 3);
+            long bitLength = (_byteCount << 3);
 
             Update((byte)128);
 
@@ -300,63 +301,273 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
         private void ProcessBlock()
         {
-            Int32 ctr = 0;
-            UInt32 w0 = _H0;
-            UInt32 w1 = _H1;
-            UInt32 w2 = _H2;
-            UInt32 w3 = _H3;
-            UInt32 w4 = _H4;
-            UInt32 w5 = _H5;
-            UInt32 w6 = _H6;
-            UInt32 w7 = _H7;
+            int ctr = 0;
+            uint w0 = _H0;
+            uint w1 = _H1;
+            uint w2 = _H2;
+            uint w3 = _H3;
+            uint w4 = _H4;
+            uint w5 = _H5;
+            uint w6 = _H6;
+            uint w7 = _H7;
 
             // expand 16 word block into 64 word blocks
-            for (int i = 16; i < 64; i++)
-                _wordBuffer[i] = Theta1(_wordBuffer[i - 2]) + _wordBuffer[i - 7] + Theta0(_wordBuffer[i - 15]) + _wordBuffer[i - 16];
+            _wordBuffer[16] = Theta1(_wordBuffer[14]) + _wordBuffer[9] + Theta0(_wordBuffer[1]) + _wordBuffer[0];
+            _wordBuffer[17] = Theta1(_wordBuffer[15]) + _wordBuffer[10] + Theta0(_wordBuffer[2]) + _wordBuffer[1];
+            _wordBuffer[18] = Theta1(_wordBuffer[16]) + _wordBuffer[11] + Theta0(_wordBuffer[3]) + _wordBuffer[2];
+            _wordBuffer[19] = Theta1(_wordBuffer[17]) + _wordBuffer[12] + Theta0(_wordBuffer[4]) + _wordBuffer[3];
+            _wordBuffer[20] = Theta1(_wordBuffer[18]) + _wordBuffer[13] + Theta0(_wordBuffer[5]) + _wordBuffer[4];
+            _wordBuffer[21] = Theta1(_wordBuffer[19]) + _wordBuffer[14] + Theta0(_wordBuffer[6]) + _wordBuffer[5];
+            _wordBuffer[22] = Theta1(_wordBuffer[20]) + _wordBuffer[15] + Theta0(_wordBuffer[7]) + _wordBuffer[6];
+            _wordBuffer[23] = Theta1(_wordBuffer[21]) + _wordBuffer[16] + Theta0(_wordBuffer[8]) + _wordBuffer[7];
+            _wordBuffer[24] = Theta1(_wordBuffer[22]) + _wordBuffer[17] + Theta0(_wordBuffer[9]) + _wordBuffer[8];
+            _wordBuffer[25] = Theta1(_wordBuffer[23]) + _wordBuffer[18] + Theta0(_wordBuffer[10]) + _wordBuffer[9];
+            _wordBuffer[26] = Theta1(_wordBuffer[24]) + _wordBuffer[19] + Theta0(_wordBuffer[11]) + _wordBuffer[10];
+            _wordBuffer[27] = Theta1(_wordBuffer[25]) + _wordBuffer[20] + Theta0(_wordBuffer[12]) + _wordBuffer[11];
+            _wordBuffer[28] = Theta1(_wordBuffer[26]) + _wordBuffer[21] + Theta0(_wordBuffer[13]) + _wordBuffer[12];
+            _wordBuffer[29] = Theta1(_wordBuffer[27]) + _wordBuffer[22] + Theta0(_wordBuffer[14]) + _wordBuffer[13];
+            _wordBuffer[30] = Theta1(_wordBuffer[28]) + _wordBuffer[23] + Theta0(_wordBuffer[15]) + _wordBuffer[14];
+            _wordBuffer[31] = Theta1(_wordBuffer[29]) + _wordBuffer[24] + Theta0(_wordBuffer[16]) + _wordBuffer[15];
+            _wordBuffer[32] = Theta1(_wordBuffer[30]) + _wordBuffer[25] + Theta0(_wordBuffer[17]) + _wordBuffer[16];
+            _wordBuffer[33] = Theta1(_wordBuffer[31]) + _wordBuffer[26] + Theta0(_wordBuffer[18]) + _wordBuffer[17];
+            _wordBuffer[34] = Theta1(_wordBuffer[32]) + _wordBuffer[27] + Theta0(_wordBuffer[19]) + _wordBuffer[18];
+            _wordBuffer[35] = Theta1(_wordBuffer[33]) + _wordBuffer[28] + Theta0(_wordBuffer[20]) + _wordBuffer[19];
+            _wordBuffer[36] = Theta1(_wordBuffer[34]) + _wordBuffer[29] + Theta0(_wordBuffer[21]) + _wordBuffer[20];
+            _wordBuffer[37] = Theta1(_wordBuffer[35]) + _wordBuffer[30] + Theta0(_wordBuffer[22]) + _wordBuffer[21];
+            _wordBuffer[38] = Theta1(_wordBuffer[36]) + _wordBuffer[31] + Theta0(_wordBuffer[23]) + _wordBuffer[22];
+            _wordBuffer[39] = Theta1(_wordBuffer[37]) + _wordBuffer[32] + Theta0(_wordBuffer[24]) + _wordBuffer[23];
+            _wordBuffer[40] = Theta1(_wordBuffer[38]) + _wordBuffer[33] + Theta0(_wordBuffer[25]) + _wordBuffer[24];
+            _wordBuffer[41] = Theta1(_wordBuffer[39]) + _wordBuffer[34] + Theta0(_wordBuffer[26]) + _wordBuffer[25];
+            _wordBuffer[42] = Theta1(_wordBuffer[40]) + _wordBuffer[35] + Theta0(_wordBuffer[27]) + _wordBuffer[26];
+            _wordBuffer[43] = Theta1(_wordBuffer[41]) + _wordBuffer[36] + Theta0(_wordBuffer[28]) + _wordBuffer[27];
+            _wordBuffer[44] = Theta1(_wordBuffer[42]) + _wordBuffer[37] + Theta0(_wordBuffer[29]) + _wordBuffer[28];
+            _wordBuffer[45] = Theta1(_wordBuffer[43]) + _wordBuffer[38] + Theta0(_wordBuffer[30]) + _wordBuffer[29];
+            _wordBuffer[46] = Theta1(_wordBuffer[44]) + _wordBuffer[39] + Theta0(_wordBuffer[31]) + _wordBuffer[30];
+            _wordBuffer[47] = Theta1(_wordBuffer[45]) + _wordBuffer[40] + Theta0(_wordBuffer[32]) + _wordBuffer[31];
+            _wordBuffer[48] = Theta1(_wordBuffer[46]) + _wordBuffer[41] + Theta0(_wordBuffer[33]) + _wordBuffer[32];
+            _wordBuffer[49] = Theta1(_wordBuffer[47]) + _wordBuffer[42] + Theta0(_wordBuffer[34]) + _wordBuffer[33];
+            _wordBuffer[50] = Theta1(_wordBuffer[48]) + _wordBuffer[43] + Theta0(_wordBuffer[35]) + _wordBuffer[34];
+            _wordBuffer[51] = Theta1(_wordBuffer[49]) + _wordBuffer[44] + Theta0(_wordBuffer[36]) + _wordBuffer[35];
+            _wordBuffer[52] = Theta1(_wordBuffer[50]) + _wordBuffer[45] + Theta0(_wordBuffer[37]) + _wordBuffer[36];
+            _wordBuffer[53] = Theta1(_wordBuffer[51]) + _wordBuffer[46] + Theta0(_wordBuffer[38]) + _wordBuffer[37];
+            _wordBuffer[54] = Theta1(_wordBuffer[52]) + _wordBuffer[47] + Theta0(_wordBuffer[39]) + _wordBuffer[38];
+            _wordBuffer[55] = Theta1(_wordBuffer[53]) + _wordBuffer[48] + Theta0(_wordBuffer[40]) + _wordBuffer[39];
+            _wordBuffer[56] = Theta1(_wordBuffer[54]) + _wordBuffer[49] + Theta0(_wordBuffer[41]) + _wordBuffer[40];
+            _wordBuffer[57] = Theta1(_wordBuffer[55]) + _wordBuffer[50] + Theta0(_wordBuffer[42]) + _wordBuffer[41];
+            _wordBuffer[58] = Theta1(_wordBuffer[56]) + _wordBuffer[51] + Theta0(_wordBuffer[43]) + _wordBuffer[42];
+            _wordBuffer[59] = Theta1(_wordBuffer[57]) + _wordBuffer[52] + Theta0(_wordBuffer[44]) + _wordBuffer[43];
+            _wordBuffer[60] = Theta1(_wordBuffer[58]) + _wordBuffer[53] + Theta0(_wordBuffer[45]) + _wordBuffer[44];
+            _wordBuffer[61] = Theta1(_wordBuffer[59]) + _wordBuffer[54] + Theta0(_wordBuffer[46]) + _wordBuffer[45];
+            _wordBuffer[62] = Theta1(_wordBuffer[60]) + _wordBuffer[55] + Theta0(_wordBuffer[47]) + _wordBuffer[46];
+            _wordBuffer[63] = Theta1(_wordBuffer[61]) + _wordBuffer[56] + Theta0(_wordBuffer[48]) + _wordBuffer[47];
 
-            for (int i = 0; i < 8; ++i)
-            {
-                // t = 8 * i
-                w7 += Sum1Ch(w4, w5, w6) + K1C[ctr] + _wordBuffer[ctr];
-                w3 += w7;
-                w7 += Sum0Maj(w0, w1, w2);
-                ++ctr;
-                // t = 8 * i + 1
-                w6 += Sum1Ch(w3, w4, w5) + K1C[ctr] + _wordBuffer[ctr];
-                w2 += w6;
-                w6 += Sum0Maj(w7, w0, w1);
-                ++ctr;
-                // t = 8 * i + 2
-                w5 += Sum1Ch(w2, w3, w4) + K1C[ctr] + _wordBuffer[ctr];
-                w1 += w5;
-                w5 += Sum0Maj(w6, w7, w0);
-                ++ctr;
-                // t = 8 * i + 3
-                w4 += Sum1Ch(w1, w2, w3) + K1C[ctr] + _wordBuffer[ctr];
-                w0 += w4;
-                w4 += Sum0Maj(w5, w6, w7);
-                ++ctr;
-                // t = 8 * i + 4
-                w3 += Sum1Ch(w0, w1, w2) + K1C[ctr] + _wordBuffer[ctr];
-                w7 += w3;
-                w3 += Sum0Maj(w4, w5, w6);
-                ++ctr;
-                // t = 8 * i + 5
-                w2 += Sum1Ch(w7, w0, w1) + K1C[ctr] + _wordBuffer[ctr];
-                w6 += w2;
-                w2 += Sum0Maj(w3, w4, w5);
-                ++ctr;
-                // t = 8 * i + 6
-                w1 += Sum1Ch(w6, w7, w0) + K1C[ctr] + _wordBuffer[ctr];
-                w5 += w1;
-                w1 += Sum0Maj(w2, w3, w4);
-                ++ctr;
-                // t = 8 * i + 7
-                w0 += Sum1Ch(w5, w6, w7) + K1C[ctr] + _wordBuffer[ctr];
-                w4 += w0;
-                w0 += Sum0Maj(w1, w2, w3);
-                ++ctr;
-            }
+            // t = 8 * i
+            w7 += Sum1Ch(w4, w5, w6) + K32[ctr] + _wordBuffer[ctr];
+            w3 += w7;
+            w7 += Sum0Maj(w0, w1, w2);
+            // t = 8 * i + 1
+            w6 += Sum1Ch(w3, w4, w5) + K32[++ctr] + _wordBuffer[ctr];
+            w2 += w6;
+            w6 += Sum0Maj(w7, w0, w1);
+            // t = 8 * i + 2
+            w5 += Sum1Ch(w2, w3, w4) + K32[++ctr] + _wordBuffer[ctr];
+            w1 += w5;
+            w5 += Sum0Maj(w6, w7, w0);
+            // t = 8 * i + 3
+            w4 += Sum1Ch(w1, w2, w3) + K32[++ctr] + _wordBuffer[ctr];
+            w0 += w4;
+            w4 += Sum0Maj(w5, w6, w7);
+            // t = 8 * i + 4
+            w3 += Sum1Ch(w0, w1, w2) + K32[++ctr] + _wordBuffer[ctr];
+            w7 += w3;
+            w3 += Sum0Maj(w4, w5, w6);
+            // t = 8 * i + 5
+            w2 += Sum1Ch(w7, w0, w1) + K32[++ctr] + _wordBuffer[ctr];
+            w6 += w2;
+            w2 += Sum0Maj(w3, w4, w5);
+            // t = 8 * i + 6
+            w1 += Sum1Ch(w6, w7, w0) + K32[++ctr] + _wordBuffer[ctr];
+            w5 += w1;
+            w1 += Sum0Maj(w2, w3, w4);
+            // t = 8 * i + 7
+            w0 += Sum1Ch(w5, w6, w7) + K32[++ctr] + _wordBuffer[ctr];
+            w4 += w0;
+            w0 += Sum0Maj(w1, w2, w3);
+
+            w7 += Sum1Ch(w4, w5, w6) + K32[++ctr] + _wordBuffer[ctr];
+            w3 += w7;
+            w7 += Sum0Maj(w0, w1, w2);
+            w6 += Sum1Ch(w3, w4, w5) + K32[++ctr] + _wordBuffer[ctr];
+            w2 += w6;
+            w6 += Sum0Maj(w7, w0, w1);
+            w5 += Sum1Ch(w2, w3, w4) + K32[++ctr] + _wordBuffer[ctr];
+            w1 += w5;
+            w5 += Sum0Maj(w6, w7, w0);
+            w4 += Sum1Ch(w1, w2, w3) + K32[++ctr] + _wordBuffer[ctr];
+            w0 += w4;
+            w4 += Sum0Maj(w5, w6, w7);
+            w3 += Sum1Ch(w0, w1, w2) + K32[++ctr] + _wordBuffer[ctr];
+            w7 += w3;
+            w3 += Sum0Maj(w4, w5, w6);
+            w2 += Sum1Ch(w7, w0, w1) + K32[++ctr] + _wordBuffer[ctr];
+            w6 += w2;
+            w2 += Sum0Maj(w3, w4, w5);
+            w1 += Sum1Ch(w6, w7, w0) + K32[++ctr] + _wordBuffer[ctr];
+            w5 += w1;
+            w1 += Sum0Maj(w2, w3, w4);
+            w0 += Sum1Ch(w5, w6, w7) + K32[++ctr] + _wordBuffer[ctr];
+            w4 += w0;
+            w0 += Sum0Maj(w1, w2, w3);
+
+            w7 += Sum1Ch(w4, w5, w6) + K32[++ctr] + _wordBuffer[ctr];
+            w3 += w7;
+            w7 += Sum0Maj(w0, w1, w2);
+            w6 += Sum1Ch(w3, w4, w5) + K32[++ctr] + _wordBuffer[ctr];
+            w2 += w6;
+            w6 += Sum0Maj(w7, w0, w1);
+            w5 += Sum1Ch(w2, w3, w4) + K32[++ctr] + _wordBuffer[ctr];
+            w1 += w5;
+            w5 += Sum0Maj(w6, w7, w0);
+            w4 += Sum1Ch(w1, w2, w3) + K32[++ctr] + _wordBuffer[ctr];
+            w0 += w4;
+            w4 += Sum0Maj(w5, w6, w7);
+            w3 += Sum1Ch(w0, w1, w2) + K32[++ctr] + _wordBuffer[ctr];
+            w7 += w3;
+            w3 += Sum0Maj(w4, w5, w6);
+            w2 += Sum1Ch(w7, w0, w1) + K32[++ctr] + _wordBuffer[ctr];
+            w6 += w2;
+            w2 += Sum0Maj(w3, w4, w5);
+            w1 += Sum1Ch(w6, w7, w0) + K32[++ctr] + _wordBuffer[ctr];
+            w5 += w1;
+            w1 += Sum0Maj(w2, w3, w4);
+            w0 += Sum1Ch(w5, w6, w7) + K32[++ctr] + _wordBuffer[ctr];
+            w4 += w0;
+            w0 += Sum0Maj(w1, w2, w3);
+
+            w7 += Sum1Ch(w4, w5, w6) + K32[++ctr] + _wordBuffer[ctr];
+            w3 += w7;
+            w7 += Sum0Maj(w0, w1, w2);
+            w6 += Sum1Ch(w3, w4, w5) + K32[++ctr] + _wordBuffer[ctr];
+            w2 += w6;
+            w6 += Sum0Maj(w7, w0, w1);
+            w5 += Sum1Ch(w2, w3, w4) + K32[++ctr] + _wordBuffer[ctr];
+            w1 += w5;
+            w5 += Sum0Maj(w6, w7, w0);
+            w4 += Sum1Ch(w1, w2, w3) + K32[++ctr] + _wordBuffer[ctr];
+            w0 += w4;
+            w4 += Sum0Maj(w5, w6, w7);
+            w3 += Sum1Ch(w0, w1, w2) + K32[++ctr] + _wordBuffer[ctr];
+            w7 += w3;
+            w3 += Sum0Maj(w4, w5, w6);
+            w2 += Sum1Ch(w7, w0, w1) + K32[++ctr] + _wordBuffer[ctr];
+            w6 += w2;
+            w2 += Sum0Maj(w3, w4, w5);
+            w1 += Sum1Ch(w6, w7, w0) + K32[++ctr] + _wordBuffer[ctr];
+            w5 += w1;
+            w1 += Sum0Maj(w2, w3, w4);
+            w0 += Sum1Ch(w5, w6, w7) + K32[++ctr] + _wordBuffer[ctr];
+            w4 += w0;
+            w0 += Sum0Maj(w1, w2, w3);
+
+            w7 += Sum1Ch(w4, w5, w6) + K32[++ctr] + _wordBuffer[ctr];
+            w3 += w7;
+            w7 += Sum0Maj(w0, w1, w2);
+            w6 += Sum1Ch(w3, w4, w5) + K32[++ctr] + _wordBuffer[ctr];
+            w2 += w6;
+            w6 += Sum0Maj(w7, w0, w1);
+            w5 += Sum1Ch(w2, w3, w4) + K32[++ctr] + _wordBuffer[ctr];
+            w1 += w5;
+            w5 += Sum0Maj(w6, w7, w0);
+            w4 += Sum1Ch(w1, w2, w3) + K32[++ctr] + _wordBuffer[ctr];
+            w0 += w4;
+            w4 += Sum0Maj(w5, w6, w7);
+            w3 += Sum1Ch(w0, w1, w2) + K32[++ctr] + _wordBuffer[ctr];
+            w7 += w3;
+            w3 += Sum0Maj(w4, w5, w6);
+            w2 += Sum1Ch(w7, w0, w1) + K32[++ctr] + _wordBuffer[ctr];
+            w6 += w2;
+            w2 += Sum0Maj(w3, w4, w5);
+            w1 += Sum1Ch(w6, w7, w0) + K32[++ctr] + _wordBuffer[ctr];
+            w5 += w1;
+            w1 += Sum0Maj(w2, w3, w4);
+            w0 += Sum1Ch(w5, w6, w7) + K32[++ctr] + _wordBuffer[ctr];
+            w4 += w0;
+            w0 += Sum0Maj(w1, w2, w3);
+
+            w7 += Sum1Ch(w4, w5, w6) + K32[++ctr] + _wordBuffer[ctr];
+            w3 += w7;
+            w7 += Sum0Maj(w0, w1, w2);
+            w6 += Sum1Ch(w3, w4, w5) + K32[++ctr] + _wordBuffer[ctr];
+            w2 += w6;
+            w6 += Sum0Maj(w7, w0, w1);
+            w5 += Sum1Ch(w2, w3, w4) + K32[++ctr] + _wordBuffer[ctr];
+            w1 += w5;
+            w5 += Sum0Maj(w6, w7, w0);
+            w4 += Sum1Ch(w1, w2, w3) + K32[++ctr] + _wordBuffer[ctr];
+            w0 += w4;
+            w4 += Sum0Maj(w5, w6, w7);
+            w3 += Sum1Ch(w0, w1, w2) + K32[++ctr] + _wordBuffer[ctr];
+            w7 += w3;
+            w3 += Sum0Maj(w4, w5, w6);
+            w2 += Sum1Ch(w7, w0, w1) + K32[++ctr] + _wordBuffer[ctr];
+            w6 += w2;
+            w2 += Sum0Maj(w3, w4, w5);
+            w1 += Sum1Ch(w6, w7, w0) + K32[++ctr] + _wordBuffer[ctr];
+            w5 += w1;
+            w1 += Sum0Maj(w2, w3, w4);
+            w0 += Sum1Ch(w5, w6, w7) + K32[++ctr] + _wordBuffer[ctr];
+            w4 += w0;
+            w0 += Sum0Maj(w1, w2, w3);
+
+            w7 += Sum1Ch(w4, w5, w6) + K32[++ctr] + _wordBuffer[ctr];
+            w3 += w7;
+            w7 += Sum0Maj(w0, w1, w2);
+            w6 += Sum1Ch(w3, w4, w5) + K32[++ctr] + _wordBuffer[ctr];
+            w2 += w6;
+            w6 += Sum0Maj(w7, w0, w1);
+            w5 += Sum1Ch(w2, w3, w4) + K32[++ctr] + _wordBuffer[ctr];
+            w1 += w5;
+            w5 += Sum0Maj(w6, w7, w0);
+            w4 += Sum1Ch(w1, w2, w3) + K32[++ctr] + _wordBuffer[ctr];
+            w0 += w4;
+            w4 += Sum0Maj(w5, w6, w7);
+            w3 += Sum1Ch(w0, w1, w2) + K32[++ctr] + _wordBuffer[ctr];
+            w7 += w3;
+            w3 += Sum0Maj(w4, w5, w6);
+            w2 += Sum1Ch(w7, w0, w1) + K32[++ctr] + _wordBuffer[ctr];
+            w6 += w2;
+            w2 += Sum0Maj(w3, w4, w5);
+            w1 += Sum1Ch(w6, w7, w0) + K32[++ctr] + _wordBuffer[ctr];
+            w5 += w1;
+            w1 += Sum0Maj(w2, w3, w4);
+            w0 += Sum1Ch(w5, w6, w7) + K32[++ctr] + _wordBuffer[ctr];
+            w4 += w0;
+            w0 += Sum0Maj(w1, w2, w3);
+
+            w7 += Sum1Ch(w4, w5, w6) + K32[++ctr] + _wordBuffer[ctr];
+            w3 += w7;
+            w7 += Sum0Maj(w0, w1, w2);
+            w6 += Sum1Ch(w3, w4, w5) + K32[++ctr] + _wordBuffer[ctr];
+            w2 += w6;
+            w6 += Sum0Maj(w7, w0, w1);
+            w5 += Sum1Ch(w2, w3, w4) + K32[++ctr] + _wordBuffer[ctr];
+            w1 += w5;
+            w5 += Sum0Maj(w6, w7, w0);
+            w4 += Sum1Ch(w1, w2, w3) + K32[++ctr] + _wordBuffer[ctr];
+            w0 += w4;
+            w4 += Sum0Maj(w5, w6, w7);
+            w3 += Sum1Ch(w0, w1, w2) + K32[++ctr] + _wordBuffer[ctr];
+            w7 += w3;
+            w3 += Sum0Maj(w4, w5, w6);
+            w2 += Sum1Ch(w7, w0, w1) + K32[++ctr] + _wordBuffer[ctr];
+            w6 += w2;
+            w2 += Sum0Maj(w3, w4, w5);
+            w1 += Sum1Ch(w6, w7, w0) + K32[++ctr] + _wordBuffer[ctr];
+            w5 += w1;
+            w1 += Sum0Maj(w2, w3, w4);
+            w0 += Sum1Ch(w5, w6, w7) + K32[++ctr] + _wordBuffer[ctr];
+            w4 += w0;
+            w0 += Sum0Maj(w1, w2, w3);
 
             _H0 += w0;
             _H1 += w1;
@@ -377,13 +588,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             if (_wordOffset > 14)
                 ProcessBlock();
 
-            _wordBuffer[14] = (UInt32)((UInt64)BitLength >> 32);
-            _wordBuffer[15] = (UInt32)((UInt64)BitLength);
+            _wordBuffer[14] = (uint)((ulong)BitLength >> 32);
+            _wordBuffer[15] = (uint)((ulong)BitLength);
         }
 
         private void ProcessWord(byte[] Input, int Offset)
         {
-            _wordBuffer[_wordOffset] = BEToUInt32(Input, Offset);
+            _wordBuffer[_wordOffset] = IntUtils.BytesToBe32(Input, Offset);
 
             if (++_wordOffset == 16)
                 ProcessBlock();
@@ -391,45 +602,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         #endregion
 
         #region Helpers
-        /// <remarks>
-        /// Big Endian to UInt32
-        /// </remarks>
-        private static UInt32 BEToUInt32(byte[] Input, int InOffset)
-        {
-            UInt32 n = (UInt32)Input[InOffset] << 24;
-            n |= (UInt32)Input[++InOffset] << 16;
-            n |= (UInt32)Input[++InOffset] << 8;
-            n |= (UInt32)Input[++InOffset];
-            return n;
-        }
-
-        /// <remarks>
-        /// UInt32 to Big Endian
-        /// </remarks>
-        private static void UInt32ToBE(UInt32 Input, byte[] Output, int OutOffset)
-        {
-            Output[OutOffset] = (byte)(Input >> 24);
-            Output[++OutOffset] = (byte)(Input >> 16);
-            Output[++OutOffset] = (byte)(Input >> 8);
-            Output[++OutOffset] = (byte)(Input);
-        }
-
-        private static UInt32 Sum1Ch(UInt32 X, UInt32 Y, UInt32 Z)
+        private static uint Sum1Ch(uint X, uint Y, uint Z)
         {
             return (((X >> 6) | (X << 26)) ^ ((X >> 11) | (X << 21)) ^ ((X >> 25) | (X << 7))) + ((X & Y) ^ ((~X) & Z));
         }
 
-        private static UInt32 Sum0Maj(UInt32 X, UInt32 Y, UInt32 Z)
+        private static uint Sum0Maj(uint X, uint Y, uint Z)
         {
             return (((X >> 2) | (X << 30)) ^ ((X >> 13) | (X << 19)) ^ ((X >> 22) | (X << 10))) + ((X & Y) ^ (X & Z) ^ (Y & Z));
         }
 
-        private static UInt32 Theta0(UInt32 X)
+        private static uint Theta0(uint X)
         {
             return ((X >> 7) | (X << 25)) ^ ((X >> 18) | (X << 14)) ^ (X >> 3);
         }
 
-        private static UInt32 Theta1(UInt32 X)
+        private static uint Theta1(uint X)
         {
             return ((X >> 17) | (X << 15)) ^ ((X >> 19) | (X << 13)) ^ (X >> 10);
         }
@@ -439,7 +627,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <remarks>
         /// the first 32 bits of the fractional parts of the cube roots of the first sixty-four prime numbers)
         /// </remarks>
-        private static readonly UInt32[] K1C = { 
+        private static readonly uint[] K32 = { 
             0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
             0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
             0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,

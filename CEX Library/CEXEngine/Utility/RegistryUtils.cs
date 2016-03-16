@@ -67,10 +67,10 @@ namespace VTDev.Libraries.CEXEngine.Utility
         private const int INVALID_HANDLE_VALUE = -1;
 
         private const int VALID_FILE = 32;
-        private const UInt32 Infinite = 0xffffffff;
-        private const Int32 Startf_UseStdHandles = 0x00000100;
-        private const Int32 StdOutputHandle = -11;
-        private const Int32 StdErrorHandle = -12;
+        private const uint Infinite = 0xffffffff;
+        private const int Startf_UseStdHandles = 0x00000100;
+        private const int StdOutputHandle = -11;
+        private const int StdErrorHandle = -12;
         #endregion
 
         #region Enums
@@ -326,144 +326,114 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
         #region API
         // enable priviledge decl
-        [DllImport("advapi32.dll", EntryPoint = "AdjustTokenPrivileges", SetLastError = true)]
+        [DllImport("advapi32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool AdjustTokenPrivileges(IntPtr TokenHandle, int DisableAllPriv, ref TOKEN_PRIVILEGES NewState, int BufferLength, int PreviousState, int ReturnLength);
+        static extern bool AdjustTokenPrivileges(IntPtr TokenHandle, [MarshalAs(UnmanagedType.Bool)]bool DisableAllPrivileges, ref TOKEN_PRIVILEGES NewState, 
+            uint BufferLengthInBytes, IntPtr PreviousState, IntPtr ReturnLengthInBytes);
 
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "LookupPrivilegeValueW", SetLastError = true)]
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool LookupPrivilegeValue(int lpSystemName, [MarshalAs(UnmanagedType.LPWStr)]string lpName, ref LUID lpLuid);
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "LookupPrivilegeValueA", SetLastError = true)]
+        private static extern bool LookupPrivilegeValue(int lpSystemName, [MarshalAs(UnmanagedType.LPStr)]string lpName, ref LUID lpLuid);
+
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool LookupPrivilegeValueA(int lpSystemName, [MarshalAs(UnmanagedType.LPStr)]string lpName, ref LUID lpLuid);
 
-        [DllImport("advapi32.dll", EntryPoint = "OpenProcessToken", SetLastError = true)]
+        [DllImport("advapi32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool OpenProcessToken(IntPtr ProcessHandle, uint DesiredAccess, ref IntPtr TokenHandle);
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, EntryPoint = "OpenProcess", SetLastError = true)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
         private static extern IntPtr OpenProcess(int dwDesiredAccess, int blnheritHandle, int dwAppProcessId);
 
-        [DllImport("kernel32.dll", EntryPoint = "CloseHandle", SetLastError = true)]
+        [DllImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool CloseHandle(IntPtr hObject);
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, EntryPoint = "GetCurrentProcessId", SetLastError = true)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
         private static extern int GetCurrentProcessId();
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, EntryPoint = "RtlMoveMemory", SetLastError = true)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
         private static extern int RtlMoveMemory(ref string Destination, ref byte[] Source, int Length);
 
-        // RegQueryValueEx overloads- added ansi decl versions for old platforms [untested AND no methods provided]
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegQueryValueExW", SetLastError = true)]
-        static extern int RegQueryValueEx(UIntPtr hKey, [MarshalAs(UnmanagedType.LPWStr)]string lpValueName, int lpReserved, out uint lpType, [Optional] System.Text.StringBuilder lpData, ref uint lpcbData);
-        [DllImport("advapi32.dll", CharSet = CharSet.Ansi, EntryPoint = "RegQueryValueExA", SetLastError = true)]
-        static extern int RegQueryValueExA(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string lpValueName, int lpReserved, out uint lpType, [Optional] [MarshalAs(UnmanagedType.LPStr)]string lpData, ref uint lpcbData);
-
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegQueryValueExW", SetLastError = true)]
-        static extern int RegQueryValueEx(UIntPtr hKey, [MarshalAs(UnmanagedType.LPWStr)]string lpValueName, int lpReserved, ref uint lpType, [Optional] ref byte lpData, ref uint lpcbData);
-        [DllImport("advapi32.dll", CharSet = CharSet.Ansi, EntryPoint = "RegQueryValueExA", SetLastError = true)]
-        static extern int RegQueryValueExA(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string lpValueName, int lpReserved, ref uint lpType, [Optional] ref byte lpData, ref uint lpcbData);
-
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegQueryValueExW", SetLastError = true)]
-        static extern int RegQueryValueEx(UIntPtr hKey, [MarshalAs(UnmanagedType.LPWStr)]string lpValueName, int lpReserved, ref uint lpType, [Optional] ref int lpData, ref uint lpcbData);
-        [DllImport("advapi32.dll", CharSet = CharSet.Ansi, EntryPoint = "RegQueryValueExA", SetLastError = true)]
-        static extern int RegQueryValueExA(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string lpValueName, int lpReserved, ref uint lpType, [Optional] ref int lpData, ref uint lpcbData);
-
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegQueryValueExW", SetLastError = true)]
-        static extern int RegQueryValueEx(UIntPtr hKey, [MarshalAs(UnmanagedType.LPWStr)]string lpValueName, int lpReserved, ref uint lpType, [Optional] ref long lpData, ref uint lpcbData);
-        [DllImport("advapi32.dll", CharSet = CharSet.Ansi, EntryPoint = "RegQueryValueExA", SetLastError = true)]
-        static extern int RegQueryValueExA(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string lpValueName, int lpReserved, ref uint lpType, [Optional] ref long lpData, ref uint lpcbData);
+        // RegQueryValueEx overloads
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
+        static extern int RegQueryValueEx(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string lpValueName, int lpReserved, ref uint lpType, [Optional] System.Text.StringBuilder lpData, ref uint lpcbData);
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
+        static extern int RegQueryValueEx(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string lpValueName, int lpReserved, ref uint lpType, [Optional] ref byte lpData, ref uint lpcbData);
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
+        static extern int RegQueryValueEx(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string lpValueName, int lpReserved, ref uint lpType, [Optional] ref int lpData, ref uint lpcbData);
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
+        static extern int RegQueryValueEx(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string lpValueName, int lpReserved, ref uint lpType, [Optional] ref long lpData, ref uint lpcbData);
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
+        static extern int RegQueryValueEx(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string lpValueName, int lpReserved, ref uint lpType, [Optional] ref IntPtr lpData, ref uint lpcbData);
 
         // RegSetValueEx overloads
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegSetValueExW", SetLastError = true)]
-        private static extern int RegSetValueEx(UIntPtr hKey, [MarshalAs(UnmanagedType.LPWStr)]string lpValueName, int Reserved, uint dwType, ref int lpData, int cbData);
-        [DllImport("advapi32.dll", CharSet = CharSet.Ansi, EntryPoint = "RegSetValueExA", SetLastError = true)]
-        private static extern int RegSetValueExA(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string lpValueName, int Reserved, uint dwType, ref int lpData, int cbData);
-
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegSetValueExW", SetLastError = true)]
-        private static extern int RegSetValueEx(UIntPtr hKey, [MarshalAs(UnmanagedType.LPWStr)]string lpValueName, int Reserved, uint dwType, ref long lpData, int cbData);
-        [DllImport("advapi32.dll", CharSet = CharSet.Ansi, EntryPoint = "RegSetValueExA", SetLastError = true)]
-        private static extern int RegSetValueExA(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string lpValueName, int Reserved, uint dwType, ref long lpData, int cbData);
-
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegSetValueExW", SetLastError = true)]
-        private static extern int RegSetValueEx(UIntPtr hKey, [MarshalAs(UnmanagedType.LPWStr)]string lpValueName, int Reserved, uint dwType, IntPtr lpData, int cbData);
-        [DllImport("advapi32.dll", CharSet = CharSet.Ansi, EntryPoint = "RegSetValueEA", SetLastError = true)]
-        private static extern int RegSetValueExA(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string lpValueName, int Reserved, uint dwType, [MarshalAs(UnmanagedType.LPStr)]string lpData, int cbData);
-
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegSetValueExW", SetLastError = true)]
-        private static extern int RegSetValueEx(UIntPtr hKey, [MarshalAs(UnmanagedType.LPWStr)]string lpValueName, int Reserved, uint dwType, ref byte lpData, int cbData);
-        [DllImport("advapi32.dll", CharSet = CharSet.Ansi, EntryPoint = "RegSetValueExA", SetLastError = true)]
-        private static extern int RegSetValueExA(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string lpValueName, int Reserved, uint dwType, ref byte lpData, int cbData);
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
+        private static extern int RegSetValueEx(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string lpValueName, int Reserved, uint dwType, ref byte lpData, int cbData);
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
+        private static extern int RegSetValueEx(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string lpValueName, int Reserved, uint dwType, ref int lpData, int cbData);
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
+        private static extern int RegSetValueEx(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string lpValueName, int Reserved, uint dwType, ref long lpData, int cbData);
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
+        private static extern int RegSetValueEx(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string lpValueName, int Reserved, uint dwType, ref IntPtr lpData, int cbData);
 
         // registry
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegCloseKey", SetLastError = true)]
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
         private static extern int RegCloseKey(UIntPtr hKey);
 
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegCreateKeyW", SetLastError = true)]
-        private static extern int RegCreateKey(RootKey hKey, [MarshalAs(UnmanagedType.LPWStr)]string subKey, ref UIntPtr phkResult);
-        [DllImport("advapi32.dll", CharSet = CharSet.Ansi, EntryPoint = "RegCreateKeyA", SetLastError = true)]
-        private static extern int RegCreateKeyA(RootKey hKey, [MarshalAs(UnmanagedType.LPStr)]string subKey, ref UIntPtr phkResult);
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
+        private static extern int RegCreateKey(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string subKey, ref UIntPtr phkResult);
 
-        [DllImport("advapi32.dll", EntryPoint = "RegOpenKeyEx")]
-        private static extern int RegOpenKeyEx(RootKey hKey, string subKey, int options, int samDesired, ref UIntPtr phkResult);
-        [DllImport("advapi32.dll", CharSet = CharSet.Ansi, EntryPoint = "RegOpenKeyExA", SetLastError = true)]
-        private static extern int RegOpenKeyExA(RootKey hKey, [MarshalAs(UnmanagedType.LPStr)]string subKey, int options, int samDesired, ref UIntPtr phkResult);
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
+        public static extern int RegOpenKeyEx(UIntPtr hKey, string subKey, int ulOptions, int samDesired, out UIntPtr hkResult);
 
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegDeleteKeyA", SetLastError = true)]
-        private static extern int RegDeleteKeyA(RootKey hKey, [MarshalAs(UnmanagedType.LPStr)]string subKey);
-        [DllImport("advapi32.dll", CharSet = CharSet.Ansi, EntryPoint = "RegDeleteKeyW", SetLastError = true)]
-        private static extern int RegDeleteKey(RootKey hKey, [MarshalAs(UnmanagedType.LPWStr)]string subKey);
 
-        [DllImport("advapi32.dll", EntryPoint = "RegDeleteValue")]
+        [DllImport("advapi32.dll", CharSet = CharSet.Ansi)]
+        private static extern int RegDeleteKey(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string subKey);
+
+        [DllImport("advapi32.dll")]
         private static extern int RegDeleteValue(UIntPtr hKey, string lpValueName);
-        [DllImport("advapi32.dll", CharSet = CharSet.Ansi, EntryPoint = "RegDeleteValueA", SetLastError = true)]
-        private static extern int RegDeleteValueA(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string lpValueName);
 
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegCreateKeyExW", SetLastError = true)]
-        private static extern int RegCreateKeyEx(RootKey hKey, [MarshalAs(UnmanagedType.LPWStr)]string subKey, int Reserved, [MarshalAs(UnmanagedType.LPWStr)]string lpClass, int dwOptions, int samDesired, ref SECURITY_ATTRIBUTES lpSecurityAttributes, ref UIntPtr phkResult, ref int lpdwDisposition);
-        [DllImport("advapi32.dll", CharSet = CharSet.Ansi, EntryPoint = "RegCreateKeyExA", SetLastError = true)]
-        private static extern int RegCreateKeyExA(RootKey hKey, [MarshalAs(UnmanagedType.LPStr)]string subKey, int Reserved, [MarshalAs(UnmanagedType.LPStr)]string lpClass, int dwOptions, int samDesired, ref SECURITY_ATTRIBUTES lpSecurityAttributes, ref UIntPtr phkResult, ref int lpdwDisposition);
+        [DllImport("advapi32.dll")]
+        public static extern int RegCreateKeyEx(UIntPtr hKey, string lpSubKey, uint dwReserved, string lpClass, uint dwOptions, int samDesired, 
+            IntPtr lpSecurityAttributes, out UIntPtr phkResult, out uint lpdwDisposition);
 
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegEnumKeyExW", SetLastError = true)]
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
         private static extern int RegEnumKeyEx(UIntPtr hKey, uint index, StringBuilder lpName, ref uint lpcbName, IntPtr reserved, IntPtr lpClass, IntPtr lpcbClass, out long lpftLastWriteTime);
-        [DllImport("advapi32.dll", CharSet = CharSet.Ansi, EntryPoint = "RegEnumKeyExA", SetLastError = true)]
-        private static extern int RegEnumKeyExA(UIntPtr hKey, uint index, [MarshalAs(UnmanagedType.LPStr)]string lpName, ref uint lpcbName, IntPtr reserved, IntPtr lpClass, IntPtr lpcbClass, out long lpftLastWriteTime);
 
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegEnumValueW", SetLastError = true)]
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
         private static extern int RegEnumValue(UIntPtr hKey, uint dwIndex, StringBuilder lpValueName, ref uint lpcValueName, IntPtr lpReserved, IntPtr lpType, IntPtr lpData, IntPtr lpcbData);
-        [DllImport("advapi32.dll", CharSet = CharSet.Ansi, EntryPoint = "RegEnumValueA", SetLastError = true)]
-        private static extern int RegEnumValueA(UIntPtr hKey, uint dwIndex, [MarshalAs(UnmanagedType.LPStr)]string lpValueName, ref uint lpcValueName, IntPtr lpReserved, IntPtr lpType, IntPtr lpData, IntPtr lpcbData);
-        
-        [DllImport("advapi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
         private static extern int RegSaveKey(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string filename, IntPtr samDesired);
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
         private static extern int GetFileAttributes(string lpFileName);
 
-        [DllImport("kernel32.dll", SetLastError = true)]
+        [DllImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool DeleteFile([MarshalAs(UnmanagedType.LPStr)]string lpFileName);
 
-        [DllImport("advapi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
         private static extern int RegRestoreKey(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string filename, int dwFlags);
 
         [DllImport("shell32.dll")]
         private static extern IntPtr ShellExecute(IntPtr hwnd, string lpOperation, string lpFile, string lpParameters, string lpDirectory, SHOW_COMMANDS nShowCmd);
 
-        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool CreateProcessWithLogonW(String userName, String domain, String password, UInt32 logonFlags, String applicationName, String commandLine,
-            UInt32 creationFlags, UInt32 environment, String currentDirectory, ref StartupInfo startupInfo, out ProcessInformation processInformation);
+        private static extern bool CreateProcessWithLogonW(String userName, String domain, String password, uint logonFlags, String applicationName, String commandLine,
+            uint creationFlags, uint environment, String currentDirectory, ref StartupInfo startupInfo, out ProcessInformation processInformation);
 
-        [DllImport("kernel32.dll", SetLastError = true)]
+        [DllImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool GetExitCodeProcess(IntPtr process, ref UInt32 exitCode);
+        private static extern bool GetExitCodeProcess(IntPtr process, ref uint exitCode);
 
-        [DllImport("Kernel32.dll", SetLastError = true)]
-        private static extern UInt32 WaitForSingleObject(IntPtr handle, UInt32 milliseconds);
+        [DllImport("Kernel32.dll")]
+        private static extern uint WaitForSingleObject(IntPtr handle, uint milliseconds);
 
-        [DllImport("Kernel32.dll", SetLastError = true)]
+        [DllImport("Kernel32.dll")]
         private static extern IntPtr GetStdHandle(IntPtr handle);
         #endregion
 
@@ -479,8 +449,9 @@ namespace VTDev.Libraries.CEXEngine.Utility
         public bool AccessTest(RootKey RootKey, string SubKey)
         {
             UIntPtr pHKey = UIntPtr.Zero;
-            int lDeposit = 0;
+            uint lDeposit = 0;
             SECURITY_ATTRIBUTES tSecAttrib = new SECURITY_ATTRIBUTES();
+            IntPtr pSec = IntPtr.Zero;
 
             try
             {
@@ -488,14 +459,18 @@ namespace VTDev.Libraries.CEXEngine.Utility
                 tSecAttrib.nLength = Marshal.SizeOf(tSecAttrib);
                 tSecAttrib.lpSecurityDescriptor = 0;
                 tSecAttrib.bInheritHandle = true;
+                pSec = Marshal.AllocHGlobal(Marshal.SizeOf(tSecAttrib));
+                Marshal.StructureToPtr(tSecAttrib, pSec, true);
                 // open key
-                return (RegCreateKeyEx(RootKey, SubKey, 0, "", 0, KEY_WRITE, ref tSecAttrib, ref pHKey, ref lDeposit) == ERROR_NONE);
+                return (RegCreateKeyEx((UIntPtr)RootKey, SubKey, 0, "", 0, KEY_WRITE, pSec, out pHKey, out lDeposit) == ERROR_NONE);
             }
             finally
             {
                 // close key
                 if (pHKey != UIntPtr.Zero)
                     RegCloseKey(pHKey);
+                if (pSec != IntPtr.Zero)
+                    Marshal.FreeHGlobal(pSec);
             }
         }
 
@@ -529,7 +504,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
                 NewState.Privileges.pLuid = tLuid;
                 NewState.Privileges.Attributes = (Enable ? SE_PRIVILEGE_ENABLED : 0);
                 // Adjust the token privilege.
-                return (AdjustTokenPrivileges(hToken, 0, ref NewState, Marshal.SizeOf(NewState), 0, 0));
+                return (AdjustTokenPrivileges(hToken, false, ref NewState, (uint)Marshal.SizeOf(NewState), IntPtr.Zero, IntPtr.Zero));
             }
             finally
             {
@@ -550,11 +525,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <returns>True on success</returns>
         public bool ShellOpen(string FileName, SHOW_COMMANDS Paramaters)
         {
-            if ((int)ShellExecute(IntPtr.Zero, "open", FileName, "", "", Paramaters) > VALID_FILE)
-            {
-                return true;
-            }
-            return false;
+            return (int)ShellExecute(IntPtr.Zero, "open", FileName, "", "", Paramaters) > VALID_FILE;
         }
 
         /// <summary>
@@ -573,13 +544,13 @@ namespace VTDev.Libraries.CEXEngine.Utility
             startupInfo.stdOutput = (IntPtr)StdOutputHandle;
             startupInfo.stdError = (IntPtr)StdErrorHandle;
 
-            UInt32 exitCode = 123456;
+            uint exitCode = 123456;
             ProcessInformation processInfo = new ProcessInformation();
             string currentDirectory = System.IO.Directory.GetCurrentDirectory();
 
             try
             {
-                CreateProcessWithLogonW(UserName, domain, Password, (UInt32)1, Command, Command, (UInt32)0, (UInt32)0, currentDirectory, ref startupInfo, out processInfo);
+                CreateProcessWithLogonW(UserName, domain, Password, (uint)1, Command, Command, (uint)0, (uint)0, currentDirectory, ref startupInfo, out processInfo);
             } 
             catch { }
 
@@ -610,7 +581,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
             try
             {
                 // open root key
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_READ, ref hKey) == ERROR_NONE)
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_READ, out hKey) == ERROR_NONE)
                 {
                     if (RegQueryValueEx(hKey, Value, 0, ref pdwType, ref pvData, ref pvSize) == ERROR_NONE)
                         // return int
@@ -643,12 +614,9 @@ namespace VTDev.Libraries.CEXEngine.Utility
             try
             {
                 // open root key
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_WRITE, ref hKey) == ERROR_NONE)
-                {
-                    if (RegSetValueEx(hKey, Value, 0, pdwType, ref Data, 4) == ERROR_NONE)
-                        // return status
-                        return true;
-                }
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_WRITE, out hKey) == ERROR_NONE)
+                    return RegSetValueEx(hKey, Value, 0, pdwType, ref Data, 4) == ERROR_NONE;
+                
                 return false;
             }
             finally
@@ -680,14 +648,14 @@ namespace VTDev.Libraries.CEXEngine.Utility
             try
             {
                 // open root key
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_READ, ref hKey) == ERROR_NONE)
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_READ, out hKey) == ERROR_NONE)
                 {
                     if (RegQueryValueEx(hKey, Value, 0, ref pdwType, ref bBuffer[0], ref pvSize) == ERROR_NONE)
+                    {
                         // return hex string
                         for (int i = 0; i < (pvSize); i++)
-                        {
                             sRet += bBuffer[i].ToString("X");
-                        }
+                    }
                 }
                 return sRet;
             }
@@ -715,11 +683,9 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_WRITE, ref hKey) == ERROR_NONE)
-                {
-                    if (RegSetValueEx(hKey, Value, 0, pdwType, ref Data[0], (Data.GetUpperBound(0) + 1)) == ERROR_NONE)
-                        return true;
-                }
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_WRITE, out hKey) == ERROR_NONE)
+                    return RegSetValueEx(hKey, Value, 0, pdwType, ref Data[0], (Data.GetUpperBound(0) + 1)) == ERROR_NONE;
+
                 return false;
             }
             finally
@@ -749,7 +715,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_READ, ref hKey) == ERROR_NONE)
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_READ, out hKey) == ERROR_NONE)
                 {
                     if (RegQueryValueEx(hKey, Value, 0, ref pdwType, ref pvData, ref pvSize) == ERROR_NONE)
                         return pvData;
@@ -780,11 +746,9 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_WRITE, ref hKey) == ERROR_NONE)
-                {
-                    if (RegSetValueEx(hKey, Value, 0, pdwType, ref Data, 4) == ERROR_NONE)
-                        return true;
-                }
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_WRITE, out hKey) == ERROR_NONE)
+                    return RegSetValueEx(hKey, Value, 0, pdwType, ref Data, 4) == ERROR_NONE;
+                
                 return false;
             }
             finally
@@ -814,12 +778,12 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_READ, ref hKey) == ERROR_NONE)
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_READ, out hKey) == ERROR_NONE)
                 {
-                    if (RegQueryValueEx(hKey, Value, 0, out pdwType, null, ref pvSize) == ERROR_NONE)
+                    if (RegQueryValueEx(hKey, Value, 0, ref pdwType, null, ref pvSize) == ERROR_NONE)
                     {
                         pvData = new System.Text.StringBuilder((int)(pvSize / 2));
-                        RegQueryValueEx(hKey, Value, 0, out pdwType, pvData, ref pvSize);
+                        RegQueryValueEx(hKey, Value, 0, ref pdwType, pvData, ref pvSize);
                     }
                 }
                 return pvData.ToString();
@@ -849,12 +813,11 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_WRITE, ref hKey) == ERROR_NONE)
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_WRITE, out hKey) == ERROR_NONE)
                 {
                     int Size = (Data.Length + 1) * Marshal.SystemDefaultCharSize;
                     pStr = Marshal.StringToHGlobalAuto(Data);
-                    if (RegSetValueEx(hKey, Value, 0, pdwType, pStr, Size) == ERROR_NONE)
-                        return true;
+                    return RegSetValueEx(hKey, Value, 0, pdwType, ref pStr, Size) == ERROR_NONE;
                 }
                 return false;
             }
@@ -888,13 +851,13 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_READ, ref hKey) == ERROR_NONE)
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_READ, out hKey) == ERROR_NONE)
                 {
                     if (RegQueryValueEx(hKey, Value, 0, ref pdwType, ref bBuffer[0], ref pvSize) == ERROR_NONE)
+                    {
                         for (int i = 0; i < (pvSize); i++)
-                        {
                             sRet += bBuffer[i].ToString();
-                        }
+                    }
                 }
                 return sRet;
             }
@@ -922,11 +885,9 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_WRITE, ref hKey) == ERROR_NONE)
-                {
-                    if (RegSetValueEx(hKey, Value, 0, pdwType, ref Data[0], (Data.GetUpperBound(0) + 1)) == ERROR_NONE)
-                        return true;
-                }
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_WRITE, out hKey) == ERROR_NONE)
+                    return RegSetValueEx(hKey, Value, 0, pdwType, ref Data[0], (Data.GetUpperBound(0) + 1)) == ERROR_NONE;
+
                 return false;
             }
             finally
@@ -956,12 +917,12 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_READ, ref hKey) == ERROR_NONE)
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_READ, out hKey) == ERROR_NONE)
                 {
-                    if (RegQueryValueEx(hKey, Value, 0, out pdwType, null, ref pvSize) == ERROR_NONE)
+                    if (RegQueryValueEx(hKey, Value, 0, ref pdwType, null, ref pvSize) == ERROR_NONE)
                     {
                         pvData = new System.Text.StringBuilder((int)(pvSize / 2));
-                        RegQueryValueEx(hKey, Value, 0, out pdwType, pvData, ref pvSize);
+                        RegQueryValueEx(hKey, Value, 0, ref pdwType, pvData, ref pvSize);
                     }
                 }
                 return pvData.ToString();
@@ -991,13 +952,12 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_WRITE, ref hKey) == ERROR_NONE)
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_WRITE, out hKey) == ERROR_NONE)
                 {
 
                     int Size = (Data.Length + 1) * Marshal.SystemDefaultCharSize;
                     pStr = Marshal.StringToHGlobalAuto(Data);
-                    if (RegSetValueEx(hKey, Value, 0, pdwType, pStr, Size) == ERROR_NONE)
-                        return true;
+                    return RegSetValueEx(hKey, Value, 0, pdwType, ref pStr, Size) == ERROR_NONE;
                 }
                 return false;
             }
@@ -1030,11 +990,12 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_READ, ref hKey) == ERROR_NONE)
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_READ, out hKey) == ERROR_NONE)
                 {
                     if (RegQueryValueEx(hKey, Value, 0, ref pdwType, ref pvData, ref pvSize) == ERROR_NONE)
                         return pvData;
                 }
+
                 return -1;
             }
             finally
@@ -1061,11 +1022,9 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_WRITE, ref hKey) == ERROR_NONE)
-                {
-                    if (RegSetValueEx(hKey, Value, 0, pdwType, ref Data, 8) == ERROR_NONE)
-                        return true;
-                }
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_WRITE, out hKey) == ERROR_NONE)
+                    return RegSetValueEx(hKey, Value, 0, pdwType, ref Data, 8) == ERROR_NONE;
+
                 return false;
             }
             finally
@@ -1096,14 +1055,15 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_READ, ref hKey) == ERROR_NONE)
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_READ, out hKey) == ERROR_NONE)
                 {
                     if (RegQueryValueEx(hKey, Value, 0, ref pdwType, ref bBuffer[0], ref pvSize) == ERROR_NONE)
+                    {
                         for (int i = 0; i < (pvSize); i++)
-                        {
                             sRet += bBuffer[i].ToString();
-                        }
+                    }
                 }
+
                 return sRet;
             }
             finally
@@ -1130,11 +1090,9 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_WRITE, ref hKey) == ERROR_NONE)
-                {
-                    if (RegSetValueEx(hKey, Value, 0, pdwType, ref Data[0], (Data.GetUpperBound(0) + 1)) == ERROR_NONE)
-                        return true;
-                }
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_WRITE, out hKey) == ERROR_NONE)
+                    return RegSetValueEx(hKey, Value, 0, pdwType, ref Data[0], (Data.GetUpperBound(0) + 1)) == ERROR_NONE;
+
                 return false;
             }
             finally
@@ -1165,14 +1123,15 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_READ, ref hKey) == ERROR_NONE)
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_READ, out hKey) == ERROR_NONE)
                 {
                     if (RegQueryValueEx(hKey, Value, 0, ref pdwType, ref bBuffer[0], ref pvSize) == ERROR_NONE)
+                    {
                         for (int i = 0; i < (pvSize); i++)
-                        {
                             sRet += bBuffer[i].ToString();
-                        }
+                    }
                 }
+
                 return sRet;
             }
             finally
@@ -1199,11 +1158,9 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_WRITE, ref hKey) == ERROR_NONE)
-                {
-                    if (RegSetValueEx(hKey, Value, 0, pdwType, ref Data[0], (Data.GetUpperBound(0) + 1)) == ERROR_NONE)
-                        return true;
-                }
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_WRITE, out hKey) == ERROR_NONE)
+                    return RegSetValueEx(hKey, Value, 0, pdwType, ref Data[0], (Data.GetUpperBound(0) + 1)) == ERROR_NONE;
+                
                 return false;
             }
             finally
@@ -1234,14 +1191,15 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_READ, ref hKey) == ERROR_NONE)
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_READ, out hKey) == ERROR_NONE)
                 {
                     if (RegQueryValueEx(hKey, Value, 0, ref pdwType, ref bBuffer[0], ref pvSize) == ERROR_NONE)
+                    {
                         for (int i = 0; i < (pvSize); i++)
-                        {
                             sRet += bBuffer[i].ToString();
-                        }
+                    }
                 }
+
                 return sRet;
             }
             finally
@@ -1268,11 +1226,9 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_WRITE, ref hKey) == ERROR_NONE)
-                {
-                    if (RegSetValueEx(hKey, Value, 0, pdwType, ref Data[0], (Data.GetUpperBound(0) + 1)) == ERROR_NONE)
-                        return true;
-                }
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_WRITE, out hKey) == ERROR_NONE)
+                    return RegSetValueEx(hKey, Value, 0, pdwType, ref Data[0], (Data.GetUpperBound(0) + 1)) == ERROR_NONE;
+
                 return false;
             }
             finally
@@ -1302,12 +1258,12 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_READ, ref hKey) == ERROR_NONE)
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_READ, out hKey) == ERROR_NONE)
                 {
-                    if (RegQueryValueEx(hKey, Value, 0, out pdwType, null, ref pvSize) == ERROR_NONE)
+                    if (RegQueryValueEx(hKey, Value, 0, ref pdwType, null, ref pvSize) == ERROR_NONE)
                     {
                         pvData = new System.Text.StringBuilder((int)(pvSize / 2));
-                        RegQueryValueEx(hKey, Value, 0, out pdwType, pvData, ref pvSize);
+                        RegQueryValueEx(hKey, Value, 0, ref pdwType, pvData, ref pvSize);
                     }
                 }
                 return pvData.ToString();
@@ -1334,14 +1290,15 @@ namespace VTDev.Libraries.CEXEngine.Utility
             UIntPtr hKey = UIntPtr.Zero;
             uint pdwType = (uint)ValueType.REG_SZ;
             IntPtr pStr = IntPtr.Zero;
+
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_WRITE, ref hKey) == ERROR_NONE)
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_WRITE, out hKey) == ERROR_NONE)
                 {
-
                     int Size = (Data.Length + 1) * Marshal.SystemDefaultCharSize;
                     pStr = Marshal.StringToHGlobalAuto(Data);
-                    if (RegSetValueEx(hKey, Value, 0, pdwType, pStr, Size) == ERROR_NONE)
+
+                    if (RegSetValueEx(hKey, Value, 0, pdwType, ref pStr, Size) == ERROR_NONE)
                         return true;
                 }
                 return false;
@@ -1370,7 +1327,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
             UIntPtr hKey = UIntPtr.Zero;
             try
             {
-                return (RegOpenKeyEx(RootKey, SubKey, 0, KEY_QUERY_VALUE, ref hKey) == ERROR_NONE);
+                return (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_QUERY_VALUE, out hKey) == ERROR_NONE);
             }
             finally
             {
@@ -1389,12 +1346,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <returns>True on success</returns>
         public bool KeyIsEmpty(RootKey RootKey, string SubKey)
         {
-            
-            if ((!KeyHasValues(RootKey, SubKey)) && (!KeyHasSubKeys(RootKey, SubKey)))
-            {
-                return true;
-            }
-            return false;
+            return (!KeyHasValues(RootKey, SubKey)) && (!KeyHasSubKeys(RootKey, SubKey));
         }
 
         /// <summary>
@@ -1442,9 +1394,10 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_QUERY_VALUE, ref hKey) != ERROR_NONE)
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_QUERY_VALUE, out hKey) != ERROR_NONE)
                     return false;
-                return (RegQueryValueEx(hKey, Value, 0, out pdwType, null, ref pvSize) == ERROR_NONE);
+
+                return (RegQueryValueEx(hKey, Value, 0, ref pdwType, null, ref pvSize) == ERROR_NONE);
             }
             finally
             {
@@ -1466,7 +1419,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
             UIntPtr hKey = UIntPtr.Zero;
             try
             {
-                return (RegCreateKey(RootKey, SubKey, ref hKey) == ERROR_NONE);
+                return (RegCreateKey((UIntPtr)RootKey, SubKey, ref hKey) == ERROR_NONE);
             }
             finally
             {
@@ -1487,8 +1440,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         {
             try
             {
-                //int I = (RegDeleteKey(RootKey, SubKey));
-                return (RegDeleteKeyA(RootKey, SubKey) == ERROR_NONE);
+                return (RegDeleteKey((UIntPtr)RootKey, SubKey) == ERROR_NONE);
             }
             catch
             {
@@ -1510,7 +1462,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
             UIntPtr hKey = UIntPtr.Zero;
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_SET_VALUE, ref hKey) != ERROR_NONE)
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_SET_VALUE, out hKey) != ERROR_NONE)
                 {
                     return false;
                 }
@@ -1544,28 +1496,27 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_ENUMERATE_SUB_KEYS, ref hKey) != ERROR_NONE)
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_ENUMERATE_SUB_KEYS, out hKey) != ERROR_NONE)
                     return keyList;
                 do
                 {
                     keyLen = 255;
                     ret = RegEnumKeyEx(hKey, index, keyName, ref keyLen, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, out lastWrite);
+
                     if (ret == ERROR_NONE)
-                    {
                         keyList.Add(keyName.ToString());
-                    }
-                    index += 1;
+                    
+                    ++index;
                 }
                 while (ret == 0);
 
+                return keyList;
+            }
+            finally
+            {
                 if (hKey != UIntPtr.Zero)
                     RegCloseKey(hKey);
             }
-            catch
-            {
-            }
-
-            return keyList;
         }
 
         /// <summary>
@@ -1584,22 +1535,24 @@ namespace VTDev.Libraries.CEXEngine.Utility
             UIntPtr hKey = UIntPtr.Zero;
             StringBuilder valName = new StringBuilder(0);
             ArrayList valList = new ArrayList();
+
             try
             {
-                if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_QUERY_VALUE, ref hKey) != ERROR_NONE)
+                if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_QUERY_VALUE, out hKey) != ERROR_NONE)
                     return valList;
                 do
                 {
                     valLen = 255;
                     valName = new StringBuilder(255);
                     ret = RegEnumValue(hKey, index, valName, ref valLen, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+
                     if (ret == ERROR_NONE)
-                    {
                         valList.Add(valName.ToString());
-                    }
-                    index += 1;
+                    
+                    ++index;
                 }
                 while (ret == 0);
+
                 return valList;
             }
             finally
@@ -1627,29 +1580,20 @@ namespace VTDev.Libraries.CEXEngine.Utility
                 if (n >= 'a' && n <= 'z')
                 {
                     if (n > 'm')
-                    {
                         n -= 13;
-                    }
                     else
-                    {
                         n += 13;
-                    }
                 }
                 else if (n >= 'A' && n <= 'Z')
                 {
                     if (n > 'M')
-                    {
                         n -= 13;
-                    }
                     else
-                    {
                         n += 13;
-                    }
                 }
                 ac[i] = (char)n;
             }
             return new string(ac);
-
         }
 
         /// <summary>
@@ -1666,11 +1610,11 @@ namespace VTDev.Libraries.CEXEngine.Utility
             string sKey = "";
 
             sKey = @"Software\Microsoft\Windows\CurrentVersion\Applets\Regedit";
-            ret = (RegCreateKey(RootKey.HKEY_CURRENT_USER, sKey, ref hKey));
+            ret = (RegCreateKey((UIntPtr)RootKey.HKEY_CURRENT_USER, sKey, ref hKey));
             if (ret == ERROR_NONE)
             {
                 RegCloseKey(hKey);
-                ret = (RegOpenKeyEx(RootKey.HKEY_CURRENT_USER, sKey, 0, KEY_WRITE, ref hKey));
+                ret = (RegOpenKeyEx((UIntPtr)RootKey.HKEY_CURRENT_USER, sKey, 0, KEY_WRITE, out hKey));
                 if (ret == ERROR_NONE)
                 {
                     if (WriteString(RootKey.HKEY_CURRENT_USER, sKey, "LastKey", SubKey))
@@ -1679,6 +1623,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
                 }
             }
             RegCloseKey(hKey);
+
             return false;
         }
 
@@ -1705,12 +1650,11 @@ namespace VTDev.Libraries.CEXEngine.Utility
             {
                 if (EnableAccess(true))
                 {
-                    if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_ALL_ACCESS, ref hKey) == ERROR_NONE)
+                    if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_ALL_ACCESS, out hKey) == ERROR_NONE)
                     {
                         if (FileExists(FileName))
-                        {
                             DeleteFile(FileName);
-                        }
+                        
                         return (RegSaveKey(hKey, FileName, IntPtr.Zero) == 0);
                     }
                 }
@@ -1741,12 +1685,10 @@ namespace VTDev.Libraries.CEXEngine.Utility
             {
                 if (EnableAccess(true))
                 {
-                    if (RegOpenKeyEx(RootKey, SubKey, 0, KEY_ALL_ACCESS, ref hKey) == ERROR_NONE)
+                    if (RegOpenKeyEx((UIntPtr)RootKey, SubKey, 0, KEY_ALL_ACCESS, out hKey) == ERROR_NONE)
                     {
                         if (FileExists(FileName))
-                        {
                             return (RegRestoreKey(hKey, FileName, REG_FORCE_RESTORE) == 0);
-                        }
                     }
                 }
                 return false;

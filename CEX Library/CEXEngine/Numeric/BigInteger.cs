@@ -2112,7 +2112,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <param name="X">The BigInteger to convert</param>
         /// 
         /// <returns>Returns this BigInteger as an int value</returns>
-        public static implicit operator Int32(BigInteger X)
+        public static implicit operator int(BigInteger X)
         {
             return X.ToInt32();
         }
@@ -2125,7 +2125,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <param name="X">The BigInteger to convert</param>
         /// 
         /// <returns>Returns this BigInteger as a long value</returns>
-        public static implicit operator Int64(BigInteger X)
+        public static implicit operator long(BigInteger X)
         {
             return X.ToInt64();
         }

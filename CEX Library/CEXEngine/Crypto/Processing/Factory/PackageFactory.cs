@@ -569,7 +569,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// <returns>Sub key policy flag, or -1 if not key id found</returns>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if the user has insufficient access rights to access this PackageKey</exception>
-        public Int64 Policy(byte[] KeyId)
+        public long Policy(byte[] KeyId)
         {
             if (AccessScope.Equals(KeyScope.NoAccess))
                 throw new CryptoProcessingException("PackageFactory:Policy", "You do not have permission to access this key!", new UnauthorizedAccessException());

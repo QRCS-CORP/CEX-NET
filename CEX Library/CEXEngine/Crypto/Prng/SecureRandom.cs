@@ -266,7 +266,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="Minimum">Minimum value</param>
         /// <param name="Maximum">Maximum value</param>
         /// 
-        /// <returns>Random UInt32</returns>
+        /// <returns>Random uint</returns>
         [CLSCompliant(false)]
         public UInt16 NextUInt16(UInt16 Minimum, UInt16 Maximum)
         {
@@ -276,13 +276,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         }
         #endregion
 
-        #region Int32
+        #region int
         /// <summary>
         /// Get a random non-negative 32bit integer
         /// </summary>
         /// 
-        /// <returns>Random Int32</returns>
-        public Int32 Next()
+        /// <returns>Random int</returns>
+        public int Next()
         {
             return BitConverter.ToInt32(GetBytes(4), 0);
         }
@@ -291,8 +291,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// Get a random non-negative 32bit integer
         /// </summary>
         /// 
-        /// <returns>Random Int32</returns>
-        public Int32 NextInt32()
+        /// <returns>Random int</returns>
+        public int NextInt32()
         {
             return BitConverter.ToInt32(GetBytes(4), 0);
         }
@@ -303,11 +303,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// 
         /// <param name="Maximum">Maximum value</param>
         /// 
-        /// <returns>Random Int32</returns>
-        public Int32 NextInt32(Int32 Maximum)
+        /// <returns>Random int</returns>
+        public int NextInt32(int Maximum)
         {
             byte[] rand;
-            Int32[] num = new Int32[1];
+            int[] num = new int[1];
 
             do
             {
@@ -328,8 +328,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="Minimum">Minimum value</param>
         /// <param name="Maximum">Maximum value</param>
         /// 
-        /// <returns>Random Int32</returns>
-        public Int32 NextInt32(Int32 Minimum, Int32 Maximum)
+        /// <returns>Random int</returns>
+        public int NextInt32(int Minimum, int Maximum)
         {
             int num = 0;
             while ((num = NextInt32(Maximum)) < Minimum) { }
@@ -337,14 +337,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         }
         #endregion
 
-        #region UInt32
+        #region uint
         /// <summary>
         /// Get a random unsigned 32bit integer
         /// </summary>
         /// 
-        /// <returns>Random UInt32</returns>
+        /// <returns>Random uint</returns>
         [CLSCompliant(false)]
-        public UInt32 NextUInt32()
+        public uint NextUInt32()
         {
             return BitConverter.ToUInt32(GetBytes(4), 0);
         }
@@ -355,12 +355,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// 
         /// <param name="Maximum">Maximum value</param>
         /// 
-        /// <returns>Random UInt32</returns>
+        /// <returns>Random uint</returns>
         [CLSCompliant(false)]
-        public UInt32 NextUInt32(UInt32 Maximum)
+        public uint NextUInt32(uint Maximum)
         {
             byte[] rand;
-            UInt32[] num = new UInt32[1];
+            uint[] num = new uint[1];
 
             do
             {
@@ -378,23 +378,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="Minimum">Minimum value</param>
         /// <param name="Maximum">Maximum value</param>
         /// 
-        /// <returns>Random UInt32</returns>
+        /// <returns>Random uint</returns>
         [CLSCompliant(false)]
-        public UInt32 NextUInt32(UInt32 Minimum, UInt32 Maximum)
+        public uint NextUInt32(uint Minimum, uint Maximum)
         {
-            UInt32 num = 0;
+            uint num = 0;
             while ((num = NextUInt32(Maximum)) < Minimum) { }
             return num;
         }
         #endregion
 
-        #region Int64
+        #region long
         /// <summary>
         /// Get a random long integer
         /// </summary>
         /// 
-        /// <returns>Random Int64</returns>
-        public Int64 NextInt64()
+        /// <returns>Random long</returns>
+        public long NextInt64()
         {
             return BitConverter.ToInt64(GetBytes(8), 0);
         }
@@ -405,15 +405,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// 
         /// <param name="Maximum">Maximum value</param>
         /// 
-        /// <returns>Random Int64</returns>
-        public Int64 NextInt64(Int64 Maximum)
+        /// <returns>Random long</returns>
+        public long NextInt64(long Maximum)
         {
             byte[] rand;
-            Int64[] num = new Int64[1];
+            long[] num = new long[1];
 
             do
             {
-                rand = GetByteRange((Int64)Maximum);
+                rand = GetByteRange((long)Maximum);
                 Buffer.BlockCopy(rand, 0, num, 0, rand.Length);
             } while (num[0] > Maximum);
 
@@ -430,23 +430,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="Minimum">Minimum value</param>
         /// <param name="Maximum">Maximum value</param>
         /// 
-        /// <returns>Random Int64</returns>
-        public Int64 NextInt64(Int64 Minimum, Int64 Maximum)
+        /// <returns>Random long</returns>
+        public long NextInt64(long Minimum, long Maximum)
         {
-            Int64 num = 0;
+            long num = 0;
             while ((num = NextInt64(Maximum)) < Minimum) { }
             return num;
         }
         #endregion
 
-        #region UInt64
+        #region ulong
         /// <summary>
         /// Get a random unsigned long integer
         /// </summary>
         /// 
-        /// <returns>Random UInt64</returns>
+        /// <returns>Random ulong</returns>
         [CLSCompliant(false)]
-        public UInt64 NextUInt64()
+        public ulong NextUInt64()
         {
             return BitConverter.ToUInt64(GetBytes(8), 0);
         }
@@ -457,16 +457,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// 
         /// <param name="Maximum">Maximum value</param>
         /// 
-        /// <returns>Random UInt64</returns>
+        /// <returns>Random ulong</returns>
         [CLSCompliant(false)]
-        public UInt64 NextUInt64(UInt64 Maximum)
+        public ulong NextUInt64(ulong Maximum)
         {
-            byte[] rand = GetByteRange((Int64)Maximum);
-            UInt64[] num = new UInt64[1];
+            byte[] rand = GetByteRange((long)Maximum);
+            ulong[] num = new ulong[1];
 
             do
             {
-                rand = GetByteRange((Int64)Maximum);
+                rand = GetByteRange((long)Maximum);
                 Buffer.BlockCopy(rand, 0, num, 0, rand.Length);
             } while (num[0] > Maximum);
 
@@ -480,11 +480,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="Minimum">Minimum value</param>
         /// <param name="Maximum">Maximum value</param>
         /// 
-        /// <returns>Random UInt64</returns>
+        /// <returns>Random ulong</returns>
         [CLSCompliant(false)]
-        public UInt64 NextUInt64(UInt64 Minimum, UInt64 Maximum)
+        public ulong NextUInt64(ulong Minimum, ulong Maximum)
         {
-            UInt64 num = 0;
+            ulong num = 0;
             while ((num = NextUInt64(Maximum)) < Minimum) { }
             return num;
         }
@@ -598,7 +598,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// Returns the number of bytes needed to build 
         /// an integer existing within a byte range
         /// </remarks>
-        private byte[] GetByteRange(Int64 Maximum)
+        private byte[] GetByteRange(long Maximum)
         {
             byte[] data;
 
@@ -625,13 +625,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <remarks>
         /// If you need a dice roll, use the Random class (smaller range = reduced entropy)
         /// </remarks>
-        private byte[] GetBits(byte[] Data, Int64 Maximum)
+        private byte[] GetBits(byte[] Data, long Maximum)
         {
-            UInt64[] val = new UInt64[1];
+            ulong[] val = new ulong[1];
             Buffer.BlockCopy(Data, 0, val, 0, Data.Length);
             int bits = Data.Length * 8;
 
-            while (val[0] > (UInt64)Maximum && bits > 0)
+            while (val[0] > (ulong)Maximum && bits > 0)
             {
                 val[0] >>= 1;
                 bits--;

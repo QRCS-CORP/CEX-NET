@@ -175,7 +175,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
                 // To fix to the correct bitLength
                 // n.digits[last] |= 0x80000000;
-                n._digits[last] |= Int32.MinValue;
+                n._digits[last] |= int.MinValue;
                 n._digits[last] = IntUtils.URShift(n._digits[last], shiftCount);
                 // To create an odd number
                 n._digits[0] |= 1;
@@ -208,7 +208,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 
                 // To fix to the correct bitLength
                 // n.digits[last] |= 0x80000000;
-                n._digits[last] |= Int32.MinValue;
+                n._digits[last] |= int.MinValue;
                 n._digits[last] = IntUtils.URShift(n._digits[last], shiftCount);
                 // To create an odd number
                 n._digits[0] |= 1;

@@ -1,6 +1,5 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Utility
@@ -17,7 +16,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         public static double NaN = 0.0d / 0.0;
         public static double POSITIVE_INFINITY = 1.0 / 0.0;
         public static long SIGNIF_BIT_MASK = 0x000FFFFFFFFFFFFFL;
-        public static long SIGN_BIT_MASK = unchecked((Int64)0x8000000000000000L);
+        public static long SIGN_BIT_MASK = unchecked((long)0x8000000000000000L);
         #endregion
 
         #region Enums
@@ -41,7 +40,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
             EXP_BIAS = 127,
             MAX_EXPONENT = 127,
             MIN_EXPONENT = -126,
-            SIGN_BIT_MASK = unchecked((Int32)0x80000000),
+            SIGN_BIT_MASK = unchecked((int)0x80000000),
             SIGNIF_BIT_MASK = 0x007FFFFF,
             SIGNIFICAND_WIDTH = 24,
             SIZE = 32
@@ -49,14 +48,14 @@ namespace VTDev.Libraries.CEXEngine.Utility
 
         public enum IntConsts : int
         {
-            MIN_VALUE = unchecked((Int32)0x80000000),
+            MIN_VALUE = unchecked((int)0x80000000),
             MAX_VALUE = 0x7fffffff,
             SIZE = 32
         }
         public enum LongConsts : long
         {
             SIZE = 64,
-            MIN_VALUE = unchecked((Int64)0x8000000000000000L),
+            MIN_VALUE = unchecked((long)0x8000000000000000L),
             MAX_VALUE = 0x7fffffffffffffffL
         }
         #endregion
@@ -811,7 +810,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="NumBits">The number of bits to shift the given number</param>
         /// 
         /// <returns>
-        /// Returns an <see cref="System.Int32">int</see> representing the shifted number.
+        /// Returns an <see cref="System.int">int</see> representing the shifted number.
         /// </returns>
         public static int URShift(int X, int NumBits)
         {
@@ -829,7 +828,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="NumBits">The number of bits to shift the given number</param>
         /// 
         /// <returns>
-        /// Returns an <see cref="System.Int64">long integer</see> representing the shifted number.
+        /// Returns an <see cref="System.long">long integer</see> representing the shifted number.
         /// </returns>
         public static long URShift(long X, int NumBits)
         {

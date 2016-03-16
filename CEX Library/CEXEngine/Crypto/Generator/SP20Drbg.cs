@@ -69,11 +69,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// <item><description>Salsa20 <a href="http://cr.yp.to/snuffle/design.pdf">Design</a>.</description></item>
     /// <item><description>Salsa20 <a href="http://cr.yp.to/snuffle/security.pdf">Security</a>.</description></item>
     /// </list>
-    /// 
-    /// <description>Code Base Guides:</description>
-    /// <list type="table">
-    /// <item><description>Inspired in part by the Bouncy Castle Java <a href="http://bouncycastle.org/latest_releases.html">Release 1.51</a>.</description></item>
-    /// </list> 
     /// </remarks>
     public sealed class SP20Drbg : IGenerator
     {
@@ -95,14 +90,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         #endregion
 
         #region Fields
-        private UInt32[] _ctrVector = new UInt32[2];
+        private uint[] _ctrVector = new uint[2];
         private byte[] _dstCode = null;
         private bool _isDisposed = false;
         private bool _isInitialized = false;
         private bool _isParallel = false;
         private int _parallelBlockSize = PARALLEL_DEFBLOCK;
         private int _rndCount = DEFAULT_ROUNDS;
-        private UInt32[] _wrkState = new UInt32[14];
+        private uint[] _wrkState = new uint[14];
         private int _keySize = 32;
         #endregion
 
@@ -276,7 +271,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
                 throw new CryptoGeneratorException("SP20Drbg:Initialize", String.Format("Invalid seed size has been added. Size must be at least {0} or {1} bytes!", LegalSeedSizes[0], LegalSeedSizes[1]), new ArgumentOutOfRangeException());
 
             _keySize = Salt.Length;
-            _ctrVector = new UInt32[2];
+            _ctrVector = new uint[2];
             byte[] iv = new byte[VECTOR_SIZE];
 
             Buffer.BlockCopy(Salt, 0, iv, 0, VECTOR_SIZE);
@@ -508,7 +503,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
             IntUtils.Le32ToBytes(X15 + _wrkState[++ctr], Output, OutOffset);
         }
 
-        private void Generate(int Size, UInt32[] Counter, byte[] Output, int OutOffset)
+        private void Generate(int Size, uint[] Counter, byte[] Output, int OutOffset)
         {
             int aln = Size - (Size % BLOCK_SIZE);
             int ctr = 0;
@@ -571,13 +566,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         #endregion
 
         #region Helpers
-        private void Increment(UInt32[] Counter)
+        private void Increment(uint[] Counter)
         {
             if (++Counter[0] == 0)
                 ++Counter[1];
         }
 
-        private UInt32[] Increase(UInt32[] Counter, int Size)
+        private uint[] Increase(uint[] Counter, int Size)
         {
             uint[] copy = new uint[Counter.Length];
             Array.Copy(Counter, 0, copy, 0, Counter.Length);

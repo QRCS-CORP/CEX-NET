@@ -74,11 +74,11 @@ namespace VTDev.Projects.CEX
 
         #region Identity
         /// <summary>
-        /// Create a unique id for this installation
+        /// Create a block of random
         /// </summary>
         /// 
-        /// <returns>Unique machine Id</returns>
-        private byte[] IdGenerator()
+        /// <returns>pseudo random array</returns>
+        private byte[] RandomBlock()
         {
             byte[] localId = new byte[16];
 
@@ -87,29 +87,6 @@ namespace VTDev.Projects.CEX
                 gen.GetBytes(localId);
 
             return localId;
-        }
-
-        /// <summary>
-        /// Compare the local Id field with an OID (Origin ID) from a KeyHeader struct 
-        /// </summary>
-        /// <param name="LocalId">The application identity</param>
-        /// <param name="KeyOID">The OID field from a KeyHeader structure</param>
-        /// 
-        /// <returns>We are Creator</returns>
-        private bool IDCheck(byte[] LocalId, byte[] KeyOID)
-        {
-            if (LocalId == null || KeyOID == null)
-                return false;
-            if (LocalId.Length != KeyOID.Length)
-                return false;
-
-            for (int i = 0; i < LocalId.Length; i++)
-            {
-                if (LocalId[i] != KeyOID[i])
-                    return false;
-            }
-
-            return true;
         }
 
         /// <summary>
@@ -406,7 +383,7 @@ namespace VTDev.Projects.CEX
                     _container.Authority,           // the KeyAuthority structure
                     _container.Description,         // the CipherDescription structure
                     keyCount,                       // the number of subkeys to add to this key package
-                    IdGenerator());                 // the file extension encryption key
+                    RandomBlock());                 // the file extension encryption key
 
                 // create and write the key
                 using (PackageFactory factory = new PackageFactory(new FileStream(_keyFilePath, FileMode.Create, FileAccess.ReadWrite), _container.Authority))
@@ -550,6 +527,7 @@ namespace VTDev.Projects.CEX
                         cbKeySize.Items.Add(KeySizes.K768);
                         cbKeySize.Items.Add(KeySizes.K1024);
                         cbKeySize.Items.Add(KeySizes.K1280);
+                        cbKeySize.Items.Add(KeySizes.K1536);
                         break;
                     case Digests.SHA256:
                         cbKeySize.Items.Add(KeySizes.K768);
@@ -563,6 +541,12 @@ namespace VTDev.Projects.CEX
                         cbKeySize.Items.Add(KeySizes.K1536);
                         cbKeySize.Items.Add(KeySizes.K2048);
                         cbKeySize.Items.Add(KeySizes.K2560);
+                        break;
+                    case Digests.Keccak256:
+                        cbKeySize.Items.Add(KeySizes.K1600);
+                        cbKeySize.Items.Add(KeySizes.K2688);
+                        cbKeySize.Items.Add(KeySizes.K3776);
+                        cbKeySize.Items.Add(KeySizes.K4352);
                         break;
                     case Digests.Keccak512:
                         cbKeySize.Items.Add(KeySizes.K1088);
@@ -1085,7 +1069,7 @@ namespace VTDev.Projects.CEX
                 try
                 {
                     // get the encrypted _container string and convert to byte array
-                    byte[] appData = Convert.FromBase64String(Properties.Settings.Default.AppSettings);
+                    byte[] appData = Encoding.GetEncoding("Latin1").GetBytes(Properties.Settings.Default.AppSettings);
                     // decrypt the array with DAPI, requires same user context
                     appData = DataProtect.DecryptProtectedData(appData, Utilities.GetCredentials());
                     // deserialize the settings container
@@ -1140,7 +1124,7 @@ namespace VTDev.Projects.CEX
                 // get the settings container as a byte array
                 byte[] appData = SettingsContainer.Serialize(_container).ToArray();
                 // encrypt with dapi and copy to settings
-                Properties.Settings.Default.AppSettings = Convert.ToBase64String(DataProtect.EncryptProtectedData(appData, Utilities.GetCredentials()));
+                Properties.Settings.Default.AppSettings = Encoding.GetEncoding("Latin1").GetString(DataProtect.EncryptProtectedData(appData, Utilities.GetCredentials()));
             }
             finally
             {

@@ -3655,7 +3655,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <param name="X">The BigDecimal to convert</param>
         /// 
         /// <returns>Returns this BigDecimal as an int value</returns>
-        public static implicit operator Int32(BigDecimal X)
+        public static implicit operator int(BigDecimal X)
         {
             return X.ToInt32();
         }
@@ -3668,7 +3668,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <param name="X">The BigDecimal to convert</param>
         /// 
         /// <returns>Returns this BigDecimal as a long value</returns>
-        public static implicit operator Int64(BigDecimal X)
+        public static implicit operator long(BigDecimal X)
         {
             return X.ToInt64();
         }

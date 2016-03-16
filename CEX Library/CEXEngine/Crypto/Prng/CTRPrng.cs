@@ -104,6 +104,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
             _seedType = SeedEngine;
             _byteBuffer = new byte[BufferSize];
             _bufferSize = BufferSize;
+
             if (KeySize > 0)
                 _keySize = KeySize;
             else
@@ -210,7 +211,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// Get a pseudo random 32bit integer
         /// </summary>
         /// 
-        /// <returns>Random Int32</returns>
+        /// <returns>Random int</returns>
         public int Next()
         {
             return BitConverter.ToInt32(GetBytes(4), 0);
@@ -222,11 +223,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// 
         /// <param name="Maximum">Maximum value</param>
         /// 
-        /// <returns>Random Int32</returns>
-        public Int32 Next(int Maximum)
+        /// <returns>Random int</returns>
+        public int Next(int Maximum)
         {
             byte[] rand;
-            Int32[] num = new Int32[1];
+            int[] num = new int[1];
 
             do
             {
@@ -244,10 +245,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="Minimum">Minimum value</param>
         /// <param name="Maximum">Maximum value</param>
         /// 
-        /// <returns>Random Int32</returns>
-        public Int32 Next(int Minimum, int Maximum)
+        /// <returns>Random int</returns>
+        public int Next(int Minimum, int Maximum)
         {
-            Int32 num = 0;
+            int num = 0;
             while ((num = Next(Maximum)) < Minimum) { }
             return num;
         }
@@ -256,8 +257,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// Get a pseudo random 64bit integer
         /// </summary>
         /// 
-        /// <returns>Random Int64</returns>
-        public Int64 NextLong()
+        /// <returns>Random long</returns>
+        public long NextLong()
         {
             return BitConverter.ToInt64(GetBytes(8), 0);
         }
@@ -268,11 +269,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// 
         /// <param name="Maximum">Maximum value</param>
         /// 
-        /// <returns>Random Int64</returns>
-        public Int64 NextLong(long Maximum)
+        /// <returns>Random long</returns>
+        public long NextLong(long Maximum)
         {
             byte[] rand;
-            Int64[] num = new Int64[1];
+            long[] num = new long[1];
 
             do
             {
@@ -290,10 +291,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="Minimum">Minimum value</param>
         /// <param name="Maximum">Maximum value</param>
         /// 
-        /// <returns>Random Int64</returns>
-        public Int64 NextLong(long Minimum, long Maximum)
+        /// <returns>Random long</returns>
+        public long NextLong(long Minimum, long Maximum)
         {
-            Int64 num = 0;
+            long num = 0;
             while ((num = NextLong(Maximum)) < Minimum) { }
             return num;
         }
@@ -334,13 +335,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         #endregion
 
         #region Private Methods
-        private byte[] GetBits(byte[] Data, Int64 Maximum)
+        private byte[] GetBits(byte[] Data, long Maximum)
         {
-            UInt64[] val = new UInt64[1];
+            ulong[] val = new ulong[1];
             Buffer.BlockCopy(Data, 0, val, 0, Data.Length);
             int bits = Data.Length * 8;
 
-            while (val[0] > (UInt64)Maximum && bits > 0)
+            while (val[0] > (ulong)Maximum && bits > 0)
             {
                 val[0] >>= 1;
                 bits--;
@@ -352,7 +353,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
             return ret;
         }
 
-        private byte[] GetByteRange(Int64 Maximum)
+        private byte[] GetByteRange(long Maximum)
         {
             byte[] data;
 
@@ -390,15 +391,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
         private int GetKeySize(BlockCiphers CipherEngine)
         {
-            switch (CipherEngine)
-            {
-                case BlockCiphers.RHX:
-                case BlockCiphers.SHX:
-                case BlockCiphers.THX:
-                    return 320;
-                default:
-                    return 32;
-            }
+            return 320;
         }
 
         private ISeed GetSeedGenerator(SeedGenerators SeedEngine)

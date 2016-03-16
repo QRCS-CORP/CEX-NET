@@ -93,13 +93,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         #region Fields
         private int _bytesFilled; 
         private Threefish512 _blockCipher;
-        private UInt64[] _cipherInput;
-        private UInt64[] _configString;
-        private UInt64[] _configValue;
+        private ulong[] _cipherInput;
+        private ulong[] _configString;
+        private ulong[] _configValue;
         private SkeinInitializationType _initializationType;
         private byte[] _inputBuffer;
         private bool _isDisposed = false;
-        private UInt64[] _digestState;
+        private ulong[] _digestState;
         private UbiTweak _ubiParameters;
         #endregion
 
@@ -116,7 +116,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// The post-chain configuration value
         /// </summary>
         [CLSCompliant(false)]
-        public UInt64[] ConfigValue
+        public ulong[] ConfigValue
         {
             get { return _configValue; }
             private set { _configValue = value; }
@@ -126,7 +126,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// The pre-chain configuration string
         /// </summary>
         [CLSCompliant(false)]
-        public UInt64[] ConfigString
+        public ulong[] ConfigString
         {
             get { return _configString; }
             private set { _configString = value; }
@@ -195,15 +195,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             _blockCipher = new Threefish512();
             // allocate buffers
             _inputBuffer = new byte[STATE_BYTES];
-            _cipherInput = new UInt64[STATE_WORDS];
-            _digestState = new UInt64[STATE_WORDS];
+            _cipherInput = new ulong[STATE_WORDS];
+            _digestState = new ulong[STATE_WORDS];
             // allocate tweak
             _ubiParameters = new UbiTweak();
             // allocate config value
-            _configValue = new UInt64[STATE_BYTES];
+            _configValue = new ulong[STATE_BYTES];
             // initialize and enerate the configuration string
-            _configString = new UInt64[STATE_BYTES];
-            _configString[1] = (UInt64)DigestSize * 8;
+            _configString = new ulong[STATE_BYTES];
+            _configString[1] = (ulong)DigestSize * 8;
 
             SetSchema(83, 72, 65, 51); // "SHA3"
             SetVersion(1);
@@ -310,7 +310,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             Array.Clear(_cipherInput, 0, _cipherInput.Length);
             // do output block counter mode output
             byte[] hash = new byte[STATE_OUTPUT];
-            UInt64[] oldState = new UInt64[STATE_WORDS];
+            ulong[] oldState = new ulong[STATE_WORDS];
             // save old state
             Array.Copy(_digestState, oldState, _digestState.Length);
 
@@ -428,7 +428,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// 
         /// <param name="InitialState">Twofish Cipher key</param>
         [CLSCompliant(false)]
-        public void GenerateConfiguration(UInt64[] InitialState)
+        public void GenerateConfiguration(ulong[] InitialState)
         {
             Threefish512 cipher = new Threefish512();
             UbiTweak tweak = new UbiTweak();
@@ -459,15 +459,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             if (Schema.Length != 4)
                 throw new CryptoHashException("Skein512:SetSchema", "Schema must be 4 bytes.", new Exception());
 
-            UInt64 n = _configString[0];
+            ulong n = _configString[0];
 
             // clear the schema bytes
-            n &= ~(UInt64)0xfffffffful;
+            n &= ~(ulong)0xfffffffful;
             // set schema bytes
-            n |= (UInt64)Schema[3] << 24;
-            n |= (UInt64)Schema[2] << 16;
-            n |= (UInt64)Schema[1] << 8;
-            n |= (UInt64)Schema[0];
+            n |= (ulong)Schema[3] << 24;
+            n |= (ulong)Schema[2] << 16;
+            n |= (ulong)Schema[1] << 8;
+            n |= (ulong)Schema[0];
 
             _configString[0] = n;
         }
@@ -484,8 +484,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             if (Version < 0 || Version > 3)
                 throw new CryptoHashException("Skein512:SetVersion", "Version must be between 0 and 3, inclusive.", new Exception());
 
-            _configString[0] &= ~((UInt64)0x03 << 32);
-            _configString[0] |= (UInt64)Version << 32;
+            _configString[0] &= ~((ulong)0x03 << 32);
+            _configString[0] |= (ulong)Version << 32;
         }
 
         /// <summary>
@@ -495,8 +495,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="Size">Leaf size</param>
         public void SetTreeLeafSize(byte Size)
         {
-            _configString[2] &= ~(UInt64)0xff;
-            _configString[2] |= (UInt64)Size;
+            _configString[2] &= ~(ulong)0xff;
+            _configString[2] |= (ulong)Size;
         }
 
         /// <summary>
@@ -506,8 +506,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="Size">Fan out size</param>
         public void SetTreeFanOutSize(byte Size)
         {
-            _configString[2] &= ~((UInt64)0xff << 8);
-            _configString[2] |= (UInt64)Size << 8;
+            _configString[2] &= ~((ulong)0xff << 8);
+            _configString[2] |= (ulong)Size << 8;
         }
 
         /// <summary>
@@ -522,8 +522,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             if (Height == 1)
                 throw new CryptoHashException("Skein512:SetMaxTreeHeight", "Tree height must be zero or greater than 1.", new Exception());
 
-            _configString[2] &= ~((UInt64)0xff << 16);
-            _configString[2] |= (UInt64)Height << 16;
+            _configString[2] &= ~((ulong)0xff << 16);
+            _configString[2] |= (ulong)Height << 16;
         }
         #endregion
 
@@ -545,7 +545,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             // set the key to the current state
             _blockCipher.SetKey(_digestState);
             // update tweak
-            _ubiParameters.BitsProcessed += (Int64)bytes;
+            _ubiParameters.BitsProcessed += (long)bytes;
             _blockCipher.SetTweak(_ubiParameters.Tweak);
             // encrypt block
             _blockCipher.Encrypt(_cipherInput, _digestState);
@@ -555,21 +555,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
                 _digestState[i] ^= _cipherInput[i];
         }
 
-        private static UInt64 BytesToUInt64(byte[] Input, int InOffset)
+        private static ulong BytesToUInt64(byte[] Input, int InOffset)
         {
-            UInt64 n = Input[InOffset];
-            n |= (UInt64)Input[InOffset + 1] << 8;
-            n |= (UInt64)Input[InOffset + 2] << 16;
-            n |= (UInt64)Input[InOffset + 3] << 24;
-            n |= (UInt64)Input[InOffset + 4] << 32;
-            n |= (UInt64)Input[InOffset + 5] << 40;
-            n |= (UInt64)Input[InOffset + 6] << 48;
-            n |= (UInt64)Input[InOffset + 7] << 56;
+            ulong n = Input[InOffset];
+            n |= (ulong)Input[InOffset + 1] << 8;
+            n |= (ulong)Input[InOffset + 2] << 16;
+            n |= (ulong)Input[InOffset + 3] << 24;
+            n |= (ulong)Input[InOffset + 4] << 32;
+            n |= (ulong)Input[InOffset + 5] << 40;
+            n |= (ulong)Input[InOffset + 6] << 48;
+            n |= (ulong)Input[InOffset + 7] << 56;
 
             return n;
         }
 
-        private static void PutBytes(UInt64[] Input, byte[] Output, int Offset, int ByteCount)
+        private static void PutBytes(ulong[] Input, byte[] Output, int Offset, int ByteCount)
         {
             int j = 0;
             for (int i = 0; i < ByteCount; i++)
@@ -587,21 +587,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             private const int CipherSize = 512;
             private const int CipherQwords = CipherSize / 64;
             private const int ExpandedKeySize = CipherQwords + 1;
-            private const UInt64 KeyScheduleConst = 0x1BD11BDAA9FC1A22;
+            private const ulong KeyScheduleConst = 0x1BD11BDAA9FC1A22;
             private const int ExpandedTweakSize = 3;
             #endregion
 
             #region Fields
-            private UInt64[] _expandedKey;
-            private UInt64[] _expandedTweak;
+            private ulong[] _expandedKey;
+            private ulong[] _expandedTweak;
             #endregion
 
             #region Constructor
             internal Threefish512()
             {
                 // create the expanded key array
-                _expandedTweak = new UInt64[ExpandedTweakSize];
-                _expandedKey = new UInt64[ExpandedKeySize];
+                _expandedTweak = new ulong[ExpandedTweakSize];
+                _expandedKey = new ulong[ExpandedKeySize];
                 _expandedKey[ExpandedKeySize - 1] = KeyScheduleConst;
             }
             #endregion
@@ -621,29 +621,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
                 }
             }
 
-            internal void Encrypt(UInt64[] Input, UInt64[] Output)
+            internal void Encrypt(ulong[] Input, ulong[] Output)
             {
                 // cache the block, key, and tweak
-                UInt64 B0 = Input[0]; 
-                UInt64 B1 = Input[1];
-                UInt64 B2 = Input[2]; 
-                UInt64 B3 = Input[3];
-                UInt64 B4 = Input[4];
-                UInt64 B5 = Input[5];
-                UInt64 B6 = Input[6]; 
-                UInt64 B7 = Input[7];
-                UInt64 K0 = _expandedKey[0]; 
-                UInt64 K1 = _expandedKey[1];
-                UInt64 K2 = _expandedKey[2];
-                UInt64 K3 = _expandedKey[3];
-                UInt64 K4 = _expandedKey[4];
-                UInt64 K5 = _expandedKey[5];
-                UInt64 K6 = _expandedKey[6]; 
-                UInt64 K7 = _expandedKey[7];
-                UInt64 K8 = _expandedKey[8];
-                UInt64 T0 = _expandedTweak[0];
-                UInt64 T1 = _expandedTweak[1];
-                UInt64 T2 = _expandedTweak[2];
+                ulong B0 = Input[0]; 
+                ulong B1 = Input[1];
+                ulong B2 = Input[2]; 
+                ulong B3 = Input[3];
+                ulong B4 = Input[4];
+                ulong B5 = Input[5];
+                ulong B6 = Input[6]; 
+                ulong B7 = Input[7];
+                ulong K0 = _expandedKey[0]; 
+                ulong K1 = _expandedKey[1];
+                ulong K2 = _expandedKey[2];
+                ulong K3 = _expandedKey[3];
+                ulong K4 = _expandedKey[4];
+                ulong K5 = _expandedKey[5];
+                ulong K6 = _expandedKey[6]; 
+                ulong K7 = _expandedKey[7];
+                ulong K8 = _expandedKey[8];
+                ulong T0 = _expandedTweak[0];
+                ulong T1 = _expandedTweak[1];
+                ulong T2 = _expandedTweak[2];
 
                 Mix(ref B0, ref B1, 46, K0, K1);
                 Mix(ref B2, ref B3, 36, K2, K3);
@@ -947,53 +947,53 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             #endregion
 
             #region Private Methods
-            private static UInt64 RotateLeft64(UInt64 V, int B)
+            private static ulong RotateLeft64(ulong V, int B)
             {
                 return (V << B) | (V >> (64 - B));
             }
 
-            private static UInt64 RotateRight64(UInt64 V, int B)
+            private static ulong RotateRight64(ulong V, int B)
             {
                 return (V >> B) | (V << (64 - B));
             }
 
-            private static void Mix(ref UInt64 A, ref UInt64 B, int R)
+            private static void Mix(ref ulong A, ref ulong B, int R)
             {
                 A += B;
                 B = RotateLeft64(B, R) ^ A;
             }
 
-            private static void Mix(ref UInt64 A, ref UInt64 B, int R, UInt64 K0, UInt64 K1)
+            private static void Mix(ref ulong A, ref ulong B, int R, ulong K0, ulong K1)
             {
                 B += K1;
                 A += B + K0;
                 B = RotateLeft64(B, R) ^ A;
             }
 
-            private static void UnMix(ref UInt64 A, ref UInt64 B, int R)
+            private static void UnMix(ref ulong A, ref ulong B, int R)
             {
                 B = RotateRight64(B ^ A, R);
                 A -= B;
             }
 
-            private static void UnMix(ref UInt64 A, ref UInt64 B, int R, UInt64 K0, UInt64 K1)
+            private static void UnMix(ref ulong A, ref ulong B, int R, ulong K0, ulong K1)
             {
                 B = RotateRight64(B ^ A, R);
                 A -= B + K0;
                 B -= K1;
             }
 
-            internal void SetTweak(UInt64[] Tweak)
+            internal void SetTweak(ulong[] Tweak)
             {
                 _expandedTweak[0] = Tweak[0];
                 _expandedTweak[1] = Tweak[1];
                 _expandedTweak[2] = Tweak[0] ^ Tweak[1];
             }
 
-            internal void SetKey(UInt64[] Key)
+            internal void SetKey(ulong[] Key)
             {
                 int i;
-                UInt64 parity = KeyScheduleConst;
+                ulong parity = KeyScheduleConst;
 
                 for (i = 0; i < _expandedKey.Length - 1; i++)
                 {

@@ -51,6 +51,10 @@
         /// </summary>
         K1536 = 192,
         /// <summary>
+        /// 1600 bit Key
+        /// </summary>
+        K1600 = 200,
+        /// <summary>
         /// 1664 bit Key
         /// </summary>
         K1664 = 208,
@@ -75,6 +79,10 @@
         /// </summary>
         K2560 = 320,
         /// <summary>
+        /// 2688 bit Key
+        /// </summary>
+        K2688 = 336,
+        /// <summary>
         /// 2816 bit Key 
         /// </summary>
         K2816 = 352,
@@ -85,15 +93,27 @@
         /// <summary>
         /// 3584 bit Key
         /// </summary>
-        K3584 = 448,
+        K3584 = 472,
+        /// <summary>
+        /// 3776 bit Key
+        /// </summary>
+        K3776 = 448,
         /// <summary>
         /// 4096 bit Key
         /// </summary>
         K4096 = 512,
         /// <summary>
+        /// 4352 bit Key
+        /// </summary>
+        K4352 = 544,
+        /// <summary>
         /// 4608 bit Key
         /// </summary>
         K4608 = 576,
+        /// <summary>
+        /// 4864 bit Key
+        /// </summary>
+        K4864 = 608,
         /// <summary>
         /// 5120 bit Key
         /// </summary>

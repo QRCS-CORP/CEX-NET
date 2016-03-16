@@ -40,8 +40,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// Get a pseudo random 32bit integer
         /// </summary>
         /// 
-        /// <returns>Random Int32</returns>
-        Int32 Next();
+        /// <returns>Random int</returns>
+        int Next();
 
         /// <summary>
         /// Get a pseudo random 32bit integer
@@ -49,8 +49,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// 
         /// <param name="Maximum">Maximum value</param>
         /// 
-        /// <returns>Random Int32</returns>
-        Int32 Next(int Maximum);
+        /// <returns>Random int</returns>
+        int Next(int Maximum);
 
         /// <summary>
         /// Get a pseudo random 32bit integer
@@ -59,15 +59,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="Minimum">Minimum value</param>
         /// <param name="Maximum">Maximum value</param>
         /// 
-        /// <returns>Random Int32</returns>
-        Int32 Next(int Minimum, int Maximum);
+        /// <returns>Random int</returns>
+        int Next(int Minimum, int Maximum);
 
         /// <summary>
         /// Get a pseudo random 64bit integer
         /// </summary>
         /// 
-        /// <returns>Random Int64</returns>
-        Int64 NextLong();
+        /// <returns>Random long</returns>
+        long NextLong();
 
         /// <summary>
         /// Get a ranged pseudo random 64bit integer
@@ -75,8 +75,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// 
         /// <param name="Maximum">Maximum value</param>
         /// 
-        /// <returns>Random Int64</returns>
-        Int64 NextLong(long Maximum);
+        /// <returns>Random long</returns>
+        long NextLong(long Maximum);
 
         /// <summary>
         /// Get a ranged pseudo random 64bit integer
@@ -85,8 +85,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="Minimum">Minimum value</param>
         /// <param name="Maximum">Maximum value</param>
         /// 
-        /// <returns>Random Int64</returns>
-        Int64 NextLong(long Minimum, long Maximum);
+        /// <returns>Random long</returns>
+        long NextLong(long Minimum, long Maximum);
 
         /// <summary>
         /// Reset the internal state

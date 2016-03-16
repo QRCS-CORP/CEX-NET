@@ -41,7 +41,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <summary>
         /// The number of Key Sets contained in this key package file.
         /// </summary>
-        public Int32 SubKeyCount;
+        public int SubKeyCount;
         /// <summary>
         /// A <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies">Policies</see> array that contains the set of policy flags
         /// </summary>

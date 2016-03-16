@@ -47,7 +47,8 @@
     <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
-    <DocumentationFile>bin\x86\Debug\CEXEngine.XML</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -108,8 +109,10 @@
     <Compile Include="Crypto\Helper\PrngFromName.cs" />
     <Compile Include="Crypto\Helper\SeedGeneratorFromName.cs" />
     <Compile Include="Crypto\Helper\StreamCipherFromName.cs" />
+    <Compile Include="Crypto\Seed\CTRRsg.cs" />
     <Compile Include="Crypto\Seed\EntropyPool.cs" />
     <Compile Include="Crypto\Seed\ISCRsg.cs" />
+    <Compile Include="Crypto\Seed\SP20Rsg.cs" />
     <Compile Include="Documentation.cs" />
     <Compile Include="Networking\PacketBuffer.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmerticGenerator.cs" />

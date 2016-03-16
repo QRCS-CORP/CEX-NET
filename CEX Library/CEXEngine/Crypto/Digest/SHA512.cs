@@ -2,6 +2,7 @@
 using System;
 using VTDev.Libraries.CEXEngine.CryptoException;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 #region License Information
@@ -83,18 +84,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     {
         #region Constants
         private const string ALG_NAME = "SHA512";
-        private Int32 BLOCK_SIZE = 128;
-        private Int32 DIGEST_SIZE = 64;
+        private int BLOCK_SIZE = 128;
+        private int DIGEST_SIZE = 64;
         #endregion
 
         #region Fields
         private long _btCounter1 = 0;
         private long _btCounter2 = 0;
         private int _bufferOffset = 0;
-        private UInt64 _H0, _H1, _H2, _H3, _H4, _H5, _H6, _H7;
+        private ulong _H0, _H1, _H2, _H3, _H4, _H5, _H6, _H7;
         private bool _isDisposed = false;
         private byte[] _prcBuffer = new byte[8];
-        private UInt64[] _wordBuffer = new UInt64[80];
+        private ulong[] _wordBuffer = new ulong[80];
         private int _wordOffset = 0;
         #endregion
 
@@ -228,14 +229,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
             Finish();
 
-            UInt64ToBE(_H0, Output, OutOffset);
-            UInt64ToBE(_H1, Output, OutOffset + 8);
-            UInt64ToBE(_H2, Output, OutOffset + 16);
-            UInt64ToBE(_H3, Output, OutOffset + 24);
-            UInt64ToBE(_H4, Output, OutOffset + 32);
-            UInt64ToBE(_H5, Output, OutOffset + 40);
-            UInt64ToBE(_H6, Output, OutOffset + 48);
-            UInt64ToBE(_H7, Output, OutOffset + 56);
+            IntUtils.Be64ToBytes(_H0, Output, OutOffset);
+            IntUtils.Be64ToBytes(_H1, Output, OutOffset + 8);
+            IntUtils.Be64ToBytes(_H2, Output, OutOffset + 16);
+            IntUtils.Be64ToBytes(_H3, Output, OutOffset + 24);
+            IntUtils.Be64ToBytes(_H4, Output, OutOffset + 32);
+            IntUtils.Be64ToBytes(_H5, Output, OutOffset + 40);
+            IntUtils.Be64ToBytes(_H6, Output, OutOffset + 48);
+            IntUtils.Be64ToBytes(_H7, Output, OutOffset + 56);
 
             Reset();
 
@@ -284,7 +285,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         {
             if (_btCounter1 > 0x1fffffffffffffffL)
             {
-                _btCounter2 += (Int64)((UInt64)_btCounter1 >> 61);
+                _btCounter2 += (long)((ulong)_btCounter1 >> 61);
                 _btCounter1 &= 0x1fffffffffffffffL;
             }
         }
@@ -320,60 +321,344 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
         private void ProcessBlock()
         {
+            // set up working variables
+            ulong w0 = _H0;
+            ulong w1 = _H1;
+            ulong w2 = _H2;
+            ulong w3 = _H3;
+            ulong w4 = _H4;
+            ulong w5 = _H5;
+            ulong w6 = _H6;
+            ulong w7 = _H7;
+            int ctr = 0;
+
             AdjustByteCounts();
 
-            // expand 16 word block into 80 word blocks.
-            for (int i = 16; i < 80; ++i)
-                _wordBuffer[i] = Sigma1(_wordBuffer[i - 2]) + _wordBuffer[i - 7] + Sigma0(_wordBuffer[i - 15]) + _wordBuffer[i - 16];
+            // expand 16 word block into 80 word blocks
+            _wordBuffer[16] = Sigma1(_wordBuffer[14]) + _wordBuffer[9] + Sigma0(_wordBuffer[1]) + _wordBuffer[0];
+            _wordBuffer[17] = Sigma1(_wordBuffer[15]) + _wordBuffer[10] + Sigma0(_wordBuffer[2]) + _wordBuffer[1];
+            _wordBuffer[18] = Sigma1(_wordBuffer[16]) + _wordBuffer[11] + Sigma0(_wordBuffer[3]) + _wordBuffer[2];
+            _wordBuffer[19] = Sigma1(_wordBuffer[17]) + _wordBuffer[12] + Sigma0(_wordBuffer[4]) + _wordBuffer[3];
+            _wordBuffer[20] = Sigma1(_wordBuffer[18]) + _wordBuffer[13] + Sigma0(_wordBuffer[5]) + _wordBuffer[4];
+            _wordBuffer[21] = Sigma1(_wordBuffer[19]) + _wordBuffer[14] + Sigma0(_wordBuffer[6]) + _wordBuffer[5];
+            _wordBuffer[22] = Sigma1(_wordBuffer[20]) + _wordBuffer[15] + Sigma0(_wordBuffer[7]) + _wordBuffer[6];
+            _wordBuffer[23] = Sigma1(_wordBuffer[21]) + _wordBuffer[16] + Sigma0(_wordBuffer[8]) + _wordBuffer[7];
+            _wordBuffer[24] = Sigma1(_wordBuffer[22]) + _wordBuffer[17] + Sigma0(_wordBuffer[9]) + _wordBuffer[8];
+            _wordBuffer[25] = Sigma1(_wordBuffer[23]) + _wordBuffer[18] + Sigma0(_wordBuffer[10]) + _wordBuffer[9];
+            _wordBuffer[26] = Sigma1(_wordBuffer[24]) + _wordBuffer[19] + Sigma0(_wordBuffer[11]) + _wordBuffer[10];
+            _wordBuffer[27] = Sigma1(_wordBuffer[25]) + _wordBuffer[20] + Sigma0(_wordBuffer[12]) + _wordBuffer[11];
+            _wordBuffer[28] = Sigma1(_wordBuffer[26]) + _wordBuffer[21] + Sigma0(_wordBuffer[13]) + _wordBuffer[12];
+            _wordBuffer[29] = Sigma1(_wordBuffer[27]) + _wordBuffer[22] + Sigma0(_wordBuffer[14]) + _wordBuffer[13];
+            _wordBuffer[30] = Sigma1(_wordBuffer[28]) + _wordBuffer[23] + Sigma0(_wordBuffer[15]) + _wordBuffer[14];
+            _wordBuffer[31] = Sigma1(_wordBuffer[29]) + _wordBuffer[24] + Sigma0(_wordBuffer[16]) + _wordBuffer[15];
+            _wordBuffer[32] = Sigma1(_wordBuffer[30]) + _wordBuffer[25] + Sigma0(_wordBuffer[17]) + _wordBuffer[16];
+            _wordBuffer[33] = Sigma1(_wordBuffer[31]) + _wordBuffer[26] + Sigma0(_wordBuffer[18]) + _wordBuffer[17];
+            _wordBuffer[34] = Sigma1(_wordBuffer[32]) + _wordBuffer[27] + Sigma0(_wordBuffer[19]) + _wordBuffer[18];
+            _wordBuffer[35] = Sigma1(_wordBuffer[33]) + _wordBuffer[28] + Sigma0(_wordBuffer[20]) + _wordBuffer[19];
+            _wordBuffer[36] = Sigma1(_wordBuffer[34]) + _wordBuffer[29] + Sigma0(_wordBuffer[21]) + _wordBuffer[20];
+            _wordBuffer[37] = Sigma1(_wordBuffer[35]) + _wordBuffer[30] + Sigma0(_wordBuffer[22]) + _wordBuffer[21];
+            _wordBuffer[38] = Sigma1(_wordBuffer[36]) + _wordBuffer[31] + Sigma0(_wordBuffer[23]) + _wordBuffer[22];
+            _wordBuffer[39] = Sigma1(_wordBuffer[37]) + _wordBuffer[32] + Sigma0(_wordBuffer[24]) + _wordBuffer[23];
+            _wordBuffer[40] = Sigma1(_wordBuffer[38]) + _wordBuffer[33] + Sigma0(_wordBuffer[25]) + _wordBuffer[24];
+            _wordBuffer[41] = Sigma1(_wordBuffer[39]) + _wordBuffer[34] + Sigma0(_wordBuffer[26]) + _wordBuffer[25];
+            _wordBuffer[42] = Sigma1(_wordBuffer[40]) + _wordBuffer[35] + Sigma0(_wordBuffer[27]) + _wordBuffer[26];
+            _wordBuffer[43] = Sigma1(_wordBuffer[41]) + _wordBuffer[36] + Sigma0(_wordBuffer[28]) + _wordBuffer[27];
+            _wordBuffer[44] = Sigma1(_wordBuffer[42]) + _wordBuffer[37] + Sigma0(_wordBuffer[29]) + _wordBuffer[28];
+            _wordBuffer[45] = Sigma1(_wordBuffer[43]) + _wordBuffer[38] + Sigma0(_wordBuffer[30]) + _wordBuffer[29];
+            _wordBuffer[46] = Sigma1(_wordBuffer[44]) + _wordBuffer[39] + Sigma0(_wordBuffer[31]) + _wordBuffer[30];
+            _wordBuffer[47] = Sigma1(_wordBuffer[45]) + _wordBuffer[40] + Sigma0(_wordBuffer[32]) + _wordBuffer[31];
+            _wordBuffer[48] = Sigma1(_wordBuffer[46]) + _wordBuffer[41] + Sigma0(_wordBuffer[33]) + _wordBuffer[32];
+            _wordBuffer[49] = Sigma1(_wordBuffer[47]) + _wordBuffer[42] + Sigma0(_wordBuffer[34]) + _wordBuffer[33];
+            _wordBuffer[50] = Sigma1(_wordBuffer[48]) + _wordBuffer[43] + Sigma0(_wordBuffer[35]) + _wordBuffer[34];
+            _wordBuffer[51] = Sigma1(_wordBuffer[49]) + _wordBuffer[44] + Sigma0(_wordBuffer[36]) + _wordBuffer[35];
+            _wordBuffer[52] = Sigma1(_wordBuffer[50]) + _wordBuffer[45] + Sigma0(_wordBuffer[37]) + _wordBuffer[36];
+            _wordBuffer[53] = Sigma1(_wordBuffer[51]) + _wordBuffer[46] + Sigma0(_wordBuffer[38]) + _wordBuffer[37];
+            _wordBuffer[54] = Sigma1(_wordBuffer[52]) + _wordBuffer[47] + Sigma0(_wordBuffer[39]) + _wordBuffer[38];
+            _wordBuffer[55] = Sigma1(_wordBuffer[53]) + _wordBuffer[48] + Sigma0(_wordBuffer[40]) + _wordBuffer[39];
+            _wordBuffer[56] = Sigma1(_wordBuffer[54]) + _wordBuffer[49] + Sigma0(_wordBuffer[41]) + _wordBuffer[40];
+            _wordBuffer[57] = Sigma1(_wordBuffer[55]) + _wordBuffer[50] + Sigma0(_wordBuffer[42]) + _wordBuffer[41];
+            _wordBuffer[58] = Sigma1(_wordBuffer[56]) + _wordBuffer[51] + Sigma0(_wordBuffer[43]) + _wordBuffer[42];
+            _wordBuffer[59] = Sigma1(_wordBuffer[57]) + _wordBuffer[52] + Sigma0(_wordBuffer[44]) + _wordBuffer[43];
+            _wordBuffer[60] = Sigma1(_wordBuffer[58]) + _wordBuffer[53] + Sigma0(_wordBuffer[45]) + _wordBuffer[44];
+            _wordBuffer[61] = Sigma1(_wordBuffer[59]) + _wordBuffer[54] + Sigma0(_wordBuffer[46]) + _wordBuffer[45];
+            _wordBuffer[62] = Sigma1(_wordBuffer[60]) + _wordBuffer[55] + Sigma0(_wordBuffer[47]) + _wordBuffer[46];
+            _wordBuffer[63] = Sigma1(_wordBuffer[61]) + _wordBuffer[56] + Sigma0(_wordBuffer[48]) + _wordBuffer[47];
+            _wordBuffer[64] = Sigma1(_wordBuffer[62]) + _wordBuffer[57] + Sigma0(_wordBuffer[49]) + _wordBuffer[48];
+            _wordBuffer[65] = Sigma1(_wordBuffer[63]) + _wordBuffer[58] + Sigma0(_wordBuffer[50]) + _wordBuffer[49];
+            _wordBuffer[66] = Sigma1(_wordBuffer[64]) + _wordBuffer[59] + Sigma0(_wordBuffer[51]) + _wordBuffer[50];
+            _wordBuffer[67] = Sigma1(_wordBuffer[65]) + _wordBuffer[60] + Sigma0(_wordBuffer[52]) + _wordBuffer[51];
+            _wordBuffer[68] = Sigma1(_wordBuffer[66]) + _wordBuffer[61] + Sigma0(_wordBuffer[53]) + _wordBuffer[52];
+            _wordBuffer[69] = Sigma1(_wordBuffer[67]) + _wordBuffer[62] + Sigma0(_wordBuffer[54]) + _wordBuffer[53];
+            _wordBuffer[70] = Sigma1(_wordBuffer[68]) + _wordBuffer[63] + Sigma0(_wordBuffer[55]) + _wordBuffer[54];
+            _wordBuffer[71] = Sigma1(_wordBuffer[69]) + _wordBuffer[64] + Sigma0(_wordBuffer[56]) + _wordBuffer[55];
+            _wordBuffer[72] = Sigma1(_wordBuffer[70]) + _wordBuffer[65] + Sigma0(_wordBuffer[57]) + _wordBuffer[56];
+            _wordBuffer[73] = Sigma1(_wordBuffer[71]) + _wordBuffer[66] + Sigma0(_wordBuffer[58]) + _wordBuffer[57];
+            _wordBuffer[74] = Sigma1(_wordBuffer[72]) + _wordBuffer[67] + Sigma0(_wordBuffer[59]) + _wordBuffer[58];
+            _wordBuffer[75] = Sigma1(_wordBuffer[73]) + _wordBuffer[68] + Sigma0(_wordBuffer[60]) + _wordBuffer[59];
+            _wordBuffer[76] = Sigma1(_wordBuffer[74]) + _wordBuffer[69] + Sigma0(_wordBuffer[61]) + _wordBuffer[60];
+            _wordBuffer[77] = Sigma1(_wordBuffer[75]) + _wordBuffer[70] + Sigma0(_wordBuffer[62]) + _wordBuffer[61];
+            _wordBuffer[78] = Sigma1(_wordBuffer[76]) + _wordBuffer[71] + Sigma0(_wordBuffer[63]) + _wordBuffer[62];
+            _wordBuffer[79] = Sigma1(_wordBuffer[77]) + _wordBuffer[72] + Sigma0(_wordBuffer[64]) + _wordBuffer[63];
 
-            // set up working variables.
-            UInt64 w0 = _H0;
-            UInt64 w1 = _H1;
-            UInt64 w2 = _H2;
-            UInt64 w3 = _H3;
-            UInt64 w4 = _H4;
-            UInt64 w5 = _H5;
-            UInt64 w6 = _H6;
-            UInt64 w7 = _H7;
-			int ctr = 0;
+            // t = 8 * i
+            w7 += Sum1(w4) + Ch(w4, w5, w6) + K64[ctr] + _wordBuffer[ctr];
+            w3 += w7;
+            w7 += Sum0(w0) + Maj(w0, w1, w2);
+            // t = 8 * i + 1
+            w6 += Sum1(w3) + Ch(w3, w4, w5) + K64[++ctr] + _wordBuffer[ctr];
+            w2 += w6;
+            w6 += Sum0(w7) + Maj(w7, w0, w1);
+            // t = 8 * i + 2
+            w5 += Sum1(w2) + Ch(w2, w3, w4) + K64[++ctr] + _wordBuffer[ctr];
+            w1 += w5;
+            w5 += Sum0(w6) + Maj(w6, w7, w0);
+            // t = 8 * i + 3
+            w4 += Sum1(w1) + Ch(w1, w2, w3) + K64[++ctr] + _wordBuffer[ctr];
+            w0 += w4;
+            w4 += Sum0(w5) + Maj(w5, w6, w7);
+            // t = 8 * i + 4
+            w3 += Sum1(w0) + Ch(w0, w1, w2) + K64[++ctr] + _wordBuffer[ctr];
+            w7 += w3;
+            w3 += Sum0(w4) + Maj(w4, w5, w6);
+            // t = 8 * i + 5
+            w2 += Sum1(w7) + Ch(w7, w0, w1) + K64[++ctr] + _wordBuffer[ctr];
+            w6 += w2;
+            w2 += Sum0(w3) + Maj(w3, w4, w5);
+            // t = 8 * i + 6
+            w1 += Sum1(w6) + Ch(w6, w7, w0) + K64[++ctr] + _wordBuffer[ctr];
+            w5 += w1;
+            w1 += Sum0(w2) + Maj(w2, w3, w4);
+            // t = 8 * i + 7
+            w0 += Sum1(w5) + Ch(w5, w6, w7) + K64[++ctr] + _wordBuffer[ctr];
+            w4 += w0;
+            w0 += Sum0(w1) + Maj(w1, w2, w3);
 
-			for (int i = 0; i < 10; i ++)
-			{
-				// t = 8 * i
-				w7 += Sum1(w4) + Ch(w4, w5, w6) + K[ctr] + _wordBuffer[ctr++];
-				w3 += w7;
-				w7 += Sum0(w0) + Maj(w0, w1, w2);
-				// t = 8 * i + 1
-				w6 += Sum1(w3) + Ch(w3, w4, w5) + K[ctr] + _wordBuffer[ctr++];
-				w2 += w6;
-				w6 += Sum0(w7) + Maj(w7, w0, w1);
-				// t = 8 * i + 2
-				w5 += Sum1(w2) + Ch(w2, w3, w4) + K[ctr] + _wordBuffer[ctr++];
-				w1 += w5;
-				w5 += Sum0(w6) + Maj(w6, w7, w0);
-				// t = 8 * i + 3
-				w4 += Sum1(w1) + Ch(w1, w2, w3) + K[ctr] + _wordBuffer[ctr++];
-				w0 += w4;
-				w4 += Sum0(w5) + Maj(w5, w6, w7);
-				// t = 8 * i + 4
-				w3 += Sum1(w0) + Ch(w0, w1, w2) + K[ctr] + _wordBuffer[ctr++];
-				w7 += w3;
-				w3 += Sum0(w4) + Maj(w4, w5, w6);
-				// t = 8 * i + 5
-				w2 += Sum1(w7) + Ch(w7, w0, w1) + K[ctr] + _wordBuffer[ctr++];
-				w6 += w2;
-				w2 += Sum0(w3) + Maj(w3, w4, w5);
-				// t = 8 * i + 6
-				w1 += Sum1(w6) + Ch(w6, w7, w0) + K[ctr] + _wordBuffer[ctr++];
-				w5 += w1;
-				w1 += Sum0(w2) + Maj(w2, w3, w4);
-				// t = 8 * i + 7
-				w0 += Sum1(w5) + Ch(w5, w6, w7) + K[ctr] + _wordBuffer[ctr++];
-				w4 += w0;
-				w0 += Sum0(w1) + Maj(w1, w2, w3);
-			}
+            w7 += Sum1(w4) + Ch(w4, w5, w6) + K64[++ctr] + _wordBuffer[ctr];
+            w3 += w7;
+            w7 += Sum0(w0) + Maj(w0, w1, w2);
+            w6 += Sum1(w3) + Ch(w3, w4, w5) + K64[++ctr] + _wordBuffer[ctr];
+            w2 += w6;
+            w6 += Sum0(w7) + Maj(w7, w0, w1);
+            w5 += Sum1(w2) + Ch(w2, w3, w4) + K64[++ctr] + _wordBuffer[ctr];
+            w1 += w5;
+            w5 += Sum0(w6) + Maj(w6, w7, w0);
+            w4 += Sum1(w1) + Ch(w1, w2, w3) + K64[++ctr] + _wordBuffer[ctr];
+            w0 += w4;
+            w4 += Sum0(w5) + Maj(w5, w6, w7);
+            w3 += Sum1(w0) + Ch(w0, w1, w2) + K64[++ctr] + _wordBuffer[ctr];
+            w7 += w3;
+            w3 += Sum0(w4) + Maj(w4, w5, w6);
+            w2 += Sum1(w7) + Ch(w7, w0, w1) + K64[++ctr] + _wordBuffer[ctr];
+            w6 += w2;
+            w2 += Sum0(w3) + Maj(w3, w4, w5);
+            w1 += Sum1(w6) + Ch(w6, w7, w0) + K64[++ctr] + _wordBuffer[ctr];
+            w5 += w1;
+            w1 += Sum0(w2) + Maj(w2, w3, w4);
+            w0 += Sum1(w5) + Ch(w5, w6, w7) + K64[++ctr] + _wordBuffer[ctr];
+            w4 += w0;
+            w0 += Sum0(w1) + Maj(w1, w2, w3);
 
-			_H0 += w0;
+            w7 += Sum1(w4) + Ch(w4, w5, w6) + K64[++ctr] + _wordBuffer[ctr];
+            w3 += w7;
+            w7 += Sum0(w0) + Maj(w0, w1, w2);
+            w6 += Sum1(w3) + Ch(w3, w4, w5) + K64[++ctr] + _wordBuffer[ctr];
+            w2 += w6;
+            w6 += Sum0(w7) + Maj(w7, w0, w1);
+            w5 += Sum1(w2) + Ch(w2, w3, w4) + K64[++ctr] + _wordBuffer[ctr];
+            w1 += w5;
+            w5 += Sum0(w6) + Maj(w6, w7, w0);
+            w4 += Sum1(w1) + Ch(w1, w2, w3) + K64[++ctr] + _wordBuffer[ctr];
+            w0 += w4;
+            w4 += Sum0(w5) + Maj(w5, w6, w7);
+            w3 += Sum1(w0) + Ch(w0, w1, w2) + K64[++ctr] + _wordBuffer[ctr];
+            w7 += w3;
+            w3 += Sum0(w4) + Maj(w4, w5, w6);
+            w2 += Sum1(w7) + Ch(w7, w0, w1) + K64[++ctr] + _wordBuffer[ctr];
+            w6 += w2;
+            w2 += Sum0(w3) + Maj(w3, w4, w5);
+            w1 += Sum1(w6) + Ch(w6, w7, w0) + K64[++ctr] + _wordBuffer[ctr];
+            w5 += w1;
+            w1 += Sum0(w2) + Maj(w2, w3, w4);
+            w0 += Sum1(w5) + Ch(w5, w6, w7) + K64[++ctr] + _wordBuffer[ctr];
+            w4 += w0;
+            w0 += Sum0(w1) + Maj(w1, w2, w3);
+
+            w7 += Sum1(w4) + Ch(w4, w5, w6) + K64[++ctr] + _wordBuffer[ctr];
+            w3 += w7;
+            w7 += Sum0(w0) + Maj(w0, w1, w2);
+            w6 += Sum1(w3) + Ch(w3, w4, w5) + K64[++ctr] + _wordBuffer[ctr];
+            w2 += w6;
+            w6 += Sum0(w7) + Maj(w7, w0, w1);
+            w5 += Sum1(w2) + Ch(w2, w3, w4) + K64[++ctr] + _wordBuffer[ctr];
+            w1 += w5;
+            w5 += Sum0(w6) + Maj(w6, w7, w0);
+            w4 += Sum1(w1) + Ch(w1, w2, w3) + K64[++ctr] + _wordBuffer[ctr];
+            w0 += w4;
+            w4 += Sum0(w5) + Maj(w5, w6, w7);
+            w3 += Sum1(w0) + Ch(w0, w1, w2) + K64[++ctr] + _wordBuffer[ctr];
+            w7 += w3;
+            w3 += Sum0(w4) + Maj(w4, w5, w6);
+            w2 += Sum1(w7) + Ch(w7, w0, w1) + K64[++ctr] + _wordBuffer[ctr];
+            w6 += w2;
+            w2 += Sum0(w3) + Maj(w3, w4, w5);
+            w1 += Sum1(w6) + Ch(w6, w7, w0) + K64[++ctr] + _wordBuffer[ctr];
+            w5 += w1;
+            w1 += Sum0(w2) + Maj(w2, w3, w4);
+            w0 += Sum1(w5) + Ch(w5, w6, w7) + K64[++ctr] + _wordBuffer[ctr];
+            w4 += w0;
+            w0 += Sum0(w1) + Maj(w1, w2, w3);
+
+            w7 += Sum1(w4) + Ch(w4, w5, w6) + K64[++ctr] + _wordBuffer[ctr];
+            w3 += w7;
+            w7 += Sum0(w0) + Maj(w0, w1, w2);
+            w6 += Sum1(w3) + Ch(w3, w4, w5) + K64[++ctr] + _wordBuffer[ctr];
+            w2 += w6;
+            w6 += Sum0(w7) + Maj(w7, w0, w1);
+            w5 += Sum1(w2) + Ch(w2, w3, w4) + K64[++ctr] + _wordBuffer[ctr];
+            w1 += w5;
+            w5 += Sum0(w6) + Maj(w6, w7, w0);
+            w4 += Sum1(w1) + Ch(w1, w2, w3) + K64[++ctr] + _wordBuffer[ctr];
+            w0 += w4;
+            w4 += Sum0(w5) + Maj(w5, w6, w7);
+            w3 += Sum1(w0) + Ch(w0, w1, w2) + K64[++ctr] + _wordBuffer[ctr];
+            w7 += w3;
+            w3 += Sum0(w4) + Maj(w4, w5, w6);
+            w2 += Sum1(w7) + Ch(w7, w0, w1) + K64[++ctr] + _wordBuffer[ctr];
+            w6 += w2;
+            w2 += Sum0(w3) + Maj(w3, w4, w5);
+            w1 += Sum1(w6) + Ch(w6, w7, w0) + K64[++ctr] + _wordBuffer[ctr];
+            w5 += w1;
+            w1 += Sum0(w2) + Maj(w2, w3, w4);
+            w0 += Sum1(w5) + Ch(w5, w6, w7) + K64[++ctr] + _wordBuffer[ctr];
+            w4 += w0;
+            w0 += Sum0(w1) + Maj(w1, w2, w3);
+
+            w7 += Sum1(w4) + Ch(w4, w5, w6) + K64[++ctr] + _wordBuffer[ctr];
+            w3 += w7;
+            w7 += Sum0(w0) + Maj(w0, w1, w2);
+            w6 += Sum1(w3) + Ch(w3, w4, w5) + K64[++ctr] + _wordBuffer[ctr];
+            w2 += w6;
+            w6 += Sum0(w7) + Maj(w7, w0, w1);
+            w5 += Sum1(w2) + Ch(w2, w3, w4) + K64[++ctr] + _wordBuffer[ctr];
+            w1 += w5;
+            w5 += Sum0(w6) + Maj(w6, w7, w0);
+            w4 += Sum1(w1) + Ch(w1, w2, w3) + K64[++ctr] + _wordBuffer[ctr];
+            w0 += w4;
+            w4 += Sum0(w5) + Maj(w5, w6, w7);
+            w3 += Sum1(w0) + Ch(w0, w1, w2) + K64[++ctr] + _wordBuffer[ctr];
+            w7 += w3;
+            w3 += Sum0(w4) + Maj(w4, w5, w6);
+            w2 += Sum1(w7) + Ch(w7, w0, w1) + K64[++ctr] + _wordBuffer[ctr];
+            w6 += w2;
+            w2 += Sum0(w3) + Maj(w3, w4, w5);
+            w1 += Sum1(w6) + Ch(w6, w7, w0) + K64[++ctr] + _wordBuffer[ctr];
+            w5 += w1;
+            w1 += Sum0(w2) + Maj(w2, w3, w4);
+            w0 += Sum1(w5) + Ch(w5, w6, w7) + K64[++ctr] + _wordBuffer[ctr];
+            w4 += w0;
+            w0 += Sum0(w1) + Maj(w1, w2, w3);
+
+            w7 += Sum1(w4) + Ch(w4, w5, w6) + K64[++ctr] + _wordBuffer[ctr];
+            w3 += w7;
+            w7 += Sum0(w0) + Maj(w0, w1, w2);
+            w6 += Sum1(w3) + Ch(w3, w4, w5) + K64[++ctr] + _wordBuffer[ctr];
+            w2 += w6;
+            w6 += Sum0(w7) + Maj(w7, w0, w1);
+            w5 += Sum1(w2) + Ch(w2, w3, w4) + K64[++ctr] + _wordBuffer[ctr];
+            w1 += w5;
+            w5 += Sum0(w6) + Maj(w6, w7, w0);
+            w4 += Sum1(w1) + Ch(w1, w2, w3) + K64[++ctr] + _wordBuffer[ctr];
+            w0 += w4;
+            w4 += Sum0(w5) + Maj(w5, w6, w7);
+            w3 += Sum1(w0) + Ch(w0, w1, w2) + K64[++ctr] + _wordBuffer[ctr];
+            w7 += w3;
+            w3 += Sum0(w4) + Maj(w4, w5, w6);
+            w2 += Sum1(w7) + Ch(w7, w0, w1) + K64[++ctr] + _wordBuffer[ctr];
+            w6 += w2;
+            w2 += Sum0(w3) + Maj(w3, w4, w5);
+            w1 += Sum1(w6) + Ch(w6, w7, w0) + K64[++ctr] + _wordBuffer[ctr];
+            w5 += w1;
+            w1 += Sum0(w2) + Maj(w2, w3, w4);
+            w0 += Sum1(w5) + Ch(w5, w6, w7) + K64[++ctr] + _wordBuffer[ctr];
+            w4 += w0;
+            w0 += Sum0(w1) + Maj(w1, w2, w3);
+
+            w7 += Sum1(w4) + Ch(w4, w5, w6) + K64[++ctr] + _wordBuffer[ctr];
+            w3 += w7;
+            w7 += Sum0(w0) + Maj(w0, w1, w2);
+            w6 += Sum1(w3) + Ch(w3, w4, w5) + K64[++ctr] + _wordBuffer[ctr];
+            w2 += w6;
+            w6 += Sum0(w7) + Maj(w7, w0, w1);
+            w5 += Sum1(w2) + Ch(w2, w3, w4) + K64[++ctr] + _wordBuffer[ctr];
+            w1 += w5;
+            w5 += Sum0(w6) + Maj(w6, w7, w0);
+            w4 += Sum1(w1) + Ch(w1, w2, w3) + K64[++ctr] + _wordBuffer[ctr];
+            w0 += w4;
+            w4 += Sum0(w5) + Maj(w5, w6, w7);
+            w3 += Sum1(w0) + Ch(w0, w1, w2) + K64[++ctr] + _wordBuffer[ctr];
+            w7 += w3;
+            w3 += Sum0(w4) + Maj(w4, w5, w6);
+            w2 += Sum1(w7) + Ch(w7, w0, w1) + K64[++ctr] + _wordBuffer[ctr];
+            w6 += w2;
+            w2 += Sum0(w3) + Maj(w3, w4, w5);
+            w1 += Sum1(w6) + Ch(w6, w7, w0) + K64[++ctr] + _wordBuffer[ctr];
+            w5 += w1;
+            w1 += Sum0(w2) + Maj(w2, w3, w4);
+            w0 += Sum1(w5) + Ch(w5, w6, w7) + K64[++ctr] + _wordBuffer[ctr];
+            w4 += w0;
+            w0 += Sum0(w1) + Maj(w1, w2, w3);
+
+            w7 += Sum1(w4) + Ch(w4, w5, w6) + K64[++ctr] + _wordBuffer[ctr];
+            w3 += w7;
+            w7 += Sum0(w0) + Maj(w0, w1, w2);
+            w6 += Sum1(w3) + Ch(w3, w4, w5) + K64[++ctr] + _wordBuffer[ctr];
+            w2 += w6;
+            w6 += Sum0(w7) + Maj(w7, w0, w1);
+            w5 += Sum1(w2) + Ch(w2, w3, w4) + K64[++ctr] + _wordBuffer[ctr];
+            w1 += w5;
+            w5 += Sum0(w6) + Maj(w6, w7, w0);
+            w4 += Sum1(w1) + Ch(w1, w2, w3) + K64[++ctr] + _wordBuffer[ctr];
+            w0 += w4;
+            w4 += Sum0(w5) + Maj(w5, w6, w7);
+            w3 += Sum1(w0) + Ch(w0, w1, w2) + K64[++ctr] + _wordBuffer[ctr];
+            w7 += w3;
+            w3 += Sum0(w4) + Maj(w4, w5, w6);
+            w2 += Sum1(w7) + Ch(w7, w0, w1) + K64[++ctr] + _wordBuffer[ctr];
+            w6 += w2;
+            w2 += Sum0(w3) + Maj(w3, w4, w5);
+            w1 += Sum1(w6) + Ch(w6, w7, w0) + K64[++ctr] + _wordBuffer[ctr];
+            w5 += w1;
+            w1 += Sum0(w2) + Maj(w2, w3, w4);
+            w0 += Sum1(w5) + Ch(w5, w6, w7) + K64[++ctr] + _wordBuffer[ctr];
+            w4 += w0;
+            w0 += Sum0(w1) + Maj(w1, w2, w3);
+
+            w7 += Sum1(w4) + Ch(w4, w5, w6) + K64[++ctr] + _wordBuffer[ctr];
+            w3 += w7;
+            w7 += Sum0(w0) + Maj(w0, w1, w2);
+            w6 += Sum1(w3) + Ch(w3, w4, w5) + K64[++ctr] + _wordBuffer[ctr];
+            w2 += w6;
+            w6 += Sum0(w7) + Maj(w7, w0, w1);
+            w5 += Sum1(w2) + Ch(w2, w3, w4) + K64[++ctr] + _wordBuffer[ctr];
+            w1 += w5;
+            w5 += Sum0(w6) + Maj(w6, w7, w0);
+            w4 += Sum1(w1) + Ch(w1, w2, w3) + K64[++ctr] + _wordBuffer[ctr];
+            w0 += w4;
+            w4 += Sum0(w5) + Maj(w5, w6, w7);
+            w3 += Sum1(w0) + Ch(w0, w1, w2) + K64[++ctr] + _wordBuffer[ctr];
+            w7 += w3;
+            w3 += Sum0(w4) + Maj(w4, w5, w6);
+            w2 += Sum1(w7) + Ch(w7, w0, w1) + K64[++ctr] + _wordBuffer[ctr];
+            w6 += w2;
+            w2 += Sum0(w3) + Maj(w3, w4, w5);
+            w1 += Sum1(w6) + Ch(w6, w7, w0) + K64[++ctr] + _wordBuffer[ctr];
+            w5 += w1;
+            w1 += Sum0(w2) + Maj(w2, w3, w4);
+            w0 += Sum1(w5) + Ch(w5, w6, w7) + K64[++ctr] + _wordBuffer[ctr];
+            w4 += w0;
+            w0 += Sum0(w1) + Maj(w1, w2, w3);
+
+            _H0 += w0;
             _H1 += w1;
             _H2 += w2;
             _H3 += w3;
@@ -387,18 +672,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 			Array.Clear(_wordBuffer, 0, 16);
 		}
 
-        private void ProcessLength(Int64 LowWord, Int64 HiWord)
+        private void ProcessLength(long LowWord, long HiWord)
         {
             if (_wordOffset > 14)
                 ProcessBlock();
 
-            _wordBuffer[14] = (UInt64)HiWord;
-            _wordBuffer[15] = (UInt64)LowWord;
+            _wordBuffer[14] = (ulong)HiWord;
+            _wordBuffer[15] = (ulong)LowWord;
         }
 
         private void ProcessWord(byte[] Input, int InOffset)
         {
-            _wordBuffer[_wordOffset] = BEToUInt64(Input, InOffset);
+            _wordBuffer[_wordOffset] = IntUtils.BytesToBe64(Input, InOffset);
 
             if (++_wordOffset == 16)
                 ProcessBlock();
@@ -406,71 +691,39 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         #endregion
 
         #region Helpers
-        private static UInt64 BEToUInt64(byte[] Input, int InOffset)
-        {
-            UInt32 hi = BEToUInt32(Input, InOffset);
-            UInt32 lo = BEToUInt32(Input, InOffset + 4);
-
-            return ((UInt64)hi << 32) | (UInt64)lo;
-        }
-
-        private static UInt32 BEToUInt32(byte[] Input, int InOffset)
-        {
-            UInt32 n = (UInt32)Input[InOffset] << 24;
-            n |= (UInt32)Input[++InOffset] << 16;
-            n |= (UInt32)Input[++InOffset] << 8;
-            n |= (UInt32)Input[++InOffset];
-
-            return n;
-        }
-
-        private static UInt64 Ch(UInt64 X, UInt64 Y, UInt64 Z)
+        private static ulong Ch(ulong X, ulong Y, ulong Z)
         {
             return (X & Y) ^ (~X & Z);
         }
 
-        private static UInt64 Maj(UInt64 X, UInt64 Y, UInt64 Z)
+        private static ulong Maj(ulong X, ulong Y, ulong Z)
         {
             return (X & Y) ^ (X & Z) ^ (Y & Z);
         }
 
-        private static UInt64 Sigma0(UInt64 X)
+        private static ulong Sigma0(ulong X)
         {
             return ((X << 63) | (X >> 1)) ^ ((X << 56) | (X >> 8)) ^ (X >> 7);
         }
 
-        private static UInt64 Sigma1(UInt64 X)
+        private static ulong Sigma1(ulong X)
         {
             return ((X << 45) | (X >> 19)) ^ ((X << 3) | (X >> 61)) ^ (X >> 6);
         }
 
-        private static UInt64 Sum0(UInt64 X)
+        private static ulong Sum0(ulong X)
         {
             return ((X << 36) | (X >> 28)) ^ ((X << 30) | (X >> 34)) ^ ((X << 25) | (X >> 39));
         }
 
-        private static UInt64 Sum1(UInt64 X)
+        private static ulong Sum1(ulong X)
         {
             return ((X << 50) | (X >> 14)) ^ ((X << 46) | (X >> 18)) ^ ((X << 23) | (X >> 41));
-        }
-
-        private static void UInt64ToBE(UInt64 Input, byte[] Output, int OutOffset)
-        {
-            UInt32ToBE((UInt32)(Input >> 32), Output, OutOffset);
-            UInt32ToBE((UInt32)(Input), Output, OutOffset + 4);
-        }
-
-        private static void UInt32ToBE(UInt32 Input, byte[] Output, int OutOffset)
-        {
-            Output[OutOffset] = (byte)(Input >> 24);
-            Output[++OutOffset] = (byte)(Input >> 16);
-            Output[++OutOffset] = (byte)(Input >> 8);
-            Output[++OutOffset] = (byte)(Input);
         }
         #endregion
 
         #region Constant Tables
-        internal static readonly UInt64[] K =
+        internal static readonly ulong[] K64 =
 		{
 			0x428a2f98d728ae22, 0x7137449123ef65cd, 0xb5c0fbcfec4d3b2f, 0xe9b5dba58189dbbc,
 			0x3956c25bf348b538, 0x59f111f1b605d019, 0x923f82a4af194f9b, 0xab1c5ed5da6d8118,

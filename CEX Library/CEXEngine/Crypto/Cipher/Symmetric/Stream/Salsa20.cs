@@ -103,14 +103,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         #endregion
 
         #region Fields
-        private UInt32[] _ctrVector = new UInt32[2];
+        private uint[] _ctrVector = new uint[2];
         private byte[] _dstCode = null;
         private bool _isDisposed = false;
         private bool _isInitialized = false;
         private bool _isParallel = false;
         private int _parallelBlockSize = PARALLEL_DEFBLOCK;
         private int _rndCount = ROUNDS20;
-        private UInt32[] _wrkState = new UInt32[14];
+        private uint[] _wrkState = new uint[14];
         private ParallelOptions _parallelOption = null;
         #endregion
 
@@ -551,7 +551,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
             IntUtils.Le32ToBytes(X15 + _wrkState[++ctr], Output, OutOffset);
         }
 
-        private void Generate(int Size, UInt32[] Counter, byte[] Output, int OutOffset)
+        private void Generate(int Size, uint[] Counter, byte[] Output, int OutOffset)
         {
             int aln = Size - (Size % BLOCK_SIZE);
             int ctr = 0;
@@ -731,13 +731,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         #endregion
 
         #region Helpers
-        private void Increment(UInt32[] Counter)
+        private void Increment(uint[] Counter)
         {
             if (++Counter[0] == 0)
                 ++Counter[1];
         }
 
-        private UInt32[] Increase(UInt32[] Counter, int Size)
+        private uint[] Increase(uint[] Counter, int Size)
         {
             uint[] copy = new uint[Counter.Length];
             Array.Copy(Counter, 0, copy, 0, Counter.Length);

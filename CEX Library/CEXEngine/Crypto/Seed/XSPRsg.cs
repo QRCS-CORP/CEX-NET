@@ -81,8 +81,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         private uint _stateOffset = 0;
         private ulong[] _stateSeed;
         private ulong[] _wrkBuffer;
-        private static readonly UInt64[] JMP128 = new UInt64[] { 0x8a5cd789635d2dffUL, 0x121fd2155c472f96UL };
-        private static readonly UInt64[] JMP1024 = new UInt64[] {
+        private static readonly ulong[] JMP128 = new ulong[] { 0x8a5cd789635d2dffUL, 0x121fd2155c472f96UL };
+        private static readonly ulong[] JMP1024 = new ulong[] {
             0x84242f96eca9c41dUL, 0xa3c65b8776f96855UL, 0x5b34a39f070b5837UL, 0x4489affce4f31a1eUL,
             0x2ffeeb0a48316f40UL, 0xdc2d9891fe68c022UL, 0x3659132bb12fea70UL, 0xaac17d8efa43cab8UL,
             0xc4cb815590989b13UL, 0x5ee975283d71c93bUL, 0x691548c86c1bd540UL, 0x7910c41d10a1e6a5UL,

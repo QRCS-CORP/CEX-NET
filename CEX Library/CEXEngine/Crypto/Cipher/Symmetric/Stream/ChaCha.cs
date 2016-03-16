@@ -102,7 +102,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         #endregion
 
         #region Fields
-        private UInt32[] _ctrVector = new UInt32[2];
+        private uint[] _ctrVector = new uint[2];
         private byte[] _dstCode = null;
         private bool _isDisposed = false;
         private bool _isInitialized = false;
@@ -110,8 +110,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         private int _parallelBlockSize = PARALLEL_DEFBLOCK;
         private ParallelOptions _parallelOption = null;
         private int _rndCount = ROUNDS20;
-        private UInt32[] _wrkBuffer = new UInt32[STATE_SIZE];
-        private UInt32[] _wrkState = new UInt32[14];
+        private uint[] _wrkBuffer = new uint[STATE_SIZE];
+        private uint[] _wrkState = new uint[14];
         #endregion
 
         #region Properties
@@ -473,25 +473,25 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         #endregion
 
         #region Transform
-        private void ChaChaCore(byte[] Output, int OutOffset, UInt32[] Counter)
+        private void ChaChaCore(byte[] Output, int OutOffset, uint[] Counter)
         {
             int ctr = 0;
-            UInt32 X0 = _wrkState[ctr];
-            UInt32 X1 = _wrkState[++ctr];
-            UInt32 X2 = _wrkState[++ctr];
-            UInt32 X3 = _wrkState[++ctr];
-            UInt32 X4 = _wrkState[++ctr];
-            UInt32 X5 = _wrkState[++ctr];
-            UInt32 X6 = _wrkState[++ctr];
-            UInt32 X7 = _wrkState[++ctr];
-            UInt32 X8 = _wrkState[++ctr];
-            UInt32 X9 = _wrkState[++ctr];
-            UInt32 X10 = _wrkState[++ctr];
-            UInt32 X11 = _wrkState[++ctr];
-            UInt32 X12 = Counter[0];
-            UInt32 X13 = Counter[1];
-            UInt32 X14 = _wrkState[++ctr];
-            UInt32 X15 = _wrkState[++ctr];
+            uint X0 = _wrkState[ctr];
+            uint X1 = _wrkState[++ctr];
+            uint X2 = _wrkState[++ctr];
+            uint X3 = _wrkState[++ctr];
+            uint X4 = _wrkState[++ctr];
+            uint X5 = _wrkState[++ctr];
+            uint X6 = _wrkState[++ctr];
+            uint X7 = _wrkState[++ctr];
+            uint X8 = _wrkState[++ctr];
+            uint X9 = _wrkState[++ctr];
+            uint X10 = _wrkState[++ctr];
+            uint X11 = _wrkState[++ctr];
+            uint X12 = Counter[0];
+            uint X13 = Counter[1];
+            uint X14 = _wrkState[++ctr];
+            uint X15 = _wrkState[++ctr];
 
             ctr = Rounds;
             while (ctr != 0)
@@ -581,7 +581,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
 	        IntUtils.Le32ToBytes(X15 + _wrkState[++ctr], Output, OutOffset);
         }
 
-        private void Generate(int Size, UInt32[] Counter, byte[] Output, int OutOffset)
+        private void Generate(int Size, uint[] Counter, byte[] Output, int OutOffset)
         {
             int aln = Size - (Size % BLOCK_SIZE);
 	        int ctr = 0;
@@ -761,13 +761,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         #endregion
 
         #region Helpers
-        private void Increment(UInt32[] Counter)
+        private void Increment(uint[] Counter)
         {
             if (++Counter[0] == 0)
                 ++Counter[1];
         }
 
-        private UInt32[] Increase(UInt32[] Counter, int Size)
+        private uint[] Increase(uint[] Counter, int Size)
         {
             uint[] copy = new uint[Counter.Length];
             Array.Copy(Counter, 0, copy, 0, Counter.Length);

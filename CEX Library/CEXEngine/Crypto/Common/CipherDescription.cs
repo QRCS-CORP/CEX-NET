@@ -74,43 +74,43 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <summary>
         /// The Cryptographic <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">Engine</see> type
         /// </summary>
-        public Int32 EngineType;
+        public int EngineType;
         /// <summary>
         /// The cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeySizes">Key Size</see>
         /// </summary>
-        public Int32 KeySize;
+        public int KeySize;
         /// <summary>
         /// Size of the cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.IVSizes">Initialization Vector</see>
         /// </summary>
-        public Int32 IvSize;
+        public int IvSize;
         /// <summary>
         /// The type of <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.CipherModes">Cipher Mode</see>
         /// </summary>
-        public Int32 CipherType;
+        public int CipherType;
         /// <summary>
         /// The type of cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.PaddingModes">Padding Mode</see>
         /// </summary>
-        public Int32 PaddingType;
+        public int PaddingType;
         /// <summary>
         /// The cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockSizes">Block Size</see>
         /// </summary>
-        public Int32 BlockSize;
+        public int BlockSize;
         /// <summary>
         /// The number of diffusion <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts">Rounds</see>
         /// </summary>
-        public Int32 RoundCount;
+        public int RoundCount;
         /// <summary>
         /// The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to power the key schedule Key Derivation Function in HX and M series ciphers
         /// </summary>
-        public Int32 KdfEngine;
+        public int KdfEngine;
         /// <summary>
         /// The size of the HMAC message authentication code; a zeroed parameter means authentication is not enabled with this key
         /// </summary>
-        public Int32 MacSize;
+        public int MacSize;
         /// <summary>
         /// The HMAC <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to authenticate a message file encrypted with this key
         /// </summary>
-        public Int32 MacEngine;
+        public int MacEngine;
         #endregion
 
         #region Constructor
@@ -133,16 +133,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         public CipherDescription(SymmetricEngines EngineType, int KeySize, IVSizes IvSize, CipherModes CipherType, PaddingModes PaddingType,
             BlockSizes BlockSize, RoundCounts RoundCount, Digests KdfEngine = Digests.SHA512, int MacSize = 64, Digests MacEngine = Digests.SHA512)
         {
-            this.EngineType = (Int32)EngineType;
+            this.EngineType = (int)EngineType;
             this.KeySize = KeySize;
-            this.IvSize = (Int32)IvSize;
-            this.CipherType = (Int32)CipherType;
-            this.PaddingType = (Int32)PaddingType;
-            this.BlockSize = (Int32)BlockSize;
-            this.RoundCount = (Int32)RoundCount;
-            this.KdfEngine = (Int32)KdfEngine;
+            this.IvSize = (int)IvSize;
+            this.CipherType = (int)CipherType;
+            this.PaddingType = (int)PaddingType;
+            this.BlockSize = (int)BlockSize;
+            this.RoundCount = (int)RoundCount;
+            this.KdfEngine = (int)KdfEngine;
             this.MacSize = MacSize;
-            this.MacEngine = (Int32)MacEngine; 
+            this.MacEngine = (int)MacEngine; 
         }
 
         /// <summary>

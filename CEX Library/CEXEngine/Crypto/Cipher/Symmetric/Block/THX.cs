@@ -127,15 +127,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         private const int BLOCK_SIZE = 16;
         private const int ROUNDS16 = 16;
         private const int DEFAULT_SUBKEYS = 40;
-        private const UInt32 GF256_FDBK = 0x169; // primitive polynomial for GF(256)
-        private const UInt32 GF256_FDBK_2 = GF256_FDBK / 2;
-        private const UInt32 GF256_FDBK_4 = GF256_FDBK / 4;
+        private const uint GF256_FDBK = 0x169; // primitive polynomial for GF(256)
+        private const uint GF256_FDBK_2 = GF256_FDBK / 2;
+        private const uint GF256_FDBK_4 = GF256_FDBK / 4;
         private const int KEY_BITS = 256;
         private const int LEGAL_KEYS = 10;
         private const int MAX_STDKEY = 64;
-        private const UInt32 RS_GF_FDBK = 0x14D; // field generator
-        private const UInt32 SK_STEP = 0x02020202;
-        private const UInt32 SK_BUMP = 0x01010101;
+        private const uint RS_GF_FDBK = 0x14D; // field generator
+        private const uint SK_STEP = 0x02020202;
+        private const uint SK_BUMP = 0x01010101;
         private const int SK_ROTL = 9;
         private const int SBOX_SIZE = 1024;
         #endregion
@@ -145,14 +145,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         // configurable nonce can create a unique distribution, can be byte(0)
         private byte[] _hkdfInfo = System.Text.Encoding.ASCII.GetBytes("THX version 1 information string");
         private IDigest _keyEngine;
-        private UInt32[] _expKey;
+        private uint[] _expKey;
         private bool _isDisposed = false;
         private bool _isEncryption = false;
         private int _ikmSize = 0;
         private bool _isInitialized = false;
         private Digests _keyEngineType;
         private int[] _legalKeySizes = new int[LEGAL_KEYS];
-        private UInt32[] _sprBox = new UInt32[SBOX_SIZE];
+        private uint[] _sprBox = new uint[SBOX_SIZE];
         #endregion
 
         #region Properties
@@ -447,7 +447,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         #endregion
 
         #region Key Schedule
-        private UInt32[] ExpandKey(byte[] Key)
+        private uint[] ExpandKey(byte[] Key)
         {
             if (Key.Length > MAX_STDKEY)
             {
@@ -461,7 +461,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             }
         }
 
-        private UInt32[] SecureExpand(byte[] Key)
+        private uint[] SecureExpand(byte[] Key)
         {
             uint Y0, Y1, Y2, Y3;
             int keyCtr = 0;
@@ -513,27 +513,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             {
                 Y0 = Y1 = Y2 = Y3 = (uint)keyCtr;
 
-                Y0 = (uint)(byte)Q1[Y0] ^ sbKey[12];
-                Y1 = (uint)(byte)Q0[Y1] ^ sbKey[13];
-                Y2 = (uint)(byte)Q0[Y2] ^ sbKey[14];
-                Y3 = (uint)(byte)Q1[Y3] ^ sbKey[15];
+                Y0 = (uint)Q1[Y0] ^ sbKey[12];
+                Y1 = (uint)Q0[Y1] ^ sbKey[13];
+                Y2 = (uint)Q0[Y2] ^ sbKey[14];
+                Y3 = (uint)Q1[Y3] ^ sbKey[15];
 
-                Y0 = (uint)(byte)Q1[Y0] ^ sbKey[8];
-                Y1 = (uint)(byte)Q1[Y1] ^ sbKey[9];
-                Y2 = (uint)(byte)Q0[Y2] ^ sbKey[10];
-                Y3 = (uint)(byte)Q0[Y3] ^ sbKey[11];
+                Y0 = (uint)Q1[Y0] ^ sbKey[8];
+                Y1 = (uint)Q1[Y1] ^ sbKey[9];
+                Y2 = (uint)Q0[Y2] ^ sbKey[10];
+                Y3 = (uint)Q0[Y3] ^ sbKey[11];
 
                 // sbox members as MDS matrix multiplies 
-                _sprBox[keyCtr * 2] = MDS0[(byte)Q0[(byte)Q0[Y0] ^ sbKey[4]] ^ sbKey[0]];
-                _sprBox[keyCtr * 2 + 1] = MDS1[(byte)Q0[Q1[Y1] ^ sbKey[5]] ^ sbKey[1]];
-                _sprBox[keyCtr * 2 + 0x200] = MDS2[(byte)Q1[(byte)Q0[Y2] ^ sbKey[6]] ^ sbKey[2]];
-                _sprBox[keyCtr++ * 2 + 0x201] = MDS3[(byte)Q1[(byte)Q1[Y3] ^ sbKey[7]] ^ sbKey[3]];
+                _sprBox[keyCtr * 2] = MDS0[Q0[Q0[Y0] ^ sbKey[4]] ^ sbKey[0]];
+                _sprBox[keyCtr * 2 + 1] = MDS1[Q0[Q1[Y1] ^ sbKey[5]] ^ sbKey[1]];
+                _sprBox[keyCtr * 2 + 0x200] = MDS2[Q1[Q0[Y2] ^ sbKey[6]] ^ sbKey[2]];
+                _sprBox[keyCtr++ * 2 + 0x201] = MDS3[Q1[Q1[Y3] ^ sbKey[7]] ^ sbKey[3]];
             }
 
             return expKey;
         }
 
-        private UInt32[] StandardExpand(byte[] Key)
+        private uint[] StandardExpand(byte[] Key)
         {
             uint Y0, Y1, Y2, Y3;
             int keyCtr = 0;
@@ -567,11 +567,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                     Q = (uint)keyCtr * SK_STEP;
                     A = Mix32(Q, eKm, k64Cnt);
                     B = Mix32(Q + SK_BUMP, oKm, k64Cnt);
-                    B = B << 8 | (UInt32)(B >> 24);
+                    B = B << 8 | (uint)(B >> 24);
                     A += B;
                     expKey[keyCtr * 2] = A;
                     A += B;
-                    expKey[keyCtr * 2 + 1] = A << SK_ROTL | (UInt32)(A >> (32 - SK_ROTL));
+                    expKey[keyCtr * 2 + 1] = A << SK_ROTL | (uint)(A >> (32 - SK_ROTL));
                 }
 
                 Y0 = Y1 = Y2 = Y3 = (uint)keyCtr;
@@ -579,48 +579,48 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 // 512 key
                 if (Key.Length == 64)
                 {
-                    Y0 = (uint)(byte)Q1[Y0] ^ sbKey[28];
-                    Y1 = (uint)(byte)Q0[Y1] ^ sbKey[29];
-                    Y2 = (uint)(byte)Q0[Y2] ^ sbKey[30];
-                    Y3 = (uint)(byte)Q1[Y3] ^ sbKey[31];
+                    Y0 = (uint)Q1[Y0] ^ sbKey[28];
+                    Y1 = (uint)Q0[Y1] ^ sbKey[29];
+                    Y2 = (uint)Q0[Y2] ^ sbKey[30];
+                    Y3 = (uint)Q1[Y3] ^ sbKey[31];
 
-                    Y0 = (uint)(byte)Q1[Y0] ^ sbKey[24];
-                    Y1 = (uint)(byte)Q1[Y1] ^ sbKey[25];
-                    Y2 = (uint)(byte)Q0[Y2] ^ sbKey[26];
-                    Y3 = (uint)(byte)Q0[Y3] ^ sbKey[27];
+                    Y0 = (uint)Q1[Y0] ^ sbKey[24];
+                    Y1 = (uint)Q1[Y1] ^ sbKey[25];
+                    Y2 = (uint)Q0[Y2] ^ sbKey[26];
+                    Y3 = (uint)Q0[Y3] ^ sbKey[27];
 
-                    Y0 = (uint)(byte)Q0[Y0] ^ sbKey[20];
-                    Y1 = (uint)(byte)Q1[Y1] ^ sbKey[21];
-                    Y2 = (uint)(byte)Q1[Y2] ^ sbKey[22];
-                    Y3 = (uint)(byte)Q0[Y3] ^ sbKey[23];
+                    Y0 = (uint)Q0[Y0] ^ sbKey[20];
+                    Y1 = (uint)Q1[Y1] ^ sbKey[21];
+                    Y2 = (uint)Q1[Y2] ^ sbKey[22];
+                    Y3 = (uint)Q0[Y3] ^ sbKey[23];
 
-                    Y0 = (uint)(byte)Q0[Y0] ^ sbKey[16];
-                    Y1 = (uint)(byte)Q0[Y1] ^ sbKey[17];
-                    Y2 = (uint)(byte)Q1[Y2] ^ sbKey[18];
-                    Y3 = (uint)(byte)Q1[Y3] ^ sbKey[19];
+                    Y0 = (uint)Q0[Y0] ^ sbKey[16];
+                    Y1 = (uint)Q0[Y1] ^ sbKey[17];
+                    Y2 = (uint)Q1[Y2] ^ sbKey[18];
+                    Y3 = (uint)Q1[Y3] ^ sbKey[19];
                 }
                 // 256 key
                 if (Key.Length > 24)
                 {
-                    Y0 = (uint)(byte)Q1[Y0] ^ sbKey[12];
-                    Y1 = (uint)(byte)Q0[Y1] ^ sbKey[13];
-                    Y2 = (uint)(byte)Q0[Y2] ^ sbKey[14];
-                    Y3 = (uint)(byte)Q1[Y3] ^ sbKey[15];
+                    Y0 = (uint)Q1[Y0] ^ sbKey[12];
+                    Y1 = (uint)Q0[Y1] ^ sbKey[13];
+                    Y2 = (uint)Q0[Y2] ^ sbKey[14];
+                    Y3 = (uint)Q1[Y3] ^ sbKey[15];
                 }
                 // 192 key
                 if (Key.Length > 16)
                 {
-                    Y0 = (uint)(byte)Q1[Y0] ^ sbKey[8];
-                    Y1 = (uint)(byte)Q1[Y1] ^ sbKey[9];
-                    Y2 = (uint)(byte)Q0[Y2] ^ sbKey[10];
-                    Y3 = (uint)(byte)Q0[Y3] ^ sbKey[11];
+                    Y0 = (uint)Q1[Y0] ^ sbKey[8];
+                    Y1 = (uint)Q1[Y1] ^ sbKey[9];
+                    Y2 = (uint)Q0[Y2] ^ sbKey[10];
+                    Y3 = (uint)Q0[Y3] ^ sbKey[11];
                 }
 
                 // sbox members as MDS matrix multiplies 
-                _sprBox[keyCtr * 2] = MDS0[(byte)Q0[(byte)Q0[Y0] ^ sbKey[4]] ^ sbKey[0]];
-                _sprBox[keyCtr * 2 + 1] = MDS1[(byte)Q0[Q1[Y1] ^ sbKey[5]] ^ sbKey[1]];
-                _sprBox[(keyCtr * 2) + 0x200] = MDS2[(byte)Q1[(byte)Q0[Y2] ^ sbKey[6]] ^ sbKey[2]];
-                _sprBox[keyCtr++ * 2 + 0x201] = MDS3[(byte)Q1[(byte)Q1[Y3] ^ sbKey[7]] ^ sbKey[3]];
+                _sprBox[keyCtr * 2] = MDS0[Q0[Q0[Y0] ^ sbKey[4]] ^ sbKey[0]];
+                _sprBox[keyCtr * 2 + 1] = MDS1[Q0[Q1[Y1] ^ sbKey[5]] ^ sbKey[1]];
+                _sprBox[(keyCtr * 2) + 0x200] = MDS2[Q1[Q0[Y2] ^ sbKey[6]] ^ sbKey[2]];
+                _sprBox[keyCtr++ * 2 + 0x201] = MDS3[Q1[Q1[Y3] ^ sbKey[7]] ^ sbKey[3]];
             }
 
             return expKey;
@@ -632,11 +632,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         {
             const uint LRD = 8;
             int keyCtr = 4;
-            UInt32 X2 = IntUtils.BytesToLe32(Input, InOffset) ^ _expKey[keyCtr];
-            UInt32 X3 = IntUtils.BytesToLe32(Input, InOffset + 4) ^ _expKey[++keyCtr];
-            UInt32 X0 = IntUtils.BytesToLe32(Input, InOffset + 8) ^ _expKey[++keyCtr];
-            UInt32 X1 = IntUtils.BytesToLe32(Input, InOffset + 12) ^ _expKey[++keyCtr];
-            UInt32 T0, T1;
+            uint X2 = IntUtils.BytesToLe32(Input, InOffset) ^ _expKey[keyCtr];
+            uint X3 = IntUtils.BytesToLe32(Input, InOffset + 4) ^ _expKey[++keyCtr];
+            uint X0 = IntUtils.BytesToLe32(Input, InOffset + 8) ^ _expKey[++keyCtr];
+            uint X1 = IntUtils.BytesToLe32(Input, InOffset + 12) ^ _expKey[++keyCtr];
+            uint T0, T1;
 
             keyCtr = _expKey.Length;
             do
@@ -667,11 +667,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         {
             int LRD = _expKey.Length - 1;
             int keyCtr = 0;
-            UInt32 X0 = IntUtils.BytesToLe32(Input, InOffset) ^ _expKey[keyCtr];
-            UInt32 X1 = IntUtils.BytesToLe32(Input, InOffset + 4) ^ _expKey[++keyCtr];
-            UInt32 X2 = IntUtils.BytesToLe32(Input, InOffset + 8) ^ _expKey[++keyCtr];
-            UInt32 X3 = IntUtils.BytesToLe32(Input, InOffset + 12) ^ _expKey[++keyCtr];
-            UInt32 T0, T1;
+            uint X0 = IntUtils.BytesToLe32(Input, InOffset) ^ _expKey[keyCtr];
+            uint X1 = IntUtils.BytesToLe32(Input, InOffset + 4) ^ _expKey[++keyCtr];
+            uint X2 = IntUtils.BytesToLe32(Input, InOffset + 8) ^ _expKey[++keyCtr];
+            uint X3 = IntUtils.BytesToLe32(Input, InOffset + 12) ^ _expKey[++keyCtr];
+            uint T0, T1;
 
             keyCtr = 7;
             do
@@ -699,7 +699,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         #endregion
 
         #region Helpers
-        private UInt32 Fe0(UInt32 X)
+        private uint Fe0(uint X)
         {
             return _sprBox[2 * (byte)X] ^
                 _sprBox[2 * (byte)(X >> 8) + 0x001] ^
@@ -707,7 +707,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 _sprBox[2 * (byte)(X >> 24) + 0x201];
         }
 
-        private UInt32 Fe3(UInt32 X)
+        private uint Fe3(uint X)
         {
             return _sprBox[2 * (byte)(X >> 24)] ^
                 _sprBox[2 * (byte)X + 0x001] ^
@@ -771,23 +771,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             }
         }
 
-        private UInt32 LFSR1(UInt32 X)
+        private uint LFSR1(uint X)
         {
             return (X >> 1) ^ (((X & 0x01) != 0) ? GF256_FDBK_2 : 0);
         }
 
-        private UInt32 LFSR2(UInt32 X)
+        private uint LFSR2(uint X)
         {
             return (X >> 2) ^ (((X & 0x02) != 0) ? GF256_FDBK_2 : 0) ^
                 (((X & 0x01) != 0) ? GF256_FDBK_4 : 0);
         }
 
-        private UInt32 MDSEncode(UInt32 K0, UInt32 K1)
+        private uint MDSEncode(uint K0, uint K1)
         {
-            UInt32 b = ((K1 >> 24) & 0xff);
-            UInt32 g2 = ((b << 1) ^ ((b & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
-            UInt32 g3 = ((b >> 1) ^ ((b & 0x01) != 0 ? (RS_GF_FDBK >> 1) : 0)) ^ g2;
-            UInt32 rt = ((K1 << 8) ^ (g3 << 24) ^ (g2 << 16) ^ (g3 << 8) ^ b);
+            uint b = ((K1 >> 24) & 0xff);
+            uint g2 = ((b << 1) ^ ((b & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
+            uint g3 = ((b >> 1) ^ ((b & 0x01) != 0 ? (RS_GF_FDBK >> 1) : 0)) ^ g2;
+            uint rt = ((K1 << 8) ^ (g3 << 24) ^ (g2 << 16) ^ (g3 << 8) ^ b);
 
             b = ((rt >> 24) & 0xff);
             g2 = ((b << 1) ^ ((b & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
@@ -822,66 +822,66 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             return rt;
         }
 
-        private UInt32 Mix32(UInt32 X, UInt32[] Key, int Count)
+        private uint Mix32(uint X, uint[] Key, int Count)
         {
-            UInt32 Y0 = (byte)X;
-            UInt32 Y1 = (byte)(X >> 8);
-            UInt32 Y2 = (byte)(X >> 16);
-            UInt32 Y3 = (byte)(X >> 24);
+            uint Y0 = (byte)X;
+            uint Y1 = (byte)(X >> 8);
+            uint Y2 = (byte)(X >> 16);
+            uint Y3 = (byte)(X >> 24);
 
             // 512 key
             if (Count == 8)
             {
-                Y0 = (uint)(byte)Q1[Y0] ^ (byte)Key[7];
-                Y1 = (uint)(byte)Q0[Y1] ^ (byte)(Key[7] >> 8);
-                Y2 = (uint)(byte)Q0[Y2] ^ (byte)(Key[7] >> 16);
-                Y3 = (uint)(byte)Q1[Y3] ^ (byte)(Key[7] >> 24);
+                Y0 = (uint)Q1[Y0] ^ (byte)Key[7];
+                Y1 = (uint)Q0[Y1] ^ (byte)(Key[7] >> 8);
+                Y2 = (uint)Q0[Y2] ^ (byte)(Key[7] >> 16);
+                Y3 = (uint)Q1[Y3] ^ (byte)(Key[7] >> 24);
 
-                Y0 = (uint)(byte)Q1[Y0] ^ (byte)Key[6];
-                Y1 = (uint)(byte)Q1[Y1] ^ (byte)(Key[6] >> 8);
-                Y2 = (uint)(byte)Q0[Y2] ^ (byte)(Key[6] >> 16);
-                Y3 = (uint)(byte)Q0[Y3] ^ (byte)(Key[6] >> 24);
+                Y0 = (uint)Q1[Y0] ^ (byte)Key[6];
+                Y1 = (uint)Q1[Y1] ^ (byte)(Key[6] >> 8);
+                Y2 = (uint)Q0[Y2] ^ (byte)(Key[6] >> 16);
+                Y3 = (uint)Q0[Y3] ^ (byte)(Key[6] >> 24);
 
-                Y0 = (uint)(byte)Q0[Y0] ^ (byte)Key[5];
-                Y1 = (uint)(byte)Q1[Y1] ^ (byte)(Key[5] >> 8);
-                Y2 = (uint)(byte)Q1[Y2] ^ (byte)(Key[5] >> 16);
-                Y3 = (uint)(byte)Q0[Y3] ^ (byte)(Key[5] >> 24);
+                Y0 = (uint)Q0[Y0] ^ (byte)Key[5];
+                Y1 = (uint)Q1[Y1] ^ (byte)(Key[5] >> 8);
+                Y2 = (uint)Q1[Y2] ^ (byte)(Key[5] >> 16);
+                Y3 = (uint)Q0[Y3] ^ (byte)(Key[5] >> 24);
 
-                Y0 = (uint)(byte)Q0[Y0] ^ (byte)Key[4];
-                Y1 = (uint)(byte)Q0[Y1] ^ (byte)(Key[4] >> 8);
-                Y2 = (uint)(byte)Q1[Y2] ^ (byte)(Key[4] >> 16);
-                Y3 = (uint)(byte)Q1[Y3] ^ (byte)(Key[4] >> 24);
+                Y0 = (uint)Q0[Y0] ^ (byte)Key[4];
+                Y1 = (uint)Q0[Y1] ^ (byte)(Key[4] >> 8);
+                Y2 = (uint)Q1[Y2] ^ (byte)(Key[4] >> 16);
+                Y3 = (uint)Q1[Y3] ^ (byte)(Key[4] >> 24);
             }
             // 256 bit key
             if (Count > 3)
             {
-                Y0 = (uint)(byte)Q1[Y0] ^ (byte)Key[3];
-                Y1 = (uint)(byte)Q0[Y1] ^ (byte)(Key[3] >> 8);
-                Y2 = (uint)(byte)Q0[Y2] ^ (byte)(Key[3] >> 16);
-                Y3 = (uint)(byte)Q1[Y3] ^ (byte)(Key[3] >> 24);
+                Y0 = (uint)Q1[Y0] ^ (byte)Key[3];
+                Y1 = (uint)Q0[Y1] ^ (byte)(Key[3] >> 8);
+                Y2 = (uint)Q0[Y2] ^ (byte)(Key[3] >> 16);
+                Y3 = (uint)Q1[Y3] ^ (byte)(Key[3] >> 24);
             }
             // 192 bit key
             if (Count > 2)
             {
-                Y0 = (uint)(byte)Q1[Y0] ^ (byte)Key[2];
-                Y1 = (uint)(byte)Q1[Y1] ^ (byte)(Key[2] >> 8);
-                Y2 = (uint)(byte)Q0[Y2] ^ (byte)(Key[2] >> 16);
-                Y3 = (uint)(byte)Q0[Y3] ^ (byte)(Key[2] >> 24);
+                Y0 = (uint)Q1[Y0] ^ (byte)Key[2];
+                Y1 = (uint)Q1[Y1] ^ (byte)(Key[2] >> 8);
+                Y2 = (uint)Q0[Y2] ^ (byte)(Key[2] >> 16);
+                Y3 = (uint)Q0[Y3] ^ (byte)(Key[2] >> 24);
             }
 
             // return the MDS matrix multiply
-            return MDS0[(byte)Q0[(byte)Q0[Y0] ^ (byte)Key[1]] ^ (byte)Key[0]] ^
-                MDS1[(byte)Q0[(byte)Q1[Y1] ^ (byte)(Key[1] >> 8)] ^ (byte)(Key[0] >> 8)] ^
-                MDS2[(byte)Q1[(byte)Q0[Y2] ^ (byte)(Key[1] >> 16)] ^ (byte)(Key[0] >> 16)] ^
-                MDS3[(byte)Q1[(byte)Q1[Y3] ^ (byte)(Key[1] >> 24)] ^ (byte)(Key[0] >> 24)];
+            return MDS0[Q0[Q0[Y0] ^ (byte)Key[1]] ^ (byte)Key[0]] ^
+                MDS1[Q0[Q1[Y1] ^ (byte)(Key[1] >> 8)] ^ (byte)(Key[0] >> 8)] ^
+                MDS2[Q1[Q0[Y2] ^ (byte)(Key[1] >> 16)] ^ (byte)(Key[0] >> 16)] ^
+                MDS3[Q1[Q1[Y3] ^ (byte)(Key[1] >> 24)] ^ (byte)(Key[0] >> 24)];
         }
 
-        private UInt32 MX(UInt32 X)
+        private uint MX(uint X)
         {
             return X ^ LFSR2(X);
         }
 
-        private UInt32 MXY(UInt32 X)
+        private uint MXY(uint X)
         {
             return X ^ LFSR1(X) ^ LFSR2(X);
         }
@@ -928,7 +928,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             0xD7, 0x61, 0x1E, 0xB4, 0x50, 0x04, 0xF6, 0xC2, 0x16, 0x25, 0x86, 0x56, 0x55, 0x09, 0xBE, 0x91 
         };
 
-        private static readonly UInt32[] MDS0 = 
+        private static readonly uint[] MDS0 = 
         {
             0xBCBC3275, 0xECEC21F3, 0x202043C6, 0xB3B3C9F4, 0xDADA03DB, 0x2028B7B, 0xE2E22BFB, 0x9E9EFAC8, 
             0xC9C9EC4A, 0xD4D409D3, 0x18186BE6, 0x1E1E9F6B, 0x98980E45, 0xB2B2387D, 0xA6A6D2E8, 0x2626B74B, 
@@ -964,7 +964,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             0xACACA716, 0xD0D07625, 0x50501386, 0xDCDCF756, 0x84841A55, 0xE1E15109, 0x7A7A25BE, 0x1313EF91
         };
 
-        private static readonly UInt32[] MDS1 = 
+        private static readonly uint[] MDS1 = 
         {
             0xA9D93939, 0x67901717, 0xB3719C9C, 0xE8D2A6A6, 0x4050707, 0xFD985252, 0xA3658080, 0x76DFE4E4, 
             0x9A084545, 0x92024B4B, 0x80A0E0E0, 0x78665A5A, 0xE4DDAFAF, 0xDDB06A6A, 0xD1BF6363, 0x38362A2A, 
@@ -1000,7 +1000,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             0x6F9A1919, 0x9DE01A1A, 0x368F9494, 0x42E6C7C7, 0x4AECC9C9, 0x5EFDD2D2, 0xC1AB7F7F, 0xE0D8A8A8
         };
 
-        private static readonly UInt32[] MDS2 = 
+        private static readonly uint[] MDS2 = 
         {
             0xBC75BC32, 0xECF3EC21, 0x20C62043, 0xB3F4B3C9, 0xDADBDA03, 0x27B028B, 0xE2FBE22B, 0x9EC89EFA, 
             0xC94AC9EC, 0xD4D3D409, 0x18E6186B, 0x1E6B1E9F, 0x9845980E, 0xB27DB238, 0xA6E8A6D2, 0x264B26B7, 
@@ -1036,7 +1036,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             0xAC16ACA7, 0xD025D076, 0x50865013, 0xDC56DCF7, 0x8455841A, 0xE109E151, 0x7ABE7A25, 0x139113EF
         };
 
-        private static readonly UInt32[] MDS3 = 
+        private static readonly uint[] MDS3 = 
         {
             0xD939A9D9, 0x90176790, 0x719CB371, 0xD2A6E8D2, 0x5070405, 0x9852FD98, 0x6580A365, 0xDFE476DF, 
             0x8459A08, 0x24B9202, 0xA0E080A0, 0x665A7866, 0xDDAFE4DD, 0xB06ADDB0, 0xBF63D1BF, 0x362A3836, 

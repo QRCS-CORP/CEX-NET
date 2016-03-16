@@ -8,9 +8,9 @@ using VTDev.Libraries.CEXEngine.Crypto.Digest;
 
 namespace VTDev.Projects.CEX
 {
-    public static class Utilities
+    internal static class Utilities
     {
-        internal static bool DirectoryHasPermission(string DirectoryPath, FileSystemRights AccessRight)
+        public static bool DirectoryHasPermission(string DirectoryPath, FileSystemRights AccessRight)
         {
             if (string.IsNullOrEmpty(DirectoryPath)) return false;
 
@@ -35,7 +35,7 @@ namespace VTDev.Projects.CEX
             return false;
         }
 
-        internal static long GetFileSize(string FilePath)
+        public static long GetFileSize(string FilePath)
         {
             try
             {
@@ -45,7 +45,7 @@ namespace VTDev.Projects.CEX
             return -1;
         }
 
-        internal static bool DirectoryIsWritable(string DirectoryPath)
+        public static bool DirectoryIsWritable(string DirectoryPath)
         {
             try
             {
@@ -62,12 +62,12 @@ namespace VTDev.Projects.CEX
             }
         }
 
-        internal static string GetComputerName()
+        public static string GetComputerName()
         {
             return Environment.MachineName;
         }
 
-        internal static byte[] GetCredentials()
+        public static byte[] GetCredentials()
         {
             // unique credential should be at least these symbols; comp-name, sid, app-code
             // obscure the code and shift in file; make it hard to find
@@ -77,7 +77,7 @@ namespace VTDev.Projects.CEX
                 return digest.ComputeHash(Encoding.UTF8.GetBytes(user));
         }
 
-        internal static byte[] GetDomainId()
+        public static byte[] GetDomainId()
         {
             string domain = GetDomainName();
             if (string.IsNullOrEmpty(domain))
@@ -92,7 +92,7 @@ namespace VTDev.Projects.CEX
                 return digest.ComputeHash(Encoding.UTF8.GetBytes(domain));
         }
 
-        internal static string GetDomainName()
+        public static string GetDomainName()
         {
             try
             {
@@ -113,7 +113,7 @@ namespace VTDev.Projects.CEX
             }
         }
 
-        internal static string GetUniquePath(string FilePath)
+        public static string GetUniquePath(string FilePath)
         {
             string directory = Path.GetDirectoryName(FilePath);
             string fileName = Path.GetFileNameWithoutExtension(FilePath);
@@ -130,7 +130,7 @@ namespace VTDev.Projects.CEX
             return FilePath;
         }
 
-        internal static string GetUniquePath(string DirectoryPath, string FileName, string FileExtension)
+        public static string GetUniquePath(string DirectoryPath, string FileName, string FileExtension)
         {
             string filePath = Path.Combine(DirectoryPath, FileName + FileExtension);
 
@@ -145,12 +145,12 @@ namespace VTDev.Projects.CEX
             return filePath;
         }
 
-        internal static string GetUserName()
+        public static string GetUserName()
         {
             return Environment.UserName;
         }
 
-        internal static byte[] GetOriginId()
+        public static byte[] GetOriginId()
         {
             string user = GetUserName() + GetUserSid();
             byte[] hash;
@@ -165,7 +165,7 @@ namespace VTDev.Projects.CEX
             return id;
         }
 
-        internal static string GetUserSid()
+        public static string GetUserSid()
         {
             try
             {
@@ -177,7 +177,7 @@ namespace VTDev.Projects.CEX
             }
         }
 
-        internal static bool HostAlive(string Address)
+        public static bool HostAlive(string Address)
         {
             try
             {
@@ -193,7 +193,7 @@ namespace VTDev.Projects.CEX
             }
         }
 
-        internal static bool IsAdmin()
+        public static bool IsAdmin()
         {
             try
             {

@@ -118,7 +118,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// <item><description>NIST <a href="http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf">AES Fips 197</a>.</description></item>
     /// <item><description>NIST <a href="http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf">Rijndael ammended</a>.</description></item>
     /// <item><description>HMAC <a href="http://tools.ietf.org/html/rfc2104">RFC 2104</a>.</description></item>
-    /// <item><description>Fips <a href="http://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf">198.1</a>.</description></item>
+    /// <item><description>NIST <a href="http://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf">198.1</a>.</description></item>
     /// <item><description>HKDF <a href="http://tools.ietf.org/html/rfc5869">RFC 5869</a>.</description></item>
     /// <item><description>NIST <a href="http://csrc.nist.gov/publications/drafts/800-90/draft-sp800-90b.pdf">SP800-90B</a>.</description></item>
     /// <item><description>SHA3 <a href="https://131002.net/blake/blake.pdf">The Blake digest</a>.</description></item>
@@ -142,7 +142,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         #region Fields
         private int _blockSize = BLOCK16;
         private int _dfnRounds = 22;
-        private UInt32[] _expKey;
+        private uint[] _expKey;
         // configurable nonce can create a unique distribution, can be byte(0)
         private byte[] _hkdfInfo = System.Text.Encoding.ASCII.GetBytes("information string RHX version 1");
         private int _ikmSize = 0;
@@ -415,7 +415,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 if (KeyParam.Key.Length == LegalKeySizes[i])
                     break;
                 if (i == LegalKeySizes.Length - 1)
-                    throw new CryptoSymmetricException("RHX:Initialize", String.Format("Invalid key size! Key must be at least {0}  bytes ({1} bit).", LegalKeySizes[0], LegalKeySizes[0] * 8), new ArgumentOutOfRangeException());
+                    throw new CryptoSymmetricException("RHX:Initialize", String.Format("Invalid key size! Key must be at least {0} bytes ({1} bit).", LegalKeySizes[0], LegalKeySizes[0] * 8), new ArgumentOutOfRangeException());
            }
 
             // get the kdf digest engine
@@ -468,7 +468,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// <remarks>
         /// Expand the key and initialize state variables
         /// </remarks>
-        private UInt32[] ExpandKey(byte[] Key, bool Encryption)
+        private uint[] ExpandKey(byte[] Key, bool Encryption)
         {
             uint[] expKey = new uint[0];
 
@@ -514,7 +514,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             return expKey;
         }
 
-        private UInt32[] SecureExpand(byte[] Key)
+        private uint[] SecureExpand(byte[] Key)
         {
             // block in 32 bit words
             int blkWords = _blockSize / 4;
@@ -551,7 +551,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             return expKey;
         }
 
-        private UInt32[] StandardExpand(byte[] Key)
+        private uint[] StandardExpand(byte[] Key)
         {
             // block in 32 bit words
             int blkWords = _blockSize / 4;
@@ -788,6 +788,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             uint Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[++keyCtr];
             uint Y3 = T0[X3 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[++keyCtr];
 
+            // rounds loop
             while (keyCtr != LRD)
             {
                 X0 = T0[Y0 >> 24] ^ T1[(byte)(Y1 >> 16)] ^ T2[(byte)(Y2 >> 8)] ^ T3[(byte)Y3] ^ _expKey[++keyCtr];
@@ -828,24 +829,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             int keyCtr = 0;
 
             // round 0
-            UInt32 X0 = (UInt32)((Input[InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[keyCtr];
-            UInt32 X1 = (UInt32)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
-            UInt32 X2 = (UInt32)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
-            UInt32 X3 = (UInt32)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
-            UInt32 X4 = (UInt32)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
-            UInt32 X5 = (UInt32)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
-            UInt32 X6 = (UInt32)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
-            UInt32 X7 = (UInt32)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
+            uint X0 = (uint)((Input[InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[keyCtr];
+            uint X1 = (uint)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
+            uint X2 = (uint)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
+            uint X3 = (uint)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
+            uint X4 = (uint)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
+            uint X5 = (uint)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
+            uint X6 = (uint)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
+            uint X7 = (uint)((Input[++InOffset] << 24) | (Input[++InOffset] << 16) | (Input[++InOffset] << 8) | Input[++InOffset]) ^ _expKey[++keyCtr];
 
             // round 1
-            UInt32 Y0 = T0[X0 >> 24] ^ T1[(byte)(X1 >> 16)] ^ T2[(byte)(X3 >> 8)] ^ T3[(byte)X4] ^ _expKey[++keyCtr];
-            UInt32 Y1 = T0[X1 >> 24] ^ T1[(byte)(X2 >> 16)] ^ T2[(byte)(X4 >> 8)] ^ T3[(byte)X5] ^ _expKey[++keyCtr];
-            UInt32 Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X5 >> 8)] ^ T3[(byte)X6] ^ _expKey[++keyCtr];
-            UInt32 Y3 = T0[X3 >> 24] ^ T1[(byte)(X4 >> 16)] ^ T2[(byte)(X6 >> 8)] ^ T3[(byte)X7] ^ _expKey[++keyCtr];
-            UInt32 Y4 = T0[X4 >> 24] ^ T1[(byte)(X5 >> 16)] ^ T2[(byte)(X7 >> 8)] ^ T3[(byte)X0] ^ _expKey[++keyCtr];
-            UInt32 Y5 = T0[X5 >> 24] ^ T1[(byte)(X6 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[++keyCtr];
-            UInt32 Y6 = T0[X6 >> 24] ^ T1[(byte)(X7 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[++keyCtr];
-            UInt32 Y7 = T0[X7 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X2 >> 8)] ^ T3[(byte)X3] ^ _expKey[++keyCtr];
+            uint Y0 = T0[X0 >> 24] ^ T1[(byte)(X1 >> 16)] ^ T2[(byte)(X3 >> 8)] ^ T3[(byte)X4] ^ _expKey[++keyCtr];
+            uint Y1 = T0[X1 >> 24] ^ T1[(byte)(X2 >> 16)] ^ T2[(byte)(X4 >> 8)] ^ T3[(byte)X5] ^ _expKey[++keyCtr];
+            uint Y2 = T0[X2 >> 24] ^ T1[(byte)(X3 >> 16)] ^ T2[(byte)(X5 >> 8)] ^ T3[(byte)X6] ^ _expKey[++keyCtr];
+            uint Y3 = T0[X3 >> 24] ^ T1[(byte)(X4 >> 16)] ^ T2[(byte)(X6 >> 8)] ^ T3[(byte)X7] ^ _expKey[++keyCtr];
+            uint Y4 = T0[X4 >> 24] ^ T1[(byte)(X5 >> 16)] ^ T2[(byte)(X7 >> 8)] ^ T3[(byte)X0] ^ _expKey[++keyCtr];
+            uint Y5 = T0[X5 >> 24] ^ T1[(byte)(X6 >> 16)] ^ T2[(byte)(X0 >> 8)] ^ T3[(byte)X1] ^ _expKey[++keyCtr];
+            uint Y6 = T0[X6 >> 24] ^ T1[(byte)(X7 >> 16)] ^ T2[(byte)(X1 >> 8)] ^ T3[(byte)X2] ^ _expKey[++keyCtr];
+            uint Y7 = T0[X7 >> 24] ^ T1[(byte)(X0 >> 16)] ^ T2[(byte)(X2 >> 8)] ^ T3[(byte)X3] ^ _expKey[++keyCtr];
 
             // rounds loop
             while (keyCtr != LRD)
@@ -969,21 +970,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             }
         }
 
-        private UInt32 SubByte(UInt32 Rot)
+        private uint SubByte(uint Rot)
         {
-            UInt32 value = 0xff & Rot;
-            UInt32 result = SBox[value];
+            uint value = 0xff & Rot;
+            uint result = SBox[value];
             value = 0xff & (Rot >> 8);
-            result |= (UInt32)SBox[value] << 8;
+            result |= (uint)SBox[value] << 8;
             value = 0xff & (Rot >> 16);
-            result |= (UInt32)SBox[value] << 16;
+            result |= (uint)SBox[value] << 16;
             value = 0xff & (Rot >> 24);
-            return result | (UInt32)(SBox[value] << 24);
+            return result | (uint)(SBox[value] << 24);
         }
         #endregion
 
         #region Constant Tables
-        private static readonly UInt32[] Rcon = new UInt32[] {
+        private static readonly uint[] Rcon = new uint[] {
 			0x00000000, 0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000, 0x20000000, 0x40000000,
 			0x80000000, 0x1b000000, 0x36000000, 0x6c000000, 0xd8000000, 0xab000000, 0x4d000000, 0x9a000000,
 			0x2f000000, 0x5e000000, 0xbc000000, 0x63000000, 0xc6000000, 0x97000000, 0x35000000, 0x6a000000,
@@ -1028,7 +1029,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 			0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d,
 		};
 
-        private static readonly UInt32[] T0 = {
+        private static readonly uint[] T0 = {
 			0xc66363a5, 0xf87c7c84, 0xee777799, 0xf67b7b8d, 0xfff2f20d, 0xd66b6bbd, 0xde6f6fb1, 0x91c5c554,
 			0x60303050, 0x02010103, 0xce6767a9, 0x562b2b7d, 0xe7fefe19, 0xb5d7d762, 0x4dababe6, 0xec76769a,
 			0x8fcaca45, 0x1f82829d, 0x89c9c940, 0xfa7d7d87, 0xeffafa15, 0xb25959eb, 0x8e4747c9, 0xfbf0f00b,
@@ -1063,7 +1064,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 			0x824141c3, 0x299999b0, 0x5a2d2d77, 0x1e0f0f11, 0x7bb0b0cb, 0xa85454fc, 0x6dbbbbd6, 0x2c16163a,
 		};
 
-        private static readonly UInt32[] T1 = {
+        private static readonly uint[] T1 = {
 			0xa5c66363, 0x84f87c7c, 0x99ee7777, 0x8df67b7b, 0x0dfff2f2, 0xbdd66b6b, 0xb1de6f6f, 0x5491c5c5,
 			0x50603030, 0x03020101, 0xa9ce6767, 0x7d562b2b, 0x19e7fefe, 0x62b5d7d7, 0xe64dabab, 0x9aec7676,
 			0x458fcaca, 0x9d1f8282, 0x4089c9c9, 0x87fa7d7d, 0x15effafa, 0xebb25959, 0xc98e4747, 0x0bfbf0f0,
@@ -1098,7 +1099,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 			0xc3824141, 0xb0299999, 0x775a2d2d, 0x111e0f0f, 0xcb7bb0b0, 0xfca85454, 0xd66dbbbb, 0x3a2c1616,
 		};
 
-        private static readonly UInt32[] T2 = {
+        private static readonly uint[] T2 = {
 			0x63a5c663, 0x7c84f87c, 0x7799ee77, 0x7b8df67b, 0xf20dfff2, 0x6bbdd66b, 0x6fb1de6f, 0xc55491c5,
 			0x30506030, 0x01030201, 0x67a9ce67, 0x2b7d562b, 0xfe19e7fe, 0xd762b5d7, 0xabe64dab, 0x769aec76,
 			0xca458fca, 0x829d1f82, 0xc94089c9, 0x7d87fa7d, 0xfa15effa, 0x59ebb259, 0x47c98e47, 0xf00bfbf0,
@@ -1133,7 +1134,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 			0x41c38241, 0x99b02999, 0x2d775a2d, 0x0f111e0f, 0xb0cb7bb0, 0x54fca854, 0xbbd66dbb, 0x163a2c16,
 		};
 
-        private static readonly UInt32[] T3 = {
+        private static readonly uint[] T3 = {
 			0x6363a5c6, 0x7c7c84f8, 0x777799ee, 0x7b7b8df6, 0xf2f20dff, 0x6b6bbdd6, 0x6f6fb1de, 0xc5c55491,
 			0x30305060, 0x01010302, 0x6767a9ce, 0x2b2b7d56, 0xfefe19e7, 0xd7d762b5, 0xababe64d, 0x76769aec,
 			0xcaca458f, 0x82829d1f, 0xc9c94089, 0x7d7d87fa, 0xfafa15ef, 0x5959ebb2, 0x4747c98e, 0xf0f00bfb,
@@ -1168,7 +1169,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 			0x4141c382, 0x9999b029, 0x2d2d775a, 0x0f0f111e, 0xb0b0cb7b, 0x5454fca8, 0xbbbbd66d, 0x16163a2c,
 		};
 
-        private static readonly UInt32[] IT0 = {
+        private static readonly uint[] IT0 = {
 			0x51f4a750, 0x7e416553, 0x1a17a4c3, 0x3a275e96, 0x3bab6bcb, 0x1f9d45f1, 0xacfa58ab, 0x4be30393,
 			0x2030fa55, 0xad766df6, 0x88cc7691, 0xf5024c25, 0x4fe5d7fc, 0xc52acbd7, 0x26354480, 0xb562a38f,
 			0xdeb15a49, 0x25ba1b67, 0x45ea0e98, 0x5dfec0e1, 0xc32f7502, 0x814cf012, 0x8d4697a3, 0x6bd3f9c6,
@@ -1203,7 +1204,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 			0x39a80171, 0x080cb3de, 0xd8b4e49c, 0x6456c190, 0x7bcb8461, 0xd532b670, 0x486c5c74, 0xd0b85742,
 		};
 
-        private static readonly UInt32[] IT1 = {
+        private static readonly uint[] IT1 = {
 			0x5051f4a7, 0x537e4165, 0xc31a17a4, 0x963a275e, 0xcb3bab6b, 0xf11f9d45, 0xabacfa58, 0x934be303,
 			0x552030fa, 0xf6ad766d, 0x9188cc76, 0x25f5024c, 0xfc4fe5d7, 0xd7c52acb, 0x80263544, 0x8fb562a3,
 			0x49deb15a, 0x6725ba1b, 0x9845ea0e, 0xe15dfec0, 0x02c32f75, 0x12814cf0, 0xa38d4697, 0xc66bd3f9,
@@ -1238,7 +1239,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 			0x7139a801, 0xde080cb3, 0x9cd8b4e4, 0x906456c1, 0x617bcb84, 0x70d532b6, 0x74486c5c, 0x42d0b857,
 		};
 
-        private static readonly UInt32[] IT2 = {
+        private static readonly uint[] IT2 = {
 			0xa75051f4, 0x65537e41, 0xa4c31a17, 0x5e963a27, 0x6bcb3bab, 0x45f11f9d, 0x58abacfa, 0x03934be3,
 			0xfa552030, 0x6df6ad76, 0x769188cc, 0x4c25f502, 0xd7fc4fe5, 0xcbd7c52a, 0x44802635, 0xa38fb562,
 			0x5a49deb1, 0x1b6725ba, 0x0e9845ea, 0xc0e15dfe, 0x7502c32f, 0xf012814c, 0x97a38d46, 0xf9c66bd3,
@@ -1273,7 +1274,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 			0x017139a8, 0xb3de080c, 0xe49cd8b4, 0xc1906456, 0x84617bcb, 0xb670d532, 0x5c74486c, 0x5742d0b8,
 		};
 
-        private static readonly UInt32[] IT3 = {
+        private static readonly uint[] IT3 = {
 			0xf4a75051, 0x4165537e, 0x17a4c31a, 0x275e963a, 0xab6bcb3b, 0x9d45f11f, 0xfa58abac, 0xe303934b,
 			0x30fa5520, 0x766df6ad, 0xcc769188, 0x024c25f5, 0xe5d7fc4f, 0x2acbd7c5, 0x35448026, 0x62a38fb5,
 			0xb15a49de, 0xba1b6725, 0xea0e9845, 0xfec0e15d, 0x2f7502c3, 0x4cf01281, 0x4697a38d, 0xd3f9c66b,

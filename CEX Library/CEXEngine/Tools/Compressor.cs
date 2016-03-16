@@ -54,20 +54,20 @@ namespace VTDev.Libraries.CEXEngine.Tools
             /// <summary>
             /// The compression format
             /// </summary>
-            public Int32 Format;
+            public int Format;
             /// <summary>
             /// The number of compressed files
             /// </summary>
-            public Int32 FileCount;
+            public int FileCount;
             /// <summary>
             /// Length of an array of file names
             /// </summary>
-            public Int32 NameSize;
+            public int NameSize;
             /// <summary>
             /// An array containing the size of each file in the archive
             /// </summary>
             [MarshalAs(UnmanagedType.ByValArray)]
-            public Int64[] FileSizes;
+            public long[] FileSizes;
             /// <summary>
             /// An array containing the nameand subfolder path of each file in the archive
             /// </summary>
@@ -83,9 +83,9 @@ namespace VTDev.Libraries.CEXEngine.Tools
             /// <param name="FileSizes">An array containing the size of each file in the archive</param>
             /// <param name="FileNames">An array containing the name and subfolder path of each file in the archive</param>
             /// <param name="Format">The compression format</param>
-            public CompressionHeader(Int32 FileCount, Int32 NameSize, Int64[] FileSizes, char[] FileNames, CompressionFormats Format)
+            public CompressionHeader(int FileCount, int NameSize, long[] FileSizes, char[] FileNames, CompressionFormats Format)
             {
-                this.Format = (Int32)Format;
+                this.Format = (int)Format;
                 this.FileCount = FileCount;
                 this.NameSize = NameSize;
                 this.FileSizes = FileSizes;
@@ -521,7 +521,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
             header.Format = (int)Format;
             header.FileCount = 0;
             header.NameSize = 0;
-            header.FileSizes = new Int64[0];
+            header.FileSizes = new long[0];
             header.FileSizes[0] = 1;
             header.FileNames = new char[0];
 
@@ -545,7 +545,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
             header.Format = (int)Format;
             header.FileCount = 1;
             header.NameSize = name.Length;
-            header.FileSizes = new Int64[1];
+            header.FileSizes = new long[1];
             header.FileSizes[0] = GetFileSize(InputFile);
             header.FileNames = name;
 
@@ -585,7 +585,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
         /// <param name="InputStream">The stream containing the compressed file</param>
         /// 
         /// <returns>The total size in bytes</returns>
-        public static Int64 GetDeCompressedSize(Stream InputStream)
+        public static long GetDeCompressedSize(Stream InputStream)
         {
             CompressionHeader header = DeSerializeHeader(InputStream);
             long arcLen = 0;
@@ -603,16 +603,16 @@ namespace VTDev.Libraries.CEXEngine.Tools
         /// <param name="InputFile">The full path to the compressed file</param>
         /// 
         /// <returns>The total size in bytes</returns>
-        public static Int64 GetDeCompressedSize(string InputFile)
+        public static long GetDeCompressedSize(string InputFile)
         {
             if (!File.Exists(InputFile)) return 0;
-            Int64 length = 0;
+            long length = 0;
 
             using (BinaryReader reader = new BinaryReader(new FileStream(InputFile, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
                 reader.BaseStream.Seek(SEEKTO_COUNT, SeekOrigin.Begin);
                 int fileCount = reader.ReadInt32();
-                Int64[] sizes = new Int64[fileCount];
+                long[] sizes = new long[fileCount];
                 reader.BaseStream.Seek(SEEKTO_SIZES, SeekOrigin.Begin);
                 int btSize = fileCount * 8;
                 Buffer.BlockCopy(reader.ReadBytes(btSize), 0, sizes, 0, btSize);
@@ -701,7 +701,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
         /// <param name="InputStream">The stream containing the compressed file</param>
         /// 
         /// <returns>The header size in bytes</returns>
-        public static Int32 GetHeaderLength(Stream InputStream)
+        public static int GetHeaderLength(Stream InputStream)
         {
             InputStream.Seek(0, SeekOrigin.Begin);
             if (InputStream.Length < 1) return 0;
@@ -725,7 +725,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
         /// <param name="InputFile">The full path to the compressed file</param>
         /// 
         /// <returns>The header size in bytes</returns>
-        public static Int32 GetHeaderLength(string InputFile)
+        public static int GetHeaderLength(string InputFile)
         {
             if (!File.Exists(InputFile)) return 0;
             int length = 12;
@@ -1151,7 +1151,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
             ArchiveHeader = CreateFolderHeader(InputPath, CompressionFormat, FolderOption);
             byte[] headerStream = SerializeHeader(ArchiveHeader).ToArray();
             string[] paths = GetFilePaths(InputPath, FolderOption);
-            Int64[] sizes = new Int64[paths.Length];
+            long[] sizes = new long[paths.Length];
             byte[] inputBuffer = new byte[BlockSize];
             long byteCount = 0;
             long bytesRead = 0;
@@ -1187,7 +1187,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
             ArchiveHeader = CreateFolderHeader(InputPath, CompressionFormat, FolderOption);
             byte[] headerStream = SerializeHeader(ArchiveHeader).ToArray();
             string[] paths = GetFilePaths(InputPath, FolderOption);
-            Int64[] sizes = new Int64[paths.Length];
+            long[] sizes = new long[paths.Length];
             byte[] inputBuffer = new byte[BlockSize];
             long byteCount = 0;
             long bytesRead = 0;
@@ -1220,7 +1220,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
             ArchiveHeader = CreateFolderHeader(InputPath, CompressionFormat, FolderOption);
             byte[] headerStream = SerializeHeader(ArchiveHeader).ToArray();
             string[] paths = GetFilePaths(InputPath, FolderOption);
-            Int64[] sizes = new Int64[paths.Length];
+            long[] sizes = new long[paths.Length];
             byte[] inputBuffer = new byte[BlockSize];
             long byteCount = 0;
             long bytesRead = 0;
@@ -1257,7 +1257,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
             ArchiveHeader = CreateFolderHeader(InputPath, CompressionFormat, FolderOption);
             byte[] headerStream = SerializeHeader(ArchiveHeader).ToArray();
             string[] paths = GetFilePaths(InputPath, FolderOption);
-            Int64[] sizes = new Int64[paths.Length];
+            long[] sizes = new long[paths.Length];
             byte[] inputBuffer = new byte[BlockSize];
             long byteCount = 0;
             long bytesRead = 0;
@@ -1291,7 +1291,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
             ArchiveHeader = CreateFolderHeader(InputPath, CompressionFormat, FolderOption);
             byte[] headerStream = SerializeHeader(ArchiveHeader).ToArray();
             string[] paths = GetFilePaths(InputPath, FolderOption);
-            Int64[] sizes = new Int64[paths.Length];
+            long[] sizes = new long[paths.Length];
             byte[] inputBuffer = new byte[BlockSize];
             long byteCount = 0;
             long bytesRead = 0;
@@ -1325,7 +1325,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
             ArchiveHeader = CreateFolderHeader(InputPath, CompressionFormat, FolderOption);
             byte[] headerStream = SerializeHeader(ArchiveHeader).ToArray();
             string[] paths = GetFilePaths(InputPath, FolderOption);
-            Int64[] sizes = new Int64[paths.Length];
+            long[] sizes = new long[paths.Length];
             byte[] inputBuffer = new byte[BlockSize];
             long byteCount = 0;
             long bytesRead = 0;
@@ -1643,16 +1643,16 @@ namespace VTDev.Libraries.CEXEngine.Tools
             }
         }
 
-        private static Int64[] Convert(byte[] Data)
+        private static long[] Convert(byte[] Data)
         {
             int inCount = Data.Length / 8;
-            Int64[] temp = new Int64[inCount];
+            long[] temp = new long[inCount];
             Buffer.BlockCopy(Data, 0, temp, 0, Data.Length);
 
             return temp;
         }
 
-        private static byte[] Convert(Int32[] Data)
+        private static byte[] Convert(int[] Data)
         {
             int btCount = Data.Length * 4;
             byte[] temp = new byte[btCount];
@@ -1661,7 +1661,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
             return temp;
         }
 
-        private static byte[] Convert(Int64[] Data)
+        private static byte[] Convert(long[] Data)
         {
             int btCount = Data.Length * 8;
             byte[] temp = new byte[btCount];
@@ -1670,16 +1670,16 @@ namespace VTDev.Libraries.CEXEngine.Tools
             return temp;
         }
 
-        private static Int32 GetBlockSize(Int64 DataSize)
+        private static int GetBlockSize(long DataSize)
         {
-            Int32 size = (Int32)DataSize / 100;
+            int size = (int)DataSize / 100;
             if (size < 64000)
                 size = (int)DataSize / 4;
 
             return size < 1 ? DEF_BLOCK : size;
         }
 
-        private static Int32 GetFileCount(string InputPath, SearchOption FolderOption = SearchOption.AllDirectories)
+        private static int GetFileCount(string InputPath, SearchOption FolderOption = SearchOption.AllDirectories)
         {
             DirectoryInfo dir = new DirectoryInfo(InputPath);
             FileInfo[] files = dir.GetFiles("*.*", FolderOption);
@@ -1712,17 +1712,17 @@ namespace VTDev.Libraries.CEXEngine.Tools
             return fileList;
         }
 
-        private static Int64 GetFileSize(string InputFile)
+        private static long GetFileSize(string InputFile)
         {
             FileInfo file = new FileInfo(InputFile);
             return file.Length;
         }
 
-        private static Int64[] GetFileSizes(string InputPath, SearchOption FolderOption = SearchOption.AllDirectories)
+        private static long[] GetFileSizes(string InputPath, SearchOption FolderOption = SearchOption.AllDirectories)
         {
             DirectoryInfo dir = new DirectoryInfo(InputPath);
             FileInfo[] files = dir.GetFiles("*.*", FolderOption);
-            Int64[] fileSizes = new Int64[files.Length];
+            long[] fileSizes = new long[files.Length];
 
             for (int i = 0; i < files.Length; i++)
                 fileSizes[i] = files[i].Length;
@@ -1730,11 +1730,11 @@ namespace VTDev.Libraries.CEXEngine.Tools
             return fileSizes;
         }
 
-        private static Int64 GetFolderSize(string InputPath, SearchOption FolderOption = SearchOption.AllDirectories)
+        private static long GetFolderSize(string InputPath, SearchOption FolderOption = SearchOption.AllDirectories)
         {
             DirectoryInfo dir = new DirectoryInfo(InputPath);
             FileInfo[] files = dir.GetFiles("*.*", FolderOption);
-            Int64 filesTotal = 0;
+            long filesTotal = 0;
 
             for (int i = 0; i < files.Length; i++)
                 filesTotal += files[i].Length;

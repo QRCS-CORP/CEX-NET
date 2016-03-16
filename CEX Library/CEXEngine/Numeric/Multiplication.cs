@@ -246,31 +246,31 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
             if (byteArraySize > System.Diagnostics.Process.GetCurrentProcess().PeakVirtualMemorySize64)
                 throw new ArithmeticException("power of ten too big");
-            if (Exponent <= Int32.MaxValue)
+            if (Exponent <= int.MaxValue)
                 // To calculate:    5^exp * 2^exp
                 return bigFivePows[1].Pow(intExp).ShiftLeft(intExp);
 
             // "HUGE POWERS"
             // This branch probably won't be executed since the power of ten is too big. To calculate: 5^exp
-            BigInteger powerOfFive = bigFivePows[1].Pow(Int32.MaxValue);
+            BigInteger powerOfFive = bigFivePows[1].Pow(int.MaxValue);
             BigInteger res = powerOfFive;
-            long longExp = Exponent - Int32.MaxValue;
+            long longExp = Exponent - int.MaxValue;
 
-            intExp = (int)(Exponent % Int32.MaxValue);
-            while (longExp > Int32.MaxValue)
+            intExp = (int)(Exponent % int.MaxValue);
+            while (longExp > int.MaxValue)
             {
                 res = res.Multiply(powerOfFive);
-                longExp -= Int32.MaxValue;
+                longExp -= int.MaxValue;
             }
             res = res.Multiply(bigFivePows[1].Pow(intExp));
 
             // To calculate: 5^exp << exp
-            res = res.ShiftLeft(Int32.MaxValue);
-            longExp = Exponent - Int32.MaxValue;
-            while (longExp > Int32.MaxValue)
+            res = res.ShiftLeft(int.MaxValue);
+            longExp = Exponent - int.MaxValue;
+            while (longExp > int.MaxValue)
             {
-                res = res.ShiftLeft(Int32.MaxValue);
-                longExp -= Int32.MaxValue;
+                res = res.ShiftLeft(int.MaxValue);
+                longExp -= int.MaxValue;
             }
             res = res.ShiftLeft(intExp);
 

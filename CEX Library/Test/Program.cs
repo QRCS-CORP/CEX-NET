@@ -32,8 +32,8 @@ namespace Test
             Console.WriteLine("**********************************************");
             Console.WriteLine("* CEX Version 1.5                            *");
             Console.WriteLine("*                                            *");
-            Console.WriteLine("* Release:   v1.5                            *");
-            Console.WriteLine("* Date:      Feb 1, 2016                     *");
+            Console.WriteLine("* Release:   v1.5.3                          *");
+            Console.WriteLine("* Date:      March 16, 2016                  *");
             Console.WriteLine("* Contact:   develop@vtdev.com               *");
             Console.WriteLine("**********************************************");
             Console.WriteLine("");

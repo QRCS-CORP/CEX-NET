@@ -156,7 +156,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
         }
 
         /// <summary>
-        /// Compare Int32 arrays for equality
+        /// Compare int arrays for equality
         /// </summary>
         /// 
         /// <param name="A">Array A</param>
@@ -181,7 +181,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
         }
 
         /// <summary>
-        /// Compare Int64 arrays for equality
+        /// Compare long arrays for equality
         /// </summary>
         /// 
         /// <param name="A">Array A</param>
@@ -355,7 +355,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
         }
 
         /// <summary>
-        /// Check if a Int32 array contains a sequence of values
+        /// Check if a int array contains a sequence of values
         /// </summary>
         /// 
         /// <param name="Data">Primary array</param>
@@ -388,7 +388,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
         }
 
         /// <summary>
-        /// Check if a Int64 array contains a sequence of values
+        /// Check if a long array contains a sequence of values
         /// </summary>
         /// 
         /// <param name="Data">Primary array</param>

@@ -180,9 +180,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 
             internal void Write(byte[] Data)
             {
-                State = ArrayUtils.Concat(State, Data);
-                Position += Data.Length;
-                Length = Position;
+                if (Data.Length > State.Length - Position)
+                {
+                    State = ArrayUtils.Concat(State, Data);
+                    Position += Data.Length;
+                    Length = Position;
+                }
+                else
+                {
+                    Buffer.BlockCopy(Data, 0, State, Position, Data.Length);
+                    Position += Data.Length;
+                }
             }
         };
         #endregion
@@ -335,6 +343,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
                 byte[] rnd = new byte[len];
                 using (CSPRsg gen = new CSPRsg())
                     gen.GetBytes(rnd);
+
                 _statePool[i].Write(rnd);
 
                 // compress the state with keccak and add member to entropy queue
@@ -574,12 +583,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
             const string subkey = "CLSID";
 
             RegistryUtils rtl = new RegistryUtils();
+            if (!rtl.AccessTest(RegistryUtils.RootKey.HKEY_CLASSES_ROOT, subkey))
+                return new byte[0];
+
             if (rtl.KeyExists(RegistryUtils.RootKey.HKEY_CLASSES_ROOT, subkey))
             {
                 string[] data = (string[])rtl.EnumKeys(RegistryUtils.RootKey.HKEY_CLASSES_ROOT, subkey).ToArray(typeof(string));
                 int len = 0;
                 for (int i = 0; i < data.Length; ++i)
-                    len += data.Length;
+                    len += data[i].Length;
 
                 buffer = new byte[len];
                 for (int i = 0, j = 0; i < data.Length; ++i)
@@ -587,9 +599,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
                     Guid res = Guid.Empty;
                     if (Guid.TryParse((string)data[i], out res))
                     {
-                        byte[] gb = res.ToByteArray();
-                        Buffer.BlockCopy(gb, 0, buffer, j, gb.Length);
-                        j += gb.Length;
+                        if (!res.Equals(Guid.Empty))
+                        {
+                            byte[] gb = res.ToByteArray();
+                            Buffer.BlockCopy(gb, 0, buffer, j, gb.Length);
+                            j += gb.Length;
+                        }
                     }
                 }
             }

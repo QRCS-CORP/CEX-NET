@@ -84,8 +84,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         private const string ALG_NAME = "CTRDrbg";
         private const int BLOCK_SIZE = 16;
         private const int COUNTER_SIZE = 16;
-        private const Int32 MAX_PARALLEL = 1024000;
-        private const Int32 MIN_PARALLEL = 1024;
+        private const int MAX_PARALLEL = 1024000;
+        private const int MIN_PARALLEL = 1024;
         #endregion
 
         #region Fields

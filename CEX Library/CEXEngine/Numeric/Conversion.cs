@@ -83,7 +83,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             
             mantissa >>= 1; // drop the rounding bit
             // long resSign = (val.sign < 0) ? 0x8000000000000000L : 0;
-            long resSign = (Value._sign < 0) ? Int64.MinValue : 0;
+            long resSign = (Value._sign < 0) ? long.MinValue : 0;
             exponent = ((1023 + exponent) << 52) & 0x7FF0000000000000L;
             long result = resSign | exponent | mantissa;
 
@@ -411,7 +411,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                         else
                             result2.Append("0E"); //$NON-NLS-1$
 
-                        result2.Append((Scale == Int32.MinValue) ? "2147483648" : Convert.ToString(-Scale)); //$NON-NLS-1$
+                        result2.Append((Scale == int.MinValue) ? "2147483648" : Convert.ToString(-Scale)); //$NON-NLS-1$
                         return result2.ToString();
                 }
             }
