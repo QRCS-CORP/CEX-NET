@@ -102,14 +102,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         #region Constructor
         /// <summary>
         /// Initialize this class using the EntropyPool to provide a seed value.
-        /// <para>Seeds the generator with 512 bytes from the pool.</para>
+        /// <para>Seeds the generator with 1024 bytes from the pool.</para>
         /// </summary>
         public ISCRsg() 
         {
-            byte[] rnd = new byte[512];
+            // max pool draw is 1024 bytes
+            byte[] rnd = new byte[MSIZE * 4];
             new EntropyPool().GetBytes(rnd);
-            _rndResult = new int[128];
-            Buffer.BlockCopy(rnd, 0, _rndResult, 0, 512);
+            _rndResult = new int[MSIZE];
+            Buffer.BlockCopy(rnd, 0, _rndResult, 0, MSIZE * 4);
             Initialize(true);
         }
 
@@ -127,7 +128,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 
             int len = Seed.Length > MSIZE ? MSIZE : Seed.Length;
             Buffer.BlockCopy(Seed, 0, _rndResult, 0, len * SIZE32);
-
             Initialize(true);
         }
         #endregion

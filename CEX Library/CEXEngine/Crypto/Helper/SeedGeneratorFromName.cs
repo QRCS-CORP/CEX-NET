@@ -24,8 +24,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
             {
                 case SeedGenerators.CSPRsg:
                     return new CSPRsg();
+                case SeedGenerators.CTRRsg:
+                    return new CTRRsg();
                 case SeedGenerators.ISCRsg:
                     return new ISCRsg();
+                case SeedGenerators.SP20Rsg:
+                    return new SP20Rsg();
                 case SeedGenerators.XSPRsg:
                     return new XSPRsg();
                 default:

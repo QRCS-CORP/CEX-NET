@@ -16,7 +16,7 @@ using VTDev.Libraries.CEXEngine.Tools;
 using VTDev.Projects.CEX.Helper;
 #endregion
 
-// v1.5, Feb. 05, 2016
+// v1.5.3, Mar. 23, 2016
 namespace VTDev.Projects.CEX
 {
     public partial class FormMain : Form

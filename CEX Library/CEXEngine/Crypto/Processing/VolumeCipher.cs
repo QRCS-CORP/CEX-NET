@@ -367,8 +367,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         }
         private int GetFileNameHash(string FileName)
         {
-            // remove root for portable drives
-            string trnName = FileName.Substring(0, FileName.Length - Path.GetPathRoot(FileName).Length);
+            // for portability include container only
+            int pos = FileName.LastIndexOf(Path.DirectorySeparatorChar);
+            if (pos > 0)
+                pos = FileName.LastIndexOf(Path.DirectorySeparatorChar, pos - 1);
+            else
+                pos = 0;
+
+            string trnName = FileName.Substring(pos, FileName.Length - pos);
             byte[] hash;
             using (Digest.SHA256 eng = new Digest.SHA256())
                 hash = eng.ComputeHash(System.Text.Encoding.Unicode.GetBytes(trnName));

@@ -308,7 +308,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             if (Package.Description.MacSize > 0)
                 subKeySize += Package.Description.MacSize;
 
-            if (subKeySize < 0)
+            if (subKeySize < 1)
                 throw new CryptoProcessingException("PackageFactory:Create", "The key package cipher settings are invalid!", new Exception());
 
             try
@@ -362,7 +362,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 Array.Clear(header, 0, header.Length);
                 Array.Clear(buffer, 0, buffer.Length);
             }
-            catch
+            catch (Exception)
             {
                 throw;
             }

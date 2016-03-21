@@ -50,7 +50,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
     public sealed class KeyGenerator : IDisposable
     {
         #region Constants
-        private const int DEFCTR_SIZE = 32;
+        private const int CTRDEF_SIZE = 16;
+        private const int CTRMAX_SIZE = 32;
+        private const int CTRMIN_SIZE = 4;
         #endregion
 
         #region Fields
@@ -115,7 +117,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         public KeyGenerator(SeedGenerators SeedEngine, Digests DigestEngine, byte[] Counter)
         {
             if (Counter == null)
-                Counter = new byte[DEFCTR_SIZE];
+                Counter = new byte[CTRDEF_SIZE];
 
             if (Counter.Length > 32 || (Counter.Length < 4 && Counter.Length != 0))
                 throw new CryptoGeneratorException("KeyGenerator:Ctor", "The counter size must be either 0, or between 4 and 32", new ArgumentException());
@@ -208,7 +210,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
             // if absent, generate the initial counter
 		    if (_ctrLength == 0)
 		    {
-			    _ctrLength = DEFCTR_SIZE;
+			    _ctrLength = CTRDEF_SIZE;
 			    _ctrVector = new byte[_ctrLength];
                 using (CSPRsg pool =  new CSPRsg())
                     _ctrVector = pool.GetBytes(_ctrLength);
@@ -262,7 +264,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
             // increment the counter
             Increment(_ctrVector);
             // prepend the counter to the seed
-            seed = VTDev.Libraries.CEXEngine.Utility.ArrayUtils.Concat(_ctrVector, seed);
+            seed = Utility.ArrayUtils.Concat(_ctrVector, seed);
 
             // special case for sha-2
             if (_dgtType == Digests.SHA256 || _dgtType == Digests.SHA512)

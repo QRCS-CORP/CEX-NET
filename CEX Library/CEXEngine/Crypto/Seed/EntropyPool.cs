@@ -61,7 +61,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
     /// 
     /// <remarks>
     ///
-    /// <para>The maximum single size of a request from the entropy pool (GetBytes()) is 512 bytes. When the pool is exausted, the state is automatically refreshed, 
+    /// <para>The maximum single size of a request from the entropy pool (GetBytes()) is 1024 bytes. When the pool is exausted, the state is automatically refreshed, 
     /// this can be done manually by calling the Reset() method.</para> 
     /// 
     /// <para>There are 8 state pools and their corresponding post-processed entropy pool members. 
@@ -69,7 +69,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
     /// with a conditional (first byte ? even/odd) array reversal. 
     /// </para>
     /// 
-    /// <para>The minimum state pool member size is 200 * the keccak 512 block size, (14400 bytes).
+    /// <para>The minimum state pool member size is 100 * the keccak 512 block size, (7200 bytes).
     /// If the state size is less than the minimum, the bytes are added with the system default random provider interface; CSPRsg. 
     /// A minimum of 2 * block size is added with the default provider.</para>
     /// 
@@ -124,7 +124,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
     {
         #region Constants
         // number of state and entropy pools
-        private const int POOLCOUNT = 8;
+        private const int POOLCOUNT = 16;
         // initial state size
         private const int STATESIZE = 1024;
         // size of entropy queue member
@@ -132,7 +132,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         // compressor input size (keccak 512)
         private const int BLOCKSIZE = 72;
         // maximum number of bytes allowed per request
-        private const int MAXPULL = 512;
+        private const int MAXPULL = 1024;
         // the min state member size, remainder is filled by CSPRsg
         private const int MINSTATE = BLOCKSIZE * 200;
         #endregion
@@ -140,18 +140,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         #region Struct
         private struct PoolItem
         {
-            internal PoolItem(int BufferSize)
+            public int Length;
+            public int Position;
+            public byte[] State;
+
+            public PoolItem(int BufferSize)
             {
                 Length = BufferSize;
                 Position = 0;
                 State = new byte[0];
             }
 
-            internal int Position;
-            internal int Length;
-            internal byte[] State;
-
-            internal byte[] Read(int Size)
+            public byte[] Read(int Size)
             {
                 byte[] data = new byte[Size];
                 Array.Copy(State, Position, data, 0, Size);
@@ -159,7 +159,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
                 return data;
             }
 
-            internal void Reset()
+            public void Reset()
             {
                 Array.Clear(State, 0, State.Length);
                 Array.Resize(ref State, 0);
@@ -167,7 +167,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
                 Position = 0;
             }
 
-            internal void Write(byte Element)
+            public void Write(byte Element)
             {
                 if (Position == State.Length)
                 {
@@ -178,7 +178,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
                 ++Position;
             }
 
-            internal void Write(byte[] Data)
+            public void Write(byte[] Data)
             {
                 if (Data.Length > State.Length - Position)
                 {
