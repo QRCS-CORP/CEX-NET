@@ -13,12 +13,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
     /// <para>Used in conjunction with the <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.CipherStream"/>, <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.CompressionCipher"/>, 
     /// <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.PacketCipher"/>, and <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.VolumeCipher"/> classes.
     /// Contains all the necessary settings required to recreate a cipher instance.</para>
+    /// <para>A set of static presets are included to initialize a CipherDescription instance to an AES configuration using CBC or CTR modes.</para>
     /// </summary>
     /// 
     /// <example>
     /// <description>Example of populating a <c>CipherDescription</c> structure:</description>
     /// <code>
-    ///    CipherDescription cdsc = new CipherDescription(
+    ///    CipherDescription dsc = new CipherDescription(
     ///        Engines.RHX,             // cipher engine
     ///        192,                     // key size in bytes
     ///        IVSizes.V128,            // cipher iv size enum
@@ -29,6 +30,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
     ///        Digests.Skein512,        // cipher kdf engine
     ///        64,                      // mac size
     ///        Digests.Keccak);         // mac digest
+    /// </code>
+    /// 
+    /// <description>Using a preset to initialize a <c>CipherDescription</c> structure:</description>
+    /// <code>
+    /// CipherDescription dsc = CipherDescription.AES256CTR;
     /// </code>
     /// </example>
     /// 
@@ -56,7 +62,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         private const int KDFENG_SIZE = 1;
         private const int MACSZE_SIZE = 1;
         private const int MACENG_SIZE = 1;
-        private const int HDR_SIZE = ENGTPE_SIZE + KEYSZE_SIZE + IVSIZE_SIZE + CPRTPE_SIZE + PADTPE_SIZE + BLKSZE_SIZE + RNDCNT_SIZE + KDFENG_SIZE + MACSZE_SIZE + MACENG_SIZE;
+        private const int CPRHDR_SIZE = ENGTPE_SIZE + KEYSZE_SIZE + IVSIZE_SIZE + CPRTPE_SIZE + PADTPE_SIZE + BLKSZE_SIZE + RNDCNT_SIZE + KDFENG_SIZE + MACSZE_SIZE + MACENG_SIZE;
 
         private const long ENGTPE_SEEK = 0;
         private const long KEYSZE_SEEK = ENGTPE_SIZE;
@@ -104,9 +110,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// </summary>
         public int KdfEngine;
         /// <summary>
-        /// The size of the HMAC message authentication code; a zeroed parameter means authentication is not enabled with this key
+        /// The size of the HMAC key in bytes; a zeroed parameter means authentication is not enabled with this key
         /// </summary>
-        public int MacSize;
+        public int MacKeySize;
         /// <summary>
         /// The HMAC <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to authenticate a message file encrypted with this key
         /// </summary>
@@ -126,12 +132,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <param name="BlockSize">The cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockSizes">Block Size</see></param>
         /// <param name="RoundCount">The number of diffusion <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts">Rounds</see></param>
         /// <param name="KdfEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to power the key schedule Key Derivation Function in HX and M series ciphers</param>
-        /// <param name="MacSize">The size of the HMAC message authentication code; a zeroed parameter means authentication is not enabled with this key</param>
+        /// <param name="MacKeySize">The size of the HMAC key in bytes; a zeroed parameter means authentication is not enabled with this key</param>
         /// <param name="MacEngine">The HMAC <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to authenticate a message file encrypted with this key</param>
         /// 
         /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid KeyId, MessageKey, or ExtensionKey is used</exception>
         public CipherDescription(SymmetricEngines EngineType, int KeySize, IVSizes IvSize, CipherModes CipherType, PaddingModes PaddingType,
-            BlockSizes BlockSize, RoundCounts RoundCount, Digests KdfEngine = Digests.SHA512, int MacSize = 64, Digests MacEngine = Digests.SHA512)
+            BlockSizes BlockSize, RoundCounts RoundCount, Digests KdfEngine = Digests.SHA512, int MacKeySize = 64, Digests MacEngine = Digests.SHA512)
         {
             this.EngineType = (int)EngineType;
             this.KeySize = KeySize;
@@ -141,8 +147,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
             this.BlockSize = (int)BlockSize;
             this.RoundCount = (int)RoundCount;
             this.KdfEngine = (int)KdfEngine;
-            this.MacSize = MacSize;
-            this.MacEngine = (int)MacEngine; 
+            this.MacKeySize = MacKeySize;
+            this.MacEngine = (int)MacEngine;
         }
 
         /// <summary>
@@ -162,7 +168,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
             BlockSize = reader.ReadByte();
             RoundCount = reader.ReadByte();
             KdfEngine = reader.ReadByte();
-            MacSize = reader.ReadByte();
+            MacKeySize = reader.ReadByte();
             MacEngine = reader.ReadByte();
         }
 
@@ -177,6 +183,38 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         }
         #endregion
 
+        #region Presets
+        /// <summary>
+        /// An AES-128 preset using CBC mode and PKCS7 padding
+        /// </summary>
+        public static readonly CipherDescription AES128CBC = new CipherDescription (SymmetricEngines.RHX, 16, IVSizes.V128, CipherModes.CBC, PaddingModes.PKCS7, BlockSizes.B128, RoundCounts.R10);
+
+        /// <summary>
+        /// An AES-256 preset using CBC mode and PKCS7 padding
+        /// </summary>
+        public static readonly CipherDescription AES256CBC = new CipherDescription(SymmetricEngines.RHX, 32, IVSizes.V128, CipherModes.CBC, PaddingModes.PKCS7, BlockSizes.B128, RoundCounts.R14);
+
+        /// <summary>
+        /// An Rijndael-512 preset using CBC mode and PKCS7 padding
+        /// </summary>
+        public static readonly CipherDescription AES512CBC = new CipherDescription(SymmetricEngines.RHX, 64, IVSizes.V128, CipherModes.CBC, PaddingModes.PKCS7, BlockSizes.B128, RoundCounts.R22);
+
+        /// <summary>
+        /// An AES-128 preset using CTR mode
+        /// </summary>
+        public static readonly CipherDescription AES128CTR = new CipherDescription(SymmetricEngines.RHX, 16, IVSizes.V128, CipherModes.CTR, PaddingModes.None, BlockSizes.B128, RoundCounts.R10);
+
+        /// <summary>
+        /// An AES-256 preset using CTR mode
+        /// </summary>
+        public static readonly CipherDescription AES256CTR = new CipherDescription(SymmetricEngines.RHX, 32, IVSizes.V128, CipherModes.CTR, PaddingModes.None, BlockSizes.B128, RoundCounts.R14);
+
+        /// <summary>
+        /// An Rijndael-512 preset using CTR mode
+        /// </summary>
+        public static readonly CipherDescription AES512CTR = new CipherDescription(SymmetricEngines.RHX, 64, IVSizes.V128, CipherModes.CTR, PaddingModes.None, BlockSizes.B128, RoundCounts.R22);
+        #endregion
+
         #region Public Methods
         /// <summary>
         /// Get the header Size in bytes
@@ -185,7 +223,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <returns>Header size</returns>
         public static int GetHeaderSize()
         {
-            return HDR_SIZE;
+            return CPRHDR_SIZE;
         }
 
         /// <summary>
@@ -214,7 +252,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
             BlockSize = 0;
             RoundCount = 0;
             KdfEngine = 0;
-            MacSize = 0;
+            MacKeySize = 0;
             MacEngine = 0;
         }
 
@@ -246,7 +284,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
             writer.Write((byte)BlockSize);
             writer.Write((byte)RoundCount);
             writer.Write((byte)KdfEngine);
-            writer.Write((byte)MacSize);
+            writer.Write((byte)MacKeySize);
             writer.Write((byte)MacEngine);
             stream.Seek(0, SeekOrigin.Begin);
 
@@ -270,7 +308,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
             hash += 31 * BlockSize;
             hash += 31 * RoundCount;
             hash += 31 * KdfEngine;
-            hash += 31 * MacSize;
+            hash += 31 * MacKeySize;
             hash += 31 * MacEngine;
 
             return hash;
@@ -306,7 +344,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
                 return false;
             if (KdfEngine != other.KdfEngine)
                 return false;
-            if (MacSize != other.MacSize)
+            if (MacKeySize != other.MacKeySize)
                 return false;
             if (MacEngine != other.MacEngine)
                 return false;

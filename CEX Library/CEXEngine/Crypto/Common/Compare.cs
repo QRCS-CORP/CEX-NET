@@ -161,6 +161,34 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         }
 
         /// <summary>
+        /// Compare short integer Arrays
+        /// </summary>
+        /// 
+        /// <param name="A">Array A</param>
+        /// <param name="B">Array B</param>
+        /// 
+        /// <returns>Equal</returns>
+        public static bool IsEqual(ushort[] A, ushort[] B)
+        {
+            if (A == null && B != null || B == null && A != null)
+                return false;
+
+            int i = A.Length;
+
+            if (i != B.Length)
+                return false;
+
+            while (i != 0)
+            {
+                --i;
+                if (A[i] != B[i])
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Compare Integer Arrays
         /// </summary>
         /// 
@@ -196,7 +224,63 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <param name="B">Array B</param>
         /// 
         /// <returns>Equal</returns>
+        public static bool IsEqual(uint[] A, uint[] B)
+        {
+            if (A == null && B != null || B == null && A != null)
+                return false;
+
+            int i = A.Length;
+
+            if (i != B.Length)
+                return false;
+
+            while (i != 0)
+            {
+                --i;
+                if (A[i] != B[i])
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Compare Integer Arrays
+        /// </summary>
+        /// 
+        /// <param name="A">Array A</param>
+        /// <param name="B">Array B</param>
+        /// 
+        /// <returns>Equal</returns>
         public static bool IsEqual(long[] A, long[] B)
+        {
+            if (A == null && B != null || B == null && A != null)
+                return false;
+
+            int i = A.Length;
+
+            if (i != B.Length)
+                return false;
+
+            while (i != 0)
+            {
+                --i;
+                if (A[i] != B[i])
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Compare Integer Arrays
+        /// </summary>
+        /// 
+        /// <param name="A">Array A</param>
+        /// <param name="B">Array B</param>
+        /// 
+        /// <returns>Equal</returns>
+        public static bool IsEqual(ulong[] A, ulong[] B)
         {
             if (A == null && B != null || B == null && A != null)
                 return false;

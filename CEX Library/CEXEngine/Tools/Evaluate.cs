@@ -6,7 +6,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
 {
     /// <summary>
     /// Compare arrays for equality
-    /// <para>Security Change: 1.4B, all internal comparisons (hashing, equals..) are now done with the CEXEngine.Crypto.Common.Equate class.</para>
+    /// <para>Security Change: 1.4B, all internal comparisons (hashing, equals..) are now done with the CEXEngine.Crypto.Common.Compare class.</para>
     /// </summary>
     public static class Evaluate
     {

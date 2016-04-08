@@ -305,8 +305,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             if (Package.Description.IvSize > 0)
                 subKeySize += Package.Description.IvSize;
             
-            if (Package.Description.MacSize > 0)
-                subKeySize += Package.Description.MacSize;
+            if (Package.Description.MacKeySize > 0)
+                subKeySize += Package.Description.MacKeySize;
 
             if (subKeySize < 1)
                 throw new CryptoProcessingException("PackageFactory:Create", "The key package cipher settings are invalid!", new Exception());
@@ -422,7 +422,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 // post overwrite flag set, erase the subkey
                 if (PackageKey.KeyHasPolicy(KeyPolicy, (long)KeyPolicies.PostOverwrite))
                 {
-                    int keySize = Description.KeySize + Description.IvSize + Description.MacSize;
+                    int keySize = Description.KeySize + Description.IvSize + Description.MacKeySize;
                     // overwrite the region within file
                     Erase(keyStream, keyPos, keySize);
                     // clear this section of the key
@@ -643,9 +643,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 iv = new byte[Description.IvSize];
                 InputStream.Read(iv, 0, iv.Length);
             }
-            if (Description.MacSize > 0)
+            if (Description.MacKeySize > 0)
             {
-                ikm = new byte[Description.MacSize];
+                ikm = new byte[Description.MacKeySize];
                 InputStream.Read(ikm, 0, ikm.Length);
             }
 

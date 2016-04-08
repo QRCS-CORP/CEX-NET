@@ -1,6 +1,5 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.CryptoException;
@@ -147,10 +146,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 
         #region Constructor
         /// <summary>
-        /// Initialize the class
+        /// Initialize this class using the digest enumeration name
         /// </summary>
         /// 
-        /// <param name="Digest">Message Digest instance</param>
+        /// <param name="Digests">The message digest enumeration name</param>
+        public HMAC(Digests DigestType)
+        {
+            IDigest digest = Helper.DigestFromName.GetInstance(DigestType);
+
+            _disposeEngine = true;
+            _msgDigest = digest;
+            _digestSize = digest.DigestSize;
+            _blockSize = digest.BlockSize;
+            _inputPad = new byte[_blockSize];
+            _outputPad = new byte[_blockSize];
+        }
+
+        /// <summary>
+        /// Initialize this class class using a digest instance
+        /// </summary>
+        /// 
+        /// <param name="Digest">The message digest instance</param>
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
         /// 
         /// <exception cref="CryptoMacException">Thrown if a null digest is used</exception>
@@ -172,7 +188,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <para>When this constructor is used, <see cref="Initialize(byte[], byte[])"/> is called automatically.</para>
         /// </summary>
         /// 
-        /// <param name="Digest">Message Digest instance</param>
+        /// <param name="Digest">The message digest instance</param>
         /// <param name="Key">HMAC Key; passed to HMAC Initialize() through constructor</param>
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
         /// 
@@ -313,8 +329,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
             Array.Clear(_inputPad, keyLength, _blockSize - keyLength);
             Array.Copy(_inputPad, 0, _outputPad, 0, _blockSize);
 
-            XOR(_inputPad, IPAD);
-            XOR(_outputPad, OPAD);
+            XorPad(_inputPad, IPAD);
+            XorPad(_outputPad, OPAD);
 
             // initialise the digest
             _msgDigest.BlockUpdate(_inputPad, 0, _inputPad.Length);
@@ -343,7 +359,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         #endregion
 
         #region Private Methods
-        private static void XOR(byte[] A, byte N)
+        private static void XorPad(byte[] A, byte N)
         {
             for (int i = 0; i < A.Length; ++i)
                 A[i] ^= N;

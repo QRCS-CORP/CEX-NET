@@ -484,15 +484,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 expKey = StandardExpand(Key);
             }
 
-            // block in 32 bit words
-            int blkWords = _blockSize / 4;
-            int expSize = blkWords * (_dfnRounds + 1);
-
             // inverse cipher
             if (!Encryption)
             {
+                int blkWords = _blockSize / 4;
+
                 // reverse key
-                for (int i = 0, k = expSize - blkWords; i < k; i += blkWords, k -= blkWords)
+                for (int i = 0, k = expKey.Length - blkWords; i < k; i += blkWords, k -= blkWords)
                 {
                     for (int j = 0; j < blkWords; j++)
                     {
@@ -502,7 +500,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                     }
                 }
                 // sbox inversion
-                for (int i = blkWords; i < expSize - blkWords; i++)
+                for (int i = blkWords; i < expKey.Length - blkWords; i++)
                 {
                     expKey[i] = IT0[SBox[(expKey[i] >> 24)]] ^
                         IT1[SBox[(byte)(expKey[i] >> 16)]] ^
@@ -557,74 +555,258 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             int blkWords = _blockSize / 4;
             // key in 32 bit words
             int keyWords = Key.Length / 4;
-
             // rounds calculation
-            if (keyWords == 16)
-                _dfnRounds = 22;
-            else if (blkWords == 8 || keyWords == 8)
-                _dfnRounds = 14;
-            else if (keyWords == 6)
-                _dfnRounds = 12;
-            else
-                _dfnRounds = 10;
-
+            _dfnRounds = (blkWords == 8 || keyWords == 8) ? 14 : keyWords + 6;
             // setup expanded key
-            int expSize = blkWords * (_dfnRounds + 1);
-            uint[] expKey = new uint[expSize];
+            uint[] expKey = new uint[blkWords * (_dfnRounds + 1)];
 
-            // add bytes to beginning of working key array
-            int pos = 0;
-            for (int i = 0; i < keyWords; i++)
+            if (keyWords == 16)
             {
-                uint value = ((uint)Key[pos++] << 24);
-                value |= ((uint)Key[pos++] << 16);
-                value |= ((uint)Key[pos++] << 8);
-                value |= ((uint)Key[pos++]);
-                expKey[i] = value;
+                expKey[0] = IntUtils.BytesToBe32(Key, 0);
+                expKey[1] = IntUtils.BytesToBe32(Key, 4);
+                expKey[2] = IntUtils.BytesToBe32(Key, 8);
+                expKey[3] = IntUtils.BytesToBe32(Key, 12);
+                expKey[4] = IntUtils.BytesToBe32(Key, 16);
+                expKey[5] = IntUtils.BytesToBe32(Key, 20);
+                expKey[6] = IntUtils.BytesToBe32(Key, 24);
+                expKey[7] = IntUtils.BytesToBe32(Key, 28);
+                expKey[8] = IntUtils.BytesToBe32(Key, 32);
+                expKey[9] = IntUtils.BytesToBe32(Key, 36);
+                expKey[10] = IntUtils.BytesToBe32(Key, 40);
+                expKey[11] = IntUtils.BytesToBe32(Key, 44);
+                expKey[12] = IntUtils.BytesToBe32(Key, 48);
+                expKey[13] = IntUtils.BytesToBe32(Key, 52);
+                expKey[14] = IntUtils.BytesToBe32(Key, 56);
+                expKey[15] = IntUtils.BytesToBe32(Key, 60);
+
+                //512R: 16,24,32,40,48,56,64,72,80,88, S: 20,28,36,44,52,60,68,76,84
+                ExpandRotBlock(expKey, 16, 16);
+                ExpandSubBlock(expKey, 20, 16);
+                ExpandRotBlock(expKey, 24, 16);
+                ExpandSubBlock(expKey, 28, 16);
+                ExpandRotBlock(expKey, 32, 16);
+                ExpandSubBlock(expKey, 36, 16);
+                ExpandRotBlock(expKey, 40, 16);
+                ExpandSubBlock(expKey, 44, 16);
+                ExpandRotBlock(expKey, 48, 16);
+                ExpandSubBlock(expKey, 52, 16);
+                ExpandRotBlock(expKey, 56, 16);
+                ExpandSubBlock(expKey, 60, 16);
+                ExpandRotBlock(expKey, 64, 16);
+                ExpandSubBlock(expKey, 68, 16);
+                ExpandRotBlock(expKey, 72, 16);
+                ExpandSubBlock(expKey, 76, 16);
+                ExpandRotBlock(expKey, 80, 16);
+                ExpandSubBlock(expKey, 84, 16);
+                ExpandRotBlock(expKey, 88, 16);
+
+                if (blkWords == 8)
+                {
+                    ExpandSubBlock(expKey, 92, 16);
+                    ExpandRotBlock(expKey, 96, 16);
+                    ExpandSubBlock(expKey, 100, 16);
+                    ExpandRotBlock(expKey, 104, 16);
+                    ExpandSubBlock(expKey, 108, 16);
+                    ExpandRotBlock(expKey, 112, 16);
+                    ExpandSubBlock(expKey, 116, 16);
+                    ExpandRotBlock(expKey, 120, 16);
+                    ExpandSubBlock(expKey, 124, 16);
+                    ExpandRotBlock(expKey, 128, 16);
+                    ExpandSubBlock(expKey, 132, 16);
+                    ExpandRotBlock(expKey, 136, 16);
+                    ExpandSubBlock(expKey, 140, 16);
+                    ExpandRotBlock(expKey, 144, 16);
+                    ExpandSubBlock(expKey, 148, 16);
+                    ExpandRotBlock(expKey, 152, 16);
+                    ExpandSubBlock(expKey, 156, 16);
+                    ExpandRotBlock(expKey, 160, 16);
+                    ExpandSubBlock(expKey, 164, 16);
+                    ExpandRotBlock(expKey, 168, 16);
+                    ExpandSubBlock(expKey, 172, 16);
+                }
             }
-
-            // build the remaining round keys
-            for (int i = keyWords; i < expSize; i++)
+            else if(keyWords == 8)
             {
-                uint temp = expKey[i - 1];
+                expKey[0] = IntUtils.BytesToBe32(Key, 0);
+                expKey[1] = IntUtils.BytesToBe32(Key, 4);
+                expKey[2] = IntUtils.BytesToBe32(Key, 8);
+                expKey[3] = IntUtils.BytesToBe32(Key, 12);
+                expKey[4] = IntUtils.BytesToBe32(Key, 16);
+                expKey[5] = IntUtils.BytesToBe32(Key, 20);
+                expKey[6] = IntUtils.BytesToBe32(Key, 24);
+                expKey[7] = IntUtils.BytesToBe32(Key, 28);
 
-                // if it is a 512 bit key, maintain step 8 interval for 
-                // additional processing steps, equal to a 256 bit key distribution
-                if (keyWords > 8)
+                // 256 R: 8,16,24,32,40,48,56 S: 12,20,28,36,44,52
+                ExpandRotBlock(expKey, 8, 8);
+                ExpandSubBlock(expKey, 12, 8);
+                ExpandRotBlock(expKey, 16, 8);
+                ExpandSubBlock(expKey, 20, 8);
+                ExpandRotBlock(expKey, 24, 8);
+                ExpandSubBlock(expKey, 28, 8);
+                ExpandRotBlock(expKey, 32, 8);
+                ExpandSubBlock(expKey, 36, 8);
+                ExpandRotBlock(expKey, 40, 8);
+                ExpandSubBlock(expKey, 44, 8);
+                ExpandRotBlock(expKey, 48, 8);
+                ExpandSubBlock(expKey, 52, 8);
+                ExpandRotBlock(expKey, 56, 8);
+
+                if (blkWords == 8)
                 {
-                    if (i % keyWords == 0 || i % keyWords == 8)
-                    {
-                        // round the key
-                        uint rot = (uint)((temp << 8) | ((temp >> 24) & 0xff));
-                        // subbyte step
-                        temp = SubByte(rot) ^ Rcon[i / keyWords];
-                    }
-                    // step ik + 4 and 12
-                    else if ((i % keyWords) == 4 || (i % keyWords) == 12)
-                    {
-                        temp = SubByte(temp);
-                    }
+                    ExpandSubBlock(expKey, 60, 8);
+                    ExpandRotBlock(expKey, 64, 8);
+                    ExpandSubBlock(expKey, 68, 8);
+                    ExpandRotBlock(expKey, 72, 8);
+                    ExpandSubBlock(expKey, 76, 8);
+                    ExpandRotBlock(expKey, 80, 8);
+                    ExpandSubBlock(expKey, 84, 8);
+                    ExpandRotBlock(expKey, 88, 8);
+                    ExpandSubBlock(expKey, 92, 8);
+                    ExpandRotBlock(expKey, 96, 8);
+                    ExpandSubBlock(expKey, 100, 8);
+                    ExpandRotBlock(expKey, 104, 8);
+                    ExpandSubBlock(expKey, 108, 8);
+                    ExpandRotBlock(expKey, 112, 8);
+                    ExpandSubBlock(expKey, 116, 8);
                 }
-                else
+            }
+            else if(keyWords == 6)
+            {
+                expKey[0] = IntUtils.BytesToBe32(Key, 0);
+                expKey[1] = IntUtils.BytesToBe32(Key, 4);
+                expKey[2] = IntUtils.BytesToBe32(Key, 8);
+                expKey[3] = IntUtils.BytesToBe32(Key, 12);
+                expKey[4] = IntUtils.BytesToBe32(Key, 16);
+                expKey[5] = IntUtils.BytesToBe32(Key, 20);
+
+                // 192: 6,12,18,24,30,36,42,48
+                ExpandRotBlock(expKey, 6, 6);
+                expKey[10] = expKey[4] ^ expKey[9];
+                expKey[11] = expKey[5] ^ expKey[10];
+                ExpandRotBlock(expKey, 12, 6);
+                expKey[16] = expKey[10] ^ expKey[15];
+                expKey[17] = expKey[11] ^ expKey[16];
+                ExpandRotBlock(expKey, 18, 6);
+                expKey[22] = expKey[16] ^ expKey[21];
+                expKey[23] = expKey[17] ^ expKey[22];
+                ExpandRotBlock(expKey, 24, 6);
+                expKey[28] = expKey[22] ^ expKey[27];
+                expKey[29] = expKey[23] ^ expKey[28];
+                ExpandRotBlock(expKey, 30, 6);
+                expKey[34] = expKey[28] ^ expKey[33];
+                expKey[35] = expKey[29] ^ expKey[34];
+                ExpandRotBlock(expKey, 36, 6);
+                expKey[40] = expKey[34] ^ expKey[39];
+                expKey[41] = expKey[35] ^ expKey[40];
+                ExpandRotBlock(expKey, 42, 6);
+                expKey[46] = expKey[40] ^ expKey[45];
+                expKey[47] = expKey[41] ^ expKey[46];
+                ExpandRotBlock(expKey, 48, 6);
+
+                if (blkWords == 8)
                 {
-                    if (i % keyWords == 0)
-                    {
-                        // round the key
-                        uint rot = (uint)((temp << 8) | ((temp >> 24) & 0xff));
-                        // subbyte step
-                        temp = SubByte(rot) ^ Rcon[i / keyWords];
-                    }
-                    // step ik + 4
-                    else if (keyWords > 6 && (i % keyWords) == 4)
-                    {
-                        temp = SubByte(temp);
-                    }
+                    expKey[52] = expKey[46] ^ expKey[51];
+                    expKey[53] = expKey[47] ^ expKey[52];
+                    ExpandRotBlock(expKey, 54, 6);
+                    expKey[58] = expKey[52] ^ expKey[57];
+                    expKey[59] = expKey[53] ^ expKey[58];
+                    ExpandRotBlock(expKey, 60, 6);
+                    expKey[64] = expKey[58] ^ expKey[63];
+                    expKey[65] = expKey[59] ^ expKey[64];
+                    ExpandRotBlock(expKey, 66, 6);
+                    expKey[70] = expKey[64] ^ expKey[69];
+                    expKey[71] = expKey[65] ^ expKey[70];
+                    ExpandRotBlock(expKey, 72, 6);
+                    expKey[76] = expKey[70] ^ expKey[75];
+                    expKey[77] = expKey[71] ^ expKey[76];
+                    ExpandRotBlock(expKey, 78, 6);
+                    expKey[82] = expKey[76] ^ expKey[81];
+                    expKey[83] = expKey[77] ^ expKey[82];
+                    ExpandRotBlock(expKey, 84, 6);
+                    expKey[88] = expKey[82] ^ expKey[87];
+                    expKey[89] = expKey[83] ^ expKey[88];
+                    ExpandRotBlock(expKey, 90, 6);
+                    expKey[94] = expKey[88] ^ expKey[93];
+                    expKey[95] = expKey[89] ^ expKey[94];
+                    ExpandRotBlock(expKey, 96, 6);
+                    expKey[100] = expKey[94] ^ expKey[99];
+                    expKey[101] = expKey[95] ^ expKey[100];
+                    ExpandRotBlock(expKey, 102, 6);
+                    expKey[106] = expKey[100] ^ expKey[105];
+                    expKey[107] = expKey[101] ^ expKey[106];
+                    ExpandRotBlock(expKey, 108, 6);
+                    expKey[112] = expKey[106] ^ expKey[111];
+                    expKey[113] = expKey[107] ^ expKey[112];
+                    ExpandRotBlock(expKey, 114, 6);
+                    expKey[118] = expKey[112] ^ expKey[117];
+                    expKey[119] = expKey[113] ^ expKey[118];
                 }
-                // w[i-Nk] ^ w[i]
-                expKey[i] = (uint)expKey[i - keyWords] ^ temp;
+            }
+            else
+            {
+                expKey[0] = IntUtils.BytesToBe32(Key, 0);
+                expKey[1] = IntUtils.BytesToBe32(Key, 4);
+                expKey[2] = IntUtils.BytesToBe32(Key, 8);
+                expKey[3] = IntUtils.BytesToBe32(Key, 12);
+
+                // 128R: 4,8,12,16,20,24,28,32,36,40
+                ExpandRotBlock(expKey, 4, 4);
+                ExpandRotBlock(expKey, 8, 4);
+                ExpandRotBlock(expKey, 12, 4);
+                ExpandRotBlock(expKey, 16, 4);
+                ExpandRotBlock(expKey, 20, 4);
+                ExpandRotBlock(expKey, 24, 4);
+                ExpandRotBlock(expKey, 28, 4);
+                ExpandRotBlock(expKey, 32, 4);
+                ExpandRotBlock(expKey, 36, 4);
+                ExpandRotBlock(expKey, 40, 4);
+
+                if (blkWords == 8)
+                {
+                    ExpandRotBlock(expKey, 44, 4);
+                    ExpandRotBlock(expKey, 48, 4);
+                    ExpandRotBlock(expKey, 52, 4);
+                    ExpandRotBlock(expKey, 56, 4);
+                    ExpandRotBlock(expKey, 60, 4);
+                    ExpandRotBlock(expKey, 64, 4);
+                    ExpandRotBlock(expKey, 68, 4);
+                    ExpandRotBlock(expKey, 72, 4);
+                    ExpandRotBlock(expKey, 76, 4);
+                    ExpandRotBlock(expKey, 80, 4);
+                    ExpandRotBlock(expKey, 84, 4);
+                    ExpandRotBlock(expKey, 88, 4);
+                    ExpandRotBlock(expKey, 92, 4);
+                    ExpandRotBlock(expKey, 96, 4);
+                    ExpandRotBlock(expKey, 100, 4);
+                    ExpandRotBlock(expKey, 104, 4);
+                    ExpandRotBlock(expKey, 108, 4);
+                    ExpandRotBlock(expKey, 112, 4);
+                    ExpandRotBlock(expKey, 116, 4);
+                }
             }
 
             return expKey;
+        }
+
+        private void ExpandRotBlock(uint[] Key, int Index, int Offset)
+        {
+            int sub = Index - Offset;
+
+            Key[Index] = Key[sub] ^ SubByte((Key[Index - 1] << 8) | ((Key[Index - 1] >> 24) & 0xFF)) ^ Rcon[(Index / Offset)];
+            // note: you can insert noise before each mix to further equalize timing, i.e: uint tmp = SubByte(Key[Index - 1]) ^ Key[sub];
+            Key[++Index] = Key[++sub] ^ Key[Index - 1];
+            Key[++Index] = Key[++sub] ^ Key[Index - 1];
+            Key[++Index] = Key[++sub] ^ Key[Index - 1];
+        }
+
+        private void ExpandSubBlock(uint[] Key, int Index, int Offset)
+        {
+            int sub = Index - Offset;
+
+            Key[Index] = SubByte(Key[Index - 1]) ^ Key[sub];
+            Key[++Index] = Key[++sub] ^ Key[Index - 1];
+            Key[++Index] = Key[++sub] ^ Key[Index - 1];
+            Key[++Index] = Key[++sub] ^ Key[Index - 1];
         }
         #endregion
 
@@ -916,23 +1098,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         #region Helpers
         private int GetIkmSize(Digests DigestType)
         {
-            switch (DigestType)
-            {
-                case Digests.Blake256:
-                case Digests.Keccak256:
-                case Digests.SHA256:
-                case Digests.Skein256:
-                    return 32;
-                case Digests.Blake512:
-                case Digests.Keccak512:
-                case Digests.SHA512:
-                case Digests.Skein512:
-                    return 64;
-                case Digests.Skein1024:
-                    return 128;
-                default:
-                    throw new CryptoSymmetricException("RHX:GetDigestSize", "The digest type is not supported!", new ArgumentException());
-            }
+            return DigestFromName.GetDigestSize(DigestType);
         }
 
         private IDigest GetKdfEngine(Digests DigestType)
@@ -949,25 +1115,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 
         private int GetSaltSize(Digests DigestType)
         {
-            switch (DigestType)
-            {
-                case Digests.Blake256:
-                case Digests.Skein256:
-                    return 32;
-                case Digests.Blake512:
-                case Digests.SHA256:
-                case Digests.Skein512:
-                    return 64;
-                case Digests.SHA512:
-                case Digests.Skein1024:
-                    return 128;
-                case Digests.Keccak256:
-                    return 136;
-                case Digests.Keccak512:
-                    return 72;
-                default:
-                    throw new CryptoSymmetricException("RHX:GetBlockSize", "The digest type is not supported!", new ArgumentException());
-            }
+            return DigestFromName.GetBlockSize(DigestType);
         }
 
         private uint SubByte(uint Rot)

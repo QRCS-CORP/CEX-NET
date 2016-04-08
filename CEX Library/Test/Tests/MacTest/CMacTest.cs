@@ -109,7 +109,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
         {
             byte[] hash = new byte[16];
 
-            using (CMAC mac = new CMAC(new RHX(), 128))
+            using (CMAC mac = new CMAC(new RHX()))
             {
                 mac.Initialize(Key, null);
                 mac.BlockUpdate(Input, 0, Input.Length);

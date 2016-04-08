@@ -100,7 +100,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             KeyParams keyParam;
 
             using (KeyGenerator keyGen = new KeyGenerator(SeedEngine, HashEngine, null))
-                keyParam = keyGen.GetKeyParams(Description.KeySize, Description.IvSize, Description.MacSize);
+                keyParam = keyGen.GetKeyParams(Description.KeySize, Description.IvSize, Description.MacKeySize);
 
             Create(Description, keyParam);
         }
@@ -125,11 +125,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 if (KeyParam.IV.Length != Description.IvSize)
                     throw new CryptoProcessingException("KeyFactory:Create", "The KeyParam IV size does not align with the IVSize setting in the Header!", new ArgumentOutOfRangeException());
             }
-            if (Description.MacSize > 0)
+            if (Description.MacKeySize > 0)
             {
                 if (KeyParam.IKM == null)
                     throw new CryptoProcessingException("KeyFactory:Create", "Digest key is specified in the header MacSize, but is null in KeyParam!", new ArgumentNullException());
-                if (KeyParam.IKM.Length != Description.MacSize)
+                if (KeyParam.IKM.Length != Description.MacKeySize)
                     throw new CryptoProcessingException("KeyFactory:Create", "Header MacSize does not align with the size of the KeyParam IKM!", new ArgumentOutOfRangeException());
             }
 
@@ -171,7 +171,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 RoundCount = (int)Rounds,
                 KdfEngine = (int)KdfEngine,
                 MacEngine = (int)MacEngine,
-                MacSize = MacSize
+                MacKeySize = MacSize
             };
 
             Create(dsc, KeyParam);
@@ -191,7 +191,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             KeyHeader = new CipherKey(_keyStream);
             CipherDescription dsc = KeyHeader.Description;
 
-            if (_keyStream.Length < dsc.KeySize + dsc.IvSize + dsc.MacSize + CipherKey.GetHeaderSize())
+            if (_keyStream.Length < dsc.KeySize + dsc.IvSize + dsc.MacKeySize + CipherKey.GetHeaderSize())
                 throw new CryptoProcessingException("KeyFactory:Extract", "The size of the key file does not align with the CipherKey sizes! Key is corrupt.", new ArgumentOutOfRangeException());
 
             _keyStream.Seek(CipherKey.GetHeaderSize(), SeekOrigin.Begin);

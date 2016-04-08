@@ -135,59 +135,6 @@ namespace VTDev.Projects.CEX.Tests
                 File.Delete(path);
         }
 
-        /// <summary>
-        /// Creates a temporary VolumeKey on disk, extracts and compares the copy
-        /// <para>Throws an Exception on failure</</para>
-        /// </summary>
-        public static void VolumeFactoryTest()
-        {
-            // cipher paramaters
-            CipherDescription desc = new CipherDescription(
-                SymmetricEngines.RHX, 
-                32,
-                IVSizes.V128,
-                CipherModes.CTR,
-                PaddingModes.X923,
-                BlockSizes.B128,
-                RoundCounts.R14,
-                Digests.Keccak512,
-                64,
-                Digests.Keccak512);
-
-            // create the package key
-            VolumeKey vkey = new VolumeKey(desc, 10);
-            // add id's
-            for (int i = 0; i < vkey.FileId.Length; i++)
-                vkey.FileId[i] = i;
-
-            MemoryStream keyStream;
-            // create a volume key stream
-            using (VolumeFactory vf = new VolumeFactory())
-                keyStream = vf.Create(vkey);
-
-            for (int i = 0; i < vkey.Count; i++)
-            {
-                CipherDescription desc2;
-                KeyParams kp1;
-                KeyParams kp2;
-
-                kp1 = VolumeKey.AtIndex(keyStream, i);
-                int id = vkey.FileId[i];
-
-                // read the key
-                using (VolumeFactory vf = new VolumeFactory())
-                    vf.Extract(keyStream, id, out desc2, out kp2);
-
-                // compare key material
-                if (!Evaluate.AreEqual(kp1.Key, kp2.Key))
-                    throw new Exception();
-                if (!Evaluate.AreEqual(kp1.IV, kp2.IV))
-                    throw new Exception();
-                if (!desc.Equals(desc2))
-                    throw new Exception();
-            }
-        }
-
         private static string GetTempPath()
         {
             string path = Path.GetTempFileName();

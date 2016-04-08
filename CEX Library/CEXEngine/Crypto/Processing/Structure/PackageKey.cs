@@ -538,9 +538,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
 
             byte[] key = new byte[pkey.Description.KeySize];
             byte[] iv = new byte[pkey.Description.IvSize];
-            byte[] ikm = new byte[pkey.Description.MacSize];
+            byte[] ikm = new byte[pkey.Description.MacKeySize];
 
-            int offset = GetHeaderSize(pkey) + (Index * (pkey.Description.IvSize + pkey.Description.KeySize + pkey.Description.MacSize));
+            int offset = GetHeaderSize(pkey) + (Index * (pkey.Description.IvSize + pkey.Description.KeySize + pkey.Description.MacKeySize));
 
             KeyStream.Seek(offset, SeekOrigin.Begin);
             KeyStream.Read(key, 0, key.Length);
@@ -777,7 +777,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
 
             int keyCount = GetSubKeyCount(KeyStream);
             CipherDescription cipher = GetCipherDescription(KeyStream);
-            int keySize = cipher.KeySize + cipher.IvSize + cipher.MacSize;
+            int keySize = cipher.KeySize + cipher.IvSize + cipher.MacKeySize;
             int hdrSize = POLICY_SIZE + CREATE_SIZE + KEYAUT_SIZE + DESC_SIZE + EXTKEY_SIZE + KEYCNT_SIZE + (keyCount * (KEYPOL_SIZE + KEYID_SIZE));
             keyPos = hdrSize + (keySize * index);
 

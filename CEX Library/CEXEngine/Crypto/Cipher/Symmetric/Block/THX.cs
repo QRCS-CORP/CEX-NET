@@ -715,25 +715,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 _sprBox[2 * (byte)(X >> 16) + 0x201];
         }
 
-        private int GetIkmSize(Digests Engine)
+        private int GetIkmSize(Digests DigestType)
         {
-            switch (Engine)
-            {
-                case Digests.Blake256:
-                case Digests.Keccak256:
-                case Digests.SHA256:
-                case Digests.Skein256:
-                    return 32;
-                case Digests.Blake512:
-                case Digests.Keccak512:
-                case Digests.SHA512:
-                case Digests.Skein512:
-                    return 64;
-                case Digests.Skein1024:
-                    return 128;
-                default:
-                    throw new CryptoSymmetricException("RHX:GetDigestSize", "The digest type is not supported!", new ArgumentException());
-            }
+            return DigestFromName.GetDigestSize(DigestType);
         }
 
         private IDigest GetKdfEngine(Digests Engine)
@@ -748,27 +732,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             }
         }
 
-        private int GetSaltSize(Digests Engine)
+        private int GetSaltSize(Digests DigestType)
         {
-            switch (Engine)
-            {
-                case Digests.Blake256:
-                case Digests.Skein256:
-                    return 32;
-                case Digests.Blake512:
-                case Digests.SHA256:
-                case Digests.Skein512:
-                    return 64;
-                case Digests.SHA512:
-                case Digests.Skein1024:
-                    return 128;
-                case Digests.Keccak256:
-                    return 136;
-                case Digests.Keccak512:
-                    return 72;
-                default:
-                    throw new CryptoSymmetricException("RHX:GetBlockSize", "The digest type is not supported!", new ArgumentException());
-            }
+            return DigestFromName.GetBlockSize(DigestType);
         }
 
         private uint LFSR1(uint X)

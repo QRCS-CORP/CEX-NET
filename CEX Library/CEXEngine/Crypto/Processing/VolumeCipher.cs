@@ -1,10 +1,9 @@
 ﻿#region Directives
 using System;
 using System.IO;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
+using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Crypto.Processing.Structure;
 using VTDev.Libraries.CEXEngine.CryptoException;
 using VTDev.Libraries.CEXEngine.Tools;
@@ -38,50 +37,48 @@ using VTDev.Libraries.CEXEngine.Tools;
 // contact: develop@vtdev.com
 #endregion
 
+// ToDo:
+// add a file to existing volume
+// use headers to track files
+// move keystream from ctor to initialize
+
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 {
     /// <summary>
     /// VolumeCipher: Performs bulk file cryptographic transforms.
-    /// <para>A helper class used to encrypt or decrypt a series of files on a directory or volume.
-    /// Note: If the cipher is for encryption, files are encrypted in place.
-    /// If the cipher is for decryption, individual files or the entire directory can be decrypted.</para>
+    /// <para>A helper class used to encrypt or decrypt a series of files on a directory or volume.</para>
     /// </summary> 
     /// 
     /// <example>
-    /// <description>Example of encrypting and decrypting a Directory:</description>
+    /// <description>Example of encrypting a group of files:</description>
     /// <code>
-    /// public static void VolumeCipherTest(string InputDirectory)
+    /// // key will be written to this stream
+    /// MemoryStream keyStream = new MemoryStream();
+    /// 
+    /// // encrypt the files in the directory
+    /// using (VolumeCipher vc = new VolumeCipher())
     /// {
-    ///     string[] paths = DirectoryTools.GetFiles(InputDirectory);
+    ///     keyStream = vc.CreateKey(CipherDescription.AES256CTR, FilePaths.Length);
+    ///     vc.ProgressPercent += OnVolumeProgressPercent;
+    ///     vc.Initialize(keyStream);
+    ///     vc.Encrypt(FilePaths);
+    /// }
     /// 
-    ///     // set cipher paramaters
-    ///     CipherDescription desc = new CipherDescription(
-    ///         Engines.RDX, 32,
-    ///         IVSizes.V128,
-    ///         CipherModes.CTR,
-    ///         PaddingModes.X923,
-    ///         BlockSizes.B128,
-    ///         RoundCounts.R14,
-    ///         Digests.Keccak512,
-    ///         64,
-    ///         Digests.Keccak512);
+    /// // write the key
+    /// keyStream.Seek(0, SeekOrigin.Begin);
+    /// using (FileStream outStream = new FileStream(KeyPath, FileMode.Create, FileAccess.ReadWrite))
+    ///     keyStream.CopyTo(outStream);
+    /// </code>
     /// 
-    ///     // define the volume key
-    ///     VolumeKey vkey = new VolumeKey(desc, paths.Length);
-    ///     // key will be written to this stream
-    ///     MemoryStream keyStream = new MemoryStream();
-    /// 
-    ///     // create the volume key stream
-    ///     using (VolumeFactory vf = new VolumeFactory(keyStream))
-    ///         vf.Create(vkey);
-    /// 
-    ///     // encrypt the files in the directory
-    ///     using (VolumeCipher vc = new VolumeCipher(true, keyStream))
-    ///         vc.Transform(paths);
-    /// 
-    ///     // decrypt the files in the directory
-    ///     using (VolumeCipher vc = new VolumeCipher(false, keyStream))
-    ///         vc.Transform(paths);
+    /// <description>Example of decrypting a file:</description>
+    /// <code>
+    /// using (FileStream ks = new FileStream(KeyPath, FileMode.Open, FileAccess.ReadWrite))
+    /// {
+    ///     using (VolumeCipher vc = new VolumeCipher())
+    ///     {
+    ///         vc.Initialize(ks);
+    ///         vc.Decrypt(paths);
+    ///     }
     /// }
     /// </code>
     /// </example>
@@ -113,7 +110,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// 
         /// <param name="sender">Event owner object</param>
         /// <param name="e">Progress event arguments containing percentage and bytes processed as the UserState param</param>
-        public delegate void ProgressDelegate(object sender, System.ComponentModel.ProgressChangedEventArgs e);
+        public delegate void ProgressDelegate(object sender, ProgressEventArgs args);
 
         /// <summary>
         /// Error notification delegate
@@ -134,15 +131,47 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         public event NotificationDelegate ErrorNotification;
         #endregion
 
-        #region Fields
-        private bool _isEncryption = true;
-        private long _progressTotal = 0;
-        private bool _isDisposed = false;
-        private VolumeKey _volumeKey;
-        private Stream _keyStream;
-        private CipherStream _cipherStream;
+        #region Event Args
+        /// <summary>
+        /// An event arguments class containing the decrypted message data.
+        /// </summary>
+        public class ProgressEventArgs : EventArgs
+        {
+            #region Fields
+            /// <summary>
+            /// Length of the stream
+            /// </summary>
+            public long Length = 0;
+            /// <summary>
+            /// The percentage of data processed
+            /// </summary>
+            public int Percent = 0;
+            #endregion
+
+            #region Constructor
+            /// <summary>
+            /// Initialize this class
+            /// </summary>
+            /// 
+            /// <param name="Length">Length of the stream</param>
+            /// <param name="Percent">The percentage of data processed</param>
+            public ProgressEventArgs(long Length, int Percent)
+            {
+                this.Length = Length;
+                this.Percent = Percent;
+            }
+        }
         #endregion
-        
+        #endregion
+
+        #region Fields
+        private CipherStream _cipherStream;
+        private bool _isDisposed = false;
+        private Stream _keyStream;
+        private long _progressTotal = 0;
+        private VolumeKey _volumeKey;
+        #endregion
+
         #region Properties
         /// <summary>
         /// Get/Set: Automatic processor parallelization
@@ -203,37 +232,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         #region Constructor 
         /// <summary>
-        /// Initialize the class with a CipherDescription Structure; containing the cipher implementation details, and a <see cref="KeyParams"/> class containing the Key material.
-        /// <para>This constructor creates and configures cryptographic instances based on the cipher description contained in a CipherDescription. 
-        /// Cipher modes, padding, and engines are destroyed automatically through this classes Dispose() method.</para>
+        /// Initialize this class
         /// </summary>
-        /// 
-        /// <param name="Encryption">Cipher is an encryptor</param>
-        /// <param name="KeyStream">A stream containing a <see cref="VolumeKey"/> and the keying material</param>
-        /// 
-        /// <exception cref="CryptoProcessingException">Thrown if an invalid <see cref="VolumeKey"/> is used</exception>
-        public VolumeCipher(bool Encryption, Stream KeyStream)
-        {
-            _keyStream = KeyStream;
-            _volumeKey = new VolumeKey(KeyStream);
-
-            if (!CipherDescription.IsValid(_volumeKey.Description))
-                throw new CryptoProcessingException("VolumeCipher:CTor", "The key Header is invalid!", new ArgumentException());
-
-            _isEncryption = Encryption;
-            CipherDescription desc = _volumeKey.Description;
-
-            try
-            {
-                _cipherStream = new CipherStream(desc);
-            }
-            catch (Exception ex)
-            {
-                throw new CryptoProcessingException("VolumeCipher:CTor", "The cipher could not be initialized!", ex);
-            }
-        }
-
-        private VolumeCipher()
+        public VolumeCipher()
         {
         }
 
@@ -246,152 +247,378 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         }
         #endregion
 
-        #region Public Methods
+        #region Key Creation
         /// <summary>
-        /// Encrypt or Decrypt the files in the specified directory
+        /// Create a volume key file using automatic key material generation.
+        /// <para>The Key, and IV sets are generated automatically using the cipher description contained in the <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription"/>.
+        /// This overload creates keying material using the seed and digest engines specified with the <see cref="KeyGenerator"/> class</para>
         /// </summary>
         /// 
-        /// <param name="DirectoryPath">The directory containing the files to be processed</param>
-        public void Transform(string DirectoryPath)
+        /// <param name="Key">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.VolumeKey">VolumeKey</see> containing the cipher and key implementation details</param>
+        /// <param name="SeedEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SeedGenerators">Random Generator</see> used to create the stage I seed material during key generation.</param>
+        /// <param name="HashEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest Engine</see> used in the stage II phase of key generation.</param>
+        /// 
+        /// <returns>A populated VolumeKey</returns>
+        public MemoryStream CreateKey(VolumeKey Key, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, Digests HashEngine = Digests.SHA512)
         {
-            string[] filePaths = DirectoryTools.GetFiles(DirectoryPath);
-            Transform(filePaths);
+            int ksize = Key.Count * (Key.Description.KeySize + Key.Description.IvSize);
+            byte[] kdata;
+
+            using (KeyGenerator keyGen = new KeyGenerator(SeedEngine, HashEngine, null))
+                kdata = keyGen.GetBytes(ksize);
+
+            MemoryStream keyStream = new MemoryStream();
+            byte[] hdr = Key.ToBytes();
+            keyStream.Write(hdr, 0, hdr.Length);
+            keyStream.Write(kdata, 0, kdata.Length);
+            keyStream.Seek(0, SeekOrigin.Begin);
+
+            return keyStream;
         }
 
         /// <summary>
-        /// Encrypt or Decrypt the files in the specified directory
+        /// Create a volume key file using a <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription"/> containing the cipher implementation details, and a key count size
+        /// </summary>
+        /// 
+        /// <param name="Description">The >Cipher Description containing the cipher details</param>
+        /// <param name="KeyCount">The number of key sets associated with this volume key</param>
+        /// <param name="SeedEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SeedGenerators">Random Generator</see> used to create the stage I seed material during key generation.</param>
+        /// <param name="HashEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest Engine</see> used in the stage II phase of key generation.</param>
+        /// 
+        /// <exception cref="System.IO.FileLoadException">A key file exists at the path specified</exception>
+        /// <exception cref="System.UnauthorizedAccessException">The key file path is read only</exception>
+        /// 
+        /// <returns>A populated VolumeKey</returns>
+        public MemoryStream CreateKey(CipherDescription Description, int KeyCount, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, Digests HashEngine = Digests.SHA512)
+        {
+            return this.CreateKey(new VolumeKey(Description, KeyCount), SeedEngine, HashEngine);
+        }
+
+        /// <summary>
+        /// Create a volume key file using a manual description of the cipher parameters.
+        /// </summary>
+        /// 
+        /// <param name="KeyCount">The number of key sets associated with this volume key</param>
+        /// <param name="EngineType">The Cryptographic <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">Engine</see> type</param>
+        /// <param name="KeySize">The cipher Key Size in bytes</param>
+        /// <param name="IvSize">Size of the cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.IVSizes">Initialization Vector</see></param>
+        /// <param name="CipherType">The type of <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.CipherModes">Cipher Mode</see></param>
+        /// <param name="PaddingType">The type of cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.PaddingModes">Padding Mode</see></param>
+        /// <param name="BlockSize">The cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockSizes">Block Size</see></param>
+        /// <param name="Rounds">The number of diffusion <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts">Rounds</see></param>
+        /// <param name="KdfEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to power the key schedule Key Derivation Function in HX and M series ciphers</param>
+        /// 
+        /// <returns>A populated VolumeKey</returns>
+        public MemoryStream CreateKey(int KeyCount, SymmetricEngines EngineType, int KeySize, IVSizes IvSize, 
+            CipherModes CipherType, PaddingModes PaddingType, BlockSizes BlockSize, RoundCounts Rounds, Digests KdfEngine)
+        {
+            CipherDescription dsc = new CipherDescription()
+            {
+                EngineType = (int)EngineType,
+                KeySize = KeySize,
+                IvSize = (int)IvSize,
+                CipherType = (int)CipherType,
+                PaddingType = (int)PaddingType,
+                BlockSize = (int)BlockSize,
+                RoundCount = (int)Rounds,
+                KdfEngine = (int)KdfEngine,
+            };
+
+            return CreateKey(dsc, KeyCount);
+        }
+
+        /// <summary>
+        /// Extract a KeyParams and CipherDescription from a VolumeKey stream
+        /// </summary>
+        /// 
+        /// <param name="KeyStream">The stream containing the VolumeKey</param>
+        /// <param name="Index">The index of the key set to extract</param>
+        /// <param name="Description">The <see cref="CipherDescription"/> that receives the cipher description</param>
+        /// <param name="KeyParam">The <see cref="KeyParams"/> container that receives the key material from the file</param>
+        /// 
+        /// <exception cref="CryptoProcessingException">Thrown if the key file could not be found</exception>
+        public void ExtractKey(Stream KeyStream, int Index, out CipherDescription Description, out KeyParams KeyParam)
+        {
+            if (KeyStream == null || KeyStream.Length < 96)
+                throw new CryptoProcessingException("VolumeFactory:Extract", "The key file could not be loaded! Check the stream.", new FileNotFoundException());
+
+            VolumeKey vkey = new VolumeKey(KeyStream);
+            Description = vkey.Description;
+            KeyParam = VolumeKey.AtIndex(KeyStream, Index);
+        }
+        #endregion
+
+        #region Transform
+        /// <summary>
+        /// Decrypt a single file in the volume
+        /// </summary>
+        /// 
+        /// <param name="InputPath">The path to the encrypted file</param>
+        /// <param name="OututPath">The path to the new decrypted file</param>
+        public void Decrypt(string InputPath, string OututPath)
+        {
+            FileStream inpStream = GetStream(InputPath, true);
+            VolumeHeader vh = GetHeader(inpStream);
+            KeyParams key = VolumeKey.FromId(_keyStream, vh.FileId);
+
+            if (key == null)
+            {
+                if (ErrorNotification != null)
+                    ErrorNotification(this, string.Format("The file {0}; has no key assigned", InputPath));
+            }
+            else
+            {
+                FileStream outStream = GetStream(OututPath, false);
+
+                if (inpStream == null || outStream == null)
+                {
+                    if (ErrorNotification != null)
+                        ErrorNotification(this, string.Format("The file {0}; could not be written to", OututPath));
+                }
+                else
+                {
+                    _volumeKey.State[_volumeKey.GetIndex(vh.FileId)] = (byte)VolumeKeyStates.Decrypted;
+                    _cipherStream.ProgressPercent += OnCipherProgress;
+                    _cipherStream.Initialize(false, key);
+                    _cipherStream.Write(inpStream, outStream);
+                    _cipherStream.ProgressPercent -= OnCipherProgress;
+                    outStream.SetLength(outStream.Length - VolumeHeader.GetHeaderSize);
+                    inpStream.Dispose();
+                    outStream.Dispose();
+                    UpdateKey();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Decrypt the files in the specified directory
         /// </summary>
         /// 
         /// <param name="FilePaths">A list of the files to be processed</param>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if the VolumeKey does not contain enough keys to encrypt all the files in the directory</exception>
-        public void Transform(string[] FilePaths)
+        public void Decrypt(string[] FilePaths)
         {
             if (FilePaths.Length < 1)
                 throw new CryptoProcessingException("VolumeCipher:Transform", "The file paths list is empty!", new ArgumentException());
-            if (_isEncryption && _volumeKey.KeyCount() < FilePaths.Length)
-                throw new CryptoProcessingException("VolumeCipher:Transform", "Not enough keys in the volume key to encrypt this directory!", new ArgumentException());
-            
-            Initialize(FilePaths);
+
+            InitializeProgress(FilePaths);
 
             if (_progressTotal < 1)
                 throw new CryptoProcessingException("VolumeCipher:Initialize", "The files are all zero bytes!", new ArgumentException());
 
             long prgCtr = 0;
 
-            for (int i = 0; i < FilePaths.Length; i++)
+            for (int i = 0; i < FilePaths.Length; ++i)
             {
-                // next key
-                int index = -1;
-                FileStream inpStream;
-                FileStream outStream;
-                KeyParams key;
-                int hash = GetFileNameHash(FilePaths[i]);//TODO: check this..
-                inpStream = GetStream(FilePaths[i]);
-                outStream = GetStream(FilePaths[i]);
+                FileStream inpStream = GetStream(FilePaths[i], true);
+                VolumeHeader vh = GetHeader(inpStream);
+                KeyParams key = VolumeKey.FromId(_keyStream, vh.FileId);
 
-                // should notify or log
-                if (inpStream == null || outStream == null)
+                // user dropped a file in, notify or log
+                if (key == null)
                 {
                     if (ErrorNotification != null)
-                        ErrorNotification(this, String.Format("The file {0}; could not be written to", FilePaths[i]));
+                        ErrorNotification(this, string.Format("The file {0}; has no key assigned", FilePaths[i]));
                 }
                 else
                 {
-                    if (_isEncryption)
+                    FileStream outStream = GetStream(FilePaths[i], false);
+
+                    if (inpStream == null || outStream == null)
                     {
-                        // get an unused key
-                        index = _volumeKey.NextSubKey();
-                        key = VolumeKey.AtIndex(_keyStream, index);
-                        if (key == null)
-                        {
-                            if (ErrorNotification != null)
-                                ErrorNotification(this, String.Format("The file {0}; has no key assigned", FilePaths[i]));
-                        }
-                        else
-                        {
-                            // update header
-                            _volumeKey.FileId[index] = hash;
-                            _volumeKey.State[index] = (byte)VolumeKeyStates.Encrypted;
-                            _cipherStream.Initialize(_isEncryption, key);
-                            _cipherStream.Write(inpStream, outStream);
-                        }
+                        if (ErrorNotification != null)
+                            ErrorNotification(this, string.Format("The file {0}; could not be written to", FilePaths[i]));
                     }
                     else
                     {
-                        // get key associated with file
-                        key = VolumeKey.FromId(_keyStream, hash);
+                        _volumeKey.State[_volumeKey.GetIndex(vh.FileId)] = (byte)VolumeKeyStates.Decrypted;
+                        _cipherStream.Initialize(false, key);
+                        _cipherStream.Write(inpStream, outStream);
+                        outStream.SetLength(outStream.Length - VolumeHeader.GetHeaderSize);
 
-                        // user dropped a file in, notify or log
-                        if (key == null)
-                        {
-                            if (ErrorNotification != null)
-                                ErrorNotification(this, String.Format("The file {0}; has no key assigned", FilePaths[i]));
-                        }
-                        else
-                        {
-                            _volumeKey.State[_volumeKey.GetIndex(hash)] = (byte)VolumeKeyStates.Decrypted;
-                            _cipherStream.Initialize(_isEncryption, key);
-                            _cipherStream.Write(inpStream, outStream);
-                        }
+                        prgCtr += inpStream.Position;
+                        CalculateProgress(prgCtr);
+                        inpStream.Dispose();
+                        outStream.Dispose();
+                        UpdateKey();
                     }
                 }
-
-                prgCtr += inpStream.Position;
-                CalculateProgress(prgCtr);
-
-                inpStream.Close();
-                inpStream.Dispose();
-                outStream.Close();
-                outStream.Dispose();
             }
+        }
 
-            // update the key header
-            if (_isEncryption)
+        /// <summary>
+        /// Encrypt the files in the specified directory
+        /// </summary>
+        /// 
+        /// <param name="FilePaths">A list of the files to be processed</param>
+        /// 
+        /// <exception cref="CryptoProcessingException">Thrown if the VolumeKey does not contain enough keys to encrypt all the files in the directory</exception>
+        public void Encrypt(string[] FilePaths)
+        {
+            if (FilePaths.Length < 1)
+                throw new CryptoProcessingException("VolumeCipher:Transform", "The file paths list is empty!", new ArgumentException());
+            if (_volumeKey.KeyCount() < FilePaths.Length)
+                throw new CryptoProcessingException("VolumeCipher:Transform", "Not enough keys in the volume key to encrypt this directory!", new ArgumentException());
+            
+            InitializeProgress(FilePaths);
+
+            if (_progressTotal < 1)
+                throw new CryptoProcessingException("VolumeCipher:Initialize", "The files are all zero bytes!", new ArgumentException());
+
+            long prgCtr = 0;
+
+            for (int i = 0; i < FilePaths.Length; ++i)
             {
-                byte[] ks = _volumeKey.ToBytes();
-                _keyStream.Seek(0, SeekOrigin.Begin);
-                _keyStream.Write(ks, 0, ks.Length);
+                int index = _volumeKey.NextSubKey();
+                KeyParams key = VolumeKey.AtIndex(_keyStream, index);
+
+                if (key == null)
+                {
+                    if (ErrorNotification != null)
+                        ErrorNotification(this, string.Format("The file {0}; has no key assigned", FilePaths[i]));
+                }
+                else
+                {
+                    FileStream inpStream = GetStream(FilePaths[i], true);
+                    FileStream outStream = GetStream(FilePaths[i], false);
+
+                    if (inpStream == null || outStream == null)
+                    {
+                        if (ErrorNotification != null)
+                            ErrorNotification(this, string.Format("The file {0}; could not be written to", FilePaths[i]));
+                    }
+                    else
+                    {
+                        _volumeKey.State[index] = (byte)VolumeKeyStates.Encrypted;
+                        _cipherStream.Initialize(true, key);
+                        _cipherStream.Write(inpStream, outStream);
+
+                        // write the header
+                        VolumeHeader vh = new VolumeHeader(_volumeKey.Tag, _volumeKey.FileId[index]);
+                        outStream.Write(vh.ToBytes(), 0, VolumeHeader.GetHeaderSize);
+
+                        prgCtr += inpStream.Position;
+                        CalculateProgress(prgCtr);
+                        inpStream.Dispose();
+                        outStream.Dispose();
+                        UpdateKey();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Encrypt a file with a specific key
+        /// </summary>
+        /// 
+        /// <param name="FilePath">The full path to the file</param>
+        /// <param name="FileId">The files key id</param>
+        public void Encrypt(string FilePath, int FileId)
+        {
+            if (_progressTotal < 1)
+                throw new CryptoProcessingException("VolumeCipher:Initialize", "The files are all zero bytes!", new ArgumentException());
+
+            KeyParams key = VolumeKey.FromId(_keyStream, FileId);
+
+            if (key == null)
+            {
+                if (ErrorNotification != null)
+                    ErrorNotification(this, string.Format("The file {0}; has no key assigned", FilePath));
+            }
+            else
+            {
+                FileStream inpStream = GetStream(FilePath, true);
+                FileStream outStream = GetStream(FilePath, false);
+
+                if (inpStream == null || outStream == null)
+                {
+                    if (ErrorNotification != null)
+                        ErrorNotification(this, string.Format("The file {0}; could not be written to", FilePath));
+                }
+                else
+                {
+                    int index = _volumeKey.GetIndex(FileId);
+                    _volumeKey.State[index] = (byte)VolumeKeyStates.Encrypted;
+                    _cipherStream.Initialize(true, key);
+                    _cipherStream.ProgressPercent += OnCipherProgress;
+                    _cipherStream.Write(inpStream, outStream);
+                    _cipherStream.ProgressPercent -= OnCipherProgress;
+
+                    // write the header
+                    VolumeHeader vh = new VolumeHeader(_volumeKey.Tag, _volumeKey.FileId[index]);
+                    outStream.Write(vh.ToBytes(), 0, VolumeHeader.GetHeaderSize);
+
+                    inpStream.Dispose();
+                    outStream.Dispose();
+                    UpdateKey();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Initialize the cipher instance
+        /// </summary>
+        /// 
+        /// <param name="KeyStream">A stream containing a volume key</param>
+        public void Initialize(Stream KeyStream)
+        {
+            _keyStream = KeyStream;
+            _volumeKey = new VolumeKey(KeyStream);
+
+            if (!CipherDescription.IsValid(_volumeKey.Description))
+                throw new CryptoProcessingException("VolumeCipher:Initialize", "The key Header is invalid!", new ArgumentException());
+
+            CipherDescription dsc = _volumeKey.Description;
+
+            try
+            {
+                _cipherStream = new CipherStream(dsc);
+            }
+            catch (Exception ex)
+            {
+                throw new CryptoProcessingException("VolumeCipher:Initialize", "The cipher could not be initialized!", ex);
             }
         }
         #endregion
 
         #region Helpers
-        private void CalculateProgress(long Size)
+        private void CalculateProgress(long Processed)
         {
-            if (ProgressPercent != null && Size > 0)
+            if (ProgressPercent == null)
+                return;
+
+            if (_progressTotal != Processed)
             {
-                double progress = 100.0 * (double)Size / _progressTotal;
-                ProgressPercent(this, new System.ComponentModel.ProgressChangedEventArgs((int)progress, (object)Size));
+                double progress = 100.0 * ((double)Processed / _progressTotal);
+                if (progress > 100.0)
+                    progress = 100.0;
+
+                ProgressPercent(this, new ProgressEventArgs(_progressTotal, (int)progress));
+            }
+            else
+            {
+                ProgressPercent(this, new ProgressEventArgs(_progressTotal, 100));
             }
         }
-        private int GetFileNameHash(string FileName)
+
+        private VolumeHeader GetHeader(Stream InputStream)
         {
-            // for portability include container only
-            int pos = FileName.LastIndexOf(Path.DirectorySeparatorChar);
-            if (pos > 0)
-                pos = FileName.LastIndexOf(Path.DirectorySeparatorChar, pos - 1);
-            else
-                pos = 0;
+            InputStream.Seek(InputStream.Length - VolumeHeader.GetHeaderSize, SeekOrigin.Begin);
+            VolumeHeader vh = new VolumeHeader(InputStream);
+            InputStream.Seek(0, SeekOrigin.Begin);
 
-            string trnName = FileName.Substring(pos, FileName.Length - pos);
-            byte[] hash;
-            using (Digest.SHA256 eng = new Digest.SHA256())
-                hash = eng.ComputeHash(System.Text.Encoding.Unicode.GetBytes(trnName));
-
-            while (hash.Length > 4)
-                hash = Reduce(hash);
-
-            int[] ret = new int[1];
-            Buffer.BlockCopy(hash, 0, ret, 0, 4);
-            return ret[0];
+            return vh;
         }
 
-        private FileStream GetStream(string FilePath)
+        private FileStream GetStream(string FilePath, bool Read)
         {
             try
             {
-                return new FileStream(FilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite, 64000, FileOptions.WriteThrough);
+                if (Read)
+                    return new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.Write, 64000, FileOptions.WriteThrough);
+                else
+                    return new FileStream(FilePath, FileMode.Open, FileAccess.Write, FileShare.Read);
             }
             catch
             {
@@ -399,21 +626,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             }
         }
 
-        private void Initialize(string[] FilePaths)
+        private void InitializeProgress(string[] FilePaths)
         {
             for (int i = 0; i < FilePaths.Length; i++)
                 _progressTotal += FileTools.GetSize(FilePaths[i]);
         }
 
-        private byte[] Reduce(byte[] Seed)
+        private void OnCipherProgress(object sender, CipherStream.ProgressEventArgs args)
         {
-            int len = Seed.Length / 2;
-            byte[] data = new byte[len];
+            if (ProgressPercent != null)
+                ProgressPercent(this, new ProgressEventArgs(args.Length, args.Percent));
+        }
 
-            for (int i = 0; i < len; i++)
-                data[i] = (byte)(Seed[i] ^ Seed[len + i]);
-
-            return data;
+        private void UpdateKey()
+        {
+            byte[] ks = _volumeKey.ToBytes();
+            _keyStream.Seek(0, SeekOrigin.Begin);
+            _keyStream.Write(ks, 0, ks.Length);
         }
         #endregion
 
@@ -433,7 +662,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             {
                 try
                 {
-                    _isEncryption = false;
                     _progressTotal = 0;
                     _volumeKey.Reset();
                     if (_cipherStream != null)

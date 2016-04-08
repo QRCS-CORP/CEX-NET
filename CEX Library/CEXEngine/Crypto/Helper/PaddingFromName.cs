@@ -5,7 +5,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Helper
 {
     /// <summary>
-    /// PaddingFromName: Get a Cipher Padding Mode instance from it's enumeration name.
+    /// Get a Cipher Padding Mode instance from it's enumeration name
     /// </summary>
     public static class PaddingFromName
     {

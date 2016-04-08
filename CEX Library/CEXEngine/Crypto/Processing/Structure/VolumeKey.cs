@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
+using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.CryptoException;
 using VTDev.Libraries.CEXEngine.Utility;
 #endregion
@@ -40,12 +41,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
     public struct VolumeKey
     {
         #region Constants
-        private const int TAG_SIZE = 32;
+        private const int TAG_SIZE = 16;
         private const int DESC_SIZE = 11;
         private const int COUNT_SIZE = 4;
         private const int ID_SIZE = 4;
         private const int STATE_SIZE = 1;
-
         private const int TAG_SEEK = 0;
         private const int COUNT_SEEK = TAG_SIZE + DESC_SIZE;
         private const int ID_SEEK = TAG_SIZE + DESC_SIZE + COUNT_SIZE;
@@ -84,13 +84,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <param name="Count">The number of key/vector pairs</param>
         public VolumeKey(CipherDescription Description, int Count)
         {
-            this.Tag = new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPPrng().GetBytes(32);
             this.Description = Description;
             this.Count = Count;
             this.FileId = new int[Count];
             this.State = new byte[Count];
+            this.Tag = new CSPPrng().GetBytes(TAG_SIZE);
+            int id = 0;
+
+            using (CSPPrng rng = new CSPPrng())
+            {
+                this.Tag = rng.GetBytes(TAG_SIZE);
+                id = rng.Next();
+            }
+
             for (int i = 0; i < Count; ++i)
+            {
                 this.State[i] = (byte)VolumeKeyStates.Unassigned;
+                this.FileId[i] = id + i;
+            }
         }
 
         /// <summary>
@@ -108,8 +119,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
             this.Count = Count;
             this.FileId = new int[Count];
             this.State = new byte[Count];
+            int id = new CSPPrng().Next();
+
             for (int i = 0; i < Count; ++i)
+            {
                 this.State[i] = (byte)VolumeKeyStates.Unassigned;
+                this.FileId[i] = id + i;
+            }
         }
 
         
@@ -172,6 +188,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Creates a deep copy of the key
+        /// </summary>
+        /// 
+        /// <returns>The VolumeKey copy</returns>
+        public VolumeKey DeepCopy()
+        {
+            return new VolumeKey(ToBytes());
         }
 
         /// <summary>
@@ -290,7 +316,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <param name="Iv">The vector</param>
         /// 
         /// <returns>Returns true if the file id is known, otherwizse false</returns>
-        public static void Add(Stream KeyStream, int Id, byte[] Key, byte[] Iv)
+        public static void Add(Stream KeyStream, byte[] Key, byte[] Iv)
         {
             using (MemoryStream keyMem = new MemoryStream())
             {
@@ -302,7 +328,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
 
                 // adjust the header params
                 vkey.Count++;
-                ArrayUtils.AddAt(ref vkey.FileId, Id, vkey.Count);
+                ArrayUtils.AddAt(ref vkey.FileId, vkey.FileId[vkey.FileId.Length - 1]++, vkey.Count);
                 ArrayUtils.AddAt(ref vkey.State, (byte)0, vkey.Count);
                 // copy header to mem
                 vkey.ToStream().WriteTo(keyMem);
@@ -499,6 +525,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
                 KeyStream.Seek(0, SeekOrigin.Begin);
                 keyMem.WriteTo(KeyStream);
             }
+        }
+        #endregion
+
+        #region Private Methods
+        private static byte[] Reduce(byte[] Seed)
+        {
+            int len = Seed.Length / 2;
+            byte[] data = new byte[len];
+
+            for (int i = 0; i < len; i++)
+                data[i] = (byte)(Seed[i] ^ Seed[len + i]);
+
+            return data;
         }
         #endregion
 

@@ -1175,25 +1175,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void CalculateProgress(long Length, long Processed)
         {
-            if (ProgressPercent != null && Length >= Processed)
-	        {
+            if (ProgressPercent == null)
+                return;
+
+            if (Length != Processed)
+            {
                 double progress = 100.0 * ((double)Processed / Length);
                 if (progress > 100.0)
                     progress = 100.0;
 
-                if (_isParallel)
-                {
-                    ProgressPercent(this, new ProgressEventArgs(Length, (int)progress));
-                }
-                else
-                {
-                    long chunk = Length / 100;
-                    if (chunk == 0)
-                        ProgressPercent(this, new ProgressEventArgs(Length, (int)progress));
-                    else if (Processed % chunk == 0)
-                        ProgressPercent(this, new ProgressEventArgs(Length, (int)progress));
-                }
-	        }
+                ProgressPercent(this, new ProgressEventArgs(Length, (int)progress));
+            }
+            else
+            {
+                ProgressPercent(this, new ProgressEventArgs(Length, 100));
+            }
         }
 
         private IBlockCipher GetBlockCipher(BlockCiphers EngineType, int BlockSize, int RoundCount, Digests KdfEngine)

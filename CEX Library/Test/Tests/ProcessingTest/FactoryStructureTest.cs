@@ -7,6 +7,7 @@ using VTDev.Libraries.CEXEngine.Tools;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Processing.Factory;
 using VTDev.Libraries.CEXEngine.Crypto.Processing.Structure;
+using VTDev.Libraries.CEXEngine.Crypto.Processing;
 #endregion
 
 namespace VTDev.Projects.CEX.Test.Tests.Tools
@@ -290,8 +291,8 @@ namespace VTDev.Projects.CEX.Test.Tests.Tools
                 RoundCounts.R22);
 
             MemoryStream mk;
-            using (VolumeFactory vf = new VolumeFactory())
-                mk = vf.Create(cd1, 100);
+            using (VolumeCipher vc = new VolumeCipher())
+                mk = vc.CreateKey(cd1, 100);
 
             VolumeKey vk1 = new VolumeKey(mk);
             CipherDescription cd2 = vk1.Description;

@@ -1,7 +1,7 @@
 #region Directives
 using System;
 using System.Runtime.Serialization;
-using VTDev.Libraries.CEXEngine.Crypto.Prng ;
+using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 

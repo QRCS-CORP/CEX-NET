@@ -148,13 +148,13 @@ namespace VTDev.Projects.CEX
                     }
 
                     // offset start position is base header + Mac size
-                    int hdrOffset = MessageHeader.GetHeaderSize + cipherDesc.MacSize;
+                    int hdrOffset = MessageHeader.GetHeaderSize + cipherDesc.MacKeySize;
                     // decrypt file extension and create a unique path
                     byte[] ext = MessageHeader.GetExtension(inStream);
                     _outputPath = Utilities.GetUniquePath(_outputPath + MessageHeader.DecryptExtension(ext, extKey));
 
                     // if a signing key, test the mac: (MacSize = 0; not signed)
-                    if (cipherDesc.MacSize > 0)
+                    if (cipherDesc.MacKeySize > 0)
                     {
                         if (lblStatus.InvokeRequired)
                             lblStatus.Invoke(new MethodInvoker(delegate { lblStatus.Text = "Calculating the MAC code.."; }));
@@ -165,7 +165,7 @@ namespace VTDev.Projects.CEX
                         using (MacStream mstrm = new MacStream(new HMAC(dgt, keyParam.IKM)))
                         {
                             // get the message header mac
-                            byte[] chksum = MessageHeader.GetMessageMac(inStream, cipherDesc.MacSize);
+                            byte[] chksum = MessageHeader.GetMessageMac(inStream, cipherDesc.MacKeySize);
 
                             // initialize mac stream
                             inStream.Seek(hdrOffset, SeekOrigin.Begin);
@@ -266,7 +266,7 @@ namespace VTDev.Projects.CEX
                     keyId = (byte[])keyFactory.NextKey(out keyHeader, out keyParam, out extKey).Clone();
                 }
                 // offset start position is base header + Mac size
-                int hdrOffset = MessageHeader.GetHeaderSize + keyHeader.MacSize;
+                int hdrOffset = MessageHeader.GetHeaderSize + keyHeader.MacKeySize;
 
                 // with this constructor, the CipherStream class creates the cryptographic
                 // engine using the description in the CipherDescription.
@@ -298,7 +298,7 @@ namespace VTDev.Projects.CEX
                             MessageHeader.SetExtension(outStream, MessageHeader.EncryptExtension(Path.GetExtension(_inputPath), extKey));
 
                             // if this is a signing key, calculate the mac 
-                            if (keyHeader.MacSize > 0)
+                            if (keyHeader.MacKeySize > 0)
                             {
                                 if (lblStatus.InvokeRequired)
                                     lblStatus.Invoke(new MethodInvoker(delegate {
@@ -671,7 +671,7 @@ namespace VTDev.Projects.CEX
             Enum.TryParse<Digests>(((ComboBox)sender).Text, out digest);
             _container.Description.MacEngine = (int)digest;
             if (chkSign.Checked)
-                _container.Description.MacSize = GetMacSize(digest);
+                _container.Description.MacKeySize = GetMacSize(digest);
         }
 
         private void OnInfoButtonClick(object sender, EventArgs e)
@@ -700,9 +700,9 @@ namespace VTDev.Projects.CEX
             {
                 // mac size set to 0 means no signing
                 if (!chk.Checked)
-                    _container.Description.MacSize = 0;
+                    _container.Description.MacKeySize = 0;
                 else
-                    _container.Description.MacSize = GetMacSize((Digests)_container.Description.MacEngine);
+                    _container.Description.MacKeySize = GetMacSize((Digests)_container.Description.MacEngine);
             }
             else if (chk.Name.Equals("chkDomainRestrict"))
                 flag = KeyPolicies.DomainRestrict;
@@ -748,10 +748,10 @@ namespace VTDev.Projects.CEX
                 pbStatus.Invoke(new MethodInvoker(delegate { pbStatus.Value = args.Percent; }));
         }
 
-        private void OnMacProgress(object sender, System.ComponentModel.ProgressChangedEventArgs e)
+        private void OnMacProgress(object sender, MacStream.ProgressEventArgs args)
         {
             if (pbStatus.InvokeRequired)
-                pbStatus.Invoke(new MethodInvoker(delegate { pbStatus.Value = e.ProgressPercentage; }));
+                pbStatus.Invoke(new MethodInvoker(delegate { pbStatus.Value = args.Percent; }));
         }
 
         private void OnRoundsChanged(object sender, EventArgs e)
@@ -768,9 +768,9 @@ namespace VTDev.Projects.CEX
             Enum.TryParse<Digests>(cbHmac.Text, out digest);
 
             if (!chk.Checked)
-                _container.Description.MacSize = 0;
+                _container.Description.MacKeySize = 0;
             else
-                _container.Description.MacSize = GetMacSize(digest);
+                _container.Description.MacKeySize = GetMacSize(digest);
         }
 
         private void OnSubKeyCountKeyPress(object sender, KeyPressEventArgs e)

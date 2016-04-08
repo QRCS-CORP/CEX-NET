@@ -5,7 +5,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Helper
 {
     /// <summary>
-    /// PrngFromName: Get a Prng instance from it's enumeration name.
+    /// Get a Prng instance from it's enumeration name
     /// </summary>
     public static class PrngFromName
     {

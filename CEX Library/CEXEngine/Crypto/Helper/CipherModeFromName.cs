@@ -6,7 +6,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Helper
 {
     /// <summary>
-    /// CipherModeFromName: Get a Cipher Mode instance from it's enumeration name.
+    /// Get a Cipher Mode instance from it's enumeration name
     /// </summary>
     public static class CipherModeFromName
     {

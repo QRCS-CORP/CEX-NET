@@ -78,6 +78,39 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     /// </remarks>
     public sealed class DigestStream : IDisposable
     {
+        #region Event Args
+        /// <summary>
+        /// An event arguments class containing the decrypted message data.
+        /// </summary>
+        public class ProgressEventArgs : EventArgs
+        {
+            #region Fields
+            /// <summary>
+            /// Length of the stream
+            /// </summary>
+            public long Length = 0;
+            /// <summary>
+            /// The percentage of data processed
+            /// </summary>
+            public int Percent = 0;
+            #endregion
+
+            #region Constructor
+            /// <summary>
+            /// Initialize this class
+            /// </summary>
+            /// 
+            /// <param name="Length">Length of the stream</param>
+            /// <param name="Percent">The percentage of data processed</param>
+            public ProgressEventArgs(long Length, int Percent)
+            {
+                this.Length = Length;
+                this.Percent = Percent;
+            }
+            #endregion
+        }
+        #endregion
+
         #region Events
         /// <summary>
         /// Progress indicator delegate
@@ -85,7 +118,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// 
         /// <param name="sender">Event owner object</param>
         /// <param name="e">Progress event arguments containing percentage and bytes processed as the UserState param</param>
-        public delegate void ProgressDelegate(object sender, System.ComponentModel.ProgressChangedEventArgs e);
+        public delegate void ProgressDelegate(object sender, ProgressEventArgs args);
 
         /// <summary>
         /// Progress Percent Event; returns bytes processed as an integer percentage
@@ -256,12 +289,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void CalculateProgress(long Size, bool Completed = false)
         {
+            if (ProgressPercent == null)
+                return;
+
             if (Completed || Size % _progressInterval == 0)
             {
-                if (ProgressPercent != null)
+                if (Size != _inStream.Length)
                 {
                     double progress = 100.0 * (double)Size / _inStream.Length;
-                    ProgressPercent(this, new System.ComponentModel.ProgressChangedEventArgs((int)progress, (object)Size));
+                    ProgressPercent(this, new ProgressEventArgs(Size, (int)progress));
+                }
+                else
+                {
+                    ProgressPercent(this, new ProgressEventArgs(Size, 100));
                 }
             }
         }

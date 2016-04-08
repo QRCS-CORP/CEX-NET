@@ -1,11 +1,9 @@
 ﻿#region Directives
-using System;
 using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Processing.Structure;
 using VTDev.Libraries.CEXEngine.CryptoException;
-using VTDev.Libraries.CEXEngine.Tools;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
@@ -54,26 +52,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests"/>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Common.KeyGenerator"/>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Processing.VolumeCipher"/>
-    public sealed class VolumeFactory : IDisposable
+    public sealed class VolumeFactory
     {
-        #region Fields
-        private bool _isDisposed = false;
-        #endregion
-
         #region Constructor
         /// <summary>
         /// Initialize this class
         /// </summary>
         public VolumeFactory()
         {
-        }
-
-        /// <summary>
-        /// Finalizer: ensure resources are destroyed
-        /// </summary>
-        ~VolumeFactory()
-        {
-            Dispose(false);
         }
         #endregion
 
@@ -153,7 +139,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 RoundCount = (int)Rounds,
                 KdfEngine = (int)KdfEngine,
                 MacEngine = (int)MacEngine,
-                MacSize = MacSize
+                MacKeySize = MacSize
             };
 
             return Create(dsc, KeyCount);
@@ -177,23 +163,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             VolumeKey vkey = new VolumeKey(KeyStream);
             Description = vkey.Description;
             KeyParam = VolumeKey.AtIndex(KeyStream, Index);
-        }
-        #endregion
-
-        #region IDispose
-        /// <summary>
-        /// Dispose of this class
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        private void Dispose(bool Disposing)
-        {
-            if (!_isDisposed && Disposing)
-                _isDisposed = true;
         }
         #endregion
     }

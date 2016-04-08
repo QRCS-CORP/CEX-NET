@@ -5,7 +5,7 @@ using VTDev.Libraries.CEXEngine.CryptoException;
 namespace VTDev.Libraries.CEXEngine.Crypto.Helper
 {
     /// <summary>
-    /// BlockCipherFromName: Get a Block Cipher instance from it's enumeration name.
+    /// Get a Block Cipher instance from it's enumeration name
     /// </summary>
     public static class BlockCipherFromName
     {

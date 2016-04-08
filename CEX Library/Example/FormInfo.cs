@@ -27,7 +27,7 @@ namespace VTDev.Projects.CEX
             lstInfo.Items.Add("Rounds: " + MemberToString((RoundCounts)Info.Description.RoundCount));
             lstInfo.Items.Add("KDF Engine: " + MemberToString((Digests)Info.Description.KdfEngine));
             lstInfo.Items.Add("Padding: " + MemberToString((PaddingModes)Info.Description.PaddingType));
-            lstInfo.Items.Add("HMAC Digest:" + (Info.Description.MacSize > 0 ? MemberToString((Digests)Info.Description.MacEngine) : "None"));
+            lstInfo.Items.Add("HMAC Digest:" + (Info.Description.MacKeySize > 0 ? MemberToString((Digests)Info.Description.MacEngine) : "None"));
             if (!string.IsNullOrEmpty(Info.Tag))
                 lstInfo.Items.Add("Description: " + Info.Tag);
 

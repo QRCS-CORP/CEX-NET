@@ -102,6 +102,10 @@
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Support\DtmBufferSizes.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\KEX\DTM\Support\DtmFileTransfer.cs" />
     <Compile Include="Crypto\Common\Compare.cs" />
+    <Compile Include="Crypto\Common\MacDescription.cs" />
+    <Compile Include="Crypto\Helper\CipherFromDescription.cs" />
+    <Compile Include="Crypto\Helper\MacFromDescription.cs" />
+    <Compile Include="Crypto\Processing\Structure\MacKey.cs" />
     <Compile Include="Crypto\Helper\BlockCipherFromName.cs" />
     <Compile Include="Crypto\Helper\CipherModeFromName.cs" />
     <Compile Include="Crypto\Helper\DigestFromName.cs" />
@@ -109,6 +113,7 @@
     <Compile Include="Crypto\Helper\PrngFromName.cs" />
     <Compile Include="Crypto\Helper\SeedGeneratorFromName.cs" />
     <Compile Include="Crypto\Helper\StreamCipherFromName.cs" />
+    <Compile Include="Crypto\Processing\Structure\VolumeHeader.cs" />
     <Compile Include="Crypto\Seed\CTRRsg.cs" />
     <Compile Include="Crypto\Seed\EntropyPool.cs" />
     <Compile Include="Crypto\Seed\ISCRsg.cs" />

@@ -290,37 +290,53 @@ namespace VTDev.Projects.CEX.Tests
         {
             string[] paths = DirectoryTools.GetFiles(InputDirectory);
 
-            // set cipher paramaters
-            CipherDescription desc = new CipherDescription(
-                SymmetricEngines.RHX, 32,
-                IVSizes.V128,
-                CipherModes.CTR,
-                PaddingModes.X923,
-                BlockSizes.B128,
-                RoundCounts.R14,
-                Digests.Keccak512,
-                64,
-                Digests.Keccak512);
-
-            // define the volume key
-            VolumeKey vkey = new VolumeKey(desc, paths.Length);
-
             // key will be written to this stream
             MemoryStream keyStream = new MemoryStream();
 
-            // create the volume key stream
-            using (VolumeFactory vf = new VolumeFactory())
-                keyStream = vf.Create(vkey);
-
             // encrypt the files in the directory
-            using (VolumeCipher vc = new VolumeCipher(true, keyStream))
-                vc.Transform(paths);
+            using (VolumeCipher vc = new VolumeCipher())
+            {
+                keyStream = vc.CreateKey(CipherDescription.AES256CTR, paths.Length);
+                vc.Initialize(keyStream);
+                vc.Encrypt(paths);
+            }
 
             // decrypt the files
-            using (VolumeCipher vc = new VolumeCipher(false, keyStream))
-                vc.Transform(paths);
+            using (VolumeCipher vc = new VolumeCipher())
+            {
+                vc.Initialize(keyStream);
+                vc.Decrypt(paths);
+            }
 
             // manual inspection of files..
+        }
+
+        // example helper functions
+        private static bool IsVolumeFile(string TargetFile)
+        {
+            using (FileStream fs = new FileStream(TargetFile, FileMode.Open, FileAccess.Read))
+            {
+                int len = VolumeHeader.DistributionCode.Length;
+                byte[] id = new byte[len];
+                fs.Seek(fs.Length - VolumeHeader.GetHeaderSize, SeekOrigin.Begin);
+                fs.Read(id, 0, len);
+                return Evaluate.AreEqual(VolumeHeader.DistributionCode, id);
+            }
+        }
+
+        private static bool IsMatchingVolumeKey(string TargetFile, string KeyPath)
+        {
+            using (FileStream fs = new FileStream(TargetFile, FileMode.Open, FileAccess.Read))
+            {
+                using (FileStream ks = new FileStream(KeyPath, FileMode.Open, FileAccess.Read))
+                {
+                    fs.Seek(fs.Length - VolumeHeader.GetHeaderSize, SeekOrigin.Begin);
+                    VolumeHeader vh = new VolumeHeader(fs);
+                    VolumeKey vk = new VolumeKey(ks);
+
+                    return Evaluate.AreEqual(vk.Tag, vh.KeyId);
+                }
+            }
         }
     }
 }

@@ -1,10 +1,9 @@
 ﻿#region Directives
 using System;
-using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Mac;
 using VTDev.Libraries.CEXEngine.CryptoException;
-using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #endregion
 
 #region License Information
@@ -147,10 +146,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
         #region Constructor
         /// <summary>
-        /// Creates a HKDF Bytes Generator based on the given hash function
+        /// Initialize this class using the message digests enumeration name
         /// </summary>
         /// 
-        /// <param name="Digest">The digest used</param>
+        /// <param name="DigestType">The message digest enumeration name</param>
+        public HKDF(Digests DigestType)
+        {
+            IDigest digest = Helper.DigestFromName.GetInstance(DigestType);
+            _disposeEngine = true;
+            _digestMac = new HMAC(digest);
+            _hashLength = digest.DigestSize;
+            _keySize = digest.BlockSize;
+        }
+
+        /// <summary>
+        /// Initialize this class class using a Digest instance
+        /// </summary>
+        /// 
+        /// <param name="Digest">The message digest instance</param>
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
         /// 
         /// <exception cref="CryptoGeneratorException">Thrown if a null Digest is used</exception>
@@ -166,10 +179,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         }
 
         /// <summary>
-        /// Creates a HKDF Bytes Generator based on the given HMAC function
+        /// Initialize this class class using an Hmac instance
         /// </summary>
         /// 
-        /// <param name="Hmac">The HMAC digest used</param>
+        /// <param name="Hmac">The Hmac digest instance</param>
         /// 
         /// <exception cref="CryptoGeneratorException">Thrown if a null Hmac is used</exception>
         public HKDF(IMac Hmac)
@@ -179,7 +192,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
             _digestMac = Hmac;
             _hashLength = Hmac.MacSize;
-
             _keySize = Hmac.BlockSize;
         }
 
@@ -306,7 +318,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
             toGenerate -= toCopy;
             OutOffset += toCopy;
 
-            while (toGenerate > 0)
+            while (toGenerate > 0) //TODO: review- this can be faster
             {
                 ExpandNext();
                 toCopy = System.Math.Min(_hashLength, toGenerate);

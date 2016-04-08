@@ -152,26 +152,42 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 
         #region Constructor
         /// <summary>
-        /// Initialize the class
+        /// Initialize the class with the block cipher enumeration name
+        /// </summary>
+        /// <param name="EngineType">The block cipher enumeration name</param>
+        /// 
+        /// <exception cref="CryptoMacException">Thrown if an invalid block size is used</exception>
+        public CMAC(BlockCiphers EngineType)
+        {
+            IBlockCipher cipher = Helper.BlockCipherFromName.GetInstance(EngineType);
+            if (cipher.BlockSize != 16)
+                throw new CryptoMacException("CMAC:Ctor", "Block size must be 128 bits!", new ArgumentException());
+
+            _disposeEngine = true;
+            _cipherMode = new CBC(cipher);
+            _blockSize = _cipherMode.BlockSize;
+            _macSize = cipher.BlockSize;
+            _msgCode = new byte[_blockSize];
+            _wrkBuffer = new byte[_blockSize];
+            _wrkOffset = 0;
+        }
+
+        /// <summary>
+        /// Initialize this class with a block cipher instance
         /// </summary>
         /// <param name="Cipher">Instance of the block cipher</param>
-        /// <param name="MacBits">Expected MAC return size in Bits; must be less or equal to Cipher Block size in bits</param>
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
         /// 
-        /// <exception cref="CryptoMacException">Thrown if an invalid Mac or block size is used</exception>
-        public CMAC(IBlockCipher Cipher, int MacBits, bool DisposeEngine = true)
+        /// <exception cref="CryptoMacException">Thrown if an invalid block size is used</exception>
+        public CMAC(IBlockCipher Cipher, bool DisposeEngine = true)
         {
-            if ((MacBits % 8) != 0)
-                throw new CryptoMacException("CMAC:Ctor", "MAC size must be multiple of 8!", new ArgumentOutOfRangeException());
-            if (MacBits > (Cipher.BlockSize * 8))
-                throw new CryptoMacException("CMAC:Ctor", String.Format("MAC size must be less or equal to {0}!", Cipher.BlockSize * 8), new ArgumentOutOfRangeException());
-            if (Cipher.BlockSize != 8 && Cipher.BlockSize != 16)
-                throw new CryptoMacException("CMAC:Ctor", "Block size must be either 64 or 128 bits!", new ArgumentException());
+            if (Cipher.BlockSize != 16)
+                throw new CryptoMacException("CMAC:Ctor", "Block size must be 128 bits!", new ArgumentException());
 
             _disposeEngine = DisposeEngine;
             _cipherMode = new CBC(Cipher);
             _blockSize = _cipherMode.BlockSize;
-            _macSize = MacBits / 8;
+            _macSize = Cipher.BlockSize;
             _msgCode = new byte[_blockSize];
             _wrkBuffer = new byte[_blockSize];
             _wrkOffset = 0;
