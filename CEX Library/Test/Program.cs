@@ -23,20 +23,13 @@ namespace Test
 {
     class Program
     {
-        static void AESTest()
-        {
-            RHX cpr = new RHX();
-            cpr.Initialize(true, new VTDev.Libraries.CEXEngine.Crypto.Common.KeyParams(new byte[64], new byte[16]));
-        }
-
         static void Main(string[] args)
         {
-            AESTest();
             ConsoleUtils.SizeConsole(80, 60);
             ConsoleUtils.CenterConsole();
             Console.Title = "CEX Test Suite";
             Console.BufferHeight = 600;
-
+            RunTest(new MacStreamTest());
             Console.WriteLine("**********************************************");
             Console.WriteLine("* CEX Version 1.5                            *");
             Console.WriteLine("*                                            *");

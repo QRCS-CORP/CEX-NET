@@ -793,7 +793,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             int sub = Index - Offset;
 
             Key[Index] = Key[sub] ^ SubByte((Key[Index - 1] << 8) | ((Key[Index - 1] >> 24) & 0xFF)) ^ Rcon[(Index / Offset)];
-            // note: you can insert noise before each mix to further equalize timing, i.e: uint tmp = SubByte(Key[Index - 1]) ^ Key[sub];
+            // note: you can insert noise before each mix to further equalize timing, i.e: uint tmp = SubByte(Key[Index - 1]);
             Key[++Index] = Key[++sub] ^ Key[Index - 1];
             Key[++Index] = Key[++sub] ^ Key[Index - 1];
             Key[++Index] = Key[++sub] ^ Key[Index - 1];

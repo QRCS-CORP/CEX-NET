@@ -286,7 +286,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 else
                 {
                     // It generates random witness only if it's necesssary. 
-                    // Note that all methods would call Miller-Rabin with t <= 50 so this part is only to do more robust the algorithm
+                    // Note that all methods would call Miller-Rabin with t <= 50 so this part is only to do more robust algorithm
                     do
                     {
                         x = new BigInteger(bitLength, rnd);

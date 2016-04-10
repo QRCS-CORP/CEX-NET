@@ -1,7 +1,9 @@
 ﻿#region Directives
 using System;
 using System.IO;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Mac;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Crypto.Processing;
@@ -16,7 +18,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
     public class MacStreamTest : ITest
     {
         #region Constants
-        private const string DESCRIPTION = "Compares the normal mode of MacStream with the Concurrent mode for equality.";
+        private const string DESCRIPTION = "Compares MacStream with standard classes for equality.";
         private const string FAILURE = "FAILURE! ";
         private const string SUCCESS = "SUCCESS! All MacStream tests have executed succesfully.";
         #endregion
@@ -39,8 +41,8 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
 
         #region Public Methods
         /// <summary>
-        /// Tests for correctness of parallel processing mode in the MacStream implementation
-        /// by comparing digest output between both modes performed on random temp files
+        /// Tests initialization methods and correctness of parallel processing mode in the MacStream implementation
+        /// by comparing mac output between both modes performed on random streams
         /// </summary>
         /// 
         /// <returns>Status</returns>
@@ -48,7 +50,16 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
         {
             try
             {
+                FromDescriptionTest();
+                OnProgress(new TestEventArgs("Passed MacDescription serialization tests.."));
+                CmacDescriptionTest();
+                OnProgress(new TestEventArgs("Passed MacStream CMAC test.."));
+                HmacDescriptionTest();
+                OnProgress(new TestEventArgs("Passed MacStream HMAC tests.."));
+                VmacDescriptionTest();
+                OnProgress(new TestEventArgs("Passed MacStream VMAC tests.."));
                 MacTests();
+                OnProgress(new TestEventArgs("Passed MacStream integrity tests.."));
 
                 return SUCCESS;
             }
@@ -69,6 +80,78 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
             File.WriteAllBytes(path, data);
 
             return path;
+        }
+
+        private void FromDescriptionTest()
+        {
+            MacDescription mds = new MacDescription(64, Digests.SHA256);
+            MacDescription mds2 = new MacDescription(mds.ToBytes());
+            MacDescription mds3 = new MacDescription(mds2.ToStream());
+            if (!mds.Equals(mds2) || !mds.Equals(mds3))
+                throw new Exception("MacStreamTest: Description serialization has failed!");
+            mds = new MacDescription(32, BlockCiphers.RHX, IVSizes.V128, BlockSizes.B128, RoundCounts.R14);
+            mds2 = new MacDescription(mds.ToBytes());
+            mds3 = new MacDescription(mds2.ToStream());
+            if (!mds.Equals(mds2) || !mds.Equals(mds3))
+                throw new Exception("MacStreamTest: Description serialization has failed!");
+            mds = new MacDescription(32, 96);
+            mds2 = new MacDescription(mds.ToBytes());
+            mds3 = new MacDescription(mds2.ToStream());
+            if (!mds.Equals(mds2) || !mds.Equals(mds3))
+                throw new Exception("MacStreamTest: Description serialization has failed!");
+        }
+
+        private void CmacDescriptionTest()
+        {
+            CSPPrng rng = new CSPPrng();
+            byte[] data = rng.GetBytes(rng.Next(100, 400));
+            byte[] key = rng.GetBytes(32);
+            byte[] iv = rng.GetBytes(16);
+            CMAC mac = new CMAC(BlockCiphers.RHX);
+            mac.Initialize(key, iv);
+            byte[] c1 = mac.ComputeMac(data);
+            MacDescription mds = new MacDescription(32, BlockCiphers.RHX, IVSizes.V128, BlockSizes.B128, RoundCounts.R14);
+            MacStream mst = new MacStream(mds, new KeyParams(key, iv));
+            mst.Initialize(new MemoryStream(data));
+            byte[] c2 = mst.ComputeMac();
+
+            if (!Evaluate.AreEqual(c1, c2))
+                throw new Exception("MacStreamTest: CMAC code arrays are not equal!");
+        }
+
+        private void HmacDescriptionTest()
+        {
+            CSPPrng rng = new CSPPrng();
+            byte[] data = rng.GetBytes(rng.Next(100, 400));
+            byte[] key = rng.GetBytes(64);
+            HMAC mac = new HMAC(Digests.SHA256);
+            mac.Initialize(key);
+            byte[] c1 = mac.ComputeMac(data);
+            MacDescription mds = new MacDescription(64, Digests.SHA256);
+            MacStream mst = new MacStream(mds, new KeyParams(key));
+            mst.Initialize(new MemoryStream(data));
+            byte[] c2 = mst.ComputeMac();
+
+            if (!Evaluate.AreEqual(c1, c2))
+                throw new Exception("MacStreamTest: HMAC code arrays are not equal!");
+        }
+
+        private void VmacDescriptionTest()
+        {
+            CSPPrng rng = new CSPPrng();
+            byte[] data = rng.GetBytes(rng.Next(100, 400));
+            byte[] key = rng.GetBytes(64);
+            byte[] iv = rng.GetBytes(16);
+            VMAC mac = new VMAC();
+            mac.Initialize(key, iv);
+            byte[] c1 = mac.ComputeMac(data);
+            MacDescription mds = new MacDescription(64, 16);
+            MacStream mst = new MacStream(mds, new KeyParams(key, iv));
+            mst.Initialize(new MemoryStream(data));
+            byte[] c2 = mst.ComputeMac();
+
+            if (!Evaluate.AreEqual(c1, c2))
+                throw new Exception("MacStreamTest: Mac code arrays are not equal!");
         }
 
         private void MacTests()

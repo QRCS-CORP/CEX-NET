@@ -10,7 +10,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
     /// <summary>
     /// Test vectors from the NIST standard tests contained in the AES specification document FIPS 197:
     /// <a href="http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf"></a>
-    /// Monte Carlo AES tests from the Brian Gladman's vector set:
+    /// Monte Carlo AES tests from the Brian Gladman vector set:
     /// <a href="http://fp.gladman.plus.com/cryptography_technology/rijndael/"></a>
     /// </summary>
     public class AesFipsTest : ITest

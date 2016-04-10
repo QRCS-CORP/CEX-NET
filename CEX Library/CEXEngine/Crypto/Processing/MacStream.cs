@@ -161,14 +161,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         #region Constructor
         /// <summary>
-        /// Initialize the class with an 
+        /// Initialize the class with a MacDescription structure and a Key
         /// </summary>
         /// 
         /// <param name="Description">A MacDescription structure containing details about the Mac generator</param>
         /// <param name="MacKey">A KeyParams containing the Mac key and Iv; note the Ikm parameter in KeyParams is not used</param>
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called; default is false</param>
         /// 
-        /// <exception cref="CryptoProcessingException">Thrown if an uninitialized Mac is used</exception>
+        /// <exception cref="CryptoProcessingException">Thrown if the Mac key or parameters are invalid</exception>
         public MacStream(MacDescription Description, KeyParams MacKey, bool DisposeEngine = false)
         {
             try

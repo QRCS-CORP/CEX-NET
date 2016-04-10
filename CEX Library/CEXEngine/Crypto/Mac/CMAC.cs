@@ -160,8 +160,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         public CMAC(BlockCiphers EngineType)
         {
             IBlockCipher cipher = Helper.BlockCipherFromName.GetInstance(EngineType);
-            if (cipher.BlockSize != 16)
-                throw new CryptoMacException("CMAC:Ctor", "Block size must be 128 bits!", new ArgumentException());
+            if (cipher.BlockSize != 16 && cipher.BlockSize != 32)
+                throw new CryptoMacException("CMAC:Ctor", "Block size must be 128 or 256 bits!", new ArgumentException());
 
             _disposeEngine = true;
             _cipherMode = new CBC(cipher);
@@ -181,8 +181,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <exception cref="CryptoMacException">Thrown if an invalid block size is used</exception>
         public CMAC(IBlockCipher Cipher, bool DisposeEngine = true)
         {
-            if (Cipher.BlockSize != 16)
-                throw new CryptoMacException("CMAC:Ctor", "Block size must be 128 bits!", new ArgumentException());
+            if (Cipher.BlockSize != 16 && Cipher.BlockSize != 32)
+                throw new CryptoMacException("CMAC:Ctor", "Block size must be 128 or 256 bits!", new ArgumentException());
 
             _disposeEngine = DisposeEngine;
             _cipherMode = new CBC(Cipher);

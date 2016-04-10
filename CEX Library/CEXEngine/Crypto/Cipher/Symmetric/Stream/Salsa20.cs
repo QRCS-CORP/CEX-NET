@@ -623,7 +623,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
                 }
 
                 // copy the last counter position to class variable
-                Buffer.BlockCopy(vectors[ProcessorCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
+                Array.Copy(vectors[ProcessorCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
             }
         }
 
@@ -669,7 +669,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
                 });
 
                 // copy the last counter position to class variable
-                Buffer.BlockCopy(vectors[ProcessorCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
+                Array.Copy(vectors[ProcessorCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
             }
         }
 
@@ -725,7 +725,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
                 }
 
                 // copy the last counter position to class variable
-                Buffer.BlockCopy(vectors[ProcessorCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
+                Array.Copy(vectors[ProcessorCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
             }
         }
         #endregion

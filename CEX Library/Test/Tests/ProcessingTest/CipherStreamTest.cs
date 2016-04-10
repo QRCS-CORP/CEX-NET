@@ -1163,7 +1163,6 @@ namespace VTDev.Projects.CEX.Test.Tests.ProcessingTest
 				count += cnkSize;
 			}
 		}
-
         #endregion
     }
 }

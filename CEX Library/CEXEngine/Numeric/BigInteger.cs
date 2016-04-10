@@ -835,7 +835,6 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             res = ((_sign < 0) ? M.Subtract(res) : res);
 
             return res;
-
         }
 
         /// <summary>

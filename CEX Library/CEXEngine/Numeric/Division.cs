@@ -186,10 +186,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             int quotientSign = ((valSign == DivisorSign) ? 1 : -1);
             int[] quotientDigits = new int[quotientLength];
             int[] remainderDigits;
-            remainderDigits = new int[] { Division.DivideArrayByInt(
-                quotientDigits, valDigits, valLen, Divisor) };
-            BigInteger result0 = new BigInteger(quotientSign, quotientLength,
-                    quotientDigits);
+            remainderDigits = new int[] { Division.DivideArrayByInt(quotientDigits, valDigits, valLen, Divisor) };
+            BigInteger result0 = new BigInteger(quotientSign, quotientLength, quotientDigits);
             BigInteger result1 = new BigInteger(valSign, 1, remainderDigits);
             result0.CutOffLeadingZeroes();
             result1.CutOffLeadingZeroes();
@@ -557,7 +555,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
         /// <summary>
         /// Performs modular exponentiation using the Montgomery Reduction.
-        /// <para>It requires that all parameters be positive and the modulus be odd. </para>
+        /// <para>It requires that all parameters be positive and the modulus be odd.</para>
         /// </summary>
         /// 
         /// <param name="X">The BigInteger</param>
@@ -611,7 +609,6 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>Returns the remainder</returns>
         internal static int RemainderArrayByInt(int[] Source, int SourceLength, int Divisor)
         {
-
             long result = 0;
 
             for (int i = SourceLength - 1; i >= 0; i--)
@@ -648,7 +645,6 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         private static long DivideLongByInt(long X, int Y)
         {
             // divides an unsigned long X by an unsigned int Y
-            // 
             long quot;
             long rem;
             long bLong = Y & 0xffffffffL;
@@ -697,8 +693,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
         private static BigInteger FinalSubtraction(int[] Result, BigInteger Modulus)
         {
-            // Performs the  reduction of the Montgomery algorithm
-            // skipping leading zeros
+            // Performs the  reduction of the Montgomery algorithm skipping leading zeros
             int modulusLen = Modulus._numberLength;
             bool doSub = Result[modulusLen] != 0;
 
