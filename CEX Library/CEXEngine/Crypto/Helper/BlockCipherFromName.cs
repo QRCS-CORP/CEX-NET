@@ -13,14 +13,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
         /// Get a block cipher instance with default initialization parameters
         /// </summary>
         /// 
-        /// <param name="EngineType">The block cipher enumeration name</param>
+        /// <param name="BlockCipherType">The block cipher enumeration name</param>
         /// 
         /// <returns>An initialized block cipher</returns>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if the enumeration name is not supported</exception>
-        public static IBlockCipher GetInstance(BlockCiphers EngineType)
+        public static IBlockCipher GetInstance(BlockCiphers BlockCipherType)
         {
-            switch (EngineType)
+            switch (BlockCipherType)
             {
                 case BlockCiphers.RHX:
                     return new RHX();
@@ -37,22 +37,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
         /// Get a block cipher instance with specified initialization parameters
         /// </summary>
         /// 
-        /// <param name="EngineType">The block cipher enumeration name</param>
+        /// <param name="BlockCipherType">The block cipher enumeration name</param>
         /// <param name="BlockSize">The cipher block size</param>
         /// <param name="RoundCount">The number of cipher rounds</param>
-        /// <param name="KdfEngine">The ciphers key expansion engine (default is SHA256)</param>
+        /// <param name="KdfEngineType">The ciphers key expansion engine (default is SHA256)</param>
         /// 
         /// <returns>An initialized block cipher</returns>
-        public static IBlockCipher GetInstance(BlockCiphers EngineType, int BlockSize, int RoundCount, Digests KdfEngine = Digests.SHA256)
+        public static IBlockCipher GetInstance(BlockCiphers BlockCipherType, int BlockSize, int RoundCount, Digests KdfEngineType = Digests.None)
         {
-            switch (EngineType)
+            switch (BlockCipherType)
             {
                 case BlockCiphers.RHX:
-                    return new RHX(BlockSize, RoundCount, KdfEngine);
+                    return new RHX(BlockSize, RoundCount, KdfEngineType);
                 case BlockCiphers.SHX:
-                    return new SHX(RoundCount, KdfEngine);
+                    return new SHX(RoundCount, KdfEngineType);
                 case BlockCiphers.THX:
-                    return new THX(RoundCount, KdfEngine);
+                    return new THX(RoundCount, KdfEngineType);
                 default:
                     throw new CryptoProcessingException("BlockCipherFromName:GetInstance", "The cipher engine is not supported!");
             }

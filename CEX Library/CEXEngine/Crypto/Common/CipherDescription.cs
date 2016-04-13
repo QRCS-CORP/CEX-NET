@@ -131,13 +131,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <param name="PaddingType">The type of cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.PaddingModes">Padding Mode</see></param>
         /// <param name="BlockSize">The cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockSizes">Block Size</see></param>
         /// <param name="RoundCount">The number of diffusion <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts">Rounds</see></param>
-        /// <param name="KdfEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to power the key schedule Key Derivation Function in HX and M series ciphers</param>
+        /// <param name="KdfEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> digest engine used to power the key schedule Key Derivation Function</param>
         /// <param name="MacKeySize">The size of the HMAC key in bytes; a zeroed parameter means authentication is not enabled with this key</param>
         /// <param name="MacEngine">The HMAC <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to authenticate a message file encrypted with this key</param>
         /// 
         /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid KeyId, MessageKey, or ExtensionKey is used</exception>
         public CipherDescription(SymmetricEngines EngineType, int KeySize, IVSizes IvSize, CipherModes CipherType, PaddingModes PaddingType,
-            BlockSizes BlockSize, RoundCounts RoundCount, Digests KdfEngine = Digests.SHA512, int MacKeySize = 64, Digests MacEngine = Digests.SHA512)
+            BlockSizes BlockSize, RoundCounts RoundCount, Digests KdfEngine = Digests.None, int MacKeySize = 0, Digests MacEngine = Digests.None)
         {
             this.EngineType = (int)EngineType;
             this.KeySize = KeySize;

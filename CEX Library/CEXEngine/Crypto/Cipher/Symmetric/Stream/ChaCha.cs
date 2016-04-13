@@ -380,7 +380,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// <summary>
         /// Process an array of bytes. 
         /// <para>This method processes the entire array; used when processing small data or buffers from a larger source.
-        /// Parallel capable function if Output array length is at least equal to <see cref="ParallelMinimumSize"/>. 
+        /// Parallel capable function if Input array length is at least equal to <see cref="ParallelBlockSize"/>. 
         /// <see cref="Initialize(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
         /// 
@@ -388,14 +388,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// <param name="Output">Encrypted or Decrypted bytes</param>
         public void Transform(byte[] Input, byte[] Output)
         {
-            ProcessBlock(Input, Output);
+            ProcessBlock(Input, 0, Output, 0, Input.Length);
         }
 
         /// <summary>
         /// Process a block of bytes using offset parameters.  
         /// <para>
         /// This method will process a single block from the source array of either ParallelBlockSize or Blocksize depending on IsParallel property setting.
-        /// Parallel capable function if Output array length is at least equal to <see cref="ParallelMinimumSize"/>. 
+        /// Parallel capable function if Input array length is at least equal to <see cref="ParallelBlockSize"/>. 
         /// Partial blocks are permitted with both parallel and linear operation modes.
         /// The <see cref="Initialize(KeyParams)"/> method must be called before this method can be used.</para>
         /// </summary>
@@ -406,13 +406,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// <param name="OutOffset">Offset in the Output array</param>
         public void Transform(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
-            ProcessBlock(Input, InOffset, Output, OutOffset);
+            ProcessBlock(Input, InOffset, Output, OutOffset, _isParallel ? _parallelBlockSize : BLOCK_SIZE);
         }
 
         /// <summary>
         /// Process an array of bytes with offset and length parameters.
         /// <para>This method processes a specified length of the array; used when processing segments of a large source array.
-        /// Parallel capable function if Output array length is at least equal to <see cref="ParallelMinimumSize"/>.
+        /// Parallel capable function if Input array length is at least equal to <see cref="ParallelBlockSize"/>.
         /// This method automatically assigns the ParallelBlockSize as the Length divided by the number of processors.
         /// <see cref="Initialize(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
@@ -603,131 +603,33 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
 	        }
         }
 
-        private void ProcessBlock(byte[] Input, byte[] Output)
-        {
-            if (!IsParallel || Output.Length < ParallelBlockSize)
-            {
-                // generate random
-		        Generate(Output.Length, _ctrVector, Output, 0);
-		        // output is input xor with random
-		        int sze = Output.Length - (Output.Length % BLOCK_SIZE);
-
-		        if (sze != 0)
-			        IntUtils.XORBLK(Input, 0, Output, 0, sze);
-
-		        // get the remaining bytes
-		        if (sze != Output.Length)
-		        {
-                    for (int i = sze; i < Output.Length; i++)
-				        Output[i] ^= Input[i];
-		        }
-            }
-            else
-            {
-                // parallel CTR processing //
-                int cnkSize = (Output.Length / BLOCK_SIZE / ProcessorCount) * BLOCK_SIZE;
-                int rndSize = cnkSize * ProcessorCount;
-                int subSize = (cnkSize / BLOCK_SIZE);
-                // create jagged array of 'sub counters'
-                uint[][] vectors = new uint[ProcessorCount][];
-
-                // create random, and xor to output in parallel
-                System.Threading.Tasks.Parallel.For(0, ProcessorCount, i =>
-                {
-                    // offset counter by chunk size / block size
-                    vectors[i] = Increase(_ctrVector, subSize * i);
-                    // create random at offset position
-                    this.Generate(cnkSize, vectors[i], Output, (i * cnkSize));
-                    // xor with input at offset
-                    IntUtils.XORBLK(Input, i * cnkSize, Output, i * cnkSize, cnkSize);
-                });
-
-                // last block processing
-                if (rndSize < Output.Length)
-                {
-                    int fnlSize = Output.Length % rndSize;
-                    Generate(fnlSize, vectors[ProcessorCount - 1], Output, rndSize);
-
-                    for (int i = rndSize; i < Output.Length; ++i)
-				        Output[i] ^= Input[i];
-                }
-
-                // copy the last counter position to class variable
-                Array.Copy(vectors[ProcessorCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
-            }
-        }
-
-        private void ProcessBlock(byte[] Input, int InOffset, byte[] Output, int OutOffset)
-        {
-            int outSize = _isParallel ? (Output.Length - OutOffset) : BLOCK_SIZE;
-
-            if (outSize < _parallelBlockSize)
-            {
-                // generate random
-                Generate(outSize, _ctrVector, Output, OutOffset);
-                // output is input xor with random
-                int sze = outSize - (outSize % BLOCK_SIZE);
-
-                if (sze != 0)
-                    IntUtils.XORBLK(Input, InOffset, Output, OutOffset, sze);
-
-                // get the remaining bytes
-                if (sze != outSize)
-                {
-                    for (int i = sze; i < outSize; ++i)
-                        Output[i + OutOffset] ^= Input[i + InOffset];
-                }
-            }
-            else
-            {
-                // parallel CTR processing //
-                int cnkSize = _parallelBlockSize / ProcessorCount;
-                int rndSize = cnkSize * ProcessorCount;
-                int subSize = (cnkSize / BLOCK_SIZE);
-                // create jagged array of 'sub counters'
-                uint[][] vectors = new uint[ProcessorCount][];
-
-                // create random, and xor to output in parallel
-                System.Threading.Tasks.Parallel.For(0, ProcessorCount, i =>
-                {
-                    // offset counter by chunk size / block size
-                    vectors[i] = Increase(_ctrVector, subSize * i);
-                    // create random at offset position
-                    this.Generate(cnkSize, vectors[i], Output, (i * cnkSize));
-                    // xor with input at offset
-                    IntUtils.XORBLK(Input, InOffset + (i * cnkSize), Output, OutOffset + (i * cnkSize), cnkSize);
-                });
-
-                // copy the last counter position to class variable
-                Array.Copy(vectors[ProcessorCount - 1], 0, _ctrVector, 0, _ctrVector.Length);
-            }
-        }
-
         private void ProcessBlock(byte[] Input, int InOffset, byte[] Output, int OutOffset, int Length)
         {
-            int blkSize = Length;
+            int blkSize = (Length > Input.Length - InOffset) ? Input.Length - InOffset : Length;
+            if (blkSize > Output.Length - OutOffset)
+                blkSize = Output.Length - OutOffset;
 
-	        if (!_isParallel || blkSize < _parallelBlockSize)
+            if (!_isParallel || blkSize < _parallelBlockSize)
 	        {
 		        // generate random
 		        Generate(blkSize, _ctrVector, Output, OutOffset);
 		        // output is input xor with random
-		        int sze = Length - (Length % BLOCK_SIZE);
+		        int sze = blkSize - (blkSize % BLOCK_SIZE);
 
 		        if (sze != 0)
 			        IntUtils.XORBLK(Input, InOffset, Output, OutOffset, sze);
 
 		        // get the remaining bytes
-		        if (sze != Length)
+		        if (sze != blkSize)
 		        {
-			        for (int i = sze; i < Length; ++i)
+			        for (int i = sze; i < blkSize; ++i)
 				        Output[i + OutOffset] ^= Input[i + InOffset];
 		        }
 	        }
 	        else
 	        {
 		        // parallel CTR processing //
-		        int cnkSize = (Length / BLOCK_SIZE / ProcessorCount) * BLOCK_SIZE;
+		        int cnkSize = (blkSize / BLOCK_SIZE / ProcessorCount) * BLOCK_SIZE;
 		        int rndSize = cnkSize * ProcessorCount;
 		        int subSize = (cnkSize / BLOCK_SIZE);
 		        // create jagged array of 'sub counters'
@@ -745,9 +647,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
 		        });
 
 		        // last block processing
-		        if (rndSize < Length)
+		        if (rndSize < blkSize)
 		        {
-			        int fnlSize = Length % rndSize;
+			        int fnlSize = blkSize % rndSize;
 			        Generate(fnlSize, vectors[ProcessorCount - 1], Output, rndSize);
 
 			        for (int i = 0; i < fnlSize; ++i)

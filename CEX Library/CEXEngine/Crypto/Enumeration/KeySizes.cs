@@ -2,7 +2,7 @@
 {
     /// <summary>
     /// <para>Key Sizes in bits. Can be cast as Key byte size integers, 
-    /// i.e. (int sz = KeySizes.K256) is equal to 32.</para>
+    /// i.e. (uint sz = KeySizes.K256) is equal to 32.</para>
     /// </summary>
     public enum KeySizes : int
     {
@@ -19,14 +19,6 @@
         /// </summary>
         K256 = 32,
         /// <summary>
-        /// 384 bit Key
-        /// </summary>
-        K384 = 48,
-        /// <summary>
-        /// 448 bit Key
-        /// </summary>
-        K448 = 56,
-        /// <summary>
         /// 512 bit Key
         /// </summary>
         K512 = 64,
@@ -39,10 +31,6 @@
         /// </summary>
         K1024 = 128,
         /// <summary>
-        /// 1088 bit Key
-        /// </summary>
-        K1088 = 136,
-        /// <summary>
         /// 1280 bit Key
         /// </summary>
         K1280 = 160,
@@ -50,14 +38,6 @@
         /// 1536 bit Key
         /// </summary>
         K1536 = 192,
-        /// <summary>
-        /// 1600 bit Key
-        /// </summary>
-        K1600 = 200,
-        /// <summary>
-        /// 1664 bit Key
-        /// </summary>
-        K1664 = 208,
         /// <summary>
         /// 1792 bit Key
         /// </summary>
@@ -67,10 +47,6 @@
         /// </summary>
         K2048 = 256,
         /// <summary>
-        /// 2240 bit Key
-        /// </summary>
-        K2240 = 280,
-        /// <summary>
         /// 2304 bit Key
         /// </summary>
         K2304 = 288,
@@ -78,45 +54,5 @@
         /// 2560 bit Key
         /// </summary>
         K2560 = 320,
-        /// <summary>
-        /// 2688 bit Key
-        /// </summary>
-        K2688 = 336,
-        /// <summary>
-        /// 2816 bit Key 
-        /// </summary>
-        K2816 = 352,
-        /// <summary>
-        /// 3072 bit Key
-        /// </summary>
-        K3072 = 384,
-        /// <summary>
-        /// 3584 bit Key
-        /// </summary>
-        K3584 = 472,
-        /// <summary>
-        /// 3776 bit Key
-        /// </summary>
-        K3776 = 448,
-        /// <summary>
-        /// 4096 bit Key
-        /// </summary>
-        K4096 = 512,
-        /// <summary>
-        /// 4352 bit Key
-        /// </summary>
-        K4352 = 544,
-        /// <summary>
-        /// 4608 bit Key
-        /// </summary>
-        K4608 = 576,
-        /// <summary>
-        /// 4864 bit Key
-        /// </summary>
-        K4864 = 608,
-        /// <summary>
-        /// 5120 bit Key
-        /// </summary>
-        K5120 = 640
     }
 }

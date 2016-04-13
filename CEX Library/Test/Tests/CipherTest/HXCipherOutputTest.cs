@@ -20,10 +20,33 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string GetVector(BlockCiphers EngineType, Digests DigestType, RoundCounts Rounds)
+        public string GetHXVector(BlockCiphers EngineType, Digests DigestType, RoundCounts Rounds)
         {
             IBlockCipher engine = GetCipher(EngineType, DigestType, Rounds);
             int keyLen = GetKeySize(engine);
+            byte[] key = new byte[keyLen];
+            byte[] iv = new byte[engine.BlockSize];
+            ICipherMode cipher = new CTR(engine);
+
+            for (int i = 0; i < keyLen; i++)
+                key[i] = (byte)i;
+            for (int i = 0; i < iv.Length; i++)
+                iv[i] = (byte)i;
+
+            cipher.Initialize(true, new KeyParams(key, iv));
+
+            return MonteCarloTest(cipher);
+        }
+
+        /// <summary>
+        /// Outputs expected values for 512 bit keys
+        /// </summary>
+        /// 
+        /// <returns>State</returns>
+        public string Get512Vector(BlockCiphers EngineType, RoundCounts Rounds)
+        {
+            IBlockCipher engine = GetCipher(EngineType, Digests.None, Rounds); // rounds calc automatic
+            int keyLen = 64;
             byte[] key = new byte[keyLen];
             byte[] iv = new byte[engine.BlockSize];
             ICipherMode cipher = new CTR(engine);

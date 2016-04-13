@@ -169,6 +169,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <exception cref="CryptoMacException">Thrown if an invalid Input size is chosen</exception>
         public void BlockUpdate(byte[] Input, int InOffset, int Length)
         {
+            if (!_isInitialized)
+                throw new CryptoGeneratorException("VMAC:BlockUpdate", "The Mac is not initialized!", new InvalidOperationException());
             if ((InOffset + Length) > Input.Length)
                 throw new CryptoMacException("VMAC:Ctor", "The Input buffer is too short!", new ArgumentOutOfRangeException());
 
@@ -208,6 +210,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <exception cref="CryptoMacException">Thrown if Output array is too small</exception>
         public int DoFinal(byte[] Output, int OutOffset)
         {
+            if (!_isInitialized)
+                throw new CryptoGeneratorException("VMAC:DoFinal", "The Mac is not initialized!", new InvalidOperationException());
             if (Output.Length - OutOffset < DIGEST_SIZE)
                 throw new CryptoMacException("VMAC:DoFinal", "The Output buffer is too short!", new ArgumentOutOfRangeException());
 

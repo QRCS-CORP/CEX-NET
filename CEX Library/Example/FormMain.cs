@@ -12,11 +12,12 @@ using VTDev.Libraries.CEXEngine.Crypto.Mac;
 using VTDev.Libraries.CEXEngine.Crypto.Processing;
 using VTDev.Libraries.CEXEngine.Crypto.Processing.Factory;
 using VTDev.Libraries.CEXEngine.Crypto.Processing.Structure;
+using VTDev.Libraries.CEXEngine.Crypto.Seed;
 using VTDev.Libraries.CEXEngine.Tools;
 using VTDev.Projects.CEX.Helper;
 #endregion
 
-// v1.5.3, Mar. 23, 2016
+// v1.5.4, Apr. 12, 2016
 namespace VTDev.Projects.CEX
 {
     public partial class FormMain : Form
@@ -56,19 +57,6 @@ namespace VTDev.Projects.CEX
         public FormMain()
         {
             InitializeComponent();
-
-            // examples testing key factories and processors
-            // adjust paths to your installation
-
-            //VTDev.Projects.CEX.Tests.FactoryTests.KeyFactoryTest();
-            //VTDev.Projects.CEX.Tests.FactoryTests.PackageFactoryTest();
-            //VTDev.Projects.CEX.Tests.FactoryTests.VolumeFactoryTest();
-            //VTDev.Projects.CEX.Tests.ProcessingTests.VolumeCipherTest(@"C:\Tests\Volume");
-            //VTDev.Projects.CEX.Tests.ProcessingTests.CompressionCipherTest(@"C:\Tests\Compress", @"C:\Tests\Extract", @"C:\Tests\voltest.cep");
-            //VTDev.Projects.CEX.Tests.ProcessingTests.PacketCipherTest();
-            //VTDev.Projects.CEX.Tests.ProcessingTests.StreamCipherTest();
-            //VTDev.Projects.CEX.Tests.ProcessingTests.StreamDigestTest();
-            //VTDev.Projects.CEX.Tests.ProcessingTests.StreamMacTest();
         }
         #endregion
 
@@ -82,9 +70,8 @@ namespace VTDev.Projects.CEX
         {
             byte[] localId = new byte[16];
 
-            // create a unique machine id, in an organization this would be assigned
-            using (KeyGenerator gen = new KeyGenerator())
-                gen.GetBytes(localId);
+            using (CSPRsg rnd = new CSPRsg())
+                rnd.GetBytes(localId);
 
             return localId;
         }
@@ -376,6 +363,9 @@ namespace VTDev.Projects.CEX
                 if (!string.IsNullOrEmpty(txtSubKeyCount.Text) && txtSubKeyCount.Text != "0")
                     int.TryParse(txtSubKeyCount.Text, out keyCount);
 
+                if (!cbHkdf.Enabled)
+                    _container.Description.KdfEngine = 0;
+
                 // create a PackageKey; a key package can contain 1 or many thousands of 'subkeys'. Each subkey set
                 // contains one group of unique random keying material; key, iv, and optional hmac key. 
                 // Each key set is used only once for encryption, guaranteeing that a unique set of values is used for every encryption cycle.
@@ -523,48 +513,26 @@ namespace VTDev.Projects.CEX
                 switch (KdfEngine)
                 {
                     case Digests.Blake256:
+                    case Digests.Keccak256:
                     case Digests.Skein256:
+                    case Digests.SHA256:
                         cbKeySize.Items.Add(KeySizes.K768);
                         cbKeySize.Items.Add(KeySizes.K1024);
                         cbKeySize.Items.Add(KeySizes.K1280);
                         cbKeySize.Items.Add(KeySizes.K1536);
                         break;
-                    case Digests.SHA256:
-                        cbKeySize.Items.Add(KeySizes.K768);
-                        cbKeySize.Items.Add(KeySizes.K1280);
-                        cbKeySize.Items.Add(KeySizes.K1792);
-                        cbKeySize.Items.Add(KeySizes.K2304);
-                        break;
                     case Digests.Blake512:
+                    case Digests.Keccak512:
+                    case Digests.SHA512:
                     case Digests.Skein512:
                         cbKeySize.Items.Add(KeySizes.K1024);
                         cbKeySize.Items.Add(KeySizes.K1536);
                         cbKeySize.Items.Add(KeySizes.K2048);
                         cbKeySize.Items.Add(KeySizes.K2560);
                         break;
-                    case Digests.Keccak256:
-                        cbKeySize.Items.Add(KeySizes.K1600);
-                        cbKeySize.Items.Add(KeySizes.K2688);
-                        cbKeySize.Items.Add(KeySizes.K3776);
-                        cbKeySize.Items.Add(KeySizes.K4352);
-                        break;
-                    case Digests.Keccak512:
-                        cbKeySize.Items.Add(KeySizes.K1088);
-                        cbKeySize.Items.Add(KeySizes.K1664);
-                        cbKeySize.Items.Add(KeySizes.K2240);
-                        cbKeySize.Items.Add(KeySizes.K2816);
-                        break;
-                    case Digests.SHA512:
+                    case Digests.Skein1024:
                         cbKeySize.Items.Add(KeySizes.K1536);
                         cbKeySize.Items.Add(KeySizes.K2560);
-                        cbKeySize.Items.Add(KeySizes.K3584);
-                        cbKeySize.Items.Add(KeySizes.K4608);
-                        break;
-                    case Digests.Skein1024:
-                        cbKeySize.Items.Add(KeySizes.K2048);
-                        cbKeySize.Items.Add(KeySizes.K3072);
-                        cbKeySize.Items.Add(KeySizes.K4096);
-                        cbKeySize.Items.Add(KeySizes.K5120);
                         break;
                 }
                 ComboHelper.SetSelectedIndex(cbKeySize, 2);
@@ -670,6 +638,10 @@ namespace VTDev.Projects.CEX
             Digests digest = Digests.Keccak512;
             Enum.TryParse<Digests>(((ComboBox)sender).Text, out digest);
             _container.Description.MacEngine = (int)digest;
+            chkSign.Enabled = digest != Digests.None;
+            if (!chkSign.Enabled)
+                chkSign.Checked = false;
+
             if (chkSign.Checked)
                 _container.Description.MacKeySize = GetMacSize(digest);
         }
@@ -1213,9 +1185,16 @@ namespace VTDev.Projects.CEX
             {
                 cbRounds.SelectedIndex = 6;
             }
-
-            cbHkdf.Enabled = (ksize > 64 && cbEngines.SelectedIndex < 3);
-            cbRounds.Enabled = (ksize > 64 || cbEngines.SelectedIndex > 2);
+            if (cbHkdf.SelectedItem != null && (Digests)cbHkdf.SelectedItem == Digests.Skein1024)
+            {
+                cbHkdf.Enabled = (ksize > 64 && cbEngines.SelectedIndex < 3);
+                cbRounds.Enabled = (ksize > 64 || cbEngines.SelectedIndex > 2);
+            }
+            else
+            {
+                cbHkdf.Enabled = (ksize > 32 && cbEngines.SelectedIndex < 3);
+                cbRounds.Enabled = (ksize > 32 || cbEngines.SelectedIndex > 2);
+            }
         }
 
         private bool ShowAuthDialog()

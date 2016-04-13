@@ -71,6 +71,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
                     return 136;
                 case Digests.Keccak512:
                     return 72;
+                case Digests.None:
+                    return 0;
                 default:
                     throw new CryptoSymmetricException("DigestFromName:GetBlockSize", "The digest type is not supported!", new ArgumentException());
             }
@@ -99,6 +101,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
                     return 64;
                 case Digests.Skein1024:
                     return 128;
+                case Digests.None:
+                    return 0;
                 default:
                     throw new CryptoSymmetricException("DigestFromName:GetDigestSize", "The digest type is not supported!", new ArgumentException());
             }

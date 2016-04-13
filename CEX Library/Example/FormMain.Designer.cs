@@ -888,7 +888,7 @@
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(63, 15);
             this.label15.TabIndex = 9;
-            this.label15.Text = "V 1.5.0.0";
+            this.label15.Text = "V 1.5.5.0";
             // 
             // label16
             // 
@@ -907,9 +907,9 @@
             this.label17.ForeColor = System.Drawing.Color.Black;
             this.label17.Location = new System.Drawing.Point(80, 57);
             this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(91, 14);
+            this.label17.Size = new System.Drawing.Size(74, 14);
             this.label17.TabIndex = 11;
-            this.label17.Text = "January 21, 2016";
+            this.label17.Text = "April 14, 2016";
             // 
             // label18
             // 

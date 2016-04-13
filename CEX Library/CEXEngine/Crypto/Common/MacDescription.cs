@@ -108,19 +108,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <param name="IvSize">Size of the Mac Initialization Vector</param>
         /// <param name="HmacEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used in the Hmac</param>
         /// <param name="EngineType">The symmetric block cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines">Engine</see> type</param>
-        /// <param name="BlockSize">The cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockSizes">Block Size</see></param>
         /// <param name="RoundCount">The number of diffusion <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts">Rounds</see></param>
+        /// <param name="BlockSize">The cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockSizes">Block Size</see></param>
         /// <param name="KdfEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to power the key schedule Key Derivation Function in HX and M series ciphers</param>
         public MacDescription(Macs MacType, int KeySize, int IvSize, Digests HmacEngine = Digests.SHA512, BlockCiphers EngineType = BlockCiphers.RHX, 
-            BlockSizes BlockSize = BlockSizes.B128, RoundCounts RoundCount = RoundCounts.R14, Digests KdfEngine = Digests.SHA512)
+            RoundCounts RoundCount = RoundCounts.R14, BlockSizes BlockSize = BlockSizes.B128, Digests KdfEngine = Digests.SHA512)
         {
             this.MacType = (int)MacType;
             this.KeySize = KeySize;
             this.IvSize = IvSize;
             this.HmacEngine = (int)HmacEngine;
             this.EngineType = (int)EngineType;
-            this.BlockSize = (int)BlockSize;
             this.RoundCount = (int)RoundCount;
+            this.BlockSize = (int)BlockSize;
             this.KdfEngine = (int)KdfEngine;
         }
 

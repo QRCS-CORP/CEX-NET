@@ -210,71 +210,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
         #region Public Methods
         /// <summary>
-        /// Initialize the generator
-        /// </summary>
-        /// 
-        /// <param name="Salt">Salt value</param>
-        /// 
-        /// <exception cref="CryptoGeneratorException">Thrown if a null Salt is used</exception>
-        public void Initialize(byte[] Salt)
-        {
-            if (Salt == null)
-                throw new CryptoGeneratorException("HKDF:Initialize", "Salt can not be null!", new ArgumentNullException());
-
-            _digestMac.Initialize(Salt, null);
-            _generatedBytes = 0;
-            _currentT = new byte[_hashLength];
-            _isInitialized = true;
-        }
-
-        /// <summary>
-        /// Initialize the generator
-        /// </summary>
-        /// 
-        /// <param name="Salt">Salt value</param>
-        /// <param name="Ikm">Key material</param>
-        /// 
-        /// <exception cref="CryptoGeneratorException">Thrown if a null Salt or Ikm is used</exception>
-        public void Initialize(byte[] Salt, byte[] Ikm)
-        {
-            if (Salt == null)
-                throw new CryptoGeneratorException("HKDF:Initialize", "Salt can not be null!", new ArgumentNullException());
-            if (Ikm == null)
-                throw new CryptoGeneratorException("HKDF:Initialize", "IKM can not be null!", new ArgumentNullException());
-
-            _digestMac.Initialize(Extract(Salt, Ikm), null);
-            _generatedBytes = 0;
-            _currentT = new byte[_hashLength];
-            _isInitialized = true;
-        }
-
-        /// <summary>
-        /// Initialize the generator
-        /// </summary>
-        /// 
-        /// <param name="Salt">Salt value</param>
-        /// <param name="Ikm">Key material</param>
-        /// <param name="Info">Nonce value</param>
-        /// 
-        /// <exception cref="CryptoGeneratorException">Thrown if a null Salt or Ikm is used</exception>
-        public void Initialize(byte[] Salt, byte[] Ikm, byte[] Info)
-        {
-            if (Salt == null)
-                throw new CryptoGeneratorException("HKDF:Initialize", "Salt can not be null!", new ArgumentNullException());
-            if (Ikm == null)
-                throw new CryptoGeneratorException("HKDF:Initialize", "IKM can not be null!", new ArgumentNullException());
-
-            _digestMac.Initialize(Extract(Salt, Ikm), null);
-
-            if (Info != null)
-                _digestInfo = Info;
-
-            _generatedBytes = 0;
-            _currentT = new byte[_hashLength];
-            _isInitialized = true;
-        }
-
-        /// <summary>
         /// Generate a block of pseudo random bytes
         /// </summary>
         /// 
@@ -318,7 +253,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
             toGenerate -= toCopy;
             OutOffset += toCopy;
 
-            while (toGenerate > 0) //TODO: review- this can be faster
+            while (toGenerate > 0) // TODO: review- this can be faster
             {
                 ExpandNext();
                 toCopy = System.Math.Min(_hashLength, toGenerate);
@@ -329,6 +264,70 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
             }
 
             return Size;
+        }
+        /// <summary>
+        /// Initialize the generator with a Key
+        /// </summary>
+        /// 
+        /// <param name="Ikm">The Key value</param>
+        /// 
+        /// <exception cref="CryptoGeneratorException">Thrown if a null Ikm is used</exception>
+        public void Initialize(byte[] Ikm)
+        {
+            if (Ikm == null)
+                throw new CryptoGeneratorException("HKDF:Initialize", "Salt can not be null!", new ArgumentNullException());
+
+            _digestMac.Initialize(Ikm, null);
+            _generatedBytes = 0;
+            _currentT = new byte[_hashLength];
+            _isInitialized = true;
+        }
+
+        /// <summary>
+        /// Initialize the generator
+        /// </summary>
+        /// 
+        /// <param name="Salt">The Salt value</param>
+        /// <param name="Ikm">The Key value</param>
+        /// 
+        /// <exception cref="CryptoGeneratorException">Thrown if a null Salt or Ikm is used</exception>
+        public void Initialize(byte[] Salt, byte[] Ikm)
+        {
+            if (Salt == null)
+                throw new CryptoGeneratorException("HKDF:Initialize", "Salt can not be null!", new ArgumentNullException());
+            if (Ikm == null)
+                throw new CryptoGeneratorException("HKDF:Initialize", "IKM can not be null!", new ArgumentNullException());
+
+            _digestMac.Initialize(Extract(Salt, Ikm), null);
+            _generatedBytes = 0;
+            _currentT = new byte[_hashLength];
+            _isInitialized = true;
+        }
+
+        /// <summary>
+        /// Initialize the generator
+        /// </summary>
+        /// 
+        /// <param name="Salt">The Salt value</param>
+        /// <param name="Ikm">The Key value</param>
+        /// <param name="Info">The Nonce value</param>
+        /// 
+        /// <exception cref="CryptoGeneratorException">Thrown if a null Salt or Ikm is used</exception>
+        public void Initialize(byte[] Salt, byte[] Ikm, byte[] Info)
+        {
+            if (Salt == null)
+                throw new CryptoGeneratorException("HKDF:Initialize", "Salt can not be null!", new ArgumentNullException());
+            if (Ikm == null)
+                throw new CryptoGeneratorException("HKDF:Initialize", "IKM can not be null!", new ArgumentNullException());
+
+            _digestMac.Initialize(Extract(Salt, Ikm), null);
+
+            if (Info != null)
+                _digestInfo = Info;
+
+            _generatedBytes = 0;
+            _currentT = new byte[_hashLength];
+            _isInitialized = true;
         }
 
         /// <summary>
@@ -352,7 +351,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         {
             byte[] prk = new byte[_hashLength];
 
-            if (Salt == null)
+            if (Salt.Length == 0)
                 _digestMac.Initialize(new byte[_hashLength], null);
             else
                 _digestMac.Initialize(Salt, null);

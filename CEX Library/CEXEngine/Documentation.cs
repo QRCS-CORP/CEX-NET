@@ -3,14 +3,14 @@
 /*! \mainpage A programmers guide to the CEX .NET Cryptographic library
 
 \section intro_sec Welcome
-Welcome to the CEX Cryptographic Library, version 1.5.0.7.
+Welcome to the CEX Cryptographic Library, version 1.5.5.0.
 \brief 
 CEX is a library built for both speed and maximum security. 
 This help package contains details on the cryptographic primitives used in the library, their uses, and code examples.
 
 \author    John Underhill
-\version   1.5.0.6
-\date      February 14, 2016
+\version   1.5.5.0
+\date      April 14, 2016
 \copyright MIT public license
 
 \section intro_link Links

@@ -13,15 +13,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
         /// Get a stream cipher instance with specified initialization parameters
         /// </summary>
         /// 
-        /// <param name="EngineType">The stream cipher enumeration name</param>
+        /// <param name="StreamCipherType">The stream cipher enumeration name</param>
         /// <param name="RoundCount">The number of cipher rounds</param>
         /// 
         /// <returns>An initialized stream cipher</returns>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if the enumeration name is not supported</exception>
-        public static IStreamCipher GetInstance(StreamCiphers EngineType, int RoundCount = 20)
+        public static IStreamCipher GetInstance(StreamCiphers StreamCipherType, int RoundCount = 20)
         {
-            switch (EngineType)
+            switch (StreamCipherType)
             {
                 case StreamCiphers.ChaCha:
                     return new ChaCha(RoundCount);

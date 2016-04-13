@@ -297,9 +297,6 @@ namespace Speed
                     cbKeySize.Items.Add(KeySizes.K192);
                     cbKeySize.Items.Add(KeySizes.K256);
                     cbKeySize.Items.Add(KeySizes.K512);
-                    cbKeySize.Items.Add(KeySizes.K1536);
-                    cbKeySize.Items.Add(KeySizes.K2560);
-                    cbKeySize.Items.Add(KeySizes.K3584);
                     ComboHelper.SetSelectedIndex(cbKeySize, 2);
                     ComboHelper.AddEnumRange(cbRounds, typeof(RoundCounts), 10, 38);
                     ComboHelper.SetSelectedIndex(cbRounds, 2);
@@ -309,9 +306,6 @@ namespace Speed
                     cbKeySize.Items.Add(KeySizes.K192);
                     cbKeySize.Items.Add(KeySizes.K256);
                     cbKeySize.Items.Add(KeySizes.K512);
-                    cbKeySize.Items.Add(KeySizes.K1536);
-                    cbKeySize.Items.Add(KeySizes.K2560);
-                    cbKeySize.Items.Add(KeySizes.K3584);
                     ComboHelper.SetSelectedIndex(cbKeySize, 2);
                     cbRounds.Items.Add(RoundCounts.R32);
                     cbRounds.Items.Add(RoundCounts.R40);
@@ -325,9 +319,6 @@ namespace Speed
                     cbKeySize.Items.Add(KeySizes.K192);
                     cbKeySize.Items.Add(KeySizes.K256);
                     cbKeySize.Items.Add(KeySizes.K512);
-                    cbKeySize.Items.Add(KeySizes.K1536);
-                    cbKeySize.Items.Add(KeySizes.K2560);
-                    cbKeySize.Items.Add(KeySizes.K3584);
                     ComboHelper.SetSelectedIndex(cbKeySize, 2);
                     ComboHelper.AddEnumRange(cbRounds, typeof(RoundCounts), 16, 32);
                     ComboHelper.SetSelectedIndex(cbRounds, 0);

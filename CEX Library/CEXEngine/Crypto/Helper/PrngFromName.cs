@@ -13,9 +13,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
         /// Get a Prng instance with default initialization parameters
         /// </summary>
         /// 
-        /// <param name="PrngType">The prng enumeration name</param>
+        /// <param name="PrngType">The Prng enumeration name</param>
         /// 
-        /// <returns>An initialized prng</returns>
+        /// <returns>An initialized Prng</returns>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if the enumeration name is not supported</exception>
         public static IRandom GetInstance(Prngs PrngType)

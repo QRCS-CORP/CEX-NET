@@ -29,7 +29,7 @@ namespace DTMServerTest
         public void TestExchange()
         {
             // dtm server exchange parameters X11RNS1R2
-            DtmParameters srvDtmParams = DtmParamSets.FromName(DtmParamSets.DtmParamNames.X44RNT1T1);       // preset contains all the settings required for the exchange
+            DtmParameters srvDtmParams = DtmParamSets.FromName(DtmParamSets.DtmParamNames.X32RNR1R1);       // preset contains all the settings required for the exchange
 
             // dtm server id
             DtmClientStruct srvDmtId = new DtmClientStruct(

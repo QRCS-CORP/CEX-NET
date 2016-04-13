@@ -305,22 +305,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
                 _progressInterval = _blockSize;
         }
 
-        private void CalculateProgress(long Size, bool Completed = false)
+        private void CalculateProgress(long Size)
         {
             if (ProgressPercent == null)
                 return;
 
-            if (Completed || Size % _progressInterval == 0)
+            if (Size == _inStream.Length)
             {
-                if (Size != _inStream.Length)
-                {
-                    double progress = 100.0 * (double)Size / _inStream.Length;
-                    ProgressPercent(this, new ProgressEventArgs(Size, (int)progress));
-                }
-                else
-                {
-                    ProgressPercent(this, new ProgressEventArgs(Size, 100));
-                }
+                ProgressPercent(this, new ProgressEventArgs(Size, 100));
+            }
+            else if (Size % _progressInterval == 0)
+            {
+                double progress = 100.0 * (double)Size / _inStream.Length;
+                ProgressPercent(this, new ProgressEventArgs(Size, (int)progress));
             }
         }
 

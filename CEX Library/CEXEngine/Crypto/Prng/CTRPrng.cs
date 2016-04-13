@@ -391,7 +391,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
         private int GetKeySize(BlockCiphers CipherEngine)
         {
-            return 320;
+            return 32;
         }
 
         private ISeed GetSeedGenerator(SeedGenerators SeedEngine)

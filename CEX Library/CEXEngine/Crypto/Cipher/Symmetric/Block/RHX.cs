@@ -50,10 +50,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 {
     /// <summary>
     /// RHX: A Rijndael Cipher extended with an (optional) HKDF powered Key Schedule.
-    /// <para>RHX is a Rijndael implementation that can use a standard configuration on key sizes up to 256 bits, 
-    /// an extended key size of 512 bits, or unlimited key sizes greater than 64 bytes. 
-    /// On <see cref="LegalKeySizes"/> larger than 64 bytes, an HKDF bytes generator is used to expand the <c>working key</c> integer array.
-    /// In extended mode, the number of <c>transformation rounds</c> can be user assigned (through the constructor) to between 10 and 38 rounds.</para>
+    /// <para>RHX is a Rijndael implementation that uses a standard configuration on key sizes up to 64 bytes (512 bits). 
+    /// An optional HKDF Expand bytes generator can be used to expand the user supplied key into a working key integer array
+    /// for increased rounds and additional security.</para>
     /// </summary> 
     /// 
     /// <example>
@@ -79,35 +78,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
     /// <remarks>
     /// <description>Implementation Notes:</description>
     /// <para>The key schedule in RHX is the defining difference between this and a standard version of Rijndael.
-    /// If the cipher key input is beyond the standard lengths used in Rijndael (128-512 bits), instead of using an inline function to expand the user supplied key into a larger working array, 
-    /// RHX uses a hash based pseudo-random generator to create the internal working key array.
-    /// When using a non-standard key size, the number of diffusion rounds can be set by the user (through the class constructor). RHX can run between 10 and 38 rounds.
-    /// </para>
+    /// The standard Rijndael Key Schedule (128-256 bits), has been extended to accomodate a 512 bit key size.
+    /// RHX can (optionally) use an HMAC based Key Derivation Function (HKDF) to expand the cipher key to create the internal round key integer array. 
+    /// This provides better security, and allows for a user assignable number of transformation rounds.
+    /// When using a the HKDF extended mode, the number of diffusion rounds can be set by the user (through the class constructor). 
+    /// RHX can run between 10 and 38 rounds.</para>
     /// 
     /// <list type="bullet">
-    /// <item><description>When using a standard cipher key length the rounds calculation is done automatically: 10, 12, 14, and 22, for key sizes 128, 192, 256, and 512 bits.</description></item>
-    /// <item><description><see cref="VTDev.Libraries.CEXEngine.Crypto.Generator.HKDF">HKDF</see> Digest <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">engine</see> is definable through the <see cref="RHX(int, int, Digests)">Constructor</see> parameter: KeyEngine.</description></item>
-    /// <item><description>Key Schedule is (optionally) powered by a Hash based Key Derivation Function using a user definable <see cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">Digest</see>.</description></item>
-    /// <item><description>Minimum key size is (IKm + Salt) (N * Digest State Size) + (Digest Hash Size) in bytes.</description></item>
+    /// <item><description>When using the standard cipher, the key length the rounds calculation is done automatically: 10, 12, 14, and 22, for key sizes 126, 192, 256, and 512 bits.</description></item>
+    /// <item><description>HKDF Digest engine is definable through the RHX(uint, uint, Digests) Constructor parameter: KDFEngine.</description></item>
+    /// <item><description>Key Schedule is powered by a Hash based Key Derivation Function using a user definable Digest.</description></item>
+    /// <item><description>Minimum key size is the Digests hash return size, and extendable in blocks of (N * Hash Size) bytes.</description></item>
     /// <item><description>Valid block sizes are 16 and 32 byte wide.</description></item>
-    /// <item><description>Rounds are determined automatically when using standard key sizes, and user assignable in extended mode to between 10 and 38 rounds in steps of two, (default is 22).</description></item>
+    /// <item><description>The rounds can only be assigned if using the HKDF extended mode. Valid Rounds are 10 to 38, default is 22.</description></item>
     /// </list>
     /// 
-    /// <description>HKDF Bytes Generator:</description>
-    /// <para>HKDF: is a key derivation function that uses a Digest HMAC (Hash based Message Authentication Code) as its random engine. 
-    /// This is one of the strongest methods available for generating pseudo-random keying material, and far superior in entropy dispersion to Rijndael, or even Serpents key schedule. 
-    /// HKDF uses up to three inputs; a nonce value called an information string, an Ikm (Input keying material), and a Salt value. 
-    /// The HMAC RFC 2104, recommends a key size equal to the digest output, in the case of SHA512, 64 bytes, anything larger gets passed through the hash function to get the required 512 bit key size. 
-    /// The Salt size is a minimum of the hash functions block size, with SHA-2 512 that is 128 bytes.</para>
-    /// 
-    /// <para>When using SHA-2 512, a minimum key size for RHX is 192 bytes, further blocks of salt can be added to the key so long as they align; ikm + (n * blocksize), ex. 192, 320, 448 bytes.. there is no upper maximum. 
-    /// This means that you can create keys as large as you like so long as it falls on these boundaries, this effectively eliminates brute force as a means of attack on the cipher, even in post-quantum terms.</para> 
+    /// <para>When using SHA-2 256, a minimum key size for RHX is 32 bytes, further blocks of can be added to the key so long as they align; (n * hash size), ex. 64, 128, 192 bytes.. there is no upper maximum.</para> 
     /// 
     /// <para>The Digest that powers HKDF, can be any one of the Hash Digests implemented in the CEX library; Blake, Keccak, SHA-2 or Skein.
-    /// The default Digest Engine is SHA-2 512.</para>
-    /// 
-    /// <para>The legal key sizes are determined by a combination of the (Hash Size + a Multiplier * the Digest State Size); klen = h + (n * s), this will vary between Digest implementations. 
-    /// Correct key sizes can be determined at runtime using the <see cref="LegalKeySizes"/> property.</para>
+    /// Correct key sizes can be determined at runtime using the <see cref="LegalKeySizes"/> property, based on the digest selected.
+    /// When using the extended mode, the legal key sizes are determined based on the selected digests hash output size, 
+    /// ex. SHA256 the minimum legal key size is 256 bits (32 bytes), the recommended size is 2* the hash size, or 512 bits (64 bytes).</para>
     /// 
     /// <para>The number of diffusion rounds processed within the ciphers rounds function can also be defined; adding rounds creates a more diffused cipher output, making the resulting cipher-text more difficult to cryptanalyze. 
     /// RHX is capable of processing up to 38 rounds, that is twenty-four rounds more than the fourteen rounds used in an implementation of AES-256. 
@@ -133,9 +124,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         private const int BLOCK16 = 16;
         private const int BLOCK32 = 32;
         private const int ROUNDS22 = 22;
-        private const int LEGAL_KEYS = 14;
+        private const int LEGAL_KEYS = 8;
         private const int MAX_ROUNDS = 38;
-        private const int MAX_STDKEY = 64;
         private const int MIN_ROUNDS = 10;
         #endregion
 
@@ -146,12 +136,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         // configurable nonce can create a unique distribution, can be byte(0)
         private byte[] _hkdfInfo = System.Text.Encoding.ASCII.GetBytes("information string RHX version 1");
         private int _ikmSize = 0;
-        private IDigest _keyEngine;
+        private IDigest _kdfEngine;
         private Digests _kdfEngineType;
         private bool _isDisposed = false;
         private bool _isEncryption = false;
         private bool _isInitialized = false;
         private int[] _legalKeySizes = new int[LEGAL_KEYS];
+        private int[] _legalRounds;
         #endregion
 
         #region Properties
@@ -195,31 +186,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         }
 
         /// <summary>
-        /// Get/Set: Specify the size of the HMAC key; extracted from the cipher key.
-        /// <para>This property can only be changed before the Initialize function is called.</para>
-        /// <para>Default is the digest return size; can only be a multiple of that length.
-        /// Maximum size is the digests underlying block size; if the key
-        /// is longer than this, the size will default to the block size.</para>
-        /// </summary>
-        public int IkmSize
-        {
-            get { return _ikmSize; }
-            set
-            {
-                if (value == 0)
-                    _ikmSize = _keyEngine.DigestSize;
-                if (value < _keyEngine.DigestSize)
-                    _ikmSize = _keyEngine.DigestSize;
-                else if (value > _keyEngine.BlockSize)
-                    _ikmSize = _keyEngine.BlockSize;
-                else if (value % _keyEngine.DigestSize > 0)
-                    _ikmSize = value - (value % _keyEngine.DigestSize);
-                else
-                    _ikmSize = _keyEngine.DigestSize;
-            }
-        }
-
-        /// <summary>
         /// Get: Cipher is initialized for encryption, false for decryption.
         /// <para>Value set in <see cref="Initialize(bool, KeyParams)"/>.</para>
         /// </summary>
@@ -260,7 +226,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// </summary>
         public int[] LegalRounds
         {
-            get { return new int[] { 10, 12, 14, 22, 38 }; }
+            get { return _legalRounds; }
         }
 
         /// <summary>
@@ -286,35 +252,45 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// </summary>
         /// 
         /// <param name="BlockSize">Cipher input <see cref="BlockSize"/>. The <see cref="LegalBlockSizes"/> property contains available sizes. Default is 16 bytes.</param>
-        /// <param name="Rounds">Number of diffusion rounds. The <see cref="LegalRounds"/> property contains available sizes.  Default is 22 rounds.</param>
-        /// <param name="KdfEngine"><para>The Key Schedule KDF digest engine; can be any one of the <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> 
-        /// implementations. The default engine is <see cref="SHA512"/></para>.</param>
+        /// <param name="Rounds">Number of diffusion rounds. The <see cref="LegalRounds"/> property contains available sizes. 
+        /// Default is based on the key size; defining rounds requires HKDF extended mode.</param>
+        /// <param name="KdfEngineType">The Key Schedule HKDF digest engine; can be any one of the <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> 
+        /// implementations. The default engine is None, which invokes the standard key schedule mechanism.</param>
         /// 
         /// <exception cref="CryptoSymmetricException">Thrown if an invalid block size or invalid rounds count are used</exception>
-        public RHX(int BlockSize = BLOCK16, int Rounds = ROUNDS22, Digests KdfEngine = Digests.SHA512)
+        public RHX(int BlockSize = BLOCK16, int Rounds = ROUNDS22, Digests KdfEngineType = Digests.None)
         {
             if (BlockSize != BLOCK16 && BlockSize != BLOCK32)
                 throw new CryptoSymmetricException("RHX:CTor", "Invalid block size! Supported block sizes are 16 and 32 bytes.", new ArgumentException());
-            if (Rounds < MIN_ROUNDS || Rounds > MAX_ROUNDS || Rounds % 2 > 0)
-                throw new CryptoSymmetricException("RHX:CTor", "Invalid rounds size! Sizes supported are even numbers between 10 and 38.", new ArgumentException());
 
-            _kdfEngineType = KdfEngine;
-            // set the hmac key size
-            _ikmSize = _ikmSize == 0 ? GetIkmSize(KdfEngine) : _ikmSize;
+            _kdfEngineType = KdfEngineType;
             // add standard key lengths
             _legalKeySizes[0] = 16;
             _legalKeySizes[1] = 24;
             _legalKeySizes[2] = 32;
             _legalKeySizes[3] = 64;
-
-            int dgtblock = GetSaltSize(KdfEngine);
-
-            // hkdf extended key sizes
-            for (int i = 4; i < _legalKeySizes.Length; ++i)
-                _legalKeySizes[i] = (dgtblock * (i - 3)) + _ikmSize;
-
-            _dfnRounds = Rounds;
             _blockSize = BlockSize;
+
+            if (KdfEngineType != Digests.None)
+            {
+                if (Rounds < MIN_ROUNDS || Rounds > MAX_ROUNDS || Rounds % 2 > 0)
+                    throw new CryptoSymmetricException("RHX:CTor", "Invalid rounds size! Rounds assignment option only available in HKDF extended mode.", new ArgumentException());
+
+                _legalRounds = new int[] { 10, 12, 14, 22, 24, 26, 28, 30, 32, 34, 36, 38 };
+                // set the hmac key size
+                _ikmSize =  GetIkmSize(KdfEngineType);
+
+                // hkdf extended key sizes
+                for (int i = 4; i < _legalKeySizes.Length; ++i)
+                    _legalKeySizes[i] = (_legalKeySizes[3] + _ikmSize * (i - 3));
+
+                _dfnRounds = Rounds;
+            }
+            else
+            {
+                _legalRounds = new int[] { 10, 12, 14, 22 };
+                Array.Resize(ref _legalKeySizes, 4);
+            }
         }
 
         /// <summary>
@@ -407,8 +383,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         {
             if (KeyParam.Key == null)
                 throw new CryptoSymmetricException("RHX:Initialize", "Invalid key! Key can not be null.", new ArgumentNullException());
-            if (KeyParam.Key.Length > LegalKeySizes[3] && (KeyParam.Key.Length - GetIkmSize(_kdfEngineType)) % GetSaltSize(_kdfEngineType) != 0)
-                throw new CryptoSymmetricException("RHX:Initialize", String.Format("Invalid key size! Key must be (length - IKm length: {0} bytes) + multiple of {1} block size.", GetIkmSize(_kdfEngineType), GetSaltSize(_kdfEngineType)), new ArgumentOutOfRangeException());
+            if (KeyParam.Key.Length > LegalKeySizes[3] && (KeyParam.Key.Length % GetIkmSize(_kdfEngineType)) != 0)
+                throw new CryptoSymmetricException("RHX:Initialize", "Invalid key size! Key must be divisible of digests output size!", new ArgumentOutOfRangeException());
             
             for (int i = 0; i < LegalKeySizes.Length; ++i)
             {
@@ -419,12 +395,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
            }
 
             // get the kdf digest engine
-            if (KeyParam.Key.Length > MAX_STDKEY)
-                _keyEngine = GetKdfEngine(_kdfEngineType);
+            if (_kdfEngineType != Digests.None)
+            {
+                if (KeyParam.Key.Length < _ikmSize)
+                    throw new CryptoSymmetricException("RHX:Initialize", "Invalid key! HKDF extended mode requires key be at least digests output size.", new ArgumentNullException());
+
+                _kdfEngine = GetKdfEngine(_kdfEngineType);
+            }
 
             _isEncryption = Encryption;
-            // expand the key
-            _expKey = ExpandKey(KeyParam.Key, Encryption);
+            // generate the round keys
+            ExpandKey(KeyParam.Key, Encryption);
             // ready to transform data
             _isInitialized = true;
         }
@@ -468,20 +449,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// <remarks>
         /// Expand the key and initialize state variables
         /// </remarks>
-        private uint[] ExpandKey(byte[] Key, bool Encryption)
+        private void ExpandKey(byte[] Key, bool Encryption)
         {
-            uint[] expKey = new uint[0];
-
-            // min possible size for hkdf extended is 768 bit (96 bytes)
-            if (Key.Length > MAX_STDKEY)
+            if (_kdfEngineType != Digests.None)
             {
                 // hkdf key expansion
-                expKey = SecureExpand(Key);
+                _expKey = SecureExpand(Key);
             }
             else
             {
                 // standard rijndael key expansion + k512
-                expKey = StandardExpand(Key);
+                _expKey = StandardExpand(Key);
             }
 
             // inverse cipher
@@ -490,26 +468,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 int blkWords = _blockSize / 4;
 
                 // reverse key
-                for (int i = 0, k = expKey.Length - blkWords; i < k; i += blkWords, k -= blkWords)
+                for (int i = 0, k = _expKey.Length - blkWords; i < k; i += blkWords, k -= blkWords)
                 {
                     for (int j = 0; j < blkWords; j++)
                     {
-                        uint temp = expKey[i + j];
-                        expKey[i + j] = expKey[k + j];
-                        expKey[k + j] = temp;
+                        uint temp = _expKey[i + j];
+                        _expKey[i + j] = _expKey[k + j];
+                        _expKey[k + j] = temp;
                     }
                 }
                 // sbox inversion
-                for (int i = blkWords; i < expKey.Length - blkWords; i++)
+                for (int i = blkWords; i < _expKey.Length - blkWords; i++)
                 {
-                    expKey[i] = IT0[SBox[(expKey[i] >> 24)]] ^
-                        IT1[SBox[(byte)(expKey[i] >> 16)]] ^
-                        IT2[SBox[(byte)(expKey[i] >> 8)]] ^
-                        IT3[SBox[(byte)expKey[i]]];
+                    _expKey[i] = IT0[SBox[(_expKey[i] >> 24)]] ^
+                        IT1[SBox[(byte)(_expKey[i] >> 16)]] ^
+                        IT2[SBox[(byte)(_expKey[i] >> 8)]] ^
+                        IT3[SBox[(byte)_expKey[i]]];
                 }
             }
-
-            return expKey;
         }
 
         private uint[] SecureExpand(byte[] Key)
@@ -522,22 +498,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             int keyBytes = expSize * 4;
             byte[] rawKey = new byte[keyBytes];
             int saltSize = Key.Length - _ikmSize;
-
-            // salt must be divisible of hash blocksize
-            if (saltSize % _keyEngine.BlockSize != 0)
-                saltSize = saltSize - saltSize % _keyEngine.BlockSize;
-
             // hkdf input
-            byte[] kdfKey = new byte[_ikmSize];
-            byte[] kdfSalt = new byte[saltSize];
-            // copy hkdf key and salt from user key
-            Buffer.BlockCopy(Key, 0, kdfKey, 0, _ikmSize);
-            Buffer.BlockCopy(Key, _ikmSize, kdfSalt, 0, saltSize);
+            byte[] hkdfKey = new byte[_ikmSize];
+            byte[] hkdfSalt = new byte[0];
 
-            // HKDF generator expands array
-            using (HKDF gen = new HKDF(_keyEngine, false))
+            // copy hkdf key and salt from user key
+            Buffer.BlockCopy(Key, 0, hkdfKey, 0, _ikmSize);
+            if (saltSize > 0)
             {
-                gen.Initialize(kdfSalt, kdfKey, _hkdfInfo);
+                hkdfSalt = new byte[saltSize];
+                Buffer.BlockCopy(Key, _ikmSize, hkdfSalt, 0, saltSize);
+            }
+            // HKDF generator expands array
+            using (HKDF gen = new HKDF(_kdfEngine, false))
+            {
+                gen.Initialize(hkdfSalt, hkdfKey, _hkdfInfo);
                 gen.Generate(rawKey);
             }
 
@@ -555,7 +530,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             int blkWords = _blockSize / 4;
             // key in 32 bit words
             int keyWords = Key.Length / 4;
-            // rounds calculation
+            // rounds calculation, 512 gets 22 rounds
             _dfnRounds = (blkWords == 8 || keyWords == 8) ? 14 : keyWords + 6;
             // setup expanded key
             uint[] expKey = new uint[blkWords * (_dfnRounds + 1)];
@@ -579,7 +554,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 expKey[14] = IntUtils.BytesToBe32(Key, 56);
                 expKey[15] = IntUtils.BytesToBe32(Key, 60);
 
-                //512R: 16,24,32,40,48,56,64,72,80,88, S: 20,28,36,44,52,60,68,76,84
+                // k512 R: 16,24,32,40,48,56,64,72,80,88, S: 20,28,36,44,52,60,68,76,84
                 ExpandRotBlock(expKey, 16, 16);
                 ExpandSubBlock(expKey, 20, 16);
                 ExpandRotBlock(expKey, 24, 16);
@@ -636,7 +611,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 expKey[6] = IntUtils.BytesToBe32(Key, 24);
                 expKey[7] = IntUtils.BytesToBe32(Key, 28);
 
-                // 256 R: 8,16,24,32,40,48,56 S: 12,20,28,36,44,52
+                // k256 R: 8,16,24,32,40,48,56 S: 12,20,28,36,44,52
                 ExpandRotBlock(expKey, 8, 8);
                 ExpandSubBlock(expKey, 12, 8);
                 ExpandRotBlock(expKey, 16, 8);
@@ -679,7 +654,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 expKey[4] = IntUtils.BytesToBe32(Key, 16);
                 expKey[5] = IntUtils.BytesToBe32(Key, 20);
 
-                // 192: 6,12,18,24,30,36,42,48
+                // k192 R: 6,12,18,24,30,36,42,48
                 ExpandRotBlock(expKey, 6, 6);
                 expKey[10] = expKey[4] ^ expKey[9];
                 expKey[11] = expKey[5] ^ expKey[10];
@@ -749,7 +724,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 expKey[2] = IntUtils.BytesToBe32(Key, 8);
                 expKey[3] = IntUtils.BytesToBe32(Key, 12);
 
-                // 128R: 4,8,12,16,20,24,28,32,36,40
+                // k128 R: 4,8,12,16,20,24,28,32,36,40
                 ExpandRotBlock(expKey, 4, 4);
                 ExpandRotBlock(expKey, 8, 4);
                 ExpandRotBlock(expKey, 12, 4);
@@ -1113,11 +1088,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             }
         }
 
-        private int GetSaltSize(Digests DigestType)
-        {
-            return DigestFromName.GetBlockSize(DigestType);
-        }
-
         private uint SubByte(uint Rot)
         {
             uint value = 0xff & Rot;
@@ -1474,10 +1444,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             {
                 try
                 {
-                    if (_keyEngine != null)
+                    if (_kdfEngine != null)
                     {
-                        _keyEngine.Dispose();
-                        _keyEngine = null;
+                        _kdfEngine.Dispose();
+                        _kdfEngine = null;
                     }
                     if (_expKey != null)
                     {

@@ -127,9 +127,9 @@ namespace VTDev.Projects.CEX.Test.Tests.ProcessingTest
 					PaddingModes.ISO7816,		// cipher padding
 					BlockSizes.B128,			// cipher block size
 					RoundCounts.R14,			// number of transformation rounds
-					Digests.Keccak512,			// optional key schedule engine (HX ciphers)
-					64,							// optional HMAC size
-					Digests.Keccak512);		    // optional HMAC engine
+					Digests.None,			    // optional key schedule engine (HX ciphers)
+					0,							// optional HMAC size
+					Digests.None);		        // optional HMAC engine
 
 				DescriptionTest(cd);
 				OnProgress(new TestEventArgs("Passed CipherDescription stream test.."));
