@@ -531,7 +531,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             // key in 32 bit words
             int keyWords = Key.Length / 4;
             // rounds calculation, 512 gets 22 rounds
-            _dfnRounds = (blkWords == 8 || keyWords == 8) ? 14 : keyWords + 6;
+            _dfnRounds = (blkWords == 8 && Key.Length != 64) ? 14 : keyWords + 6;
             // setup expanded key
             uint[] expKey = new uint[blkWords * (_dfnRounds + 1)];
 
