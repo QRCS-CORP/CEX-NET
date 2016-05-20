@@ -1,4 +1,4 @@
-﻿#region Directives
+#region Directives
 using System;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
@@ -182,7 +182,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// </summary>
         public BlockCiphers Enumeral
         {
-            get { return BlockCiphers.RHX; }
+            get { return BlockCiphers.Rijndael; }
         }
 
         /// <summary>
@@ -531,7 +531,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             // key in 32 bit words
             int keyWords = Key.Length / 4;
             // rounds calculation, 512 gets 22 rounds
-            _dfnRounds = (blkWords == 8 && Key.Length != 64) ? 14 : keyWords + 6;
+            _dfnRounds = (blkWords == 8 && keyWords != 16) ? 14 : keyWords + 6;
             // setup expanded key
             uint[] expKey = new uint[blkWords * (_dfnRounds + 1)];
 
@@ -555,48 +555,48 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 expKey[15] = IntUtils.BytesToBe32(Key, 60);
 
                 // k512 R: 16,24,32,40,48,56,64,72,80,88, S: 20,28,36,44,52,60,68,76,84
-                ExpandRotBlock(expKey, 16, 16);
+                ExpandRotBlock(expKey, 16, 16, 1);
                 ExpandSubBlock(expKey, 20, 16);
-                ExpandRotBlock(expKey, 24, 16);
+                ExpandRotBlock(expKey, 24, 16, 2);
                 ExpandSubBlock(expKey, 28, 16);
-                ExpandRotBlock(expKey, 32, 16);
+                ExpandRotBlock(expKey, 32, 16, 3);
                 ExpandSubBlock(expKey, 36, 16);
-                ExpandRotBlock(expKey, 40, 16);
+                ExpandRotBlock(expKey, 40, 16, 4);
                 ExpandSubBlock(expKey, 44, 16);
-                ExpandRotBlock(expKey, 48, 16);
+                ExpandRotBlock(expKey, 48, 16, 5);
                 ExpandSubBlock(expKey, 52, 16);
-                ExpandRotBlock(expKey, 56, 16);
+                ExpandRotBlock(expKey, 56, 16, 6);
                 ExpandSubBlock(expKey, 60, 16);
-                ExpandRotBlock(expKey, 64, 16);
+                ExpandRotBlock(expKey, 64, 16, 7);
                 ExpandSubBlock(expKey, 68, 16);
-                ExpandRotBlock(expKey, 72, 16);
+                ExpandRotBlock(expKey, 72, 16, 8);
                 ExpandSubBlock(expKey, 76, 16);
-                ExpandRotBlock(expKey, 80, 16);
+                ExpandRotBlock(expKey, 80, 16, 9);
                 ExpandSubBlock(expKey, 84, 16);
-                ExpandRotBlock(expKey, 88, 16);
+                ExpandRotBlock(expKey, 88, 16, 10);
 
                 if (blkWords == 8)
                 {
                     ExpandSubBlock(expKey, 92, 16);
-                    ExpandRotBlock(expKey, 96, 16);
+                    ExpandRotBlock(expKey, 96, 16, 11);
                     ExpandSubBlock(expKey, 100, 16);
-                    ExpandRotBlock(expKey, 104, 16);
+                    ExpandRotBlock(expKey, 104, 16, 12);
                     ExpandSubBlock(expKey, 108, 16);
-                    ExpandRotBlock(expKey, 112, 16);
+                    ExpandRotBlock(expKey, 112, 16, 13);
                     ExpandSubBlock(expKey, 116, 16);
-                    ExpandRotBlock(expKey, 120, 16);
+                    ExpandRotBlock(expKey, 120, 16, 14);
                     ExpandSubBlock(expKey, 124, 16);
-                    ExpandRotBlock(expKey, 128, 16);
+                    ExpandRotBlock(expKey, 128, 16, 15);
                     ExpandSubBlock(expKey, 132, 16);
-                    ExpandRotBlock(expKey, 136, 16);
+                    ExpandRotBlock(expKey, 136, 16, 16);
                     ExpandSubBlock(expKey, 140, 16);
-                    ExpandRotBlock(expKey, 144, 16);
+                    ExpandRotBlock(expKey, 144, 16, 17);
                     ExpandSubBlock(expKey, 148, 16);
-                    ExpandRotBlock(expKey, 152, 16);
+                    ExpandRotBlock(expKey, 152, 16, 18);
                     ExpandSubBlock(expKey, 156, 16);
-                    ExpandRotBlock(expKey, 160, 16);
+                    ExpandRotBlock(expKey, 160, 16, 19);
                     ExpandSubBlock(expKey, 164, 16);
-                    ExpandRotBlock(expKey, 168, 16);
+                    ExpandRotBlock(expKey, 168, 16, 20);
                     ExpandSubBlock(expKey, 172, 16);
                 }
             }
@@ -612,36 +612,36 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 expKey[7] = IntUtils.BytesToBe32(Key, 28);
 
                 // k256 R: 8,16,24,32,40,48,56 S: 12,20,28,36,44,52
-                ExpandRotBlock(expKey, 8, 8);
+                ExpandRotBlock(expKey, 8, 8, 1);
                 ExpandSubBlock(expKey, 12, 8);
-                ExpandRotBlock(expKey, 16, 8);
+                ExpandRotBlock(expKey, 16, 8, 2);
                 ExpandSubBlock(expKey, 20, 8);
-                ExpandRotBlock(expKey, 24, 8);
+                ExpandRotBlock(expKey, 24, 8, 3);
                 ExpandSubBlock(expKey, 28, 8);
-                ExpandRotBlock(expKey, 32, 8);
+                ExpandRotBlock(expKey, 32, 8, 4);
                 ExpandSubBlock(expKey, 36, 8);
-                ExpandRotBlock(expKey, 40, 8);
+                ExpandRotBlock(expKey, 40, 8, 5);
                 ExpandSubBlock(expKey, 44, 8);
-                ExpandRotBlock(expKey, 48, 8);
+                ExpandRotBlock(expKey, 48, 8, 6);
                 ExpandSubBlock(expKey, 52, 8);
-                ExpandRotBlock(expKey, 56, 8);
+                ExpandRotBlock(expKey, 56, 8, 7);
 
                 if (blkWords == 8)
                 {
                     ExpandSubBlock(expKey, 60, 8);
-                    ExpandRotBlock(expKey, 64, 8);
+                    ExpandRotBlock(expKey, 64, 8, 8);
                     ExpandSubBlock(expKey, 68, 8);
-                    ExpandRotBlock(expKey, 72, 8);
+                    ExpandRotBlock(expKey, 72, 8, 9);
                     ExpandSubBlock(expKey, 76, 8);
-                    ExpandRotBlock(expKey, 80, 8);
+                    ExpandRotBlock(expKey, 80, 8, 10);
                     ExpandSubBlock(expKey, 84, 8);
-                    ExpandRotBlock(expKey, 88, 8);
+                    ExpandRotBlock(expKey, 88, 8, 11);
                     ExpandSubBlock(expKey, 92, 8);
-                    ExpandRotBlock(expKey, 96, 8);
+                    ExpandRotBlock(expKey, 96, 8, 12);
                     ExpandSubBlock(expKey, 100, 8);
-                    ExpandRotBlock(expKey, 104, 8);
+                    ExpandRotBlock(expKey, 104, 8, 13);
                     ExpandSubBlock(expKey, 108, 8);
-                    ExpandRotBlock(expKey, 112, 8);
+                    ExpandRotBlock(expKey, 112, 8, 14);
                     ExpandSubBlock(expKey, 116, 8);
                 }
             }
@@ -655,64 +655,64 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 expKey[5] = IntUtils.BytesToBe32(Key, 20);
 
                 // k192 R: 6,12,18,24,30,36,42,48
-                ExpandRotBlock(expKey, 6, 6);
+                ExpandRotBlock(expKey, 6, 6, 1);
                 expKey[10] = expKey[4] ^ expKey[9];
                 expKey[11] = expKey[5] ^ expKey[10];
-                ExpandRotBlock(expKey, 12, 6);
+                ExpandRotBlock(expKey, 12, 6, 2);
                 expKey[16] = expKey[10] ^ expKey[15];
                 expKey[17] = expKey[11] ^ expKey[16];
-                ExpandRotBlock(expKey, 18, 6);
+                ExpandRotBlock(expKey, 18, 6, 3);
                 expKey[22] = expKey[16] ^ expKey[21];
                 expKey[23] = expKey[17] ^ expKey[22];
-                ExpandRotBlock(expKey, 24, 6);
+                ExpandRotBlock(expKey, 24, 6, 4);
                 expKey[28] = expKey[22] ^ expKey[27];
                 expKey[29] = expKey[23] ^ expKey[28];
-                ExpandRotBlock(expKey, 30, 6);
+                ExpandRotBlock(expKey, 30, 6, 5);
                 expKey[34] = expKey[28] ^ expKey[33];
                 expKey[35] = expKey[29] ^ expKey[34];
-                ExpandRotBlock(expKey, 36, 6);
+                ExpandRotBlock(expKey, 36, 6, 6);
                 expKey[40] = expKey[34] ^ expKey[39];
                 expKey[41] = expKey[35] ^ expKey[40];
-                ExpandRotBlock(expKey, 42, 6);
+                ExpandRotBlock(expKey, 42, 6, 7);
                 expKey[46] = expKey[40] ^ expKey[45];
                 expKey[47] = expKey[41] ^ expKey[46];
-                ExpandRotBlock(expKey, 48, 6);
+                ExpandRotBlock(expKey, 48, 6, 8);
 
                 if (blkWords == 8)
                 {
                     expKey[52] = expKey[46] ^ expKey[51];
                     expKey[53] = expKey[47] ^ expKey[52];
-                    ExpandRotBlock(expKey, 54, 6);
+                    ExpandRotBlock(expKey, 54, 6, 9);
                     expKey[58] = expKey[52] ^ expKey[57];
                     expKey[59] = expKey[53] ^ expKey[58];
-                    ExpandRotBlock(expKey, 60, 6);
+                    ExpandRotBlock(expKey, 60, 6, 10);
                     expKey[64] = expKey[58] ^ expKey[63];
                     expKey[65] = expKey[59] ^ expKey[64];
-                    ExpandRotBlock(expKey, 66, 6);
+                    ExpandRotBlock(expKey, 66, 6, 11);
                     expKey[70] = expKey[64] ^ expKey[69];
                     expKey[71] = expKey[65] ^ expKey[70];
-                    ExpandRotBlock(expKey, 72, 6);
+                    ExpandRotBlock(expKey, 72, 6, 12);
                     expKey[76] = expKey[70] ^ expKey[75];
                     expKey[77] = expKey[71] ^ expKey[76];
-                    ExpandRotBlock(expKey, 78, 6);
+                    ExpandRotBlock(expKey, 78, 6, 13);
                     expKey[82] = expKey[76] ^ expKey[81];
                     expKey[83] = expKey[77] ^ expKey[82];
-                    ExpandRotBlock(expKey, 84, 6);
+                    ExpandRotBlock(expKey, 84, 6, 14);
                     expKey[88] = expKey[82] ^ expKey[87];
                     expKey[89] = expKey[83] ^ expKey[88];
-                    ExpandRotBlock(expKey, 90, 6);
+                    ExpandRotBlock(expKey, 90, 6, 15);
                     expKey[94] = expKey[88] ^ expKey[93];
                     expKey[95] = expKey[89] ^ expKey[94];
-                    ExpandRotBlock(expKey, 96, 6);
+                    ExpandRotBlock(expKey, 96, 6, 16);
                     expKey[100] = expKey[94] ^ expKey[99];
                     expKey[101] = expKey[95] ^ expKey[100];
-                    ExpandRotBlock(expKey, 102, 6);
+                    ExpandRotBlock(expKey, 102, 6, 17);
                     expKey[106] = expKey[100] ^ expKey[105];
                     expKey[107] = expKey[101] ^ expKey[106];
-                    ExpandRotBlock(expKey, 108, 6);
+                    ExpandRotBlock(expKey, 108, 6, 18);
                     expKey[112] = expKey[106] ^ expKey[111];
                     expKey[113] = expKey[107] ^ expKey[112];
-                    ExpandRotBlock(expKey, 114, 6);
+                    ExpandRotBlock(expKey, 114, 6, 19);
                     expKey[118] = expKey[112] ^ expKey[117];
                     expKey[119] = expKey[113] ^ expKey[118];
                 }
@@ -725,63 +725,65 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 expKey[3] = IntUtils.BytesToBe32(Key, 12);
 
                 // k128 R: 4,8,12,16,20,24,28,32,36,40
-                ExpandRotBlock(expKey, 4, 4);
-                ExpandRotBlock(expKey, 8, 4);
-                ExpandRotBlock(expKey, 12, 4);
-                ExpandRotBlock(expKey, 16, 4);
-                ExpandRotBlock(expKey, 20, 4);
-                ExpandRotBlock(expKey, 24, 4);
-                ExpandRotBlock(expKey, 28, 4);
-                ExpandRotBlock(expKey, 32, 4);
-                ExpandRotBlock(expKey, 36, 4);
-                ExpandRotBlock(expKey, 40, 4);
+                ExpandRotBlock(expKey, 4, 4, 1);
+                ExpandRotBlock(expKey, 8, 4, 2);
+                ExpandRotBlock(expKey, 12, 4, 3);
+                ExpandRotBlock(expKey, 16, 4, 4);
+                ExpandRotBlock(expKey, 20, 4, 5);
+                ExpandRotBlock(expKey, 24, 4, 6);
+                ExpandRotBlock(expKey, 28, 4, 7);
+                ExpandRotBlock(expKey, 32, 4, 8);
+                ExpandRotBlock(expKey, 36, 4, 9);
+                ExpandRotBlock(expKey, 40, 4, 10);
 
                 if (blkWords == 8)
                 {
-                    ExpandRotBlock(expKey, 44, 4);
-                    ExpandRotBlock(expKey, 48, 4);
-                    ExpandRotBlock(expKey, 52, 4);
-                    ExpandRotBlock(expKey, 56, 4);
-                    ExpandRotBlock(expKey, 60, 4);
-                    ExpandRotBlock(expKey, 64, 4);
-                    ExpandRotBlock(expKey, 68, 4);
-                    ExpandRotBlock(expKey, 72, 4);
-                    ExpandRotBlock(expKey, 76, 4);
-                    ExpandRotBlock(expKey, 80, 4);
-                    ExpandRotBlock(expKey, 84, 4);
-                    ExpandRotBlock(expKey, 88, 4);
-                    ExpandRotBlock(expKey, 92, 4);
-                    ExpandRotBlock(expKey, 96, 4);
-                    ExpandRotBlock(expKey, 100, 4);
-                    ExpandRotBlock(expKey, 104, 4);
-                    ExpandRotBlock(expKey, 108, 4);
-                    ExpandRotBlock(expKey, 112, 4);
-                    ExpandRotBlock(expKey, 116, 4);
+                    ExpandRotBlock(expKey, 44, 4, 11);
+                    ExpandRotBlock(expKey, 48, 4, 12);
+                    ExpandRotBlock(expKey, 52, 4, 13);
+                    ExpandRotBlock(expKey, 56, 4, 14);
+                    ExpandRotBlock(expKey, 60, 4, 15);
+                    ExpandRotBlock(expKey, 64, 4, 16);
+                    ExpandRotBlock(expKey, 68, 4, 17);
+                    ExpandRotBlock(expKey, 72, 4, 18);
+                    ExpandRotBlock(expKey, 76, 4, 19);
+                    ExpandRotBlock(expKey, 80, 4, 20);
+                    ExpandRotBlock(expKey, 84, 4, 21);
+                    ExpandRotBlock(expKey, 88, 4, 22);
+                    ExpandRotBlock(expKey, 92, 4, 23);
+                    ExpandRotBlock(expKey, 96, 4, 24);
+                    ExpandRotBlock(expKey, 100, 4, 25);
+                    ExpandRotBlock(expKey, 104, 4, 26);
+                    ExpandRotBlock(expKey, 108, 4, 27);
+                    ExpandRotBlock(expKey, 112, 4, 28);
+                    ExpandRotBlock(expKey, 116, 4, 29);
                 }
             }
 
             return expKey;
         }
 
-        private void ExpandRotBlock(uint[] Key, int Index, int Offset)
+        private void ExpandRotBlock(uint[] Key, int KeyIndex, int KeyOffset, int RconIndex)
         {
-            int sub = Index - Offset;
+            int sub = KeyIndex - KeyOffset;
 
-            Key[Index] = Key[sub] ^ SubByte((Key[Index - 1] << 8) | ((Key[Index - 1] >> 24) & 0xFF)) ^ Rcon[(Index / Offset)];
-            // note: you can insert noise before each mix to further equalize timing, i.e: uint tmp = SubByte(Key[Index - 1]);
-            Key[++Index] = Key[++sub] ^ Key[Index - 1];
-            Key[++Index] = Key[++sub] ^ Key[Index - 1];
-            Key[++Index] = Key[++sub] ^ Key[Index - 1];
+            Key[KeyIndex] = Key[sub] ^ SubByte((Key[KeyIndex - 1] << 8) | ((Key[KeyIndex - 1] >> 24) & 0xFF)) ^ Rcon[RconIndex];
+            // Note: you can insert noise before each subsequent mix to further equalize timing; ex. add between each mix line: 
+            // (uint) tmp = SubByte((Key[Index - 1] << 8) | ((Key[Index - 1] >> 24) & 0xFF))];
+            Key[++KeyIndex] = Key[++sub] ^ Key[KeyIndex - 1];
+            Key[++KeyIndex] = Key[++sub] ^ Key[KeyIndex - 1];
+            Key[++KeyIndex] = Key[++sub] ^ Key[KeyIndex - 1];
         }
 
-        private void ExpandSubBlock(uint[] Key, int Index, int Offset)
+        private void ExpandSubBlock(uint[] Key, int KeyIndex, int KeyOffset)
         {
-            int sub = Index - Offset;
+            int sub = KeyIndex - KeyOffset;
 
-            Key[Index] = SubByte(Key[Index - 1]) ^ Key[sub];
-            Key[++Index] = Key[++sub] ^ Key[Index - 1];
-            Key[++Index] = Key[++sub] ^ Key[Index - 1];
-            Key[++Index] = Key[++sub] ^ Key[Index - 1];
+            Key[KeyIndex] = SubByte(Key[KeyIndex - 1]) ^ Key[sub];
+            // can equalize timing here as well..
+            Key[++KeyIndex] = Key[++sub] ^ Key[KeyIndex - 1];
+            Key[++KeyIndex] = Key[++sub] ^ Key[KeyIndex - 1];
+            Key[++KeyIndex] = Key[++sub] ^ Key[KeyIndex - 1];
         }
         #endregion
 
