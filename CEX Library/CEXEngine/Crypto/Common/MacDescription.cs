@@ -46,21 +46,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         private const int KEYSZE_SIZE = 2;
         private const int IVSIZE_SIZE = 1;
         private const int MACENG_SIZE = 1;
-        private const int MACKEY_SIZE = 1;
         private const int ENGTPE_SIZE = 1;
         private const int BLKSZE_SIZE = 1;
         private const int RNDCNT_SIZE = 1;
         private const int KDFENG_SIZE = 1;
-        private const int MACHDR_SIZE = MACTPE_SIZE + KEYSZE_SIZE + IVSIZE_SIZE + MACENG_SIZE + MACKEY_SIZE + ENGTPE_SIZE + BLKSZE_SIZE + RNDCNT_SIZE + KDFENG_SIZE;
+        private const int MACHDR_SIZE = MACTPE_SIZE + KEYSZE_SIZE + IVSIZE_SIZE + MACENG_SIZE + ENGTPE_SIZE + BLKSZE_SIZE + RNDCNT_SIZE + KDFENG_SIZE;
         private const long MACTPE_SEEK = 0;
         private const long KEYSZE_SEEK = MACTPE_SIZE;
         private const long IVSIZE_SEEK = MACTPE_SIZE + KEYSZE_SIZE;
         private const long MACENG_SEEK = MACTPE_SIZE + KEYSZE_SIZE + IVSIZE_SIZE;
         private const long MACKEY_SEEK = MACTPE_SIZE + KEYSZE_SIZE + IVSIZE_SIZE + MACENG_SIZE;
-        private const long ENGTPE_SEEK = MACTPE_SIZE + KEYSZE_SIZE + IVSIZE_SIZE + MACENG_SIZE + MACKEY_SIZE;
-        private const long BLKSZE_SEEK = MACTPE_SIZE + KEYSZE_SIZE + IVSIZE_SIZE + MACENG_SIZE + MACKEY_SIZE + ENGTPE_SIZE;
-        private const long RNDCNT_SEEK = MACTPE_SIZE + KEYSZE_SIZE + IVSIZE_SIZE + MACENG_SIZE + MACKEY_SIZE + ENGTPE_SIZE + BLKSZE_SIZE;
-        private const long KDFENG_SEEK = MACTPE_SIZE + KEYSZE_SIZE + IVSIZE_SIZE + MACENG_SIZE + MACKEY_SIZE + ENGTPE_SIZE + BLKSZE_SIZE + RNDCNT_SIZE;
+        private const long ENGTPE_SEEK = MACTPE_SIZE + KEYSZE_SIZE + IVSIZE_SIZE + MACENG_SIZE;
+        private const long BLKSZE_SEEK = MACTPE_SIZE + KEYSZE_SIZE + IVSIZE_SIZE + MACENG_SIZE + ENGTPE_SIZE;
+        private const long RNDCNT_SEEK = MACTPE_SIZE + KEYSZE_SIZE + IVSIZE_SIZE + MACENG_SIZE+ ENGTPE_SIZE + BLKSZE_SIZE;
+        private const long KDFENG_SEEK = MACTPE_SIZE + KEYSZE_SIZE + IVSIZE_SIZE + MACENG_SIZE + ENGTPE_SIZE + BLKSZE_SIZE + RNDCNT_SIZE;
         #endregion
 
         #region Public Fields
@@ -111,7 +110,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <param name="RoundCount">The number of diffusion <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts">Rounds</see></param>
         /// <param name="BlockSize">The cipher <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockSizes">Block Size</see></param>
         /// <param name="KdfEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to power the key schedule Key Derivation Function in HX and M series ciphers</param>
-        public MacDescription(Macs MacType, int KeySize, int IvSize, Digests HmacEngine = Digests.SHA512, BlockCiphers EngineType = BlockCiphers.RHX, 
+        public MacDescription(Macs MacType, int KeySize, int IvSize, Digests HmacEngine = Digests.SHA512, BlockCiphers EngineType = BlockCiphers.Rijndael, 
             RoundCounts RoundCount = RoundCounts.R14, BlockSizes BlockSize = BlockSizes.B128, Digests KdfEngine = Digests.SHA512)
         {
             this.MacType = (int)MacType;

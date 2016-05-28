@@ -67,7 +67,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
     /// <item><description>MAC return size must be a divisible of 8.</description></item>
     /// <item><description>MAC return size can be no longer than the Cipher Block size.</description></item>
     /// <item><description>Valid Cipher block sizes are 8 and 16 byte wide.</description></item>
-    /// <item><description>The <see cref="CMAC(IBlockCipher, int, bool)">Constructors</see> DisposeEngine parameter determines if Cipher engine is destroyed when <see cref="Dispose()"/> is called on this class; default is <c>true</c>.</description></item>
+    /// <item><description>The <see cref="CMAC(IBlockCipher, bool)">Constructors</see> DisposeEngine parameter determines if Cipher engine is destroyed when <see cref="Dispose()"/> is called on this class; default is <c>true</c>.</description></item>
     /// </list>
     /// 
     /// <description>Guiding Publications:</description>

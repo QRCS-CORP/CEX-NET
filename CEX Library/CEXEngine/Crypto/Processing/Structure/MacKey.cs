@@ -57,7 +57,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// 
         /// <param name="Description">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.MacDescription">MacDescription</see> structure containing a complete description of the cipher instance</param>
         /// <param name="KeyId">The unique 16 byte ID field used to identify this key. A null value auto generates this field</param>
-        /// <param name="ExtensionKey">An array of random bytes used to encrypt a message file extension. A null value auto generates this field</param>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if either the KeyId or ExtensionKey fields are null or invalid</exception>
         public MacKey(MacDescription Description, byte[] KeyId = null)

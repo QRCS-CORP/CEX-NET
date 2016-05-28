@@ -11,11 +11,11 @@ using VTDev.Libraries.CEXEngine.Tools;
 namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
 {
     /// <summary>
-    /// KeyFactory: Used to create or extract a CipherKey stream
+    /// KeyFactory: Used to create or extract a CipherKey
     /// </summary>
     /// 
     /// <example>
-    /// <description>Example using the <see cref="Create(CipherDescription, SeedGenerators, Digests)"/> overload:</description>
+    /// <description>Example using the <see cref="Create(CipherDescription, SeedGenerators, Digests, int)"/> overload:</description>
     /// <code>
     /// // create the key file
     /// new KeyFactory(KeyStream).Create(CipherDescription);
@@ -42,7 +42,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     /// <list type="bullet">
     /// <item><description>Constructor may use a FileStream or a MemoryStream.</description></item>
     /// <item><description>The <see cref="Create(CipherDescription, KeyParams)"/> method requires a populated KeyParams class.</description></item>
-    /// <item><description>The <see cref="Create(CipherDescription, SeedGenerators, Digests)"/> method auto-generate keying material.</description></item>
+    /// <item><description>The <see cref="Create(CipherDescription, SeedGenerators, Digests, int)"/> method auto-generate keying material.</description></item>
     /// <item><description>The Extract() method retrieves a populated cipher key (CipherKey), and key material (KeyParams), from the key stream.</description></item>
     /// </list>
     /// </remarks>
@@ -90,17 +90,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// </summary>
         /// 
         /// <param name="Description">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription">Cipher Description</see> containing the cipher implementation details</param>
-        /// <param name="SeedEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SeedGenerators">Random Generator</see> used to create the stage I seed material during key generation.</param>
-        /// <param name="HashEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest Engine</see> used in the stage II phase of key generation.</param>
+        /// <param name="SeedEngine">The (optional) <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SeedGenerators">Random Generator</see> used to create the stage I seed material during key generation.</param>
+        /// <param name="HashEngine">The (optional) <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest Engine</see> used in the stage II phase of key generation.</param>
+        /// <param name="ExtKeySize">The (optional) size of the extended keying material array.</param>
         /// 
         /// <exception cref="System.ArgumentNullException">Thrown if a KeyParams member is null, but specified in the Header</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">Thrown if a Header parameter does not match a KeyParams value</exception>
-        public void Create(CipherDescription Description, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, Digests HashEngine = Digests.SHA512)
+        public void Create(CipherDescription Description, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, Digests HashEngine = Digests.SHA512, int ExtKeySize = 0)
         {
             KeyParams keyParam;
 
             using (KeyGenerator keyGen = new KeyGenerator(SeedEngine, HashEngine, null))
-                keyParam = keyGen.GetKeyParams(Description.KeySize, Description.IvSize, Description.MacKeySize);
+                keyParam = keyGen.GetKeyParams(Description.KeySize, Description.IvSize, Description.MacKeySize, ExtKeySize);
 
             Create(Description, keyParam);
         }
@@ -110,13 +111,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// </summary>
         /// 
         /// <param name="Description">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription">Cipher Description</see> containing the cipher details</param>
-        /// <param name="KeyParam">An initialized and populated key material container</param>
+        /// <param name="KeyParam">An initialized and populated key material container; must include a 16 byte populated ExtKey property</param>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if a KeyParams member is null, but specified in the Header or a Header parameter does not match a KeyParams value</exception>
         public void Create(CipherDescription Description, KeyParams KeyParam)
         {
             if (KeyParam.Key == null)
                 throw new CryptoProcessingException("KeyFactory:Create", "The key can not be null!", new ArgumentNullException());
+            
             if (KeyParam.Key.Length != Description.KeySize)
                 throw new CryptoProcessingException("KeyFactory:Create", "The key parameter does not match the key size specified in the Header!", new ArgumentOutOfRangeException());
 

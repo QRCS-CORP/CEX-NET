@@ -566,6 +566,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 			        ProcessStream(InStream, OutStream);
 	        }
 
+            // trim for stream ciphers, and removed padding
             OutStream.SetLength(OutStream.Position);
         }
 

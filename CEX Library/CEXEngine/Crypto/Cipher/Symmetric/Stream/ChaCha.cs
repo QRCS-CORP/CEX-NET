@@ -384,8 +384,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// <see cref="Initialize(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
         /// 
-        /// <param name="Input">Bytes to Encrypt/Decrypt</param>
-        /// <param name="Output">Encrypted or Decrypted bytes</param>
+        /// <param name="Input">Bytes to Transform</param>
+        /// <param name="Output">Transformed bytes</param>
         public void Transform(byte[] Input, byte[] Output)
         {
             ProcessBlock(Input, 0, Output, 0, Input.Length);
@@ -400,9 +400,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// The <see cref="Initialize(KeyParams)"/> method must be called before this method can be used.</para>
         /// </summary>
         /// 
-        /// <param name="Input">Bytes to Encrypt</param>
+        /// <param name="Input">Bytes to Transform</param>
         /// <param name="InOffset">Offset in the Input array</param>
-        /// <param name="Output">Encrypted bytes</param>
+        /// <param name="Output">Transformed bytes</param>
         /// <param name="OutOffset">Offset in the Output array</param>
         public void Transform(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
@@ -412,14 +412,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// <summary>
         /// Process an array of bytes with offset and length parameters.
         /// <para>This method processes a specified length of the array; used when processing segments of a large source array.
-        /// Parallel capable function if Input array length is at least equal to <see cref="ParallelBlockSize"/>.
+        /// Parallel capable function if Length is at least equal to <see cref="ParallelBlockSize"/>.
         /// This method automatically assigns the ParallelBlockSize as the Length divided by the number of processors.
         /// <see cref="Initialize(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
         /// 
-        /// <param name="Input">Bytes to Encrypt</param>
+        /// <param name="Input">Bytes to Transform</param>
         /// <param name="InOffset">Offset in the Input array</param>
-        /// <param name="Output">Encrypted bytes</param>
+        /// <param name="Output">Transformed bytes</param>
         /// <param name="OutOffset">Offset in the Output array</param>
         /// <param name="Length">Number of bytes to process</param>
         public void Transform(byte[] Input, int InOffset, byte[] Output, int OutOffset, int Length)

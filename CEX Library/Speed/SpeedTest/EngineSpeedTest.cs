@@ -112,15 +112,16 @@ namespace Speed.SpeedTest
                     else
                         _blockSize = 1024;
 
+                    // align block
+                    if (_isParallel)
+                        _blockSize -= (_blockSize % (16 * Environment.ProcessorCount));
+
                     if (_cipherEngine.GetType().Equals(typeof(CTR)))
                         ((CTR)_cipherEngine).ParallelBlockSize = _blockSize;
                     else if (_cipherEngine.GetType().Equals(typeof(CBC)))
                         ((CBC)_cipherEngine).ParallelBlockSize = _blockSize;
                     else if (_cipherEngine.GetType().Equals(typeof(CFB)))
                         ((CFB)_cipherEngine).ParallelBlockSize = _blockSize;
-                    // align block
-                    if (_isParallel)
-                        _blockSize -= (_blockSize % (16 * Environment.ProcessorCount));
                 }
                 else
                 {

@@ -88,6 +88,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         {
             if (A == null && B != null || B == null && A != null)
                 return false;
+            else if (A == null && B == null)
+                return true;
 
             int i = A.Length;
 
@@ -116,6 +118,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         {
             if (A == null && B != null || B == null && A != null)
                 return false;
+            else if (A == null && B == null)
+                return true;
 
             int i = A.Length;
 
@@ -144,6 +148,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         {
             if (A == null && B != null || B == null && A != null)
                 return false;
+            else if (A == null && B == null)
+                return true;
 
             int i = A.Length;
 
@@ -172,6 +178,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         {
             if (A == null && B != null || B == null && A != null)
                 return false;
+            else if (A == null && B == null)
+                return true;
 
             int i = A.Length;
 
@@ -200,6 +208,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         {
             if (A == null && B != null || B == null && A != null)
                 return false;
+            else if (A == null && B == null)
+                return true;
 
             int i = A.Length;
 
@@ -228,6 +238,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         {
             if (A == null && B != null || B == null && A != null)
                 return false;
+            else if (A == null && B == null)
+                return true;
 
             int i = A.Length;
 
@@ -256,6 +268,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         {
             if (A == null && B != null || B == null && A != null)
                 return false;
+            else if (A == null && B == null)
+                return true;
 
             int i = A.Length;
 
@@ -284,6 +298,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         {
             if (A == null && B != null || B == null && A != null)
                 return false;
+            else if (A == null && B == null)
+                return true;
 
             int i = A.Length;
 
@@ -312,6 +328,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         {
             if (A == null && B != null || B == null && A != null)
                 return false;
+            else if (A == null && B == null)
+                return true;
 
             int i = A.Length;
 
@@ -340,6 +358,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         {
             if (A == null && B != null || B == null && A != null)
                 return false;
+            else if (A == null && B == null)
+                return true;
 
             int i = A.Length;
 

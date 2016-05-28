@@ -23,6 +23,11 @@ namespace DTMServerTest
         public DTMServerTest()
         {
         }
+
+        ~DTMServerTest()
+        {
+            _dtmServer.Dispose();
+        }
         #endregion
 
         #region Key Exchange

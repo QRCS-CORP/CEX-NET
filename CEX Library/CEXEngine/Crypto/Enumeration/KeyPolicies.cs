@@ -52,6 +52,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Enumeration
         /// <summary>
         /// If this flag is set, the PackageKey.KeyAuthority:TargetId field is set to the targets OriginId, and used to authenticate the operator. This is an encryption flag.
         /// </summary>
-        PackageAuth = 4096
+        PackageAuth = 4096,
+        /// <summary>
+        /// This key has been used to encrypt a file volume. Volume keys can not decrypt an individual file inside the local volume, but must export the file.
+        /// </summary>
+        VolumeKey = 8192,
     }
 }

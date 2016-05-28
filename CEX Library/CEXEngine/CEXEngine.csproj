@@ -309,7 +309,7 @@
     <Compile Include="Crypto\Processing\Factory\PackageFactory.cs" />
     <Compile Include="Crypto\Processing\Structure\PackageKey.cs" />
     <Compile Include="Crypto\Processing\Structure\VolumeKey.cs" />
-    <Compile Include="Crypto\Processing\Structure\MessageHeader.cs" />
+    <Compile Include="Crypto\Processing\Structure\MessageDescription.cs" />
     <Compile Include="Crypto\Mac\CMAC.cs" />
     <Compile Include="Crypto\Mac\VMAC.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Block\Padding\ISO7816.cs" />

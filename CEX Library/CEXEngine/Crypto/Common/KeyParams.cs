@@ -15,6 +15,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         private byte[] _Key = null;
         private byte[] _Iv = null;
         private byte[] _Ikm = null;
+        private byte[] _ExtKey = null;
         #endregion
 
         #region Properties
@@ -43,6 +44,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         {
             get { return _Iv == null ? null : (byte[])_Iv.Clone(); }
             set { _Iv = value; } 
+        }
+
+        /// <summary>
+        /// Extended key material
+        /// </summary>
+        public byte[] ExtKey
+        {
+            get { return _ExtKey == null ? null : (byte[])_ExtKey.Clone(); }
+            set { _ExtKey = value; }
         }
         #endregion
 
@@ -115,6 +125,67 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         }
 
         /// <summary>
+        /// Initialize the class with a Cipher Key, IV, IKM, and ExtKey
+        /// </summary>
+        /// 
+        /// <param name="Key">Cipher Key</param>
+        /// <param name="IV">Cipher IV</param>
+        /// <param name="IKM">IKM value</param>
+        /// <param name="ExtKey">ExtKey value</param>
+        public KeyParams(byte[] Key, byte[] IV, byte[] IKM, byte[] ExtKey)
+        {
+            if (Key != null)
+            {
+                _Key = new byte[Key.Length];
+                Buffer.BlockCopy(Key, 0, _Key, 0, _Key.Length);
+            }
+            if (IV != null)
+            {
+                _Iv = new byte[IV.Length];
+                Buffer.BlockCopy(IV, 0, _Iv, 0, _Iv.Length);
+            }
+            if (IKM != null)
+            {
+                _Ikm = new byte[IKM.Length];
+                Buffer.BlockCopy(IKM, 0, _Ikm, 0, _Ikm.Length);
+            }
+            if (ExtKey != null)
+            {
+                _ExtKey = new byte[ExtKey.Length];
+                Buffer.BlockCopy(ExtKey, 0, _ExtKey, 0, _ExtKey.Length);
+            }
+        }
+
+        /// <summary>
+        /// Convert the Key parameters to a MemoryStream
+        /// </summary>
+        /// 
+        /// <returns>The MemoryStream containing the keying material</returns>
+        public MemoryStream ToStream()
+        {
+            MemoryStream stream = new MemoryStream();
+            BinaryWriter writer = new BinaryWriter(stream);
+
+            writer.Write(_Key != null ? (short)_Key.Length : (short)0);
+            writer.Write(_Iv != null ? (short)_Iv.Length : (short)0);
+            writer.Write(_Ikm != null ? (short)_Ikm.Length : (short)0);
+            writer.Write(_ExtKey != null ? (short)_ExtKey.Length : (short)0);
+
+            if (_Key != null)
+                writer.Write(_Key);
+            if (_Iv != null)
+                writer.Write(_Iv);
+            if (_Ikm != null)
+                writer.Write(_Ikm);
+            if (_ExtKey != null)
+                writer.Write(_ExtKey);
+
+            stream.Seek(0, SeekOrigin.Begin);
+
+            return stream;
+        }
+
+        /// <summary>
         /// Finalize objects
         /// </summary>
         ~KeyParams()
@@ -137,9 +208,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
             short keyLen = reader.ReadInt16();
             short ivLen = reader.ReadInt16();
             short ikmLen = reader.ReadInt16();
+            short extLen = reader.ReadInt16();
+
             byte[] key = null;
             byte[] iv = null;
             byte[] ikm = null;
+            byte[] ext = null;
 
             if (keyLen > 0)
                 key = reader.ReadBytes(keyLen);
@@ -147,8 +221,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
                 iv = reader.ReadBytes(ivLen);
             if (ikmLen > 0)
                 ikm = reader.ReadBytes(ikmLen);
+            if (extLen > 0)
+                ext = reader.ReadBytes(extLen);
 
-            return new KeyParams(key, iv, ikm);
+            return new KeyParams(key, iv, ikm, ext);
         }
 
         /// <summary>
@@ -166,6 +242,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
             writer.Write(KeyObj.Key != null ? (short)KeyObj.Key.Length : (short)0);
             writer.Write(KeyObj.IV != null ? (short)KeyObj.IV.Length : (short)0);
             writer.Write(KeyObj.IKM != null ? (short)KeyObj.IKM.Length : (short)0);
+            writer.Write(KeyObj.ExtKey != null ? (short)KeyObj.ExtKey.Length : (short)0);
 
             if (KeyObj.Key != null)
                 writer.Write(KeyObj.Key);
@@ -173,6 +250,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
                 writer.Write(KeyObj.IV);
             if (KeyObj.IKM != null)
                 writer.Write(KeyObj.IKM);
+            if (KeyObj.ExtKey != null)
+                writer.Write(KeyObj.ExtKey);
 
             stream.Seek(0, SeekOrigin.Begin);
 
@@ -188,7 +267,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <returns>The KeyParams copy</returns>
         public object Clone()
         {
-            return new KeyParams(_Key, _Iv, _Ikm);
+            return new KeyParams(_Key, _Iv, _Ikm, _ExtKey);
         }
 
         /// <summary>
@@ -218,6 +297,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
                 return false;
             if (!Compare.IsEqual(Obj.IKM, _Ikm))
                 return false;
+            if (!Compare.IsEqual(Obj.ExtKey, _ExtKey))
+                return false;
 
             return true;
         }
@@ -232,6 +313,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
             int hash =  Utility.ArrayUtils.GetHashCode(_Key);
             hash += Utility.ArrayUtils.GetHashCode(_Iv);
             hash += Utility.ArrayUtils.GetHashCode(_Ikm);
+            hash += Utility.ArrayUtils.GetHashCode(_ExtKey);
 
             return hash;
         }
@@ -268,6 +350,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
                     {
                         Array.Clear(_Ikm, 0, _Ikm.Length);
                         _Ikm = null;
+                    }
+                    if (_ExtKey != null)
+                    {
+                        Array.Clear(_ExtKey, 0, _ExtKey.Length);
+                        _ExtKey = null;
                     }
                 }
                 finally

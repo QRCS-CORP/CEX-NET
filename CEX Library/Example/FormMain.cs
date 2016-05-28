@@ -17,7 +17,7 @@ using VTDev.Libraries.CEXEngine.Tools;
 using VTDev.Projects.CEX.Helper;
 #endregion
 
-// v1.5.4, Apr. 12, 2016
+// v1.5.6, May. 27, 2016
 namespace VTDev.Projects.CEX
 {
     public partial class FormMain : Form
@@ -113,14 +113,18 @@ namespace VTDev.Projects.CEX
         {
             CipherDescription cipherDesc;
             KeyParams keyParam;
-            byte[] extKey;
+            byte[] chksum = null;
 
             try
             {
-                using (FileStream inStream = new FileStream(_inputPath, FileMode.Open, FileAccess.Read))
-                {
-                    byte[] keyId = MessageHeader.GetKeyId(inStream);
+                // decrypt file extension first
+                string ext = GetExtension(_inputPath, _keyFilePath);
+                // copy and erase the message header and resize stream
+                MemoryStream hdrStream = ExtractHeader(_inputPath);
+                MessageDescription msgDesc = new MessageDescription(hdrStream);
 
+                using (FileStream inStream = new FileStream(_inputPath, FileMode.Open, FileAccess.ReadWrite))
+                {
                     // get the keyheader and key material from the key file
                     using (PackageFactory keyFactory = new PackageFactory(new FileStream(_keyFilePath, FileMode.Open, FileAccess.ReadWrite), _container.Authority))
                     {
@@ -131,14 +135,10 @@ namespace VTDev.Projects.CEX
                             }));
                             return;
                         }
-                        keyFactory.Extract(keyId, out cipherDesc, out keyParam, out extKey);
+                        keyFactory.Extract(msgDesc.KeyID, out cipherDesc, out keyParam);//id:149,159.. e:90,141.. k:49,90.. i:63,184.. -g
                     }
 
-                    // offset start position is base header + Mac size
-                    int hdrOffset = MessageHeader.GetHeaderSize + cipherDesc.MacKeySize;
-                    // decrypt file extension and create a unique path
-                    byte[] ext = MessageHeader.GetExtension(inStream);
-                    _outputPath = Utilities.GetUniquePath(_outputPath + MessageHeader.DecryptExtension(ext, extKey));
+                    _outputPath = Utilities.GetUniquePath(_outputPath + ext);
 
                     // if a signing key, test the mac: (MacSize = 0; not signed)
                     if (cipherDesc.MacKeySize > 0)
@@ -149,19 +149,20 @@ namespace VTDev.Projects.CEX
                         // get the hmac for the encrypted file; this could be made selectable
                         // via the KeyHeaderStruct MacDigest and MacSize members.
                         IDigest dgt = DigestFromName.GetInstance((Digests)_container.Description.MacEngine);
+
                         using (MacStream mstrm = new MacStream(new HMAC(dgt, keyParam.IKM)))
                         {
-                            // get the message header mac
-                            byte[] chksum = MessageHeader.GetMessageMac(inStream, cipherDesc.MacKeySize);
-
+                            // get the message mac code
+                            chksum = new byte[msgDesc.MacCodeLength];
+                            hdrStream.Read(chksum, 0, msgDesc.MacCodeLength);
                             // initialize mac stream
-                            inStream.Seek(hdrOffset, SeekOrigin.Begin);
+                            inStream.Seek(0, SeekOrigin.Begin);
                             mstrm.ProgressPercent -= OnMacProgress;
                             mstrm.ProgressPercent += OnMacProgress;
                             mstrm.Initialize(inStream);
 
                             // get the mac; offset by header length + Mac and specify adjusted length
-                            byte[] hash = mstrm.ComputeMac(inStream.Length - hdrOffset, hdrOffset);
+                            byte[] hash = mstrm.ComputeMac(inStream.Length, 0);
 
                             // compare, notify and abort on failure
                             if (!Evaluate.AreEqual(chksum, hash))
@@ -185,7 +186,7 @@ namespace VTDev.Projects.CEX
                         using (FileStream outStream = new FileStream(_outputPath, FileMode.Create, FileAccess.Write))
                         {
                             // start at an input offset equal to the message header size
-                            inStream.Seek(hdrOffset, SeekOrigin.Begin);
+                            inStream.Seek(0, SeekOrigin.Begin);
                             // use a percentage counter
                             cstrm.ProgressPercent -= OnCipherProgress;
                             cstrm.ProgressPercent += new CipherStream.ProgressDelegate(OnCipherProgress);
@@ -195,7 +196,25 @@ namespace VTDev.Projects.CEX
                             cstrm.Write(inStream, outStream);
                         }
                     }
+                    // copy the header back
+                    if (_outputPath != _inputPath)
+                    {
+                        if (chksum != null)
+                            inStream.Write(chksum, 0, chksum.Length);
+                        msgDesc.ToStream().CopyTo(inStream);
+                    }
                 }
+
+                // in-place decryption
+                if (_outputPath == _inputPath)
+                {
+                    _outputPath = Utilities.GetUniquePath(Path.Combine(Path.GetDirectoryName(_inputPath), Path.GetFileNameWithoutExtension(_inputPath) +
+                        MessageDescription.DecryptExtension(msgDesc.Extension, keyParam.ExtKey)));
+                    if (File.Exists(_outputPath))
+                        File.Delete(_outputPath);
+                    File.Move(_inputPath, _outputPath);
+                }
+
                 // destroy the key
                 keyParam.Dispose();
             }
@@ -228,7 +247,6 @@ namespace VTDev.Projects.CEX
             try
             {
                 byte[] keyId = null;
-                byte[] extKey = null;
 
                 // get the keyheader and key material from the key file
                 using (PackageFactory keyFactory = new PackageFactory(new FileStream(_keyFilePath, FileMode.Open, FileAccess.ReadWrite), _container.Authority))
@@ -250,10 +268,8 @@ namespace VTDev.Projects.CEX
 
                     // get the key info
                     PackageInfo pki = keyFactory.KeyInfo();
-                    keyId = (byte[])keyFactory.NextKey(out keyHeader, out keyParam, out extKey).Clone();
+                    keyId = (byte[])keyFactory.NextKey(out keyHeader, out keyParam).Clone();
                 }
-                // offset start position is base header + Mac size
-                int hdrOffset = MessageHeader.GetHeaderSize + keyHeader.MacKeySize;
 
                 // with this constructor, the CipherStream class creates the cryptographic
                 // engine using the description in the CipherDescription.
@@ -269,8 +285,6 @@ namespace VTDev.Projects.CEX
                                     lblStatus.Text = "Encrypting the file..";
                                 }));
 
-                            // start at an output offset equal to the message header + MAC length
-                            outStream.Seek(hdrOffset, SeekOrigin.Begin);
                             // use a percentage counter
                             cstrm.ProgressPercent -= OnCipherProgress;
                             cstrm.ProgressPercent += new CipherStream.ProgressDelegate(OnCipherProgress);
@@ -279,10 +293,8 @@ namespace VTDev.Projects.CEX
                             // write the encrypted output to file
                             cstrm.Write(inStream, outStream);
 
-                            // write the key id to the header
-                            MessageHeader.SetKeyId(outStream, keyId);
-                            // write the encrypted file extension
-                            MessageHeader.SetExtension(outStream, MessageHeader.EncryptExtension(Path.GetExtension(_inputPath), extKey));
+                            // create the header
+                            MemoryStream hdrStream = new MessageDescription(keyId, MessageDescription.EncryptExtension(Path.GetExtension(_inputPath), keyParam.ExtKey), keyHeader.MacKeySize).ToStream();
 
                             // if this is a signing key, calculate the mac 
                             if (keyHeader.MacKeySize > 0)
@@ -302,15 +314,19 @@ namespace VTDev.Projects.CEX
                                     mstrm.ProgressPercent -= OnMacProgress;
                                     mstrm.ProgressPercent += OnMacProgress;
                                     // seek to end of header
-                                    outStream.Seek(hdrOffset, SeekOrigin.Begin);
+                                    outStream.Seek(0, SeekOrigin.Begin);
                                     // initialize mac stream
                                     mstrm.Initialize(outStream);
                                     // get the hash; specify offset and adjusted size
-                                    byte[] hash = mstrm.ComputeMac(outStream.Length - hdrOffset, hdrOffset);
-                                    // write the keyed hash value to the message header
-                                    MessageHeader.SetMessageMac(outStream, hash);
+                                    // get the mac value 
+                                    byte[] hash = mstrm.ComputeMac(outStream.Length, 0);
+                                    // write the mac value to the end of the file
+                                    outStream.Write(hash, 0, hash.Length);
                                 }
                             }
+
+                            // copy the header to file
+                            hdrStream.CopyTo(outStream);
                         }
                     }
                 }
@@ -331,6 +347,73 @@ namespace VTDev.Projects.CEX
             {
                 Invoke(new MethodInvoker(() => { Reset(); }));
             }
+        }
+
+        /// <summary>
+        /// Copy and remove the message description structure
+        /// </summary>
+        /// 
+        /// <param name="MessagePath">Path to the message file</param>
+        /// 
+        /// <returns>Serialized MessageDescription structure</returns>
+        private MemoryStream ExtractHeader(string MessagePath)
+        {
+            MemoryStream hdrStream = new MemoryStream();
+
+            using (FileStream inStream = new FileStream(MessagePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
+            {
+                // get the message header
+                int len = MessageDescription.GetHeaderSize;
+                inStream.Seek(inStream.Length - len, SeekOrigin.Begin);
+                inStream.CopyTo(hdrStream);
+
+                int msze = MessageDescription.GetMessageMacSize(hdrStream);
+                if (msze > 0)
+                {
+                    len += msze;
+                    inStream.Seek(inStream.Length - len, SeekOrigin.Begin);
+                    byte[] code = new byte[msze];
+                    inStream.Read(code, 0, msze);
+                    hdrStream.Seek(hdrStream.Length, SeekOrigin.Begin);
+                    hdrStream.Write(code, 0, msze);
+                }
+
+                // erase first
+                inStream.Seek(inStream.Length - len, SeekOrigin.Begin);
+                byte[] fill = new byte[len];
+                inStream.Write(fill, 0, len);
+                inStream.SetLength(inStream.Length - len);
+                hdrStream.Seek(0, SeekOrigin.Begin);
+            }
+            return hdrStream;
+        }
+
+        /// <summary>
+        /// Retrieve the decrypted file extension
+        /// </summary>
+        /// 
+        /// <param name="MessagePath">Full path to the message file</param>
+        /// <param name="KeyPath">Full path to the key file</param>
+        /// 
+        /// <returns>The decrypted file extension</returns>
+        private string GetExtension(string MessagePath, string KeyPath)
+        {
+            string decExt = "";
+
+            if (File.Exists(MessagePath) && File.Exists(KeyPath))
+            {
+                using (PackageFactory pf = new PackageFactory(new FileStream(KeyPath, FileMode.Open, FileAccess.Read), _container.Authority))
+                {
+                    using (FileStream ms = new FileStream(MessagePath, FileMode.Open, FileAccess.Read))
+                    {
+                        ms.Seek(ms.Length - MessageDescription.GetHeaderSize, SeekOrigin.Begin);
+                        MessageDescription msg = new MessageDescription(ms);
+                        decExt = MessageDescription.DecryptExtension(msg.Extension, pf.GetExtensionKey(msg.KeyID));
+                    }
+                }
+            }
+
+            return decExt;
         }
 
         /// <summary>
@@ -372,9 +455,8 @@ namespace VTDev.Projects.CEX
                 PackageKey package = new PackageKey(
                     _container.Authority,           // the KeyAuthority structure
                     _container.Description,         // the CipherDescription structure
-                    keyCount,                       // the number of subkeys to add to this key package
-                    RandomBlock());                 // the file extension encryption key
-
+                    keyCount);                      // the number of subkeys to add to this key package
+                    
                 // create and write the key
                 using (PackageFactory factory = new PackageFactory(new FileStream(_keyFilePath, FileMode.Create, FileAccess.ReadWrite), _container.Authority))
                     factory.Create(package);
@@ -404,12 +486,14 @@ namespace VTDev.Projects.CEX
 
             if (File.Exists(MessagePath) && File.Exists(KeyPath))
             {
-                using (FileStream msgFile = new FileStream(MessagePath, FileMode.Open, FileAccess.Read))
+                using (PackageFactory pf = new PackageFactory(new FileStream(KeyPath, FileMode.Open, FileAccess.Read), _container.Authority))
                 {
-                    byte[] messageId = MessageHeader.GetKeyId(msgFile);
-
-                    using (PackageFactory factory = new PackageFactory(new FileStream(KeyPath, FileMode.Open, FileAccess.Read), _container.Authority))
-                        isEqual = factory.ContainsSubKey(messageId) > -1;
+                    using (FileStream ms = new FileStream(MessagePath, FileMode.Open, FileAccess.Read))
+                    {
+                        ms.Seek(ms.Length - MessageDescription.GetHeaderSize, SeekOrigin.Begin);
+                        MessageDescription msg = new MessageDescription(ms);
+                        isEqual = pf.ContainsSubKey(msg.KeyID) > -1;
+                    }
                 }
             }
 
@@ -505,33 +589,36 @@ namespace VTDev.Projects.CEX
                 CipherEngine == SymmetricEngines.SHX ||
                 CipherEngine == SymmetricEngines.THX)
             {
-                cbKeySize.Items.Add(KeySizes.K128);
-                cbKeySize.Items.Add(KeySizes.K192);
-                cbKeySize.Items.Add(KeySizes.K256);
-                cbKeySize.Items.Add(KeySizes.K512);
-
                 switch (KdfEngine)
                 {
+                    case Digests.None:
+                        cbKeySize.Items.Add(KeySizes.K128);
+                        cbKeySize.Items.Add(KeySizes.K192);
+                        cbKeySize.Items.Add(KeySizes.K256);
+                        cbKeySize.Items.Add(KeySizes.K512);
+                        break;
                     case Digests.Blake256:
                     case Digests.Keccak256:
                     case Digests.Skein256:
                     case Digests.SHA256:
+                        cbKeySize.Items.Add(KeySizes.K256);
+                        cbKeySize.Items.Add(KeySizes.K512);
                         cbKeySize.Items.Add(KeySizes.K768);
                         cbKeySize.Items.Add(KeySizes.K1024);
-                        cbKeySize.Items.Add(KeySizes.K1280);
-                        cbKeySize.Items.Add(KeySizes.K1536);
                         break;
                     case Digests.Blake512:
                     case Digests.Keccak512:
                     case Digests.SHA512:
                     case Digests.Skein512:
+                        cbKeySize.Items.Add(KeySizes.K512);
                         cbKeySize.Items.Add(KeySizes.K1024);
                         cbKeySize.Items.Add(KeySizes.K1536);
                         cbKeySize.Items.Add(KeySizes.K2048);
-                        cbKeySize.Items.Add(KeySizes.K2560);
                         break;
                     case Digests.Skein1024:
+                        cbKeySize.Items.Add(KeySizes.K1024);
                         cbKeySize.Items.Add(KeySizes.K1536);
+                        cbKeySize.Items.Add(KeySizes.K2048);
                         cbKeySize.Items.Add(KeySizes.K2560);
                         break;
                 }
@@ -1017,7 +1104,7 @@ namespace VTDev.Projects.CEX
             _container = new SettingsContainer()
             {
                 Authority = new KeyAuthority(Utilities.GetDomainId(), origin, new byte[0], new byte[0], KeyPolicies.None),
-                Description = new CipherDescription(SymmetricEngines.RHX, (int)KeySizes.K2560, IVSizes.V128, CipherModes.CTR, PaddingModes.X923, BlockSizes.B128, RoundCounts.R22, Digests.SHA512, 0),
+                Description = new CipherDescription(SymmetricEngines.RHX, (int)KeySizes.K256, IVSizes.V128, CipherModes.CTR, PaddingModes.X923, BlockSizes.B128, RoundCounts.R22, Digests.SHA512, 0),
                 DomainRestrictChecked = false,
                 NoNarrativeChecked = false,
                 PackageAuthChecked = false,
@@ -1185,16 +1272,9 @@ namespace VTDev.Projects.CEX
             {
                 cbRounds.SelectedIndex = 6;
             }
-            if (cbHkdf.SelectedItem != null && (Digests)cbHkdf.SelectedItem == Digests.Skein1024)
-            {
-                cbHkdf.Enabled = (ksize > 64 && cbEngines.SelectedIndex < 3);
-                cbRounds.Enabled = (ksize > 64 || cbEngines.SelectedIndex > 2);
-            }
-            else
-            {
-                cbHkdf.Enabled = (ksize > 32 && cbEngines.SelectedIndex < 3);
-                cbRounds.Enabled = (ksize > 32 || cbEngines.SelectedIndex > 2);
-            }
+
+            if (cbHkdf.SelectedItem != null)
+                cbRounds.Enabled = (Digests)cbHkdf.SelectedItem != Digests.None;
         }
 
         private bool ShowAuthDialog()

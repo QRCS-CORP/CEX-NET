@@ -6,16 +6,16 @@
     public enum BlockCiphers : int
     {
         /// <summary>
-        /// An implementation based on the Rijndael Block Cipher, using HKDF with a SHA512 HMAC for expanded key generation
+        /// An implementation based on the Rijndael Block Cipher
         /// </summary>
-        RHX = 1,
+        Rijndael = 1,
         /// <summary>
-        /// The Serpent Block Cipher Extended with an HKDF Key Schedule
+        /// An implementation based on the Serpent Block Cipher
         /// </summary>
-        SHX = 2,
+        Serpent = 2,
         /// <summary>
-        /// A Twofish Block Cipher Extended with an HKDF Key Schedule
+        /// An implementation based on the Twofish Block Cipher
         /// </summary>
-        THX = 4,
+        Twofish = 4,
     }
 }

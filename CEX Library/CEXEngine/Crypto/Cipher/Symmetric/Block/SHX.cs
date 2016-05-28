@@ -176,7 +176,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// </summary>
         public BlockCiphers Enumeral
         {
-            get { return BlockCiphers.SHX; }
+            get { return BlockCiphers.Serpent; }
         }
 
         /// <summary>
@@ -457,7 +457,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 Buffer.BlockCopy(Key, _ikmSize, hkdfSalt, 0, saltSize);
             }
 
-            // HKDF generator expands array using an SHA512 HMAC
+            // HKDF generator expands array
             using (HKDF gen = new HKDF(_kdfEngine, false))
             {
                 gen.Initialize(hkdfSalt, hkdfKey, _hkdfInfo);

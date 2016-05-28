@@ -95,7 +95,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="SeedEngine">The Seed engine used to create keyng material (default is CSPRsg)</param>
         /// <param name="BufferSize">The size of the cache of random bytes (must be more than 1024 to enable parallel processing)</param>
         /// <param name="KeySize">The key size (in bytes) of the symmetric cipher; a <c>0</c> value will auto size the key</param>
-        public CTRPrng(BlockCiphers BlockEngine = BlockCiphers.RHX, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, int BufferSize = 4096, int KeySize = 0)
+        public CTRPrng(BlockCiphers BlockEngine = BlockCiphers.Rijndael, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, int BufferSize = 4096, int KeySize = 0)
         {
             if (BufferSize < 64)
                 throw new CryptoRandomException("CTRPrng:Ctor", "Buffer size must be at least 64 bytes!", new ArgumentNullException());
@@ -122,7 +122,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="BufferSize">The size of the cache of random bytes (must be more than 1024 to enable parallel processing)</param>
         /// 
         /// <exception cref="CryptoRandomException">Thrown if the seed is null or too small</exception>
-        public CTRPrng(byte[] Seed, BlockCiphers BlockEngine = BlockCiphers.RHX, int BufferSize = 4096)
+        public CTRPrng(byte[] Seed, BlockCiphers BlockEngine = BlockCiphers.Rijndael, int BufferSize = 4096)
         {
             if (BufferSize < 64)
                 throw new CryptoRandomException("CTRPrng:Ctor", "Buffer size must be at least 64 bytes!", new ArgumentNullException());

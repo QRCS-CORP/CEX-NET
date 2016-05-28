@@ -89,7 +89,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
             MacDescription mds3 = new MacDescription(mds2.ToStream());
             if (!mds.Equals(mds2) || !mds.Equals(mds3))
                 throw new Exception("MacStreamTest: Description serialization has failed!");
-            mds = new MacDescription(32, BlockCiphers.RHX, IVSizes.V128, BlockSizes.B128, RoundCounts.R14);
+            mds = new MacDescription(32, BlockCiphers.Rijndael, IVSizes.V128, BlockSizes.B128, RoundCounts.R14);
             mds2 = new MacDescription(mds.ToBytes());
             mds3 = new MacDescription(mds2.ToStream());
             if (!mds.Equals(mds2) || !mds.Equals(mds3))
@@ -107,10 +107,10 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
             byte[] data = rng.GetBytes(rng.Next(100, 400));
             byte[] key = rng.GetBytes(32);
             byte[] iv = rng.GetBytes(16);
-            CMAC mac = new CMAC(BlockCiphers.RHX);
+            CMAC mac = new CMAC(BlockCiphers.Rijndael);
             mac.Initialize(key, iv);
             byte[] c1 = mac.ComputeMac(data);
-            MacDescription mds = new MacDescription(32, BlockCiphers.RHX, IVSizes.V128, BlockSizes.B128, RoundCounts.R14);
+            MacDescription mds = new MacDescription(32, BlockCiphers.Rijndael, IVSizes.V128, BlockSizes.B128, RoundCounts.R14);
             MacStream mst = new MacStream(mds, new KeyParams(key, iv));
             mst.Initialize(new MemoryStream(data));
             byte[] c2 = mst.ComputeMac();

@@ -87,7 +87,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Structure
         /// <param name="KdfEngine">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">Digest</see> engine used to power the key schedule Key Derivation Function in HX and M series ciphers</param>
         /// 
         /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an invalid KeyId, MessageKey, or ExtensionKey is used</exception>
-        public DtmSessionStruct(BlockCiphers EngineType = BlockCiphers.RHX, int KeySize = 32, IVSizes IvSize = IVSizes.V128, RoundCounts RoundCount = RoundCounts.R14, Digests KdfEngine = Digests.None)
+        public DtmSessionStruct(BlockCiphers EngineType = BlockCiphers.Rijndael, int KeySize = 32, IVSizes IvSize = IVSizes.V128, RoundCounts RoundCount = RoundCounts.R14, Digests KdfEngine = Digests.None)
         {
             this.EngineType = (byte)EngineType;
             this.KeySize = (short)KeySize;

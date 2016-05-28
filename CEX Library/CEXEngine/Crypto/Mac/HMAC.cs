@@ -149,7 +149,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// Initialize this class using the digest enumeration name
         /// </summary>
         /// 
-        /// <param name="Digests">The message digest enumeration name</param>
+        /// <param name="DigestType">The message digest enumeration name</param>
         public HMAC(Digests DigestType)
         {
             IDigest digest = Helper.DigestFromName.GetInstance(DigestType);
@@ -160,6 +160,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
             _blockSize = digest.BlockSize;
             _inputPad = new byte[_blockSize];
             _outputPad = new byte[_blockSize];
+        }
+
+        /// <summary>
+        /// Initialize this class using the digest enumeration name.
+        /// <para>When this constructor is used, <see cref="Initialize(byte[], byte[])"/> is called automatically.</para>
+        /// </summary>
+        /// 
+        /// <param name="DigestType">The message digest enumeration name</param>
+        /// <param name="Key">HMAC Key; passed to HMAC Initialize() through constructor</param>
+        public HMAC(Digests DigestType, byte[] Key)
+        {
+            IDigest digest = Helper.DigestFromName.GetInstance(DigestType);
+
+            _disposeEngine = true;
+            _msgDigest = digest;
+            _digestSize = digest.DigestSize;
+            _blockSize = digest.BlockSize;
+            _inputPad = new byte[_blockSize];
+            _outputPad = new byte[_blockSize];
+
+            Initialize(Key);
         }
 
         /// <summary>

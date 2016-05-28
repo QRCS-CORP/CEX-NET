@@ -59,8 +59,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         private const long KEYAUT_SEEK = POLICY_SIZE + CREATE_SIZE;
         private const long DESC_SEEK = POLICY_SIZE + CREATE_SIZE + KEYAUT_SIZE;
         private const long EXTKEY_SEEK = POLICY_SIZE + CREATE_SIZE + KEYAUT_SIZE + DESC_SIZE;
-        private const long KEYCNT_SEEK = POLICY_SIZE + CREATE_SIZE + KEYAUT_SIZE + DESC_SIZE + EXTKEY_SIZE;
-        private const long KEYPOL_SEEK = POLICY_SIZE + CREATE_SIZE + KEYAUT_SIZE + DESC_SIZE + EXTKEY_SIZE + KEYCNT_SIZE;
+        private const long KEYCNT_SEEK = POLICY_SIZE + CREATE_SIZE + KEYAUT_SIZE + DESC_SIZE;
+        private const long KEYPOL_SEEK = POLICY_SIZE + CREATE_SIZE + KEYAUT_SIZE + DESC_SIZE + KEYCNT_SIZE;
         #endregion
 
         #region Public Fields
@@ -83,11 +83,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         [MarshalAs(UnmanagedType.Struct, SizeConst = DESC_SIZE)]
         public CipherDescription Description;
         /// <summary>
-        /// An array of random bytes used to encrypt a message file extension. A null value auto generates this field.
-        /// </summary>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = EXTKEY_SIZE)]
-        public byte[] ExtensionKey;
-        /// <summary>
         /// The number of Key Sets contained in this key package file.
         /// </summary>
         public int SubKeyCount;
@@ -109,10 +104,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <param name="Authority">The <see cref="KeyAuthority">KeyAuthority</see> structure containing the key authorization schema.</param>
         /// <param name="Cipher">The <see cref="VTDev.Libraries.CEXEngine.Crypto.Common.CipherDescription">CipherDescription</see> structure containing a complete description of the cipher instance.</param>
         /// <param name="SubKeyCount">The number of Key Sets contained in this key package file.</param>
-        /// <param name="ExtensionKey">An array of random bytes used to encrypt a message file extension. A null value auto generates this field.</param>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if an invalid ExtensionKey is used</exception>
-        public PackageKey(KeyAuthority Authority, CipherDescription Cipher, int SubKeyCount, byte[] ExtensionKey = null)
+        public PackageKey(KeyAuthority Authority, CipherDescription Cipher, int SubKeyCount)
         {
             this.KeyPolicy = Authority.KeyPolicy;
             this.Authority = Authority;
@@ -126,19 +120,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
             {
                 SubKeyPolicy[i] = (long)Authority.KeyPolicy;
                 SubKeyID[i] = Guid.NewGuid().ToByteArray();
-            }
-
-            if (ExtensionKey != null)
-            {
-                if (ExtensionKey.Length != 16)
-                    throw new CryptoProcessingException("PackageKey:CTor", "Extension key must be exactly 16 bytes in length!", new ArgumentOutOfRangeException());
-
-                this.ExtensionKey = ExtensionKey;
-            }
-            else
-            {
-                using (CSPPrng rand = new CSPPrng())
-                    this.ExtensionKey = rand.GetBytes(16);
             }
 
             CreatedOn = DateTime.Now.Ticks;
@@ -157,7 +138,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
             CreatedOn = reader.ReadInt64();
             Authority = new KeyAuthority(KeyStream);
             Description = new CipherDescription(KeyStream);
-            ExtensionKey = reader.ReadBytes(EXTKEY_SIZE);
             SubKeyCount = reader.ReadInt32();
             SubKeyPolicy = new long[SubKeyCount];
 
@@ -196,12 +176,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
             this.CreatedOn = 0;
             this.Authority.Reset();
             this.Description.Reset();
-
-            if (this.ExtensionKey != null)
-            {
-                Array.Clear(this.ExtensionKey, 0, this.ExtensionKey.Length);
-                this.ExtensionKey = null;
-            }
 
             this.SubKeyCount = 0;
 
@@ -249,7 +223,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
             writer.Write(CreatedOn);
             writer.Write(Authority.ToBytes());
             writer.Write(Description.ToBytes());
-            writer.Write(ExtensionKey);
             writer.Write(SubKeyCount);
 
             byte[] buffer = new byte[SubKeyCount * KEYPOL_SIZE];
@@ -278,7 +251,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         /// <returns>Header size</returns>
         public static int GetHeaderSize(PackageKey Package)
         {
-            return POLICY_SIZE + CREATE_SIZE + KEYAUT_SIZE + DESC_SIZE + EXTKEY_SIZE + KEYCNT_SIZE + (Package.SubKeyCount * (KEYPOL_SIZE + KEYID_SIZE));
+            return POLICY_SIZE + CREATE_SIZE + KEYAUT_SIZE + DESC_SIZE + KEYCNT_SIZE + (Package.SubKeyCount * (KEYPOL_SIZE + KEYID_SIZE));
         }
 
         /// <summary>
@@ -341,19 +314,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         {
             KeyStream.Seek(DESC_SEEK, SeekOrigin.Begin);
             return new CipherDescription(KeyStream);
-        }
-
-        /// <summary>
-        /// Get the extension key (16 bytes)
-        /// </summary>
-        /// 
-        /// <param name="KeyStream">The stream containing a key package</param>
-        /// 
-        /// <returns>The file extension key</returns>
-        public static byte[] GetExtensionKey(Stream KeyStream)
-        {
-            KeyStream.Seek(EXTKEY_SEEK, SeekOrigin.Begin);
-            return new BinaryReader(KeyStream).ReadBytes(EXTKEY_SIZE);
         }
 
         /// <summary>
@@ -460,20 +420,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
         {
             KeyStream.Seek(DESC_SEEK, SeekOrigin.Begin);
             new BinaryWriter(KeyStream).Write(Description.ToBytes());
-        }
-
-        /// <summary>
-        /// Set the ExtensionKey
-        /// </summary>
-        /// 
-        /// <param name="KeyStream">The stream containing a key package</param>
-        /// <param name="ExtensionKey">Array of 16 bytes containing the ExtensionKey</param>
-        public static void SetExtensionKey(Stream KeyStream, byte[] ExtensionKey)
-        {
-            byte[] key = new byte[EXTKEY_SIZE];
-            Array.Copy(ExtensionKey, 0, key, 0, ExtensionKey.Length < EXTKEY_SIZE ? ExtensionKey.Length : EXTKEY_SIZE);
-            KeyStream.Seek(EXTKEY_SEEK, SeekOrigin.Begin);
-            new BinaryWriter(KeyStream).Write(key);
         }
 
         /// <summary>
@@ -778,7 +724,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
             int keyCount = GetSubKeyCount(KeyStream);
             CipherDescription cipher = GetCipherDescription(KeyStream);
             int keySize = cipher.KeySize + cipher.IvSize + cipher.MacKeySize;
-            int hdrSize = POLICY_SIZE + CREATE_SIZE + KEYAUT_SIZE + DESC_SIZE + EXTKEY_SIZE + KEYCNT_SIZE + (keyCount * (KEYPOL_SIZE + KEYID_SIZE));
+            int hdrSize = POLICY_SIZE + CREATE_SIZE + KEYAUT_SIZE + DESC_SIZE + KEYCNT_SIZE + (keyCount * (KEYPOL_SIZE + KEYID_SIZE));
             keyPos = hdrSize + (keySize * index);
 
             return keyPos;
@@ -821,7 +767,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
             hash += 31 * SubKeyCount;
             hash += Authority.GetHashCode();
             hash += Description.GetHashCode();
-            hash += ArrayUtils.GetHashCode(ExtensionKey);
             hash += ArrayUtils.GetHashCode(SubKeyPolicy);
             hash += ArrayUtils.GetHashCode(SubKeyID);
 
@@ -849,8 +794,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Structure
             if (Authority.GetHashCode() != other.Authority.GetHashCode())
                 return false;
             if (Description.GetHashCode() != other.Description.GetHashCode())
-                return false;
-            if (!Compare.IsEqual(ExtensionKey, other.ExtensionKey))
                 return false;
             if (SubKeyCount != other.SubKeyCount)
                 return false;

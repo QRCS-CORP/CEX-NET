@@ -1,4 +1,4 @@
-#region Directives
+﻿#region Directives
 using System;
 using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
@@ -598,6 +598,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                     ExpandSubBlock(expKey, 164, 16);
                     ExpandRotBlock(expKey, 168, 16, 20);
                     ExpandSubBlock(expKey, 172, 16);
+                    ExpandRotBlock(expKey, 176, 16, 21);
+                    ExpandSubBlock(expKey, 180, 16);
                 }
             }
             else if(keyWords == 8)

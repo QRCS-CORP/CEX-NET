@@ -22,11 +22,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
         {
             switch (BlockCipherType)
             {
-                case BlockCiphers.RHX:
+                case BlockCiphers.Rijndael:
                     return new RHX();
-                case BlockCiphers.SHX:
+                case BlockCiphers.Serpent:
                     return new SHX();
-                case BlockCiphers.THX:
+                case BlockCiphers.Twofish:
                     return new THX();
                 default:
                     throw new CryptoProcessingException("BlockCipherFromName:GetInstance", "The cipher engine is not supported!");
@@ -47,11 +47,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
         {
             switch (BlockCipherType)
             {
-                case BlockCiphers.RHX:
+                case BlockCiphers.Rijndael:
                     return new RHX(BlockSize, RoundCount, KdfEngineType);
-                case BlockCiphers.SHX:
+                case BlockCiphers.Serpent:
                     return new SHX(RoundCount, KdfEngineType);
-                case BlockCiphers.THX:
+                case BlockCiphers.Twofish:
                     return new THX(RoundCount, KdfEngineType);
                 default:
                     throw new CryptoProcessingException("BlockCipherFromName:GetInstance", "The cipher engine is not supported!");

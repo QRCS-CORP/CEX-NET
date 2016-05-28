@@ -109,7 +109,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// </summary>
         /// 
         /// <param name="sender">Event owner object</param>
-        /// <param name="e">Progress event arguments containing percentage and bytes processed as the UserState param</param>
+        /// <param name="args">Progress event arguments containing percentage and bytes processed as the UserState param</param>
         public delegate void ProgressDelegate(object sender, ProgressEventArgs args);
 
         /// <summary>

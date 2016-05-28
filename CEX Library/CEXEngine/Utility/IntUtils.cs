@@ -10,7 +10,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
     internal static class IntUtils
     {
         #region Constants
-        public const long INFLATED = long.MinValue;
+        public static long INFLATED = long.MinValue;
         public static double DOUBLE_MAX = double.MaxValue;
         public static double NEGATIVE_INFINITY = -1.0 / 0.0;
         public static double NaN = 0.0d / 0.0;
@@ -775,9 +775,9 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="X">The value whose signum is to be computed</param>
         /// 
         /// <returns>The signum function of the specified long value</returns>
-        public static int Signum(long X)
+        public static long Signum(long X)
         {
-            return (int)(((uint)X >> 63) | ((uint)-X >> 63));
+            return (long)(((ulong)X >> 63) | ((ulong)-X >> 63));
         }
 
         /// <summary>
@@ -810,7 +810,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="NumBits">The number of bits to shift the given number</param>
         /// 
         /// <returns>
-        /// Returns an <see cref="System.int">int</see> representing the shifted number.
+        /// Returns an int representing the shifted number.
         /// </returns>
         public static int URShift(int X, int NumBits)
         {
@@ -828,7 +828,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="NumBits">The number of bits to shift the given number</param>
         /// 
         /// <returns>
-        /// Returns an <see cref="System.long">long integer</see> representing the shifted number.
+        /// Returns an long integer representing the shifted number.
         /// </returns>
         public static long URShift(long X, int NumBits)
         {

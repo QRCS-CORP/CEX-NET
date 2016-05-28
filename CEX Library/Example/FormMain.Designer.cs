@@ -74,11 +74,11 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.pnlOptions = new System.Windows.Forms.Panel();
+            this.dtVolatileTime = new System.Windows.Forms.DateTimePicker();
             this.chkNoExport = new System.Windows.Forms.CheckBox();
             this.chkDomainRestrict = new System.Windows.Forms.CheckBox();
             this.label9 = new System.Windows.Forms.Label();
             this.chkVolatile = new System.Windows.Forms.CheckBox();
-            this.dtVolatileTime = new System.Windows.Forms.DateTimePicker();
             this.chkSingleUse = new System.Windows.Forms.CheckBox();
             this.label11 = new System.Windows.Forms.Label();
             this.chkPostOverwrite = new System.Windows.Forms.CheckBox();
@@ -643,11 +643,11 @@
             // 
             // pnlOptions
             // 
+            this.pnlOptions.Controls.Add(this.dtVolatileTime);
             this.pnlOptions.Controls.Add(this.chkNoExport);
             this.pnlOptions.Controls.Add(this.chkDomainRestrict);
             this.pnlOptions.Controls.Add(this.label9);
             this.pnlOptions.Controls.Add(this.chkVolatile);
-            this.pnlOptions.Controls.Add(this.dtVolatileTime);
             this.pnlOptions.Controls.Add(this.chkSingleUse);
             this.pnlOptions.Controls.Add(this.label11);
             this.pnlOptions.Controls.Add(this.chkPostOverwrite);
@@ -659,6 +659,15 @@
             this.pnlOptions.Name = "pnlOptions";
             this.pnlOptions.Size = new System.Drawing.Size(433, 281);
             this.pnlOptions.TabIndex = 35;
+            // 
+            // dtVolatileTime
+            // 
+            this.dtVolatileTime.CustomFormat = "yyyy/MM/dd  HH:mm:ss";
+            this.dtVolatileTime.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.dtVolatileTime.Location = new System.Drawing.Point(185, 56);
+            this.dtVolatileTime.Name = "dtVolatileTime";
+            this.dtVolatileTime.Size = new System.Drawing.Size(200, 20);
+            this.dtVolatileTime.TabIndex = 61;
             // 
             // chkNoExport
             // 
@@ -709,15 +718,6 @@
         "r Decryption");
             this.chkVolatile.UseVisualStyleBackColor = true;
             this.chkVolatile.CheckStateChanged += new System.EventHandler(this.OnKeyPolicyChanged);
-            // 
-            // dtVolatileTime
-            // 
-            this.dtVolatileTime.CustomFormat = "yyyy/MM/dd  HH:mm:ss";
-            this.dtVolatileTime.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dtVolatileTime.Location = new System.Drawing.Point(185, 56);
-            this.dtVolatileTime.Name = "dtVolatileTime";
-            this.dtVolatileTime.Size = new System.Drawing.Size(200, 20);
-            this.dtVolatileTime.TabIndex = 61;
             // 
             // chkSingleUse
             // 
@@ -888,7 +888,7 @@
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(63, 15);
             this.label15.TabIndex = 9;
-            this.label15.Text = "V 1.5.5.0";
+            this.label15.Text = "V 1.5.6.0";
             // 
             // label16
             // 
@@ -907,9 +907,9 @@
             this.label17.ForeColor = System.Drawing.Color.Black;
             this.label17.Location = new System.Drawing.Point(80, 57);
             this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(74, 14);
+            this.label17.Size = new System.Drawing.Size(72, 14);
             this.label17.TabIndex = 11;
-            this.label17.Text = "April 14, 2016";
+            this.label17.Text = "May 27, 2016";
             // 
             // label18
             // 

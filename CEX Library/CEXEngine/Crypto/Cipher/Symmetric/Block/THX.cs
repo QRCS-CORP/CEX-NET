@@ -181,7 +181,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         /// </summary>
         public BlockCiphers Enumeral
         {
-            get { return BlockCiphers.THX; }
+            get { return BlockCiphers.Twofish; }
         }
 
         /// <summary>
@@ -287,6 +287,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             }
         }
 
+        /// <summary>
+        /// Finalize objects
+        /// </summary>
         ~THX()
         {
             Dispose(false);

@@ -22,6 +22,11 @@ namespace DTMClientTest
         public DtmClientTest()
         {
         }
+
+        ~DtmClientTest()
+        {
+            _dtmClient.Dispose();
+        }
         #endregion
 
         #region Key Exchange

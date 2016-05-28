@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("VTDev.com")]
 [assembly: AssemblyProduct("CEX")]
-[assembly: AssemblyCopyright("Copyright ©VTDev.com  2014")]
+[assembly: AssemblyCopyright("Copyright ©VTDev.com  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.2.0.0")]
-[assembly: AssemblyFileVersion("1.2.0.0")]
+[assembly: AssemblyVersion("1.5.6.0")]
+[assembly: AssemblyFileVersion("1.5.6.0")]

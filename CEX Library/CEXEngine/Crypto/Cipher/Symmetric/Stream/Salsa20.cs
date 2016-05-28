@@ -383,12 +383,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// <summary>
         /// Process an array of bytes. 
         /// <para>This method processes the entire array; used when processing small data or buffers from a larger source.
-        /// Parallel capable function if Output array length is at least equal to <see cref="ParallelBlockSize"/>. 
+        /// Parallel capable function if Input array length is at least equal to <see cref="ParallelBlockSize"/>. 
         /// <see cref="Initialize(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
         /// 
-        /// <param name="Input">Bytes to Encrypt/Decrypt</param>
-        /// <param name="Output">Encrypted or Decrypted bytes</param>
+        /// <param name="Input">Bytes to Transform</param>
+        /// <param name="Output">Transformed bytes</param>
         public void Transform(byte[] Input, byte[] Output)
         {
             ProcessBlock(Input, 0, Output, 0, Input.Length);
@@ -396,15 +396,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
 
         /// <summary>
         /// Process a block of bytes using offset parameters.  
-        /// <para>Parallel capable function if Output array length is at least equal to <see cref="ParallelBlockSize"/>. 
+        /// <para>Parallel capable function if Input array length is at least equal to <see cref="ParallelBlockSize"/>. 
         /// This method will process a single block from the source array of either ParallelBlockSize or Blocksize depending on IsParallel property setting.
         /// Partial blocks are permitted with both parallel and linear operation modes.
         /// <see cref="Initialize(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
         /// 
-        /// <param name="Input">Bytes to Encrypt</param>
+        /// <param name="Input">Bytes to Transform</param>
         /// <param name="InOffset">Offset in the Input array</param>
-        /// <param name="Output">Encrypted bytes</param>
+        /// <param name="Output">Transformed bytes</param>
         /// <param name="OutOffset">Offset in the Output array</param>
         public void Transform(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
@@ -414,14 +414,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Stream
         /// <summary>
         /// Process an array of bytes using offset and length parameters.
         /// <para>This method processes a specified length of the array; used when processing segments of a large source array.
-        /// Parallel capable function if Output array length is at least equal to <see cref="ParallelBlockSize"/>.
+        /// Parallel capable function if Length is at least equal to <see cref="ParallelBlockSize"/>.
         /// This method automatically assigns the ParallelBlockSize as the Length divided by the number of processors.
         /// <see cref="Initialize(KeyParams)"/> must be called before this method can be used.</para>
         /// </summary>
         /// 
-        /// <param name="Input">Bytes to Encrypt</param>
+        /// <param name="Input">Bytes to Transform</param>
         /// <param name="InOffset">Offset in the Input array</param>
-        /// <param name="Output">Encrypted bytes</param>
+        /// <param name="Output">Transformed bytes</param>
         /// <param name="OutOffset">Offset in the Output array</param>
         /// <param name="Length">Number of bytes to process</param>
         public void Transform(byte[] Input, int InOffset, byte[] Output, int OutOffset, int Length)

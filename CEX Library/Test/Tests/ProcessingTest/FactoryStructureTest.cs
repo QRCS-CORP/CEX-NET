@@ -201,26 +201,20 @@ namespace VTDev.Projects.CEX.Test.Tests.Tools
             CSPPrng rnd = new CSPPrng();
             byte[] id = new byte[16];
             byte[] ex = new byte[16];
-            byte[] ha = new byte[64];
             rnd.GetBytes(id);
             rnd.GetBytes(ex);
-            rnd.GetBytes(ha);
 
             // test serialization
-            MessageHeader mh = new MessageHeader(id, ex, ha);
+            /*MessageHeader mh = new MessageHeader(id, ex, 0);
             byte[] sk = mh.ToBytes();
             MessageHeader mh2 = new MessageHeader(sk);
             if (!mh.Equals(mh2))
                 throw new Exception("KeyFactoryTest: MessageHeader serialization has failed!");
 
             MemoryStream mk = mh.ToStream();
-            MessageHeader mh3 = new MessageHeader(mk, 64);
+            MessageHeader mh3 = new MessageHeader(mk);
             if (!mh.Equals(mh3))
                 throw new Exception("KeyFactoryTest: MessageHeader serialization has failed!");
-
-            byte[] ha2 = MessageHeader.GetMessageMac(mk, 64);
-            if (!Evaluate.AreEqual(ha, ha2))
-                throw new Exception("KeyFactoryTest: MessageHeader access has failed!");
 
             byte[] id2 = MessageHeader.GetKeyId(mk);
             if (!Evaluate.AreEqual(id, id2))
@@ -234,7 +228,7 @@ namespace VTDev.Projects.CEX.Test.Tests.Tools
             byte[] enc = MessageHeader.EncryptExtension(ext1, MessageHeader.GetExtension(mk));
             string ext2 = MessageHeader.DecryptExtension(enc, MessageHeader.GetExtension(mk));
             if (ext1 != ext2)
-                throw new Exception("KeyFactoryTest: MessageHeader access has failed!");
+                throw new Exception("KeyFactoryTest: MessageHeader access has failed!");*/
         }
 
         private void PackageKeyTest()

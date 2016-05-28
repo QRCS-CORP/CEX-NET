@@ -43,9 +43,9 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         /// </summary>
         /// 
         /// <returns>State</returns>
-        public string Get512Vector(BlockCiphers EngineType, RoundCounts Rounds)
+        public string Get512Vector(BlockCiphers EngineType, RoundCounts Rounds, int BlockSize = 16)
         {
-            IBlockCipher engine = GetCipher(EngineType, Digests.None, Rounds); // rounds calc automatic
+            IBlockCipher engine = GetCipher(EngineType, Digests.None, Rounds, BlockSize); // rounds calc automatic
             int keyLen = 64;
             byte[] key = new byte[keyLen];
             byte[] iv = new byte[engine.BlockSize];
@@ -75,15 +75,15 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                 throw new Exception();
         }
 
-        private IBlockCipher GetCipher(BlockCiphers EngineType, Digests DigestType, RoundCounts Rounds)
+        private IBlockCipher GetCipher(BlockCiphers EngineType, Digests DigestType, RoundCounts Rounds, int BlockSize = 16)
         {
             switch (EngineType)
             {
-                case BlockCiphers.RHX:
-                    return new RHX(16, (int)Rounds, DigestType);
-                case BlockCiphers.SHX:
+                case BlockCiphers.Rijndael:
+                    return new RHX(BlockSize, (int)Rounds, DigestType);
+                case BlockCiphers.Serpent:
                     return new SHX((int)Rounds, DigestType);
-                case BlockCiphers.THX:
+                case BlockCiphers.Twofish:
                     return new THX((int)Rounds, DigestType);
             }
             throw new Exception();

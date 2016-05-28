@@ -386,7 +386,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         private static extern int RegCreateKey(UIntPtr hKey, [MarshalAs(UnmanagedType.LPStr)]string subKey, ref UIntPtr phkResult);
 
         [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
-        public static extern int RegOpenKeyEx(UIntPtr hKey, string subKey, int ulOptions, int samDesired, out UIntPtr hkResult);
+        private static extern int RegOpenKeyEx(UIntPtr hKey, string subKey, int ulOptions, int samDesired, out UIntPtr hkResult);
 
 
         [DllImport("advapi32.dll", CharSet = CharSet.Ansi)]
@@ -396,7 +396,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         private static extern int RegDeleteValue(UIntPtr hKey, string lpValueName);
 
         [DllImport("advapi32.dll")]
-        public static extern int RegCreateKeyEx(UIntPtr hKey, string lpSubKey, uint dwReserved, string lpClass, uint dwOptions, int samDesired, 
+        private static extern int RegCreateKeyEx(UIntPtr hKey, string lpSubKey, uint dwReserved, string lpClass, uint dwOptions, int samDesired, 
             IntPtr lpSecurityAttributes, out UIntPtr phkResult, out uint lpdwDisposition);
 
         [DllImport("advapi32.dll", CharSet = CharSet.Auto)]

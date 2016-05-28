@@ -29,7 +29,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     /// new PackageFactory(keyStream, authority).Create(PackageKey);
     /// </code>
     /// 
-    /// <description>Example using the <see cref="Extract(byte[], out CipherDescription, out KeyParams, out byte[])"/> method to get an existing key for decryption:</description>
+    /// <description>Example using the <see cref="Extract(byte[], out CipherDescription, out KeyParams)"/> method to get an existing key for decryption:</description>
     /// <code>
     /// // populate a KeyAuthority structure
     /// KeyAuthority authority =  new KeyAuthority(domainId, originId, packageId, packageTag, keyPolicy);
@@ -43,7 +43,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     ///     factory.Extract(keyId, out description, out keyparam, out extKey);
     /// </code>
     /// 
-    /// <description>Example using the <see cref="NextKey(out CipherDescription, out KeyParams, out byte[])"/> method to get an unused key for encryption:</description>
+    /// <description>Example using the <see cref="NextKey(out CipherDescription, out KeyParams)"/> method to get an unused key for encryption:</description>
     /// <code>
     /// // populate a KeyAuthority structure
     /// KeyAuthority authority =  new KeyAuthority(domainId, originId, packageId, packageTag, keyPolicy);
@@ -76,7 +76,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     /// <para>A PackageKey can contain one subkey, or many thousands of subkeys. Each subkey provides a unique keying material, and can only be used once for encryption; 
     /// guaranteeing a unique Key, IV, and HMAC key is used for every single encryption cycle.</para>
     /// <para>Each subkey in the Key Package contains a unique policy flag, which can be used to mark a key as locked(decryption) or expired(encryption), or trigger an erasure 
-    /// of a specific subkey after the key is read for decryption using the <see cref="Extract(byte[], out CipherDescription, out KeyParams, out byte[])"/> function.</para>
+    /// of a specific subkey after the key is read for decryption using the <see cref="Extract(byte[], out CipherDescription, out KeyParams)"/> function.</para>
     /// 
     /// <list type="bullet">
     /// <item><description>Constructors may use either a memory or file stream, and a <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.KeyAuthority"/> structure.</description></item>
@@ -87,37 +87,84 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     public sealed class PackageFactory : IDisposable
     {
         #region Constants
+        private const int EXTKEY_SIZE = 16;
         // fewer than 10 subkeys per package is best security
         private const int SUBKEY_MAX = 100000;
         #endregion
 
         #region Fields
+        private bool _isCreator = false;
         private bool _isDisposed = false;
+        private KeyScope _accessScope;
+        private long _keyPolicy = 0;
         private Stream _keyStream;
         private PackageKey _keyPackage;
         private KeyAuthority _keyOwner;
+        private string _lastError = "";
         #endregion
 
         #region Properties
         /// <summary>
-        /// The access rights available to the current user of this <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.PackageKey"/>
+        /// Get: The access rights available to the current user of this <see cref="VTDev.Libraries.CEXEngine.Crypto.Processing.Structure.PackageKey"/>
         /// </summary>
-        public KeyScope AccessScope { private set; get; }
+        public KeyScope AccessScope
+        {
+            private set { _accessScope = value; }
+            get { return _accessScope; }
+        }
 
         /// <summary>
         /// Are we the Creator of this PackageKey
         /// </summary>
-        public bool IsCreator { private set; get; }
+        public bool IsCreator {
+            private set { _isCreator = value; }
+            get { return _isCreator; }
+        }
 
         /// <summary>
-        /// The PackageKey <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies">policy flags</see>
+        /// Get: The PackageKey <see cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.KeyPolicies">policy flags</see>
         /// </summary>
-        public long KeyPolicy { private set; get; }
+        public long KeyPolicy
+        {
+            private set { _keyPolicy = value; }
+            get { return _keyPolicy; }
+        }
 
         /// <summary>
-        /// The last error string
+        /// Get: The number of unused key sets in the package
         /// </summary>
-        public string LastError { private set; get; }
+        public int KeysRemaining
+        {
+            get
+            {
+                if (_keyPackage == null)
+                    return 0;
+                int ctr = 0;
+                for (int i = 0; i < _keyPackage.SubKeyCount; i++)
+                {
+                    if (!PackageKey.KeyHasPolicy(_keyPackage.SubKeyPolicy[i], (long)PackageKeyStates.Expired))
+                        ++ctr;
+                }
+                return ctr;
+            }
+        }
+
+        /// <summary>
+        /// Get: The last error string
+        /// </summary>
+        public string LastError
+        {
+            private set { _lastError = value; }
+            get { return _lastError; }
+        }
+
+        /// <summary>
+        /// Get: Total number of subkey sets
+        /// </summary>
+        public int SubKeyCount
+        {
+            get { return (_keyPackage == null) ? 0 : _keyPackage.SubKeyCount; }
+        }
         #endregion
 
         #region Constructor
@@ -300,7 +347,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 throw new CryptoProcessingException("PackageFactory:Create", String.Format("The key package can not contain more than {0} keys!", SUBKEY_MAX), new ArgumentOutOfRangeException());
 
             // get the size of a subkey set
-            int subKeySize = Package.Description.KeySize;
+            int subKeySize = Package.Description.KeySize + EXTKEY_SIZE;
 
             if (Package.Description.IvSize > 0)
                 subKeySize += Package.Description.IvSize;
@@ -377,10 +424,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// <param name="KeyId">The KeyId array used to identify a subkey set; set as the KeyId in a MessageHeader structure</param>
         /// <param name="Description">out: The CipherDescription structure; the properties required to create a specific cipher instance</param>
         /// <param name="KeyParam">out: The KeyParams class containing a unique key, initialization vector and HMAC key</param>
-        /// <param name="ExtensionKey">out: The random key used to encrypt the message file extension</param>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if the user has insufficient access rights to access this PackageKey, or the PackageKey does not contain the KeyId specified</exception>
-        public void Extract(byte[] KeyId, out CipherDescription Description, out KeyParams KeyParam, out byte[] ExtensionKey)
+        public void Extract(byte[] KeyId, out CipherDescription Description, out KeyParams KeyParam)
         {
             if (AccessScope.Equals(KeyScope.NoAccess))
                 throw new CryptoProcessingException("PackageFactory:Extract", "You do not have permission to access this key!", new UnauthorizedAccessException());
@@ -400,7 +446,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 // get the index
                 index = PackageKey.IndexFromId(keyStream, KeyId);
                 // key flagged SingleUse was used for decryption and is locked out
-                if (PackageKey.KeyHasPolicy(_keyPackage.SubKeyPolicy[index], (long)PackageKeyStates.Locked))
+                if (PackageKey.KeyHasPolicy(_keyPackage.SubKeyPolicy[index], (long)PackageKeyStates.Locked) && !PackageKey.KeyHasPolicy(KeyPolicy, (long)KeyPolicies.VolumeKey))
                     throw new CryptoProcessingException("PackageFactory:Extract", "SubKey is locked. The subkey has a single use policy and was previously used to decrypt the file.", new Exception());
                 // key flagged PostOverwrite was used for decryption and was erased
                 if (PackageKey.KeyHasPolicy(_keyPackage.SubKeyPolicy[index], (long)PackageKeyStates.Erased))
@@ -410,8 +456,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 Description = _keyPackage.Description;
                 // get the keying material
                 KeyParam = GetKeySet(keyStream, _keyPackage.Description, keyPos);
-                // encrypts the file extension
-                ExtensionKey = _keyPackage.ExtensionKey;
 
                 // test flags for overwrite or single use policies
                 if (PackageKey.KeyHasPolicy(KeyPolicy, (long)KeyPolicies.PostOverwrite))
@@ -437,6 +481,56 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             {
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Get the file extension key associated with a subkey
+        /// </summary>
+        /// 
+        /// <param name="KeyId">The id of the subkey</param>
+        /// 
+        /// <returns>The keys extension array</returns>
+        public byte[] GetExtensionKey(byte[] KeyId)
+        {
+            try
+            {
+                long keyPos;
+                int index;
+                // get the key data
+                MemoryStream keyStream = GetKeyStream();
+                // get the keying materials starting offset within the key file
+                keyPos = PackageKey.SubKeyOffset(keyStream, KeyId);
+
+                if (keyPos == -1)
+                    throw new CryptoProcessingException("PackageFactory:GetExtensionKey", "This package does not contain the key file!", new ArgumentException());
+
+                // get the index
+                index = PackageKey.IndexFromId(keyStream, KeyId);
+                // key flagged PostOverwrite was used for decryption and was erased
+                if (PackageKey.KeyHasPolicy(_keyPackage.SubKeyPolicy[index], (long)PackageKeyStates.Erased))
+                    throw new CryptoProcessingException("PackageFactory:GetExtensionKey", "SubKey is erased. The subkey has a post erase policy and was previously used to decrypt the file.", new Exception());
+
+                // get the keying material
+                KeyParams keyParam = GetKeySet(keyStream, _keyPackage.Description, keyPos);
+
+                return keyParam.ExtKey;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <remarks>
+        /// Returns the PackageKey structure
+        /// </remarks>
+        public PackageKey GetPackage()
+        {
+            MemoryStream keyStream = GetKeyStream();
+            PackageKey package = new PackageKey(keyStream);
+            keyStream.Dispose();
+
+            return package;
         }
 
         /// <summary>
@@ -512,12 +606,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// 
         /// <param name="Description">out: The CipherDescription structure; the properties required to create a specific cipher instance</param>
         /// <param name="KeyParam">out: The KeyParams class containing a unique key, initialization vector and HMAC key</param>
-        /// <param name="ExtensionKey">out: The random key used to encrypt the message file extension</param>
         /// 
         /// <returns>The KeyId array used to identify a subkey set; set as the KeyId in a MessageHeader structure</returns>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if the user has insufficient access rights to perform encryption with this key.</exception>
-        public byte[] NextKey(out CipherDescription Description, out KeyParams KeyParam, out byte[] ExtensionKey)
+        public byte[] NextKey(out CipherDescription Description, out KeyParams KeyParam)
         {
             if (!AccessScope.Equals(KeyScope.Creator))
                 throw new CryptoProcessingException("PackageFactory:NextKey", "You do not have permission to encrypt with this key!", new UnauthorizedAccessException());
@@ -534,8 +627,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
 
                 // get the cipher description
                 Description = _keyPackage.Description;
-                // get the file extension key
-                ExtensionKey = _keyPackage.ExtensionKey;
                 // store the subkey identity, this is written into the message header to identify the subkey
                 byte[] keyId = _keyPackage.SubKeyID[index];
                 // get the starting position of the keying material within the package
@@ -583,6 +674,67 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
 
             return _keyPackage.SubKeyPolicy[index];
         }
+
+
+        /// <summary>
+        /// For use only when decrypting a volume member.
+        /// <para>Resets the Expired flag; useage must guarantee that the same key-to-file matching is used when re-encrypting the file.</para>
+        /// </summary>
+        /// 
+        /// <param name="Index">The subkey index</param>
+        public void ResetSubKeyFlag(int Index)
+        {
+            if (AccessScope.Equals(KeyScope.NoAccess))
+                throw new CryptoProcessingException("PackageFactory:Extract", "You do not have permission to access this key!", new UnauthorizedAccessException());
+
+            try
+            {
+                // get the key data
+                MemoryStream keyStream = GetKeyStream();
+                PackageKey.SubKeyClearPolicy(keyStream, Index, (long)PackageKeyStates.Expired);
+                // write to file
+                WriteKeyStream(keyStream);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// For use only when decrypting a volume member.
+        /// <para>Resets the Expired flag; useage must guarantee that the same key-to-file matching is used when re-encrypting the file.</para>
+        /// </summary>
+        /// 
+        /// <param name="KeyId">The unique subkey id</param>
+        public void ResetSubKeyFlag(byte[] KeyId)
+        {
+            if (AccessScope.Equals(KeyScope.NoAccess))
+                throw new CryptoProcessingException("PackageFactory:Extract", "You do not have permission to access this key!", new UnauthorizedAccessException());
+
+            try
+            {
+                long keyPos;
+                int index;
+                // get the key data
+                MemoryStream keyStream = GetKeyStream();
+                // get the keying materials starting offset within the key file
+                keyPos = PackageKey.SubKeyOffset(keyStream, KeyId);
+
+                if (keyPos == -1)
+                    throw new CryptoProcessingException("PackageFactory:Extract", "This package does not contain the key file!", new ArgumentException());
+
+                // get the index
+                index = PackageKey.IndexFromId(keyStream, KeyId);
+                PackageKey.SubKeyClearPolicy(keyStream, index, (long)PackageKeyStates.Expired);
+                // write to file
+                WriteKeyStream(keyStream);
+            }
+            catch
+            {
+                throw;
+            }
+        }
         #endregion
 
         #region Private Methods
@@ -611,18 +763,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         }
 
         /// <remarks>
-        /// Returns the PackageKey structure
-        /// </remarks>
-        private PackageKey GetPackage()
-        {
-            MemoryStream keyStream = GetKeyStream();
-            PackageKey package = new PackageKey(keyStream);
-            keyStream.Dispose();
-
-            return package;
-        }
-
-        /// <remarks>
         /// Returns the populated KeyParams class
         /// </remarks>
         private KeyParams GetKeySet(MemoryStream InputStream, CipherDescription Description, long Position)
@@ -632,6 +772,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             byte[] key = null;
             byte[] iv = null;
             byte[] ikm = null;
+            byte[] ext = new byte[EXTKEY_SIZE];
 
             if (Description.KeySize > 0)
             {
@@ -649,7 +790,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 InputStream.Read(ikm, 0, ikm.Length);
             }
 
-            return new KeyParams(key, iv, ikm);
+            InputStream.Read(ext, 0, ext.Length);
+
+            return new KeyParams(key, iv, ikm, ext);
         }
 
         /// <remarks>
@@ -657,14 +800,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// </remarks>
         private MemoryStream GetKeyStream()
         {
-            MemoryStream keymem = null;
+            MemoryStream keyMem = null;
 
             try
             {
+                _keyStream.Seek(0, SeekOrigin.Begin);
                 BinaryReader keyReader = new BinaryReader(_keyStream);
                 // output stream and writer
-                keymem = new MemoryStream((int)keyReader.BaseStream.Length);
-                BinaryWriter keyWriter = new BinaryWriter(keymem);
+                keyMem = new MemoryStream((int)keyReader.BaseStream.Length);
+                BinaryWriter keyWriter = new BinaryWriter(keyMem);
 
                 // add policy flags
                 KeyPolicy = keyReader.ReadInt64();
@@ -688,10 +832,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 // don't wait for gc
                 Array.Clear(data, 0, data.Length);
                 // reset position
-                keymem.Seek(0, SeekOrigin.Begin);
+                keyMem.Seek(0, SeekOrigin.Begin);
                 _keyStream.Seek(0, SeekOrigin.Begin);
 
-                return keymem;
+                return keyMem;
             }
             catch
             {

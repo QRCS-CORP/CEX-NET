@@ -7,11 +7,11 @@ using Speed.SpeedTest;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 
 #region Speed Benchmarks
-/// Speed tests on an AMD ASD-3600 Quad-Core, 4GB RAM, compiled Release/Any CPU.
+/// Speed tests on an HP all-in-one with a I7-6700T processor, 12GB DDR3 RAM, compiled Release/Any CPU.
 /// Test is a transform of a byte array in a Monte Carlo method.
 /// Sizes are in MBs (1000000 bytes). Time format sec.ms, key sizes in bits. Rate is MB per minute.
 /// CTR mode and CBC decrypt are run in parallel mode. CBC encrypt is in single processor mode.
-/// Highest rate so far is RDX with a 128 bit key: 7.85 GB per minute!
+/// Highest rate so far is RDX with a 128 bit key: 18.18 GB per minute!
 /// 
 /// Tip: Compile as release/any cpu, and run the executable bin\release\speed.exe; times are much faster without the ide..
 /// 
@@ -20,26 +20,26 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 /// RHX (Rijndael): 256 Key, 14 Rounds, 100 MB
 /// Mode    State   Size    Time    Rate
 /// ----    -----   ----    ----    ----
-/// CTR     ENC     100     0.99    6060
-/// CTR     DEC     100     1.00    6000
-/// CBC     ENC     100     4.06    1477
-/// CBC     DEC     100     1.49    4026 
+/// CTR     ENC     100     0.42    14285
+/// CTR     DEC     100     0.43    13953
+/// CBC     ENC     100     1.80    3333
+/// CBC     DEC     100     0.52    11538 
 /// 
 /// SHX (Serpent): 256 Key, 32 Rounds, 100 MB
 /// Mode    State   Size    Time    Rate
 /// ----    -----   ----    ----    ----
-/// CTR     ENC     100     2.32    2586
-/// CTR     DEC     100     2.33    2575
-/// CBC     ENC     100     9.06    662
-/// CBC     DEC     100     2.72    2205
+/// CTR     ENC     100     1.07    5607
+/// CTR     DEC     100     1.07    5607
+/// CBC     ENC     100     4.49    1336
+/// CBC     DEC     100     1.22    4918
 /// 
 /// THX (Twofish): 256 Key, 16 Rounds, 100 MB
 /// Mode    State   Size    Time    Rate
 /// ----    -----   ----    ----    ----
-/// CTR     ENC     100     0.73    8219
-/// CTR     DEC     100     0.72    8333
-/// CBC     ENC     100     3.08    1948
-/// CBC     DEC     100     1.19    5042
+/// CTR     ENC     100     0.30    20000
+/// CTR     DEC     100     0.30    20000
+/// CBC     ENC     100     3.08    4651
+/// CBC     DEC     100     0.39    15384
 /// 
 /// 
 /// **Stream Ciphers**
@@ -47,12 +47,12 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 /// ChaCha: 256 Key, 20 Rounds, 100 MB
 /// Size    Time    Rate
 /// ----    ----    ----
-/// 100     0.40    15000
+/// 100     0.14    42857
 /// 
 /// Salsa20: 256 Key, 20 Rounds, 100 MB
 /// Size    Time    Rate
 /// ----    ----    ----
-/// 100     0.36    16666
+/// 100     0.13    46153
 #endregion
 
 namespace Speed
