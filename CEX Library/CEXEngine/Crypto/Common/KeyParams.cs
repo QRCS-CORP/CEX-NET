@@ -157,35 +157,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         }
 
         /// <summary>
-        /// Convert the Key parameters to a MemoryStream
-        /// </summary>
-        /// 
-        /// <returns>The MemoryStream containing the keying material</returns>
-        public MemoryStream ToStream()
-        {
-            MemoryStream stream = new MemoryStream();
-            BinaryWriter writer = new BinaryWriter(stream);
-
-            writer.Write(_Key != null ? (short)_Key.Length : (short)0);
-            writer.Write(_Iv != null ? (short)_Iv.Length : (short)0);
-            writer.Write(_Ikm != null ? (short)_Ikm.Length : (short)0);
-            writer.Write(_ExtKey != null ? (short)_ExtKey.Length : (short)0);
-
-            if (_Key != null)
-                writer.Write(_Key);
-            if (_Iv != null)
-                writer.Write(_Iv);
-            if (_Ikm != null)
-                writer.Write(_Ikm);
-            if (_ExtKey != null)
-                writer.Write(_ExtKey);
-
-            stream.Seek(0, SeekOrigin.Begin);
-
-            return stream;
-        }
-
-        /// <summary>
         /// Finalize objects
         /// </summary>
         ~KeyParams()
@@ -252,6 +223,35 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
                 writer.Write(KeyObj.IKM);
             if (KeyObj.ExtKey != null)
                 writer.Write(KeyObj.ExtKey);
+
+            stream.Seek(0, SeekOrigin.Begin);
+
+            return stream;
+        }
+
+        /// <summary>
+        /// Convert the Key parameters to a MemoryStream
+        /// </summary>
+        /// 
+        /// <returns>The MemoryStream containing the keying material</returns>
+        public MemoryStream ToStream()
+        {
+            MemoryStream stream = new MemoryStream();
+            BinaryWriter writer = new BinaryWriter(stream);
+
+            writer.Write(_Key != null ? (short)_Key.Length : (short)0);
+            writer.Write(_Iv != null ? (short)_Iv.Length : (short)0);
+            writer.Write(_Ikm != null ? (short)_Ikm.Length : (short)0);
+            writer.Write(_ExtKey != null ? (short)_ExtKey.Length : (short)0);
+
+            if (_Key != null)
+                writer.Write(_Key);
+            if (_Iv != null)
+                writer.Write(_Iv);
+            if (_Ikm != null)
+                writer.Write(_Ikm);
+            if (_ExtKey != null)
+                writer.Write(_ExtKey);
 
             stream.Seek(0, SeekOrigin.Begin);
 

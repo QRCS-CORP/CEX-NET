@@ -1,5 +1,6 @@
 ﻿#region Directives
 using System;
+using System.IO;
 using Test.Tests;
 using VTDev.Projects.CEX.Test;
 using VTDev.Projects.CEX.Test.Tests;
@@ -29,7 +30,7 @@ namespace Test
             Console.Title = "CEX Test Suite";
             Console.BufferHeight = 600;
             //GetHXVectors();
-
+            
             Console.WriteLine("**********************************************");
             Console.WriteLine("* CEX Version 1.5                            *");
             Console.WriteLine("*                                            *");
@@ -63,6 +64,7 @@ namespace Test
 
             Console.WriteLine("******TESTING MESSAGE DIGESTS******");
             RunTest(new BlakeTest());
+            RunTest(new Blake2Test());
             RunTest(new KeccakTest());
             RunTest(new Sha2Test());
             RunTest(new SkeinTest());

@@ -25,9 +25,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
 	        {
 	            case Digests.Blake256:
 		            return new Blake256();
-	            case Digests.Blake512:
+                case Digests.Blake2S256:
+                    return new Blake2Sp256();
+                case Digests.Blake2SP256:
+                    return new Blake2Sp256(true);
+                case Digests.Blake512:
 		            return new Blake512();
-	            case Digests.Keccak256:
+                case Digests.Blake2B512:
+                    return new Blake2Bp512();
+                case Digests.Blake2BP512:
+                    return new Blake2Bp512(true);
+                case Digests.Keccak256:
 		            return new Keccak256();
 	            case Digests.Keccak512:
 		            return new Keccak512();
@@ -57,13 +65,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
         {
             switch (DigestType)
             {
-                case Digests.Blake256:
                 case Digests.Skein256:
                     return 32;
-                case Digests.Blake512:
+                case Digests.Blake256:
+                case Digests.Blake2S256:
+                case Digests.Blake2SP256:
                 case Digests.SHA256:
                 case Digests.Skein512:
                     return 64;
+                case Digests.Blake512:
+                case Digests.Blake2B512:
+                case Digests.Blake2BP512:
                 case Digests.SHA512:
                 case Digests.Skein1024:
                     return 128;
@@ -90,11 +102,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
             switch (DigestType)
             {
                 case Digests.Blake256:
+                case Digests.Blake2S256:
+                case Digests.Blake2SP256:
                 case Digests.Keccak256:
                 case Digests.SHA256:
                 case Digests.Skein256:
                     return 32;
                 case Digests.Blake512:
+                case Digests.Blake2B512:
+                case Digests.Blake2BP512:
                 case Digests.Keccak512:
                 case Digests.SHA512:
                 case Digests.Skein512:

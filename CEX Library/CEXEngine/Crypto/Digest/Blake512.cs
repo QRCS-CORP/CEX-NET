@@ -62,7 +62,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     /// <remarks>
     /// <description>Implementation Notes:</description>
     /// <list type="bullet">
-    /// <item><description>Block size is 64 bytes, (512 bits).</description></item>
+    /// <item><description>Block size is 128 bytes, (1024 bits).</description></item>
     /// <item><description>Digest size is 64 bytes, (512 bits).</description></item>
     /// <item><description>The <see cref="ComputeHash(byte[])"/> method wraps the <see cref="BlockUpdate(byte[], int, int)"/> and DoFinal methods</description>/></item>
     /// <item><description>The <see cref="DoFinal(byte[], int)"/> method resets the internal state.</description></item>
@@ -84,7 +84,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
     {
         #region Constants
         private const string ALG_NAME = "Blake512";
-        private const int BLOCK_SIZE = 64;
+        private const int BLOCK_SIZE = 128;
         private const int DIGEST_SIZE = 64;
         private const int PAD_LENGTH = 111;
         private const int ROUNDS = 16;
@@ -94,7 +94,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
         #region Fields
         private int _dataLen = 0;
-        private byte[] _digestState = new byte[128];
+        private byte[] _msgState = new byte[128];
         private ulong[] _hashVal = new ulong[8];
         private bool _isDisposed = false;
         private bool _isNullT;
@@ -213,9 +213,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             // compress remaining data filled with new bits
             if ((_dataLen > 0) && (Length >= fill))
             {
-                Buffer.BlockCopy(Input, offset, _digestState, _dataLen, fill);
+                Buffer.BlockCopy(Input, offset, _msgState, _dataLen, fill);
                 _T += TN_1024;
-                Compress64(_digestState, 0);
+                Compress(_msgState, 0);
                 offset += fill;
                 Length -= fill;
                 _dataLen = 0;
@@ -225,14 +225,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             while (Length >= 128)
             {
                 _T += TN_1024;
-                Compress64(Input, offset);
+                Compress(Input, offset);
                 offset += 128;
                 Length -= 128;
             }
 
             if (Length > 0)
             {
-                Buffer.BlockCopy(Input, offset, _digestState, _dataLen, Length);
+                Buffer.BlockCopy(Input, offset, _msgState, _dataLen, Length);
                 _dataLen += Length;
             }
             else
@@ -347,7 +347,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         #endregion
 
         #region Private Methods
-        private void Compress64(byte[] Block, int Offset)
+        private void Compress(byte[] Block, int Offset)
         {
             _M[0] = IntUtils.BytesToBe64(Block, Offset);
             _M[1] = IntUtils.BytesToBe64(Block, Offset + 8);
@@ -387,7 +387,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             uint index = 0;
             do
             {
-                G64BLK(index);
+                MixBlock(index);
                 index++;
 
             } while (index != ROUNDS);
@@ -417,35 +417,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             _hashVal[5] ^= _salt64[1];
             _hashVal[6] ^= _salt64[2];
             _hashVal[7] ^= _salt64[3];
-        }
-
-        private void G64(uint A, uint B, uint C, uint D, uint R, uint I)
-        {
-            uint P = (R << 4) + I;
-            uint P0 = _ftSigma[P];
-            uint P1 = _ftSigma[P + 1];
-
-            // initialization
-            _V[A] += _V[B] + (_M[P0] ^ _C64[P1]);
-            _V[D] = IntUtils.RotateRight(_V[D] ^ _V[A], 32);
-            _V[C] += _V[D];
-            _V[B] = IntUtils.RotateRight(_V[B] ^ _V[C], 25);
-            _V[A] += _V[B] + (_M[P1] ^ _C64[P0]);
-            _V[D] = IntUtils.RotateRight(_V[D] ^ _V[A], 16);
-            _V[C] += _V[D];
-            _V[B] = IntUtils.RotateRight(_V[B] ^ _V[C], 11);
-        }
-
-        void G64BLK(uint Index)
-        {
-            G64(0, 4, 8, 12, Index, 0);
-            G64(1, 5, 9, 13, Index, 2);
-            G64(2, 6, 10, 14, Index, 4);
-            G64(3, 7, 11, 15, Index, 6);
-            G64(3, 4, 9, 14, Index, 14);
-            G64(2, 7, 8, 13, Index, 12);
-            G64(0, 5, 10, 15, Index, 8);
-            G64(1, 6, 11, 12, Index, 10);
         }
 
         private void Initialize()
@@ -482,7 +453,36 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             _dataLen = 0;
             _isNullT = false;
 
-            Array.Clear(_digestState, 0, _digestState.Length);
+            Array.Clear(_msgState, 0, _msgState.Length);
+        }
+
+        private void Mix(uint A, uint B, uint C, uint D, uint R, uint I)
+        {
+            uint P = (R << 4) + I;
+            uint P0 = _ftSigma[P];
+            uint P1 = _ftSigma[P + 1];
+
+            // initialization
+            _V[A] += _V[B] + (_M[P0] ^ _C64[P1]);
+            _V[D] = IntUtils.RotateRight(_V[D] ^ _V[A], 32);
+            _V[C] += _V[D];
+            _V[B] = IntUtils.RotateRight(_V[B] ^ _V[C], 25);
+            _V[A] += _V[B] + (_M[P1] ^ _C64[P0]);
+            _V[D] = IntUtils.RotateRight(_V[D] ^ _V[A], 16);
+            _V[C] += _V[D];
+            _V[B] = IntUtils.RotateRight(_V[B] ^ _V[C], 11);
+        }
+
+        void MixBlock(uint Index)
+        {
+            Mix(0, 4, 8, 12, Index, 0);
+            Mix(1, 5, 9, 13, Index, 2);
+            Mix(2, 6, 10, 14, Index, 4);
+            Mix(3, 7, 11, 15, Index, 6);
+            Mix(3, 4, 9, 14, Index, 14);
+            Mix(2, 7, 8, 13, Index, 12);
+            Mix(0, 5, 10, 15, Index, 8);
+            Mix(1, 6, 11, 12, Index, 10);
         }
         #endregion
 
@@ -517,10 +517,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
                         Array.Clear(_salt64, 0, _salt64.Length);
                         _salt64 = null;
                     }
-                    if (_digestState != null)
+                    if (_msgState != null)
                     {
-                        Array.Clear(_digestState, 0, _digestState.Length);
-                        _digestState = null;
+                        Array.Clear(_msgState, 0, _msgState.Length);
+                        _msgState = null;
                     }
                     if (_V != null)
                     {

@@ -120,6 +120,7 @@
     <Compile Include="Tests\CipherTest\SalsaTest.cs" />
     <Compile Include="Tests\CipherTest\SerpentTest.cs" />
     <Compile Include="Tests\CipherTest\TwofishTest.cs" />
+    <Compile Include="Tests\DigestTest\Blake2Test.cs" />
     <Compile Include="Tests\DigestTest\BlakeTest.cs" />
     <Compile Include="Tests\DigestTest\DigestStreamTest.cs" />
     <Compile Include="Tests\DigestTest\KeccakTest.cs" />

@@ -176,6 +176,30 @@ namespace VTDev.Libraries.CEXEngine.Utility
 		    Block[Offset + 7] = (byte)(DWord >> 56);
 	    }
 
+        public static void Le256ToBlock(uint[] Input, byte[] Output, int OutOffset)
+        {
+            Le32ToBytes(Input[0], Output, OutOffset);
+            Le32ToBytes(Input[1], Output, OutOffset + 4);
+            Le32ToBytes(Input[2], Output, OutOffset + 8);
+            Le32ToBytes(Input[3], Output, OutOffset + 12);
+            Le32ToBytes(Input[4], Output, OutOffset + 16);
+            Le32ToBytes(Input[5], Output, OutOffset + 20);
+            Le32ToBytes(Input[6], Output, OutOffset + 24);
+            Le32ToBytes(Input[7], Output, OutOffset + 28);
+        }
+
+        public static void Le512ToBlock(ulong[] Input, byte[] Output, int OutOffset)
+        {
+            Le64ToBytes(Input[0], Output, OutOffset);
+            Le64ToBytes(Input[1], Output, OutOffset + 8);
+            Le64ToBytes(Input[2], Output, OutOffset + 16);
+            Le64ToBytes(Input[3], Output, OutOffset + 24);
+            Le64ToBytes(Input[4], Output, OutOffset + 32);
+            Le64ToBytes(Input[5], Output, OutOffset + 40);
+            Le64ToBytes(Input[6], Output, OutOffset + 48);
+            Le64ToBytes(Input[7], Output, OutOffset + 56);
+        }
+
         /// <summary>
         /// Convert a byte array to a Little Endian 32 bit word
         /// </summary>
