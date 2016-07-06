@@ -38,7 +38,6 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
         }
         #endregion
 
-
         #region Properties
         /// <summary>
         /// Get: Test Description

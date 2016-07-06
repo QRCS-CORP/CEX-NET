@@ -155,7 +155,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         };
         #endregion
 
-
         #region Properties
         /// <summary>
         /// Get: The Digests internal blocksize in bytes
@@ -1774,7 +1773,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
         void Increment(byte[] Counter)
         {
-            IntUtils.Le64ToBytes(IntUtils.BytesToLe64(Counter, 0) + 1, Counter, 0);
+            IntUtils.Le32ToBytes(IntUtils.BytesToLe32(Counter, 0) + 1, Counter, 0);
         }
 
         void Initialize(Blake2Params Params, Blake2sState State)
