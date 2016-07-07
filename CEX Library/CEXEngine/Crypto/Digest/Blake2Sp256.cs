@@ -536,8 +536,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             int bufSize = DIGEST_SIZE;
             byte[] inpCtr = new byte[BLOCK_SIZE];
 
-            // start counter at 1
-            Increment(inpCtr);
             // add the key to state
             LoadMacKey(MacKey);
             // process the key
@@ -584,6 +582,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             return Output.Length;
         }
 
+        /// <summary>
+        /// Initialize the digest as a MAC code generator
+        /// </summary>
+        /// 
+        /// <param name="MacKey">The input key parameters. 
+        /// <para>The input Key must be a maximum size of 32 bytes, and a minimum size of 16 bytes. 
+        /// If either the Salt or Info parameters are used, their size must be 8 bytes.
+        /// The maximum combined size of Key, Salt, and Info, must be 64 bytes or less.</para></param>
         public void LoadMacKey(MacParams MacKey)
         {
             if (MacKey.Key.Length < 16 || MacKey.Key.Length > 32)
