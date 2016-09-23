@@ -445,7 +445,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         private uint[] SecureExpand(byte[] Key)
         {
             uint Y0, Y1, Y2, Y3;
-            int keyCtr = 0;
+            uint keyCtr = 0;
             int k64Cnt = 4;
             int keySize = _dfnRounds * 2 + 8;
             int kbtSize = keySize * 4;
@@ -480,9 +480,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             for (int i = 0; i < k64Cnt; i++)
             {
                 // round key material
-                eKm[i] = IntUtils.BytesToLe32(rawKey, keyCtr);
+                eKm[i] = IntUtils.BytesToLe32(rawKey, (int)keyCtr);
                 keyCtr += 4;
-                oKm[i] = IntUtils.BytesToLe32(rawKey, keyCtr);
+                oKm[i] = IntUtils.BytesToLe32(rawKey, (int)keyCtr);
                 keyCtr += 4;
                 // sbox key material
                 IntUtils.Le32ToBytes(MDSEncode(eKm[i], oKm[i]), sbKey, ((4 * k64Cnt) - 4) - (i * 4));
@@ -492,7 +492,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
 
             while (keyCtr < KEY_BITS)
             {
-                Y0 = Y1 = Y2 = Y3 = (uint)keyCtr;
+                Y0 = Y1 = Y2 = Y3 = keyCtr;
 
                 Y0 = (uint)Q1[Y0] ^ sbKey[12];
                 Y1 = (uint)Q0[Y1] ^ sbKey[13];
@@ -505,10 +505,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                 Y3 = (uint)Q0[Y3] ^ sbKey[11];
 
                 // sbox members as MDS matrix multiplies 
-                _sprBox[keyCtr * 2] = MDS0[Q0[Q0[Y0] ^ sbKey[4]] ^ sbKey[0]];
-                _sprBox[keyCtr * 2 + 1] = MDS1[Q0[Q1[Y1] ^ sbKey[5]] ^ sbKey[1]];
-                _sprBox[keyCtr * 2 + 0x200] = MDS2[Q1[Q0[Y2] ^ sbKey[6]] ^ sbKey[2]];
-                _sprBox[keyCtr++ * 2 + 0x201] = MDS3[Q1[Q1[Y3] ^ sbKey[7]] ^ sbKey[3]];
+                _sprBox[keyCtr * 2] = M0[Q0[Q0[Y0] ^ sbKey[4]] ^ sbKey[0]];
+                _sprBox[keyCtr * 2 + 1] = M1[Q0[Q1[Y1] ^ sbKey[5]] ^ sbKey[1]];
+                _sprBox[keyCtr * 2 + 0x200] = M2[Q1[Q0[Y2] ^ sbKey[6]] ^ sbKey[2]];
+                _sprBox[keyCtr++ * 2 + 0x201] = M3[Q1[Q1[Y3] ^ sbKey[7]] ^ sbKey[3]];
             }
 
             return expKey;
@@ -517,7 +517,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
         private uint[] StandardExpand(byte[] Key)
         {
             uint Y0, Y1, Y2, Y3;
-            int keyCtr = 0;
+            uint keyCtr = 0;
             int k64Cnt = Key.Length / 8;
             int kmLen = k64Cnt > 4 ? 8 : 4;
             uint A, B, Q;
@@ -533,24 +533,25 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             for (int i = 0; i < k64Cnt; i++)
             {
                 // round key material
-                eKm[i] = IntUtils.BytesToLe32(Key, keyCtr);
+                eKm[i] = IntUtils.BytesToLe32(Key, (int)keyCtr);
                 keyCtr += 4;
-                oKm[i] = IntUtils.BytesToLe32(Key, keyCtr);
+                oKm[i] = IntUtils.BytesToLe32(Key, (int)keyCtr);
                 keyCtr += 4;
                 // sbox key material
                 IntUtils.Le32ToBytes(MDSEncode(eKm[i], oKm[i]), sbKey, ((k64Cnt * 4) - 4) - (i * 4));
             }
 
             keyCtr = 0;
+            uint[] sMix = new uint[4];
 
             while (keyCtr < KEY_BITS)
             {
                 // create the expanded key
                 if (keyCtr < (expKey.Length / 2))
                 {
-                    Q = (uint)keyCtr * SK_STEP;
-                    A = Mix32(Q, eKm, k64Cnt);
-                    B = Mix32(Q + SK_BUMP, oKm, k64Cnt);
+                    Q = keyCtr * SK_STEP;
+                    A = Mix4(Q, eKm, k64Cnt);
+                    B = Mix4(Q + SK_BUMP, oKm, k64Cnt);
                     B = B << 8 | (uint)(B >> 24);
                     A += B;
                     expKey[keyCtr * 2] = A;
@@ -558,53 +559,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
                     expKey[keyCtr * 2 + 1] = A << SK_ROTL | (uint)(A >> (32 - SK_ROTL));
                 }
 
-                Y0 = Y1 = Y2 = Y3 = (uint)keyCtr;
-
-                // 512 key
-                if (Key.Length == 64)
-                {
-                    Y0 = (uint)Q1[Y0] ^ sbKey[28];
-                    Y1 = (uint)Q0[Y1] ^ sbKey[29];
-                    Y2 = (uint)Q0[Y2] ^ sbKey[30];
-                    Y3 = (uint)Q1[Y3] ^ sbKey[31];
-
-                    Y0 = (uint)Q1[Y0] ^ sbKey[24];
-                    Y1 = (uint)Q1[Y1] ^ sbKey[25];
-                    Y2 = (uint)Q0[Y2] ^ sbKey[26];
-                    Y3 = (uint)Q0[Y3] ^ sbKey[27];
-
-                    Y0 = (uint)Q0[Y0] ^ sbKey[20];
-                    Y1 = (uint)Q1[Y1] ^ sbKey[21];
-                    Y2 = (uint)Q1[Y2] ^ sbKey[22];
-                    Y3 = (uint)Q0[Y3] ^ sbKey[23];
-
-                    Y0 = (uint)Q0[Y0] ^ sbKey[16];
-                    Y1 = (uint)Q0[Y1] ^ sbKey[17];
-                    Y2 = (uint)Q1[Y2] ^ sbKey[18];
-                    Y3 = (uint)Q1[Y3] ^ sbKey[19];
-                }
-                // 256 key
-                if (Key.Length > 24)
-                {
-                    Y0 = (uint)Q1[Y0] ^ sbKey[12];
-                    Y1 = (uint)Q0[Y1] ^ sbKey[13];
-                    Y2 = (uint)Q0[Y2] ^ sbKey[14];
-                    Y3 = (uint)Q1[Y3] ^ sbKey[15];
-                }
-                // 192 key
-                if (Key.Length > 16)
-                {
-                    Y0 = (uint)Q1[Y0] ^ sbKey[8];
-                    Y1 = (uint)Q1[Y1] ^ sbKey[9];
-                    Y2 = (uint)Q0[Y2] ^ sbKey[10];
-                    Y3 = (uint)Q0[Y3] ^ sbKey[11];
-                }
-
-                // sbox members as MDS matrix multiplies 
-                _sprBox[keyCtr * 2] = MDS0[Q0[Q0[Y0] ^ sbKey[4]] ^ sbKey[0]];
-                _sprBox[keyCtr * 2 + 1] = MDS1[Q0[Q1[Y1] ^ sbKey[5]] ^ sbKey[1]];
-                _sprBox[(keyCtr * 2) + 0x200] = MDS2[Q1[Q0[Y2] ^ sbKey[6]] ^ sbKey[2]];
-                _sprBox[keyCtr++ * 2 + 0x201] = MDS3[Q1[Q1[Y3] ^ sbKey[7]] ^ sbKey[3]];
+                Y0 = Y1 = Y2 = Y3 = keyCtr;
+                sMix = Mix16(keyCtr, sbKey, Key.Length);
+                _sprBox[keyCtr * 2] = sMix[0];
+                _sprBox[keyCtr * 2 + 1] = sMix[1];
+                _sprBox[keyCtr * 2 + 0x200] = sMix[2];
+                _sprBox[keyCtr * 2 + 0x201] = sMix[3];
+                ++keyCtr;
             }
 
             return expKey;
@@ -716,58 +677,97 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             }
         }
 
-        private uint LFSR1(uint X)
-        {
-            return (X >> 1) ^ (((X & 0x01) != 0) ? GF256_FDBK_2 : 0);
-        }
-
-        private uint LFSR2(uint X)
-        {
-            return (X >> 2) ^ (((X & 0x02) != 0) ? GF256_FDBK_2 : 0) ^
-                (((X & 0x01) != 0) ? GF256_FDBK_4 : 0);
-        }
-
         private uint MDSEncode(uint K0, uint K1)
         {
-            uint b = ((K1 >> 24) & 0xff);
-            uint g2 = ((b << 1) ^ ((b & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
-            uint g3 = ((b >> 1) ^ ((b & 0x01) != 0 ? (RS_GF_FDBK >> 1) : 0)) ^ g2;
-            uint rt = ((K1 << 8) ^ (g3 << 24) ^ (g2 << 16) ^ (g3 << 8) ^ b);
+            uint B = ((K1 >> 24) & 0xff);
+            uint G2 = ((B << 1) ^ ((B & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
+            uint G3 = ((B >> 1) ^ ((B & 0x01) != 0 ? (RS_GF_FDBK >> 1) : 0)) ^ G2;
+            uint temp = ((K1 << 8) ^ (G3 << 24) ^ (G2 << 16) ^ (G3 << 8) ^ B);
 
-            b = ((rt >> 24) & 0xff);
-            g2 = ((b << 1) ^ ((b & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
-            g3 = ((b >> 1) ^ ((b & 0x01) != 0 ? (RS_GF_FDBK >> 1) : 0)) ^ g2;
-            rt = ((rt << 8) ^ (g3 << 24) ^ (g2 << 16) ^ (g3 << 8) ^ b);
-            b = ((rt >> 24) & 0xff);
-            g2 = ((b << 1) ^ ((b & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
-            g3 = ((b >> 1) ^ ((b & 0x01) != 0 ? (RS_GF_FDBK >> 1) : 0)) ^ g2;
-            rt = ((rt << 8) ^ (g3 << 24) ^ (g2 << 16) ^ (g3 << 8) ^ b);
-            b = ((rt >> 24) & 0xff);
-            g2 = ((b << 1) ^ ((b & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
-            g3 = ((b >> 1) ^ ((b & 0x01) != 0 ? (RS_GF_FDBK >> 1) : 0)) ^ g2;
-            rt = ((rt << 8) ^ (g3 << 24) ^ (g2 << 16) ^ (g3 << 8) ^ b);
-            rt ^= K0;
-            b = ((rt >> 24) & 0xff);
-            g2 = ((b << 1) ^ ((b & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
-            g3 = ((b >> 1) ^ ((b & 0x01) != 0 ? (RS_GF_FDBK >> 1) : 0)) ^ g2;
-            rt = ((rt << 8) ^ (g3 << 24) ^ (g2 << 16) ^ (g3 << 8) ^ b);
-            b = ((rt >> 24) & 0xff);
-            g2 = ((b << 1) ^ ((b & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
-            g3 = ((b >> 1) ^ ((b & 0x01) != 0 ? (RS_GF_FDBK >> 1) : 0)) ^ g2;
-            rt = ((rt << 8) ^ (g3 << 24) ^ (g2 << 16) ^ (g3 << 8) ^ b);
-            b = ((rt >> 24) & 0xff);
-            g2 = ((b << 1) ^ ((b & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
-            g3 = ((b >> 1) ^ ((b & 0x01) != 0 ? (RS_GF_FDBK >> 1) : 0)) ^ g2;
-            rt = ((rt << 8) ^ (g3 << 24) ^ (g2 << 16) ^ (g3 << 8) ^ b);
-            b = ((rt >> 24) & 0xff);
-            g2 = ((b << 1) ^ ((b & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
-            g3 = ((b >> 1) ^ ((b & 0x01) != 0 ? (RS_GF_FDBK >> 1) : 0)) ^ g2;
-            rt = ((rt << 8) ^ (g3 << 24) ^ (g2 << 16) ^ (g3 << 8) ^ b);
+            B = ((temp >> 24) & 0xff);
+            G2 = ((B << 1) ^ ((B & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
+            G3 = ((B >> 1) ^ ((B & 0x01) != 0 ? (RS_GF_FDBK >> 1) : 0)) ^ G2;
+            temp = ((temp << 8) ^ (G3 << 24) ^ (G2 << 16) ^ (G3 << 8) ^ B);
+            B = ((temp >> 24) & 0xff);
+            G2 = ((B << 1) ^ ((B & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
+            G3 = ((B >> 1) ^ ((B & 0x01) != 0 ? (RS_GF_FDBK >> 1) : 0)) ^ G2;
+            temp = ((temp << 8) ^ (G3 << 24) ^ (G2 << 16) ^ (G3 << 8) ^ B);
+            B = ((temp >> 24) & 0xff);
+            G2 = ((B << 1) ^ ((B & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
+            G3 = ((B >> 1) ^ ((B & 0x01) != 0 ? (RS_GF_FDBK >> 1) : 0)) ^ G2;
+            temp = ((temp << 8) ^ (G3 << 24) ^ (G2 << 16) ^ (G3 << 8) ^ B);
+            temp ^= K0;
+            B = ((temp >> 24) & 0xff);
+            G2 = ((B << 1) ^ ((B & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
+            G3 = ((B >> 1) ^ ((B & 0x01) != 0 ? (RS_GF_FDBK >> 1) : 0)) ^ G2;
+            temp = ((temp << 8) ^ (G3 << 24) ^ (G2 << 16) ^ (G3 << 8) ^ B);
+            B = ((temp >> 24) & 0xff);
+            G2 = ((B << 1) ^ ((B & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
+            G3 = ((B >> 1) ^ ((B & 0x01) != 0 ? (RS_GF_FDBK >> 1) : 0)) ^ G2;
+            temp = ((temp << 8) ^ (G3 << 24) ^ (G2 << 16) ^ (G3 << 8) ^ B);
+            B = ((temp >> 24) & 0xff);
+            G2 = ((B << 1) ^ ((B & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
+            G3 = ((B >> 1) ^ ((B & 0x01) != 0 ? (RS_GF_FDBK >> 1) : 0)) ^ G2;
+            temp = ((temp << 8) ^ (G3 << 24) ^ (G2 << 16) ^ (G3 << 8) ^ B);
+            B = ((temp >> 24) & 0xff);
+            G2 = ((B << 1) ^ ((B & 0x80) != 0 ? RS_GF_FDBK : 0)) & 0xff;
+            G3 = ((B >> 1) ^ ((B & 0x01) != 0 ? (RS_GF_FDBK >> 1) : 0)) ^ G2;
+            temp = ((temp << 8) ^ (G3 << 24) ^ (G2 << 16) ^ (G3 << 8) ^ B);
 
-            return rt;
+            return temp;
         }
 
-        private uint Mix32(uint X, uint[] Key, int Count)
+        private uint[] Mix16(uint X, byte[] Key, int Count)
+        {
+            uint Y0, Y1, Y2, Y3;
+            Y0 = Y1 = Y2 = Y3 = X;
+
+            if (Count == 64)
+            {
+                Y0 = (byte)(Q1[Y0] ^ Key[28]);
+                Y1 = (byte)(Q0[Y1] ^ Key[29]);
+                Y2 = (byte)(Q0[Y2] ^ Key[30]);
+                Y3 = (byte)(Q1[Y3] ^ Key[31]);
+
+                Y0 = (byte)(Q1[Y0] ^ Key[24]);
+                Y1 = (byte)(Q1[Y1] ^ Key[25]);
+                Y2 = (byte)(Q0[Y2] ^ Key[26]);
+                Y3 = (byte)(Q0[Y3] ^ Key[27]);
+
+                Y0 = (byte)(Q0[Y0] ^ Key[20]);
+                Y1 = (byte)(Q1[Y1] ^ Key[21]);
+                Y2 = (byte)(Q1[Y2] ^ Key[22]);
+                Y3 = (byte)(Q0[Y3] ^ Key[23]);
+
+                Y0 = (byte)(Q0[Y0] ^ Key[16]);
+                Y1 = (byte)(Q0[Y1] ^ Key[17]);
+                Y2 = (byte)(Q1[Y2] ^ Key[18]);
+                Y3 = (byte)(Q1[Y3] ^ Key[19]);
+            }
+            if (Count > 24)
+            {
+                Y0 = (byte)(Q1[Y0] ^ Key[12]);
+                Y1 = (byte)(Q0[Y1] ^ Key[13]);
+                Y2 = (byte)(Q0[Y2] ^ Key[14]);
+                Y3 = (byte)(Q1[Y3] ^ Key[15]);
+            }
+            if (Count > 16)
+            {
+                Y0 = (byte)(Q1[Y0] ^ Key[8]);
+                Y1 = (byte)(Q1[Y1] ^ Key[9]);
+                Y2 = (byte)(Q0[Y2] ^ Key[10]);
+                Y3 = (byte)(Q0[Y3] ^ Key[11]);
+            }
+
+            return new uint[4] {
+                M0[Q0[Q0[Y0] ^ Key[4]] ^ Key[0]],
+                M1[Q0[Q1[Y1] ^ Key[5]] ^ Key[1]],
+                M2[Q1[Q0[Y2] ^ Key[6]] ^ Key[2]],
+                M3[Q1[Q1[Y3] ^ Key[7]] ^ Key[3]]
+            };
+        }
+
+        private uint Mix4(uint X, uint[] Key, int Count)
         {
             uint Y0 = (byte)X;
             uint Y1 = (byte)(X >> 8);
@@ -815,20 +815,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             }
 
             // return the MDS matrix multiply
-            return MDS0[Q0[Q0[Y0] ^ (byte)Key[1]] ^ (byte)Key[0]] ^
-                MDS1[Q0[Q1[Y1] ^ (byte)(Key[1] >> 8)] ^ (byte)(Key[0] >> 8)] ^
-                MDS2[Q1[Q0[Y2] ^ (byte)(Key[1] >> 16)] ^ (byte)(Key[0] >> 16)] ^
-                MDS3[Q1[Q1[Y3] ^ (byte)(Key[1] >> 24)] ^ (byte)(Key[0] >> 24)];
-        }
-
-        private uint MX(uint X)
-        {
-            return X ^ LFSR2(X);
-        }
-
-        private uint MXY(uint X)
-        {
-            return X ^ LFSR1(X) ^ LFSR2(X);
+            return M0[Q0[Q0[Y0] ^ (byte)Key[1]] ^ (byte)Key[0]] ^
+                M1[Q0[Q1[Y1] ^ (byte)(Key[1] >> 8)] ^ (byte)(Key[0] >> 8)] ^
+                M2[Q1[Q0[Y2] ^ (byte)(Key[1] >> 16)] ^ (byte)(Key[0] >> 16)] ^
+                M3[Q1[Q1[Y3] ^ (byte)(Key[1] >> 24)] ^ (byte)(Key[0] >> 24)];
         }
         #endregion
 
@@ -873,7 +863,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             0xD7, 0x61, 0x1E, 0xB4, 0x50, 0x04, 0xF6, 0xC2, 0x16, 0x25, 0x86, 0x56, 0x55, 0x09, 0xBE, 0x91 
         };
 
-        private static readonly uint[] MDS0 = 
+        private static readonly uint[] M0 = 
         {
             0xBCBC3275, 0xECEC21F3, 0x202043C6, 0xB3B3C9F4, 0xDADA03DB, 0x2028B7B, 0xE2E22BFB, 0x9E9EFAC8, 
             0xC9C9EC4A, 0xD4D409D3, 0x18186BE6, 0x1E1E9F6B, 0x98980E45, 0xB2B2387D, 0xA6A6D2E8, 0x2626B74B, 
@@ -909,7 +899,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             0xACACA716, 0xD0D07625, 0x50501386, 0xDCDCF756, 0x84841A55, 0xE1E15109, 0x7A7A25BE, 0x1313EF91
         };
 
-        private static readonly uint[] MDS1 = 
+        private static readonly uint[] M1 = 
         {
             0xA9D93939, 0x67901717, 0xB3719C9C, 0xE8D2A6A6, 0x4050707, 0xFD985252, 0xA3658080, 0x76DFE4E4, 
             0x9A084545, 0x92024B4B, 0x80A0E0E0, 0x78665A5A, 0xE4DDAFAF, 0xDDB06A6A, 0xD1BF6363, 0x38362A2A, 
@@ -945,7 +935,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             0x6F9A1919, 0x9DE01A1A, 0x368F9494, 0x42E6C7C7, 0x4AECC9C9, 0x5EFDD2D2, 0xC1AB7F7F, 0xE0D8A8A8
         };
 
-        private static readonly uint[] MDS2 = 
+        private static readonly uint[] M2 = 
         {
             0xBC75BC32, 0xECF3EC21, 0x20C62043, 0xB3F4B3C9, 0xDADBDA03, 0x27B028B, 0xE2FBE22B, 0x9EC89EFA, 
             0xC94AC9EC, 0xD4D3D409, 0x18E6186B, 0x1E6B1E9F, 0x9845980E, 0xB27DB238, 0xA6E8A6D2, 0x264B26B7, 
@@ -981,7 +971,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block
             0xAC16ACA7, 0xD025D076, 0x50865013, 0xDC56DCF7, 0x8455841A, 0xE109E151, 0x7ABE7A25, 0x139113EF
         };
 
-        private static readonly uint[] MDS3 = 
+        private static readonly uint[] M3 = 
         {
             0xD939A9D9, 0x90176790, 0x719CB371, 0xD2A6E8D2, 0x5070405, 0x9852FD98, 0x6580A365, 0xDFE476DF, 
             0x8459A08, 0x24B9202, 0xA0E080A0, 0x665A7866, 0xDDAFE4DD, 0xB06ADDB0, 0xBF63D1BF, 0x362A3836, 

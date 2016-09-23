@@ -1,5 +1,6 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Mac;
@@ -48,6 +49,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     {
         #region Constants
         private const string ALG_NAME = "PBKDF2";
+        private const uint MIN_PASSLENGTH = 4;
+        private const uint MIN_SALTLENGTH = 4;
         #endregion
 
         #region Fields
@@ -180,85 +183,92 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
         #region Public Methods
         /// <summary>
-        /// Initialize the generator
+        /// Initialize the generator with a MacParams structure containing the key, and optional salt, and info string
         /// </summary>
         /// 
-        /// <param name="Salt">Mac Key and Salt value combined.
-        /// <para>Mac Key must be at least digest size, recommended salt size is 64 bytes or greater.</para></param>
+        /// <param name="GenParam">The MacParams containing the generators keying material</param>
+        public void Initialize(MacParams GenParam)
+        {
+            if (GenParam.Salt.Length != 0)
+            {
+                if (GenParam.Info.Length != 0)
+
+                    Initialize(GenParam.Key, GenParam.Salt, GenParam.Info);
+                else
+
+                    Initialize(GenParam.Key, GenParam.Salt);
+            }
+            else
+            {
+
+                Initialize(GenParam.Key);
+            }
+        }
+
+        /// <summary>
+        /// Initialize the generator with a passphrase.
+        /// <para>The use of a salt value mitigates some attacks against a passphrase, and is highly recommended with PBKDF2.</para>
+        /// </summary>
+        /// 
+        /// <param name="Key">The primary key (password) array used to seed the generator.
+        /// <para>The minimum passphrase size is 4 bytes.</para></param>
         /// 
         /// <exception cref="CryptoGeneratorException">Thrown if a null Salt is used</exception>
-        public void Initialize(byte[] Salt)
+        public void Initialize(byte[] Key)
         {
-            if (Salt == null)
+            if (Key == null)
                 throw new CryptoGeneratorException("PBKDF2:Initialize", "Salt can not be null!", new ArgumentNullException());
+            if (Key.Length < MIN_PASSLENGTH)
+                throw new CryptoGeneratorException("PBKDF2:Initialize", "Key value is too small!", new ArgumentException());
 
-            // Note: small standard test vectors prevent this from being enforced
-            //if (Salt.Length < _digestMac.DigestSize)
-            //    throw new CryptoGeneratorException("PBKDF2:Initialize", "Salt value is too small!", new ArgumentException());
-
-            _macKey = new byte[_digestMac.MacSize];
-            Buffer.BlockCopy(Salt, 0, _macKey, 0, _digestMac.MacSize);
-
-            if (Salt.Length > _digestMac.MacSize)
-            {
-                _macSalt =  new byte[Salt.Length - _digestMac.MacSize];
-                Buffer.BlockCopy(Salt, _digestMac.MacSize, _macSalt, 0, Salt.Length - _digestMac.MacSize);
-            }
+            _macKey = new byte[Key.Length];
+            Buffer.BlockCopy(Key, 0, _macKey, 0, _macKey.Length);
 
             _isInitialized = true;
         }
 
         /// <summary>
-        /// Initialize the generator
+        /// Initialize the generator with key and salt arrays
         /// </summary>
         /// 
-        /// <param name="Salt">Salt value.
-        /// <para>Recommended salt size is 64 bytes or greater.</para></param>
-        /// <param name="Ikm">Key material.
-        /// <para>Mac Key must be at least digest size in length.</para></param>
+        /// <param name="Key">The primary key (password) array used to seed the generator</param>
+        /// <param name="Salt">The salt value containing an additional source of entropy</param>
         /// 
-        /// <exception cref="CryptoGeneratorException">Thrown if a null Salt or Ikm is used</exception>
-        public void Initialize(byte[] Salt, byte[] Ikm)
+        /// <exception cref="CryptoGeneratorException">Thrown if a null key or salt is used</exception>
+        public void Initialize(byte[] Key, byte[] Salt)
         {
+            if (Key == null)
+                throw new CryptoGeneratorException("PBKDF2:Initialize", "Key can not be null!", new ArgumentNullException());
             if (Salt == null)
                 throw new CryptoGeneratorException("PBKDF2:Initialize", "Salt can not be null!", new ArgumentNullException());
-            if (Ikm == null)
-                throw new CryptoGeneratorException("PBKDF2:Initialize", "IKM can not be null!", new ArgumentNullException());
-            //if (Ikm.Length < _digestMac.DigestSize)
-            //    throw new CryptoGeneratorException("PBKDF2:Initialize", "IKM value is too small!", new ArgumentException());
+            if (Salt.Length < MIN_SALTLENGTH)
+                throw new CryptoGeneratorException("PBKDF2:Initialize", "Salt value is too small!", new ArgumentException());
 
+            _macKey = (byte[])Key.Clone();
             _macSalt = (byte[])Salt.Clone();
-            _macKey = (byte[])Ikm.Clone();
-
             _isInitialized = true;
         }
 
         /// <summary>
-        /// Initialize the generator
+        /// Initialize the generator with a key, a salt array, and an information string or nonce
         /// </summary>
         /// 
-        /// <param name="Salt">Salt value.
-        /// <para>Recommended salt size is 64 bytes or greater.</para></param>
-        /// <param name="Ikm">Key material.
-        /// <para>Mac Key must be at least digest size in length.</para></param>
-        /// <param name="Nonce">Nonce value</param>
+        /// <param name="Key">The primary key (password) array used to seed the generator</param>
+        /// <param name="Salt">The salt value used as an additional source of entropy</param>
+        /// <param name="Info">The information string or nonce used as a third source of entropy</param>
         /// 
-        /// <exception cref="CryptoGeneratorException">Thrown if a null Salt or Ikm is used</exception>
-        public void Initialize(byte[] Salt, byte[] Ikm, byte[] Nonce)
+        /// <exception cref="CryptoGeneratorException">Thrown if a null key, salt, or info string is used</exception>
+        public void Initialize(byte[] Key, byte[] Salt, byte[] Info)
         {
+            if (Key == null)
+                throw new CryptoGeneratorException("PBKDF2:Initialize", "Key can not be null!", new ArgumentNullException());
             if (Salt == null)
                 throw new CryptoGeneratorException("PBKDF2:Initialize", "Salt can not be null!", new ArgumentNullException());
-            if (Ikm == null)
-                throw new CryptoGeneratorException("PBKDF2:Initialize", "IKM can not be null!", new ArgumentNullException());
-            //if (Ikm.Length < _digestMac.DigestSize)
-            //    throw new CryptoGeneratorException("PBKDF2:Initialize", "IKM value is too small!", new ArgumentException());
 
-            _macKey = (byte[])Ikm.Clone();
-            _macSalt = new byte[Salt.Length + Nonce.Length];
-
+            _macKey = (byte[])Key.Clone();
+            _macSalt = new byte[Salt.Length + Info.Length];
             Buffer.BlockCopy(Salt, 0, _macSalt, 0, Salt.Length);
-            Buffer.BlockCopy(Nonce, 0, _macSalt, Salt.Length, Nonce.Length);
-
+            Buffer.BlockCopy(Info, 0, _macSalt, Salt.Length, Info.Length);
             _isInitialized = true;
         }
 

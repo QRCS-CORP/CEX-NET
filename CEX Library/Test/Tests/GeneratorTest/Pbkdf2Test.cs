@@ -1,21 +1,24 @@
 ﻿#region Directives
 using System;
+using System.Text;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Generator;
+using VTDev.Libraries.CEXEngine.Crypto.Mac;
 using VTDev.Libraries.CEXEngine.Tools;
 #endregion
 
 namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
 {
     /// <summary>
-    /// Tests PBKDF2 with SHA-2 vectors
+    /// Tests the PBKDF2 implementation using vector comparisons.
+    /// <para>Using the official Kats from RFC 6070: https://tools.ietf.org/html/rfc6070 .</para>
     /// </summary>
     public class Pbkdf2Test : ITest
     {
         #region Constants
-        private const string DESCRIPTION = "KDF2 Drbg SHA-2 test vectors.";
+        private const string DESCRIPTION = "PBKDF2 VER2 SHA-2 test vectors.";
         private const string FAILURE = "FAILURE! ";
-        private const string SUCCESS = "SUCCESS! All KDF2 Drbg tests have executed succesfully.";
+        private const string SUCCESS = "SUCCESS! All PBKDF2 tests have executed succesfully.";
         #endregion
 
         #region Events
@@ -28,13 +31,22 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
         #endregion
 
         #region Vectors
-        private static readonly byte[][] _salt = 
+        private static readonly byte[][] _salt =
         {
-            HexConverter.Decode("032e45326fa859a72ec235acff929b15d1372e30b207255f0611b8f785d764374152e0ac009e509e7ba30cd2f1778e113b64e135cf4e2292c75efe5288edfda4"),
+            Encoding.ASCII.GetBytes("salt"),
+            Encoding.ASCII.GetBytes("saltSALTsaltSALTsaltSALTsaltSALTsalt"),
         };
-        private static readonly byte[][] _output = 
+        private static readonly byte[][] _ikm =
         {
-            HexConverter.Decode("10a2403db42a8743cb989de86e668d168cbe6046e23ff26f741e87949a3bba1311ac179f819a3d18412e9eb45668f2923c087c1299005f8d5fd42ca257bc93e8fee0c5a0d2a8aa70185401fbbd99379ec76c663e9a29d0b70f3fe261a59cdc24875a60b4aacb1319fa11c3365a8b79a44669f26fba933d012db213d7e3b16349")
+            Encoding.ASCII.GetBytes("password"),
+            Encoding.ASCII.GetBytes("passwordPASSWORDpassword")
+        };
+        private static readonly byte[][] _output =
+        {
+            HexConverter.Decode("120fb6cffcf8b32c43e7225256c4f837a86548c92ccc35480805987cb70be17b"),
+            HexConverter.Decode("ae4d0c95af6b46d32d0adff928f06dd02a303f8ef3c251dfd6e2d85a95474c43"),
+            HexConverter.Decode("c5e478d59288c841aa530db6845c4c8d962893a001ce4e11a4963873aa98134a"),
+            HexConverter.Decode("348c89dbcbd32b2f32d814b8116e84cf2b17347ebc1800181c4e2a1fb8dd53e1c635518c7dac47e9")
         };
         #endregion
 
@@ -47,7 +59,7 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
 
         #region Public Methods
         /// <summary>
-        /// 
+        /// Start the test
         /// </summary>
         /// 
         /// <returns>Status</returns>
@@ -55,8 +67,11 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
         {
             try
             {
-                KDF2Test(_output[0].Length, _salt[0], _output[0]);
-                OnProgress(new TestEventArgs("Passed KDF2 Drbg vector tests.."));
+                PKCSTest(32, 1, _salt[0], _ikm[0], _output[0]);
+                PKCSTest(32, 2, _salt[0], _ikm[0], _output[1]);
+                PKCSTest(32, 4096, _salt[0], _ikm[0], _output[2]);
+                PKCSTest(40, 4096, _salt[1], _ikm[1], _output[3]);
+                OnProgress(new TestEventArgs("Passed PBKDF2 vector tests.."));
 
                 return SUCCESS;
             }
@@ -69,19 +84,33 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
         #endregion
 
         #region Private Methods
-        private void KDF2Test(int Size, byte[] Salt, byte[] Output)
+        private void PKCSTest(int Size, int Iterations, byte[] Salt, byte[] Key, byte[] Output)
         {
             byte[] outBytes = new byte[Size];
 
-            using (KDF2Drbg gen = new KDF2Drbg(new SHA256()))
+            using (PBKDF2 gen = new PBKDF2(new SHA256(), Iterations))
             {
-                gen.Initialize(Salt);
+                gen.Initialize(Key, Salt);
                 gen.Generate(outBytes, 0, Size);
             }
 
             if (Evaluate.AreEqual(outBytes, Output) == false)
-                throw new Exception("KDF2Drbg: Values are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
+                throw new Exception("PBKDF2: Values are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
+
+            using (PBKDF2 gen = new PBKDF2(new HMAC(new SHA256()), Iterations))
+            {
+                gen.Initialize(Key, Salt);
+                gen.Generate(outBytes, 0, Size);
+            }
+
+            if (Evaluate.AreEqual(outBytes, Output) == false)
+                throw new Exception("PBKDF2: Values are not equal! Expected: " + HexConverter.ToString(Output) + " Received: " + HexConverter.ToString(outBytes));
         }
         #endregion
     }
+
+
+
+
+
 }

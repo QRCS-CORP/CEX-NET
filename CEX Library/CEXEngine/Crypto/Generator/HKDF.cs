@@ -1,5 +1,6 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Mac;
@@ -265,62 +266,86 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
             return Size;
         }
+
         /// <summary>
-        /// Initialize the generator with a Key
+        /// Initialize the generator with a MacParams structure containing the key, and optional salt, and info string
         /// </summary>
         /// 
-        /// <param name="Ikm">The Key value</param>
-        /// 
-        /// <exception cref="CryptoGeneratorException">Thrown if a null Ikm is used</exception>
-        public void Initialize(byte[] Ikm)
+        /// <param name="GenParam">The MacParams containing the generators keying material</param>
+        public void Initialize(MacParams GenParam)
         {
-            if (Ikm == null)
-                throw new CryptoGeneratorException("HKDF:Initialize", "Salt can not be null!", new ArgumentNullException());
+            if (GenParam.Salt.Length != 0)
+            {
+                if (GenParam.Info.Length != 0)
 
-            _digestMac.Initialize(Ikm, null);
+                    Initialize(GenParam.Key, GenParam.Salt, GenParam.Info);
+                else
+
+                    Initialize(GenParam.Key, GenParam.Salt);
+            }
+            else
+            {
+
+                Initialize(GenParam.Key);
+            }
+        }
+
+        /// <summary>
+        /// Initialize the generator with a key
+        /// </summary>
+        /// 
+        /// <param name="Key">The primary key array used to seed the generator</param>
+        /// 
+        /// <exception cref="CryptoGeneratorException">Thrown if a null key is used</exception>
+        public void Initialize(byte[] Key)
+        {
+            if (Key == null)
+                throw new CryptoGeneratorException("HKDF:Initialize", "Key can not be null!", new ArgumentNullException());
+
+            _digestMac.Initialize(Key, null);
             _generatedBytes = 0;
             _currentT = new byte[_hashLength];
             _isInitialized = true;
         }
 
         /// <summary>
-        /// Initialize the generator
+        /// Initialize the generator with key and salt arrays
         /// </summary>
         /// 
-        /// <param name="Salt">The Salt value</param>
-        /// <param name="Ikm">The Key value</param>
+        /// <param name="Key">The primary key array used to seed the generator</param>
+        /// <param name="Salt">The salt value containing an additional source of entropy</param>
         /// 
-        /// <exception cref="CryptoGeneratorException">Thrown if a null Salt or Ikm is used</exception>
-        public void Initialize(byte[] Salt, byte[] Ikm)
+        /// <exception cref="CryptoGeneratorException">Thrown if an invalid or null key or salt is used</exception>
+        public void Initialize(byte[] Key, byte[] Salt)
         {
+            if (Key == null)
+                throw new CryptoGeneratorException("HKDF:Initialize", "Key can not be null!", new ArgumentNullException());
             if (Salt == null)
                 throw new CryptoGeneratorException("HKDF:Initialize", "Salt can not be null!", new ArgumentNullException());
-            if (Ikm == null)
-                throw new CryptoGeneratorException("HKDF:Initialize", "IKM can not be null!", new ArgumentNullException());
 
-            _digestMac.Initialize(Extract(Salt, Ikm), null);
+            _digestMac.Initialize(Extract(Key, Salt), null);
             _generatedBytes = 0;
             _currentT = new byte[_hashLength];
             _isInitialized = true;
         }
 
         /// <summary>
-        /// Initialize the generator
+        /// Initialize the generator with a key, a salt array, and an information string or nonce
         /// </summary>
         /// 
-        /// <param name="Salt">The Salt value</param>
-        /// <param name="Ikm">The Key value</param>
-        /// <param name="Info">The Nonce value</param>
+        /// <param name="Key">The primary key array used to seed the generator</param>
+        /// <param name="Salt">The salt value used as an additional source of entropy</param>
+        /// <param name="Info">The information string or nonce used as a third source of entropy</param>
         /// 
-        /// <exception cref="CryptoGeneratorException">Thrown if a null Salt or Ikm is used</exception>
-        public void Initialize(byte[] Salt, byte[] Ikm, byte[] Info)
+        /// <exception cref="CryptoGeneratorException">Thrown if a null key, salt, or info string is used</exception>
+        public void Initialize(byte[] Key, byte[] Salt, byte[] Info)
         {
+            if (Key == null)
+                throw new CryptoGeneratorException("HKDF:Initialize", "Key can not be null!", new ArgumentNullException());
             if (Salt == null)
                 throw new CryptoGeneratorException("HKDF:Initialize", "Salt can not be null!", new ArgumentNullException());
-            if (Ikm == null)
-                throw new CryptoGeneratorException("HKDF:Initialize", "IKM can not be null!", new ArgumentNullException());
 
-            _digestMac.Initialize(Extract(Salt, Ikm), null);
+            _digestMac.Initialize(Extract(Key, Salt), null);
 
             if (Info != null)
                 _digestInfo = Info;

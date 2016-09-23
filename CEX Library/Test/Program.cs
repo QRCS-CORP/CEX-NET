@@ -30,7 +30,7 @@ namespace Test
             Console.Title = "CEX Test Suite";
             Console.BufferHeight = 600;
             //GetHXVectors();
-            
+            RunTest(new TwofishTest());
             Console.WriteLine("**********************************************");
             Console.WriteLine("* CEX Version 1.5                            *");
             Console.WriteLine("*                                            *");

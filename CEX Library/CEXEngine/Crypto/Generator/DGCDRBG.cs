@@ -1,6 +1,7 @@
 ﻿#region Directives
-using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using System;
+using VTDev.Libraries.CEXEngine.Crypto.Common;
+using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.CryptoException;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 #endregion
@@ -181,26 +182,49 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
         #region Public Methods
         /// <summary>
-        /// Initialize the generator
+        /// Initialize the generator with a MacParams structure containing the key, and optional salt, and info string
         /// </summary>
         /// 
-        /// <param name="Salt">Salt value</param>
-        /// 
-        /// <exception cref="CryptoGeneratorException">Thrown if an invalid or null salt is used</exception>
-        public void Initialize(byte[] Salt)
+        /// <param name="GenParam">The MacParams containing the generators keying material</param>
+        public void Initialize(MacParams GenParam)
         {
-            if (Salt == null)
-                throw new CryptoGeneratorException("DGCDrbg:Initialize", "Salt can not be null!", new ArgumentNullException());
-            if (Salt.Length < COUNTER_SIZE)
-                throw new CryptoGeneratorException("DGCDrbg:Initialize", "Salt must be at least 8 bytes!", new ArgumentOutOfRangeException());
+            if (GenParam.Salt.Length != 0)
+            {
+                if (GenParam.Info.Length != 0)
+
+                    Initialize(GenParam.Key, GenParam.Salt, GenParam.Info);
+                else
+
+                    Initialize(GenParam.Key, GenParam.Salt);
+            }
+            else
+            {
+
+                Initialize(GenParam.Key);
+            }
+        }
+
+        /// <summary>
+        /// Initialize the generator with a key
+        /// </summary>
+        /// 
+        /// <param name="Key">The primary key array used to seed the generator</param>
+        /// 
+        /// <exception cref="CryptoGeneratorException">Thrown if an invalid or null key is used</exception>
+        public void Initialize(byte[] Key)
+        {
+            if (Key == null)
+                throw new CryptoGeneratorException("DGCDrbg:Initialize", "Key can not be null!", new ArgumentNullException());
+            if (Key.Length < COUNTER_SIZE)
+                throw new CryptoGeneratorException("DGCDrbg:Initialize", "Key must be at least 8 bytes!", new ArgumentOutOfRangeException());
 
             long[] counter = new long[1];
-            int keyLen = (Salt.Length - COUNTER_SIZE) < 0 ? 0 : Salt.Length - COUNTER_SIZE;
+            int keyLen = (Key.Length - COUNTER_SIZE) < 0 ? 0 : Key.Length - COUNTER_SIZE;
             byte[] key = new byte[keyLen];
-            int ctrLen = Math.Min(COUNTER_SIZE, Salt.Length);
+            int ctrLen = Math.Min(COUNTER_SIZE, Key.Length);
 
-            Buffer.BlockCopy(Salt, 0, counter, 0, ctrLen);
-            Buffer.BlockCopy(Salt, ctrLen, key, 0, keyLen);
+            Buffer.BlockCopy(Key, 0, counter, 0, ctrLen);
+            Buffer.BlockCopy(Key, ctrLen, key, 0, keyLen);
 
             UpdateSeed(key);
             UpdateCounter(counter[0]);
@@ -209,39 +233,39 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         }
 
         /// <summary>
-        /// Initialize the generator
+        /// Initialize the generator with key and salt arrays
         /// </summary>
         /// 
-        /// <param name="Salt">Salt value</param>
-        /// <param name="Ikm">Key material</param>
+        /// <param name="Key">The primary key array used to seed the generator</param>
+        /// <param name="Salt">The salt value containing an additional source of entropy</param>
         /// 
-        /// <exception cref="CryptoGeneratorException">Thrown if an invalid or null salt is used</exception>
-        public void Initialize(byte[] Salt, byte[] Ikm)
+        /// <exception cref="CryptoGeneratorException">Thrown if an invalid or null key or salt is used</exception>
+        public void Initialize(byte[] Key, byte[] Salt)
         {
-            byte[] seed = new byte[Salt.Length + Ikm.Length];
+            byte[] seed = new byte[Key.Length + Salt.Length];
 
-            Buffer.BlockCopy(Salt, 0, seed, 0, Salt.Length);
-            Buffer.BlockCopy(Ikm, 0, seed, Salt.Length, Ikm.Length);
+            Buffer.BlockCopy(Key, 0, seed, 0, Key.Length);
+            Buffer.BlockCopy(Salt, 0, seed, Key.Length, Salt.Length);
 
             Initialize(seed);
         }
 
         /// <summary>
-        /// Initialize the generator
+        /// Initialize the generator with a key, a salt array, and an information string or nonce
         /// </summary>
         /// 
-        /// <param name="Salt">Salt value</param>
-        /// <param name="Ikm">Key material</param>
-        /// <param name="Info">Info value</param>
+        /// <param name="Key">The primary key array used to seed the generator</param>
+        /// <param name="Salt">The salt value used as an additional source of entropy</param>
+        /// <param name="Info">The information string or nonce used as a third source of entropy</param>
         /// 
-        /// <exception cref="CryptoGeneratorException">Thrown if an invalid or null salt is used</exception>
-        public void Initialize(byte[] Salt, byte[] Ikm, byte[] Info)
+        /// <exception cref="CryptoGeneratorException">Thrown if a null key, salt, or info string is used</exception>
+        public void Initialize(byte[] Key, byte[] Salt, byte[] Info)
         {
-            byte[] seed = new byte[Salt.Length + Ikm.Length + Info.Length];
+            byte[] seed = new byte[Key.Length + Salt.Length + Info.Length];
 
-            Buffer.BlockCopy(Salt, 0, seed, 0, Salt.Length);
-            Buffer.BlockCopy(Ikm, 0, seed, Salt.Length, Ikm.Length);
-            Buffer.BlockCopy(Info, 0, seed, Ikm.Length + Salt.Length, Info.Length);
+            Buffer.BlockCopy(Key, 0, seed, 0, Key.Length);
+            Buffer.BlockCopy(Salt, 0, seed, Key.Length, Salt.Length);
+            Buffer.BlockCopy(Info, 0, seed, Salt.Length + Key.Length, Info.Length);
 
             Initialize(seed);
         }

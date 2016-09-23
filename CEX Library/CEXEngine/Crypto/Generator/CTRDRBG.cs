@@ -66,8 +66,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// <item><description>Parallelized by default on a multi processer system when an input byte array of <see cref="ParallelMinimumSize"/> bytes or larger is used.</description></item>
     /// <item><description>Parallelization can be disabled using the <see cref="IsParallel"/> property.</description></item>
     /// <item><description>The <see cref="CTRDrbg(IBlockCipher, bool, int)">Constructors</see> DisposeEngine parameter determines if Cipher engine is destroyed when <see cref="Dispose()"/> is called on this class; default is <c>true</c>.</description></item>
-    /// <item><description>Combination of [Salt, Ikm, Nonce] must be: cipher key size +  cipher block size in length.</description></item>
-    /// <item><description>Nonce and Ikm are optional, (but recommended).</description></item>
+    /// <item><description>Combination of [Key, Salt, Info] must be: cipher key size +  cipher block size in length.</description></item>
+    /// <item><description>Salt and Info are optional, and combined to create key and initialization vector.</description></item>
     /// </list>
     /// 
     /// <description>Guiding Publications:</description>
@@ -226,68 +226,91 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
         #region Public Methods
         /// <summary>
-        /// Initialize the generator
+        /// Initialize the generator with a MacParams structure containing the key, and optional salt, and info string
         /// </summary>
         /// 
-        /// <param name="Salt">Salt value</param>
-        /// 
-        /// <exception cref="CryptoGeneratorException">Thrown if an invalid or null salt is used</exception>
-        public void Initialize(byte[] Salt)
+        /// <param name="GenParam">The MacParams containing the generators keying material</param>
+        public void Initialize(MacParams GenParam)
         {
-            if (Salt == null)
+            if (GenParam.Salt.Length != 0)
+            {
+                if (GenParam.Info.Length != 0)
+
+                    Initialize(GenParam.Key, GenParam.Salt, GenParam.Info);
+                else
+
+                    Initialize(GenParam.Key, GenParam.Salt);
+            }
+            else
+            {
+
+                Initialize(GenParam.Key);
+            }
+        }
+
+        /// <summary>
+        /// Initialize the generator with a key
+        /// </summary>
+        /// 
+        /// <param name="Key">The primary key array used to seed the generator</param>
+        /// 
+        /// <exception cref="CryptoGeneratorException">Thrown if an invalid or null key is used</exception>
+        public void Initialize(byte[] Key)
+        {
+            if (Key == null)
                 throw new CryptoGeneratorException("CTRDrbg:Initialize", "Salt can not be null!", new ArgumentNullException());
-            if (Salt.Length < _keySize + COUNTER_SIZE)
+            if (Key.Length < _keySize + COUNTER_SIZE)
                 throw new CryptoGeneratorException("CTRDrbg:Initialize", string.Format("Minimum key size has not been added. Size must be at least {0} bytes!", _keySize + COUNTER_SIZE), new ArgumentOutOfRangeException());
 
             _ctrVector = new byte[_blockSize];
-            Buffer.BlockCopy(Salt, 0, _ctrVector, 0, _blockSize);
-            int keyLen = Salt.Length - _blockSize;
+            Buffer.BlockCopy(Key, 0, _ctrVector, 0, _blockSize);
+            int keyLen = Key.Length - _blockSize;
             byte[] key = new byte[keyLen];
-            Buffer.BlockCopy(Salt, _blockSize, key, 0, keyLen);
+            Buffer.BlockCopy(Key, _blockSize, key, 0, keyLen);
 
             _blockCipher.Initialize(true, new KeyParams(key));
             _isInitialized = true;
         }
 
         /// <summary>
-        /// Initialize the generator
+        /// Initialize the generator with key and salt arrays
         /// </summary>
         /// 
-        /// <param name="Salt">Salt value</param>
-        /// <param name="Ikm">Key material</param>
+        /// <param name="Key">The primary key array used to seed the generator</param>
+        /// <param name="Salt">The salt value containing an additional source of entropy</param>
         /// 
-        /// <exception cref="CryptoGeneratorException">Thrown if a null salt or ikm is used</exception>
-        public void Initialize(byte[] Salt, byte[] Ikm)
+        /// <exception cref="CryptoGeneratorException">Thrown if an invalid or null key or salt is used</exception>
+        public void Initialize(byte[] Key, byte[] Salt)
         {
+            if (Key == null)
+                throw new CryptoGeneratorException("CTRDrbg:Initialize", "Key can not be null!", new ArgumentNullException());
             if (Salt == null)
                 throw new CryptoGeneratorException("CTRDrbg:Initialize", "Salt can not be null!", new ArgumentNullException());
-            if (Ikm == null)
-                throw new CryptoGeneratorException("CTRDrbg:Initialize", "IKM can not be null!", new ArgumentNullException());
 
-            byte[] seed = new byte[Salt.Length + Ikm.Length];
+            byte[] seed = new byte[Key.Length + Salt.Length];
 
-            Buffer.BlockCopy(Salt, 0, seed, 0, Salt.Length);
-            Buffer.BlockCopy(Ikm, 0, seed, Salt.Length, Ikm.Length);
+            Buffer.BlockCopy(Key, 0, seed, 0, Key.Length);
+            Buffer.BlockCopy(Salt, 0, seed, Key.Length, Salt.Length);
 
             Initialize(seed);
         }
 
         /// <summary>
-        /// Initialize the generator
+        /// Initialize the generator with a key, a salt array, and an information string or nonce
         /// </summary>
         /// 
-        /// <param name="Salt">Salt value</param>
-        /// <param name="Ikm">Key material</param>
-        /// <param name="Info">Nonce value</param>
+        /// <param name="Key">The primary key array used to seed the generator</param>
+        /// <param name="Salt">The salt value used as an additional source of entropy</param>
+        /// <param name="Info">The information string or nonce used as a third source of entropy</param>
         /// 
-        /// <exception cref="CryptoGeneratorException">Thrown if a null salt or ikm is used</exception>
-        public void Initialize(byte[] Salt, byte[] Ikm, byte[] Info)
+        /// <exception cref="CryptoGeneratorException">Thrown if a null key, salt, or info string is used</exception>
+        public void Initialize(byte[] Key, byte[] Salt, byte[] Info)
         {
-            byte[] seed = new byte[Salt.Length + Ikm.Length + Info.Length];
+            byte[] seed = new byte[Key.Length + Salt.Length + Info.Length];
 
-            Buffer.BlockCopy(Salt, 0, seed, 0, Salt.Length);
-            Buffer.BlockCopy(Ikm, 0, seed, Salt.Length, Ikm.Length);
-            Buffer.BlockCopy(Info, 0, seed, Ikm.Length + Salt.Length, Info.Length);
+            Buffer.BlockCopy(Key, 0, seed, 0, Key.Length);
+            Buffer.BlockCopy(Salt, 0, seed, Key.Length, Salt.Length);
+            Buffer.BlockCopy(Info, 0, seed, Salt.Length + Key.Length, Info.Length);
 
             Initialize(seed);
         }
