@@ -91,14 +91,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         #endregion
 
         #region Fields
-        private int _blockSize;
-        private int _digestSize;
-        private bool _disposeEngine = true;
-        private bool _isDisposed = false;
-        private byte[] _inputPad;
-        private bool _isInitialized = false;
-        private IDigest _msgDigest;
-        private byte[] _outputPad;
+        private int m_blockSize;
+        private int m_digestSize;
+        private bool m_disposeEngine = true;
+        private bool m_isDisposed = false;
+        private byte[] m_inputPad;
+        private bool m_isInitialized = false;
+        private IDigest m_msgDigest;
+        private byte[] m_outputPad;
         #endregion
 
         #region Properties
@@ -107,7 +107,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// </summary>
         public int BlockSize
         {
-            get { return _msgDigest.BlockSize; }
+            get { return m_msgDigest.BlockSize; }
         }
 
         /// <summary>
@@ -123,8 +123,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// </summary>
         public bool IsInitialized
         {
-            get { return _isInitialized; }
-            private set { _isInitialized = value; }
+            get { return m_isInitialized; }
+            private set { m_isInitialized = value; }
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// </summary>
         public int MacSize
         {
-            get { return _msgDigest.DigestSize; }
+            get { return m_msgDigest.DigestSize; }
         }
 
         /// <summary>
@@ -154,12 +154,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         {
             IDigest digest = Helper.DigestFromName.GetInstance(DigestType);
 
-            _disposeEngine = true;
-            _msgDigest = digest;
-            _digestSize = digest.DigestSize;
-            _blockSize = digest.BlockSize;
-            _inputPad = new byte[_blockSize];
-            _outputPad = new byte[_blockSize];
+            m_disposeEngine = true;
+            m_msgDigest = digest;
+            m_digestSize = digest.DigestSize;
+            m_blockSize = digest.BlockSize;
+            m_inputPad = new byte[m_blockSize];
+            m_outputPad = new byte[m_blockSize];
         }
 
         /// <summary>
@@ -173,12 +173,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         {
             IDigest digest = Helper.DigestFromName.GetInstance(DigestType);
 
-            _disposeEngine = true;
-            _msgDigest = digest;
-            _digestSize = digest.DigestSize;
-            _blockSize = digest.BlockSize;
-            _inputPad = new byte[_blockSize];
-            _outputPad = new byte[_blockSize];
+            m_disposeEngine = true;
+            m_msgDigest = digest;
+            m_digestSize = digest.DigestSize;
+            m_blockSize = digest.BlockSize;
+            m_inputPad = new byte[m_blockSize];
+            m_outputPad = new byte[m_blockSize];
 
             Initialize(Key);
         }
@@ -196,12 +196,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
             if (Digest == null)
                 throw new CryptoMacException("HMAC:Ctor", "Digest can not be null!", new ArgumentNullException());
 
-            _disposeEngine = DisposeEngine;
-            _msgDigest = Digest;
-            _digestSize = Digest.DigestSize;
-            _blockSize = Digest.BlockSize;
-            _inputPad = new byte[_blockSize];
-            _outputPad = new byte[_blockSize];
+            m_disposeEngine = DisposeEngine;
+            m_msgDigest = Digest;
+            m_digestSize = Digest.DigestSize;
+            m_blockSize = Digest.BlockSize;
+            m_inputPad = new byte[m_blockSize];
+            m_outputPad = new byte[m_blockSize];
         }
 
         /// <summary>
@@ -219,12 +219,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
             if (Digest == null)
                 throw new CryptoMacException("HMAC:Ctor", "Digest can not be null!", new ArgumentNullException());
 
-            _disposeEngine = DisposeEngine;
-            _msgDigest = Digest;
-            _digestSize = Digest.DigestSize;
-            _blockSize = Digest.BlockSize;
-            _inputPad = new byte[_blockSize];
-            _outputPad = new byte[_blockSize];
+            m_disposeEngine = DisposeEngine;
+            m_msgDigest = Digest;
+            m_digestSize = Digest.DigestSize;
+            m_blockSize = Digest.BlockSize;
+            m_inputPad = new byte[m_blockSize];
+            m_outputPad = new byte[m_blockSize];
 
             Initialize(Key);
         }
@@ -257,7 +257,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
             if (InOffset + Length > Input.Length)
                 throw new CryptoMacException("HMAC:BlockUpdate", "The Input buffer is too short!", new ArgumentOutOfRangeException());
 
-            _msgDigest.BlockUpdate(Input, InOffset, Length);
+            m_msgDigest.BlockUpdate(Input, InOffset, Length);
         }
 
         /// <summary>
@@ -269,10 +269,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <returns>HMAC hash value</returns>
         public byte[] ComputeMac(byte[] Input)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoGeneratorException("HMAC:ComputeMac", "The Mac is not initialized!", new InvalidOperationException());
 
-            byte[] hash = new byte[_msgDigest.DigestSize];
+            byte[] hash = new byte[m_msgDigest.DigestSize];
 
             BlockUpdate(Input, 0, Input.Length);
             DoFinal(hash, 0);
@@ -292,15 +292,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <exception cref="CryptoMacException">Thrown if Output array is too small</exception>
         public int DoFinal(byte[] Output, int OutOffset)
         {
-            if (Output.Length - OutOffset < _msgDigest.DigestSize)
+            if (Output.Length - OutOffset < m_msgDigest.DigestSize)
                 throw new CryptoMacException("HMAC:DoFinal", "The Output buffer is too short!", new ArgumentOutOfRangeException());
 
-            byte[] temp = new byte[_digestSize];
-            _msgDigest.DoFinal(temp, 0);
-            _msgDigest.BlockUpdate(_outputPad, 0, _outputPad.Length);
-            _msgDigest.BlockUpdate(temp, 0, temp.Length);
-            int msgLen = _msgDigest.DoFinal(Output, OutOffset);
-            _msgDigest.BlockUpdate(_inputPad, 0, _inputPad.Length);
+            byte[] temp = new byte[m_digestSize];
+            m_msgDigest.DoFinal(temp, 0);
+            m_msgDigest.BlockUpdate(m_outputPad, 0, m_outputPad.Length);
+            m_msgDigest.BlockUpdate(temp, 0, temp.Length);
+            int msgLen = m_msgDigest.DoFinal(Output, OutOffset);
+            m_msgDigest.BlockUpdate(m_inputPad, 0, m_inputPad.Length);
 
             Reset();
 
@@ -324,7 +324,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
             if (MacKey == null)
                 throw new CryptoMacException("HMAC:Initialize", "HmacKey can not be null!", new ArgumentNullException());
 
-            _msgDigest.Reset();
+            m_msgDigest.Reset();
 
             byte[] tmpKey = (byte[])MacKey.Clone();
             int keyLength = tmpKey.Length;
@@ -332,30 +332,30 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
             if (IV != null) // combine and compress
             {
                 tmpKey = VTDev.Libraries.CEXEngine.Utility.ArrayUtils.Concat(MacKey, IV);
-                _msgDigest.BlockUpdate(tmpKey, 0, tmpKey.Length);
-                _msgDigest.DoFinal(_inputPad, 0);
-                keyLength = _digestSize;
+                m_msgDigest.BlockUpdate(tmpKey, 0, tmpKey.Length);
+                m_msgDigest.DoFinal(m_inputPad, 0);
+                keyLength = m_digestSize;
             }
-            else if (keyLength > _blockSize) // compress to block size
+            else if (keyLength > m_blockSize) // compress to block size
             {
-                _msgDigest.BlockUpdate(tmpKey, 0, tmpKey.Length);
-                _msgDigest.DoFinal(_inputPad, 0);
-                keyLength = _digestSize;
+                m_msgDigest.BlockUpdate(tmpKey, 0, tmpKey.Length);
+                m_msgDigest.DoFinal(m_inputPad, 0);
+                keyLength = m_digestSize;
             }
             else
             {
-                Array.Copy(tmpKey, 0, _inputPad, 0, keyLength);
+                Array.Copy(tmpKey, 0, m_inputPad, 0, keyLength);
             }
 
-            Array.Clear(_inputPad, keyLength, _blockSize - keyLength);
-            Array.Copy(_inputPad, 0, _outputPad, 0, _blockSize);
+            Array.Clear(m_inputPad, keyLength, m_blockSize - keyLength);
+            Array.Copy(m_inputPad, 0, m_outputPad, 0, m_blockSize);
 
-            XorPad(_inputPad, IPAD);
-            XorPad(_outputPad, OPAD);
+            XorPad(m_inputPad, IPAD);
+            XorPad(m_outputPad, OPAD);
 
             // initialise the digest
-            _msgDigest.BlockUpdate(_inputPad, 0, _inputPad.Length);
-            _isInitialized = true;
+            m_msgDigest.BlockUpdate(m_inputPad, 0, m_inputPad.Length);
+            m_isInitialized = true;
         }
 
         /// <summary>
@@ -363,8 +363,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// </summary>
         public void Reset()
         {
-            _msgDigest.Reset();
-            _msgDigest.BlockUpdate(_inputPad, 0, _inputPad.Length);
+            m_msgDigest.Reset();
+            m_msgDigest.BlockUpdate(m_inputPad, 0, m_inputPad.Length);
         }
 
         /// <summary>
@@ -374,7 +374,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <param name="Input">Input byte</param>
         public void Update(byte Input)
         {
-            _msgDigest.Update(Input);
+            m_msgDigest.Update(Input);
         }
 
         #endregion
@@ -399,29 +399,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_msgDigest != null && _disposeEngine)
+                    if (m_msgDigest != null && m_disposeEngine)
                     {
-                        _msgDigest.Dispose();
-                        _msgDigest = null;
+                        m_msgDigest.Dispose();
+                        m_msgDigest = null;
                     }
-                    if (_inputPad != null)
+                    if (m_inputPad != null)
                     {
-                        Array.Clear(_inputPad, 0, _inputPad.Length);
-                        _inputPad = null;
+                        Array.Clear(m_inputPad, 0, m_inputPad.Length);
+                        m_inputPad = null;
                     }
-                    if (_outputPad != null)
+                    if (m_outputPad != null)
                     {
-                        Array.Clear(_outputPad, 0, _outputPad.Length);
-                        _outputPad = null;
+                        Array.Clear(m_outputPad, 0, m_outputPad.Length);
+                        m_outputPad = null;
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

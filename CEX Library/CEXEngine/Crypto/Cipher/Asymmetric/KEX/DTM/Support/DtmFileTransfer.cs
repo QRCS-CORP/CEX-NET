@@ -57,10 +57,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Support
         private string _filePath = "";                      // full file path
         private string _tempPath = "";                      // temp file path
         private bool _isConnected = false;                  // connected flag
-        private bool _isDisposed = false;                   // dispose flag
+        private bool m_isDisposed = false;                   // dispose flag
         private long _bytesSent = 0;                        // total bytes sent
         private long _fileId = 0;                           // unique file id
-        private int _bufferSize = 0;                        // each buffers size
+        private int m_bufferSize = 0;                        // each buffers size
         private int _bufferCount = 0;                       // the number of buffer segments
         private long _seqCounter = 0;                       // tracks high sequence
         private object _sndLock = new object();             // locks the send transmission queue
@@ -157,7 +157,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Support
             _fileId = FileId;
             _rcvBuffer = new PacketBuffer(BufferCount);
             _sndBuffer = new PacketBuffer(BufferCount);
-            _bufferSize = BufferSize;
+            m_bufferSize = BufferSize;
             _bufferCount = BufferCount;
         }
 
@@ -196,8 +196,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Support
                 using (new FileStream(_tempPath, FileMode.Create, FileAccess.Write, FileShare.Read)) { }
                 // set to hidden to avoid cross process errors
                 File.SetAttributes(_tempPath, File.GetAttributes(_tempPath) | FileAttributes.Hidden);
-                _clientSocket.ReceiveBufferSize = _bufferSize;
-                _clientSocket.SendBufferSize = _bufferSize;
+                _clientSocket.ReceiveBufferSize = m_bufferSize;
+                _clientSocket.SendBufferSize = m_bufferSize;
                 // start receiving
                 _clientSocket.ReceiveAsync();
                 _clientSocket.ReceiveTimeout = -1;
@@ -308,8 +308,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Support
             else
             {
                 // connection established
-                _clientSocket.ReceiveBufferSize = _bufferSize;
-                _clientSocket.SendBufferSize = _bufferSize;
+                _clientSocket.ReceiveBufferSize = m_bufferSize;
+                _clientSocket.SendBufferSize = m_bufferSize;
                 _isConnected = true;
             }
         }
@@ -769,10 +769,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM.Support
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 TearDown();
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

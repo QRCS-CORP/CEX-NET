@@ -95,7 +95,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         #region Fields
         private int _dataLen = 0;
         private uint[] _hashVal = new uint[8];
-        private bool _isDisposed = false;
+        private bool m_isDisposed = false;
         private bool _isNullT;
         private uint[] _salt32 = new uint[4];
         private static uint[] _ftSigma;
@@ -500,7 +500,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
@@ -532,7 +532,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

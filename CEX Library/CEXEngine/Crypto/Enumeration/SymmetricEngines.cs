@@ -6,6 +6,10 @@
     public enum SymmetricEngines : int
     {
         /// <summary>
+        /// No cipher was selected
+        /// </summary>
+        None = 0,
+        /// <summary>
         /// An implementation based on the Rijndael Block Cipher, using HKDF with a SHA512 HMAC for expanded key generation
         /// </summary>
         RHX = 1,

@@ -6,8 +6,8 @@
     public static class HexConverter
     {
         #region Fields
-        private static readonly byte[] _decodingTable = new byte[128];
-        private static readonly byte[] _encodingTable =
+        private static readonly byte[] m_decodingTable = new byte[128];
+        private static readonly byte[] m_encodingTable =
 		{
 			(byte)'0', (byte)'1', (byte)'2', (byte)'3', (byte)'4', (byte)'5', (byte)'6', (byte)'7',
 			(byte)'8', (byte)'9', (byte)'a', (byte)'b', (byte)'c', (byte)'d', (byte)'e', (byte)'f'
@@ -17,15 +17,15 @@
         #region Constructor
         static HexConverter()
 		{
-			for (int i = 0; i < _encodingTable.Length; i++)
-				_decodingTable[_encodingTable[i]] = (byte)i;
+			for (int i = 0; i < m_encodingTable.Length; i++)
+				m_decodingTable[m_encodingTable[i]] = (byte)i;
 
-			_decodingTable['A'] = _decodingTable['a'];
-			_decodingTable['B'] = _decodingTable['b'];
-			_decodingTable['C'] = _decodingTable['c'];
-			_decodingTable['D'] = _decodingTable['d'];
-			_decodingTable['E'] = _decodingTable['e'];
-			_decodingTable['F'] = _decodingTable['f'];
+			m_decodingTable['A'] = m_decodingTable['a'];
+			m_decodingTable['B'] = m_decodingTable['b'];
+			m_decodingTable['C'] = m_decodingTable['c'];
+			m_decodingTable['D'] = m_decodingTable['d'];
+			m_decodingTable['E'] = m_decodingTable['e'];
+			m_decodingTable['F'] = m_decodingTable['f'];
 		}
         #endregion
 
@@ -59,8 +59,8 @@
             for (int i = Offset; i < (Offset + Length); i++)
             {
                 int v = Data[i];
-                temp[counter++] = _encodingTable[v >> 4];
-                temp[counter++] = _encodingTable[v & 0xf];
+                temp[counter++] = m_encodingTable[v >> 4];
+                temp[counter++] = m_encodingTable[v & 0xf];
             }
 
             return temp;
@@ -96,12 +96,12 @@
                 while (i < end && Ignore(Data[i]))
                     i++;
 
-                b1 = _decodingTable[Data[i++]];
+                b1 = m_decodingTable[Data[i++]];
 
                 while (i < end && Ignore(Data[i]))
                     i++;
 
-                b2 = _decodingTable[Data[i++]];
+                b2 = m_decodingTable[Data[i++]];
                 temp[ct++] = (byte)((b1 << 4) | b2);
                 length++;
             }

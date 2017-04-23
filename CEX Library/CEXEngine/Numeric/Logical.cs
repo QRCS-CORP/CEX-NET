@@ -33,34 +33,34 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>Returns <c>~Value</c></returns>
         internal static BigInteger Not(BigInteger Value)
         {
-            if (Value._sign == 0)
+            if (Value.m_sign == 0)
                 return BigInteger.MinusOne;
             if (Value.Equals(BigInteger.MinusOne))
                 return BigInteger.Zero;
 
-            int[] resDigits = new int[Value._numberLength + 1];
+            int[] resDigits = new int[Value.m_numberLength + 1];
             int i;
 
-            if (Value._sign > 0)
+            if (Value.m_sign > 0)
             {
                 // ~val = -val + 1
-                if (Value._digits[Value._numberLength - 1] != -1)
+                if (Value.m_digits[Value.m_numberLength - 1] != -1)
                 {
-                    for (i = 0; Value._digits[i] == -1; i++)
+                    for (i = 0; Value.m_digits[i] == -1; i++)
                     {
                         ;
                     }
                 }
                 else
                 {
-                    for (i = 0; (i < Value._numberLength) && (Value._digits[i] == -1); i++)
+                    for (i = 0; (i < Value.m_numberLength) && (Value.m_digits[i] == -1); i++)
                     {
                         ;
                     }
-                    if (i == Value._numberLength)
+                    if (i == Value.m_numberLength)
                     {
                         resDigits[i] = 1;
-                        return new BigInteger(-Value._sign, i + 1, resDigits);
+                        return new BigInteger(-Value.m_sign, i + 1, resDigits);
                     }
                 }
                 // Here a carry 1 was generated
@@ -68,17 +68,17 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             else
             {
                 // ~val = -val - 1
-                for (i = 0; Value._digits[i] == 0; i++)
+                for (i = 0; Value.m_digits[i] == 0; i++)
                     resDigits[i] = -1;
             }
 
             // Now, the carry/borrow can be absorbed
-            resDigits[i] = Value._digits[i] + Value._sign;
+            resDigits[i] = Value.m_digits[i] + Value.m_sign;
             // Copying the remaining unchanged digit
-            for (i++; i < Value._numberLength; i++)
-                resDigits[i] = Value._digits[i];
+            for (i++; i < Value.m_numberLength; i++)
+                resDigits[i] = Value.m_digits[i];
 
-            return new BigInteger(-Value._sign, i, resDigits);
+            return new BigInteger(-Value.m_sign, i, resDigits);
         }
 
         /// <summary>
@@ -93,25 +93,25 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         internal static BigInteger And(BigInteger Value, BigInteger X)
         {
-            if (X._sign == 0 || Value._sign == 0)
+            if (X.m_sign == 0 || Value.m_sign == 0)
                 return BigInteger.Zero;
             if (X.Equals(BigInteger.MinusOne))
                 return Value;
             if (Value.Equals(BigInteger.MinusOne))
                 return X;
 
-            if (Value._sign > 0)
+            if (Value.m_sign > 0)
             {
-                if (X._sign > 0)
+                if (X.m_sign > 0)
                     return AndPositive(Value, X);
                 else
                     return AndDiffSigns(Value, X);
             }
             else
             {
-                if (X._sign > 0)
+                if (X.m_sign > 0)
                     return AndDiffSigns(X, Value);
-                else if (Value._numberLength > X._numberLength)
+                else if (Value.m_numberLength > X.m_numberLength)
                     return AndNegative(Value, X);
                 else
                     return AndNegative(X, Value);
@@ -129,9 +129,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns><c>Value &amp; ~X</c></returns>
         internal static BigInteger AndNot(BigInteger Value, BigInteger X)
         {
-            if (X._sign == 0)
+            if (X.m_sign == 0)
                 return Value;
-            if (Value._sign == 0)
+            if (Value.m_sign == 0)
                 return BigInteger.Zero;
             if (Value.Equals(BigInteger.MinusOne))
                 return X.Not();
@@ -140,16 +140,16 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
             //if val == that, return 0
 
-            if (Value._sign > 0)
+            if (Value.m_sign > 0)
             {
-                if (X._sign > 0)
+                if (X.m_sign > 0)
                     return AndNotPositive(Value, X);
                 else
                     return AndNotPositiveNegative(Value, X);
             }
             else
             {
-                if (X._sign > 0)
+                if (X.m_sign > 0)
                     return AndNotNegativePositive(Value, X);
                 else
                     return AndNotNegative(Value, X);
@@ -168,16 +168,16 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             if (X.Equals(BigInteger.MinusOne) || Value.Equals(BigInteger.MinusOne))
                 return BigInteger.MinusOne;
-            if (X._sign == 0)
+            if (X.m_sign == 0)
                 return Value;
-            if (Value._sign == 0)
+            if (Value.m_sign == 0)
                 return X;
 
-            if (Value._sign > 0)
+            if (Value.m_sign > 0)
             {
-                if (X._sign > 0)
+                if (X.m_sign > 0)
                 {
-                    if (Value._numberLength > X._numberLength)
+                    if (Value.m_numberLength > X.m_numberLength)
                         return OrPositive(Value, X);
                     else
                         return OrPositive(X, Value);
@@ -189,7 +189,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             }
             else
             {
-                if (X._sign > 0)
+                if (X.m_sign > 0)
                     return OrDiffSigns(X, Value);
                 else if (X.FirstNonzeroDigit > Value.FirstNonzeroDigit)
                     return OrNegative(X, Value);
@@ -208,20 +208,20 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>Returns <c>this ^ Value</c></returns>
         internal static BigInteger Xor(BigInteger Value, BigInteger X)
         {
-            if (X._sign == 0)
+            if (X.m_sign == 0)
                 return Value;
-            if (Value._sign == 0)
+            if (Value.m_sign == 0)
                 return X;
             if (X.Equals(BigInteger.MinusOne))
                 return Value.Not();
             if (Value.Equals(BigInteger.MinusOne))
                 return X.Not();
 
-            if (Value._sign > 0)
+            if (Value.m_sign > 0)
             {
-                if (X._sign > 0)
+                if (X.m_sign > 0)
                 {
-                    if (Value._numberLength > X._numberLength)
+                    if (Value.m_numberLength > X.m_numberLength)
                         return XorPositive(Value, X);
                     else
                         return XorPositive(X, Value);
@@ -233,7 +233,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             }
             else
             {
-                if (X._sign > 0)
+                if (X.m_sign > 0)
                     return XorDiffSigns(X, Value);
                 else if (X.FirstNonzeroDigit > Value.FirstNonzeroDigit)
                     return XorNegative(X, Value);
@@ -251,28 +251,28 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             int iNeg = Negative.FirstNonzeroDigit;
 
             // Look if the trailing zeros of the negative will "blank" all the positive digits
-            if (iNeg >= Positive._numberLength)
+            if (iNeg >= Positive.m_numberLength)
                 return BigInteger.Zero;
 
-            int resLength = Positive._numberLength;
+            int resLength = Positive.m_numberLength;
             int[] resDigits = new int[resLength];
 
             // Must start from max(iPos, iNeg)
             int i = System.Math.Max(iPos, iNeg);
             if (i == iNeg)
             {
-                resDigits[i] = -Negative._digits[i] & Positive._digits[i];
+                resDigits[i] = -Negative.m_digits[i] & Positive.m_digits[i];
                 i++;
             }
-            int limit = System.Math.Min(Negative._numberLength, Positive._numberLength);
+            int limit = System.Math.Min(Negative.m_numberLength, Positive.m_numberLength);
             for (; i < limit; i++)
-                resDigits[i] = ~Negative._digits[i] & Positive._digits[i];
+                resDigits[i] = ~Negative.m_digits[i] & Positive.m_digits[i];
 
             // if the negative was shorter must copy the remaining digits from positive
-            if (i >= Negative._numberLength)
+            if (i >= Negative.m_numberLength)
             {
-                for (; i < Positive._numberLength; i++)
-                    resDigits[i] = Positive._digits[i];
+                for (; i < Positive.m_numberLength; i++)
+                    resDigits[i] = Positive.m_digits[i];
             } // else positive ended and must "copy" virtual 0's, do nothing then
 
             BigInteger result = new BigInteger(1, resLength, resDigits);
@@ -284,7 +284,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         private static BigInteger AndPositive(BigInteger Value, BigInteger X)
         {
             // PRE: both arguments are positive
-            int resLength = System.Math.Min(Value._numberLength, X._numberLength);
+            int resLength = System.Math.Min(Value.m_numberLength, X.m_numberLength);
             int i = System.Math.Max(Value.FirstNonzeroDigit, X.FirstNonzeroDigit);
 
             if (i >= resLength)
@@ -292,7 +292,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
             int[] resDigits = new int[resLength];
             for (; i < resLength; i++)
-                resDigits[i] = Value._digits[i] & X._digits[i];
+                resDigits[i] = Value.m_digits[i] & X.m_digits[i];
 
             BigInteger result = new BigInteger(1, resLength, resDigits);
             result.CutOffLeadingZeroes();
@@ -307,7 +307,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             int iShorter = Shorter.FirstNonzeroDigit;
 
             // Does shorter matter?
-            if (iLonger >= Shorter._numberLength)
+            if (iLonger >= Shorter.m_numberLength)
                 return Longer;
 
             int resLength;
@@ -316,28 +316,28 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             int digit;
 
             if (iShorter > iLonger)
-                digit = -Shorter._digits[i] & ~Longer._digits[i];
+                digit = -Shorter.m_digits[i] & ~Longer.m_digits[i];
             else if (iShorter < iLonger)
-                digit = ~Shorter._digits[i] & -Longer._digits[i];
+                digit = ~Shorter.m_digits[i] & -Longer.m_digits[i];
             else
-                digit = -Shorter._digits[i] & -Longer._digits[i];
+                digit = -Shorter.m_digits[i] & -Longer.m_digits[i];
 
             if (digit == 0)
             {
-                for (i++; i < Shorter._numberLength && (digit = ~(Longer._digits[i] | Shorter._digits[i])) == 0; i++)
+                for (i++; i < Shorter.m_numberLength && (digit = ~(Longer.m_digits[i] | Shorter.m_digits[i])) == 0; i++)
                 {
                     ;  // digit = ~longer.digits[i] & ~shorter.digits[i]
                 }
                 if (digit == 0)
                 {
                     // shorter has only the remaining virtual sign bits
-                    for (; i < Longer._numberLength && (digit = ~Longer._digits[i]) == 0; i++)
+                    for (; i < Longer.m_numberLength && (digit = ~Longer.m_digits[i]) == 0; i++)
                     {
                         ;
                     }
                     if (digit == 0)
                     {
-                        resLength = Longer._numberLength + 1;
+                        resLength = Longer.m_numberLength + 1;
                         resDigits = new int[resLength];
                         resDigits[resLength - 1] = 1;
 
@@ -346,16 +346,16 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 }
             }
 
-            resLength = Longer._numberLength;
+            resLength = Longer.m_numberLength;
             resDigits = new int[resLength];
             resDigits[i] = -digit;
 
-            for (i++; i < Shorter._numberLength; i++)
-                resDigits[i] = Longer._digits[i] | Shorter._digits[i];
+            for (i++; i < Shorter.m_numberLength; i++)
+                resDigits[i] = Longer.m_digits[i] | Shorter.m_digits[i];
 
             // shorter has only the remaining virtual sign bits
-            for (; i < Longer._numberLength; i++)
-                resDigits[i] = Longer._digits[i];
+            for (; i < Longer.m_numberLength; i++)
+                resDigits[i] = Longer.m_digits[i];
 
             BigInteger result = new BigInteger(-1, resLength, resDigits);
 
@@ -368,10 +368,10 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             int iVal = Value.FirstNonzeroDigit;
             int iThat = X.FirstNonzeroDigit;
 
-            if (iVal >= X._numberLength)
+            if (iVal >= X.m_numberLength)
                 return BigInteger.Zero;
 
-            int resLength = X._numberLength;
+            int resLength = X.m_numberLength;
             int[] resDigits = new int[resLength];
             int limit;
             int i = iVal;
@@ -379,38 +379,38 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             if (iVal < iThat)
             {
                 // resDigits[i] = -val.digits[i] & -1;
-                resDigits[i] = -Value._digits[i];
-                limit = System.Math.Min(Value._numberLength, iThat);
+                resDigits[i] = -Value.m_digits[i];
+                limit = System.Math.Min(Value.m_numberLength, iThat);
                 for (i++; i < limit; i++)
-                    resDigits[i] = ~Value._digits[i];
+                    resDigits[i] = ~Value.m_digits[i];
 
-                if (i == Value._numberLength)
+                if (i == Value.m_numberLength)
                 {
                     for (; i < iThat; i++)
                         resDigits[i] = -1;
 
-                    resDigits[i] = X._digits[i] - 1;
+                    resDigits[i] = X.m_digits[i] - 1;
                 }
                 else
                 {
-                    resDigits[i] = ~Value._digits[i] & (X._digits[i] - 1);
+                    resDigits[i] = ~Value.m_digits[i] & (X.m_digits[i] - 1);
                 }
             }
             else if (iThat < iVal)
             {
-                resDigits[i] = -Value._digits[i] & X._digits[i];
+                resDigits[i] = -Value.m_digits[i] & X.m_digits[i];
             }
             else
             {
-                resDigits[i] = -Value._digits[i] & (X._digits[i] - 1);
+                resDigits[i] = -Value.m_digits[i] & (X.m_digits[i] - 1);
             }
 
-            limit = System.Math.Min(Value._numberLength, X._numberLength);
+            limit = System.Math.Min(Value.m_numberLength, X.m_numberLength);
             for (i++; i < limit; i++)
-                resDigits[i] = ~Value._digits[i] & X._digits[i];
+                resDigits[i] = ~Value.m_digits[i] & X.m_digits[i];
 
-            for (; i < X._numberLength; i++)
-                resDigits[i] = X._digits[i];
+            for (; i < X.m_numberLength; i++)
+                resDigits[i] = X.m_digits[i];
 
             BigInteger result = new BigInteger(1, resLength, resDigits);
             result.CutOffLeadingZeroes();
@@ -428,45 +428,45 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             int iNeg = Negative.FirstNonzeroDigit;
             int iPos = Positive.FirstNonzeroDigit;
 
-            if (iNeg >= Positive._numberLength)
+            if (iNeg >= Positive.m_numberLength)
                 return Negative;
 
-            resLength = System.Math.Max(Negative._numberLength, Positive._numberLength);
+            resLength = System.Math.Max(Negative.m_numberLength, Positive.m_numberLength);
             int i = iNeg;
 
             if (iPos > iNeg)
             {
                 resDigits = new int[resLength];
-                limit = System.Math.Min(Negative._numberLength, iPos);
+                limit = System.Math.Min(Negative.m_numberLength, iPos);
                 // 1st case:  resDigits [i] = -(-negative.digits[i] & (~0)) otherwise: resDigits[i] = ~(~negative.digits[i] & ~0)  ;
                 for (; i < limit; i++)
-                    resDigits[i] = Negative._digits[i];
+                    resDigits[i] = Negative.m_digits[i];
 
-                if (i == Negative._numberLength)
+                if (i == Negative.m_numberLength)
                 {
                     // resDigits[i] = ~(~positive.digits[i] & -1);
-                    for (i = iPos; i < Positive._numberLength; i++)
-                        resDigits[i] = Positive._digits[i];
+                    for (i = iPos; i < Positive.m_numberLength; i++)
+                        resDigits[i] = Positive.m_digits[i];
                 }
             }
             else
             {
-                digit = -Negative._digits[i] & ~Positive._digits[i];
+                digit = -Negative.m_digits[i] & ~Positive.m_digits[i];
                 if (digit == 0)
                 {
-                    limit = System.Math.Min(Positive._numberLength, Negative._numberLength);
-                    for (i++; i < limit && (digit = ~(Negative._digits[i] | Positive._digits[i])) == 0; i++)
+                    limit = System.Math.Min(Positive.m_numberLength, Negative.m_numberLength);
+                    for (i++; i < limit && (digit = ~(Negative.m_digits[i] | Positive.m_digits[i])) == 0; i++)
                     {
                         ; // digit = ~negative.digits[i] & ~positive.digits[i]
                     }
                     if (digit == 0)
                     {
                         // the shorter has only the remaining virtual sign bits
-                        for (; i < Positive._numberLength && (digit = ~Positive._digits[i]) == 0; i++)
+                        for (; i < Positive.m_numberLength && (digit = ~Positive.m_digits[i]) == 0; i++)
                         {
                             ; // digit = -1 & ~positive.digits[i]
                         }
-                        for (; i < Negative._numberLength && (digit = ~Negative._digits[i]) == 0; i++)
+                        for (; i < Negative.m_numberLength && (digit = ~Negative.m_digits[i]) == 0; i++)
                         {
                             ; // digit = ~negative.digits[i] & ~0
                         }
@@ -486,15 +486,15 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 i++;
             }
 
-            limit = System.Math.Min(Positive._numberLength, Negative._numberLength);
+            limit = System.Math.Min(Positive.m_numberLength, Negative.m_numberLength);
             for (; i < limit; i++)
-                resDigits[i] = Negative._digits[i] | Positive._digits[i];
+                resDigits[i] = Negative.m_digits[i] | Positive.m_digits[i];
 
             // Actually one of the next two cycles will be executed
-            for (; i < Negative._numberLength; i++)
-                resDigits[i] = Negative._digits[i];
-            for (; i < Positive._numberLength; i++)
-                resDigits[i] = Positive._digits[i];
+            for (; i < Negative.m_numberLength; i++)
+                resDigits[i] = Negative.m_digits[i];
+            for (; i < Positive.m_numberLength; i++)
+                resDigits[i] = Positive.m_digits[i];
 
             BigInteger result = new BigInteger(-1, resLength, resDigits);
 
@@ -503,16 +503,16 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
         private static BigInteger AndNotPositive(BigInteger Value, BigInteger X)
         {
-            int[] resDigits = new int[Value._numberLength];
-            int limit = System.Math.Min(Value._numberLength, X._numberLength);
+            int[] resDigits = new int[Value.m_numberLength];
+            int limit = System.Math.Min(Value.m_numberLength, X.m_numberLength);
             int i;
 
             for (i = Value.FirstNonzeroDigit; i < limit; i++)
-                resDigits[i] = Value._digits[i] & ~X._digits[i];
-            for (; i < Value._numberLength; i++)
-                resDigits[i] = Value._digits[i];
+                resDigits[i] = Value.m_digits[i] & ~X.m_digits[i];
+            for (; i < Value.m_numberLength; i++)
+                resDigits[i] = Value.m_digits[i];
 
-            BigInteger result = new BigInteger(1, Value._numberLength, resDigits);
+            BigInteger result = new BigInteger(1, Value.m_numberLength, resDigits);
             result.CutOffLeadingZeroes();
 
             return result;
@@ -524,25 +524,25 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             int iNeg = Negative.FirstNonzeroDigit;
             int iPos = Positive.FirstNonzeroDigit;
 
-            if (iNeg >= Positive._numberLength)
+            if (iNeg >= Positive.m_numberLength)
                 return Positive;
 
-            int resLength = System.Math.Min(Positive._numberLength, Negative._numberLength);
+            int resLength = System.Math.Min(Positive.m_numberLength, Negative.m_numberLength);
             int[] resDigits = new int[resLength];
 
             // Always start from first non zero of positive
             int i = iPos;
 
             for (; i < iNeg; i++)
-                resDigits[i] = Positive._digits[i];
+                resDigits[i] = Positive.m_digits[i];
 
             if (i == iNeg)
             {
-                resDigits[i] = Positive._digits[i] & (Negative._digits[i] - 1);
+                resDigits[i] = Positive.m_digits[i] & (Negative.m_digits[i] - 1);
                 i++;
             }
             for (; i < resLength; i++)
-                resDigits[i] = Positive._digits[i] & Negative._digits[i];
+                resDigits[i] = Positive.m_digits[i] & Negative.m_digits[i];
 
             BigInteger result = new BigInteger(1, resLength, resDigits);
             result.CutOffLeadingZeroes();
@@ -560,37 +560,37 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
             // Look if the trailing zeros of the positive will "copy" all
             // the negative digits
-            if (iPos >= Negative._numberLength)
+            if (iPos >= Negative.m_numberLength)
                 return Negative;
 
-            int resLength = Negative._numberLength;
+            int resLength = Negative.m_numberLength;
             int[] resDigits = new int[resLength];
 
             if (iNeg < iPos)
             {
                 // We know for sure that this will be the first non zero digit in the result
                 for (i = iNeg; i < iPos; i++)
-                    resDigits[i] = Negative._digits[i];
+                    resDigits[i] = Negative.m_digits[i];
             }
             else if (iPos < iNeg)
             {
                 i = iPos;
-                resDigits[i] = -Positive._digits[i];
-                limit = System.Math.Min(Positive._numberLength, iNeg);
+                resDigits[i] = -Positive.m_digits[i];
+                limit = System.Math.Min(Positive.m_numberLength, iNeg);
 
                 for (i++; i < limit; i++)
-                    resDigits[i] = ~Positive._digits[i];
+                    resDigits[i] = ~Positive.m_digits[i];
 
-                if (i != Positive._numberLength)
+                if (i != Positive.m_numberLength)
                 {
-                    resDigits[i] = ~(-Negative._digits[i] | Positive._digits[i]);
+                    resDigits[i] = ~(-Negative.m_digits[i] | Positive.m_digits[i]);
                 }
                 else
                 {
                     for (; i < iNeg; i++)
                         resDigits[i] = -1;
 
-                    resDigits[i] = Negative._digits[i] - 1;
+                    resDigits[i] = Negative.m_digits[i] - 1;
                 }
                 i++;
             }
@@ -598,16 +598,16 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             {
                 // Applying two complement to negative and to result
                 i = iPos;
-                resDigits[i] = -(-Negative._digits[i] | Positive._digits[i]);
+                resDigits[i] = -(-Negative.m_digits[i] | Positive.m_digits[i]);
                 i++;
             }
-            limit = System.Math.Min(Negative._numberLength, Positive._numberLength);
+            limit = System.Math.Min(Negative.m_numberLength, Positive.m_numberLength);
 
             // Applying two complement to negative and to result
             for (; i < limit; i++)
-                resDigits[i] = Negative._digits[i] & ~Positive._digits[i];
-            for (; i < Negative._numberLength; i++)
-                resDigits[i] = Negative._digits[i];
+                resDigits[i] = Negative.m_digits[i] & ~Positive.m_digits[i];
+            for (; i < Negative.m_numberLength; i++)
+                resDigits[i] = Negative.m_digits[i];
 
             BigInteger result = new BigInteger(-1, resLength, resDigits);
             result.CutOffLeadingZeroes();
@@ -623,30 +623,30 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             int iVal = Value.FirstNonzeroDigit;
             int i;
 
-            if (iVal >= X._numberLength)
+            if (iVal >= X.m_numberLength)
                 return X;
-            else if (iThat >= Value._numberLength)
+            else if (iThat >= Value.m_numberLength)
                 return Value;
 
-            int resLength = System.Math.Min(Value._numberLength, X._numberLength);
+            int resLength = System.Math.Min(Value.m_numberLength, X.m_numberLength);
             int[] resDigits = new int[resLength];
 
             // Looking for the first non-zero digit of the result
             if (iThat == iVal)
             {
-                resDigits[iVal] = -(-Value._digits[iVal] | -X._digits[iVal]);
+                resDigits[iVal] = -(-Value.m_digits[iVal] | -X.m_digits[iVal]);
                 i = iVal;
             }
             else
             {
                 for (i = iThat; i < iVal; i++)
-                    resDigits[i] = X._digits[i];
+                    resDigits[i] = X.m_digits[i];
 
-                resDigits[i] = X._digits[i] & (Value._digits[i] - 1);
+                resDigits[i] = X.m_digits[i] & (Value.m_digits[i] - 1);
             }
 
             for (i++; i < resLength; i++)
-                resDigits[i] = Value._digits[i] & X._digits[i];
+                resDigits[i] = Value.m_digits[i] & X.m_digits[i];
 
             BigInteger result = new BigInteger(-1, resLength, resDigits);
             result.CutOffLeadingZeroes();
@@ -657,15 +657,15 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         private static BigInteger OrPositive(BigInteger Longer, BigInteger Shorter)
         {
             // longer has at least as many digits as shorter
-            int resLength = Longer._numberLength;
+            int resLength = Longer.m_numberLength;
             int[] resDigits = new int[resLength];
 
             int i = System.Math.Min(Longer.FirstNonzeroDigit, Shorter.FirstNonzeroDigit);
 
-            for (i = 0; i < Shorter._numberLength; i++)
-                resDigits[i] = Longer._digits[i] | Shorter._digits[i];
+            for (i = 0; i < Shorter.m_numberLength; i++)
+                resDigits[i] = Longer.m_digits[i] | Shorter.m_digits[i];
             for (; i < resLength; i++)
-                resDigits[i] = Longer._digits[i];
+                resDigits[i] = Longer.m_digits[i];
 
             BigInteger result = new BigInteger(1, resLength, resDigits);
 
@@ -674,7 +674,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
         private static BigInteger XorDiffSigns(BigInteger Positive, BigInteger Negative)
         {
-            int resLength = System.Math.Max(Negative._numberLength, Positive._numberLength);
+            int resLength = System.Math.Max(Negative.m_numberLength, Positive.m_numberLength);
             int[] resDigits;
             int iNeg = Negative.FirstNonzeroDigit;
             int iPos = Positive.FirstNonzeroDigit;
@@ -687,18 +687,18 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 resDigits = new int[resLength];
                 i = iNeg;
                 //resDigits[i] = -(-negative.digits[i]);
-                resDigits[i] = Negative._digits[i];
-                limit = System.Math.Min(Negative._numberLength, iPos);
+                resDigits[i] = Negative.m_digits[i];
+                limit = System.Math.Min(Negative.m_numberLength, iPos);
                 //Skip the positive digits while they are zeros
                 for (i++; i < limit; i++)
-                    resDigits[i] = Negative._digits[i];
+                    resDigits[i] = Negative.m_digits[i];
 
                 //if the negative has no more elements, must fill the
                 //result with the remaining digits of the positive
-                if (i == Negative._numberLength)
+                if (i == Negative.m_numberLength)
                 {
-                    for (; i < Positive._numberLength; i++)
-                        resDigits[i] = Positive._digits[i];
+                    for (; i < Positive.m_numberLength; i++)
+                        resDigits[i] = Positive.m_digits[i];
                 }
             }
             else if (iPos < iNeg)
@@ -706,17 +706,17 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 resDigits = new int[resLength];
                 i = iPos;
                 //Applying two complement to the first non-zero digit of the result
-                resDigits[i] = -Positive._digits[i];
-                limit = System.Math.Min(Positive._numberLength, iNeg);
+                resDigits[i] = -Positive.m_digits[i];
+                limit = System.Math.Min(Positive.m_numberLength, iNeg);
                 //Continue applying two complement the result
                 for (i++; i < limit; i++)
-                    resDigits[i] = ~Positive._digits[i];
+                    resDigits[i] = ~Positive.m_digits[i];
 
                 //When the first non-zero digit of the negative is reached, must apply
                 //two complement (arithmetic negation) to it, and then operate
                 if (i == iNeg)
                 {
-                    resDigits[i] = ~(Positive._digits[i] ^ -Negative._digits[i]);
+                    resDigits[i] = ~(Positive.m_digits[i] ^ -Negative.m_digits[i]);
                     i++;
                 }
                 else
@@ -725,8 +725,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                     //the negative ones
                     for (; i < iNeg; i++)
                         resDigits[i] = -1;
-                    for (; i < Negative._numberLength; i++)
-                        resDigits[i] = Negative._digits[i];
+                    for (; i < Negative.m_numberLength; i++)
+                        resDigits[i] = Negative.m_digits[i];
                 }
             }
             else
@@ -734,20 +734,20 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 int digit;
                 //The first non-zero digit of the positive and negative are the same
                 i = iNeg;
-                digit = Positive._digits[i] ^ -Negative._digits[i];
+                digit = Positive.m_digits[i] ^ -Negative.m_digits[i];
                 if (digit == 0)
                 {
-                    limit = System.Math.Min(Positive._numberLength, Negative._numberLength);
-                    for (i++; i < limit && (digit = Positive._digits[i] ^ ~Negative._digits[i]) == 0; i++)
+                    limit = System.Math.Min(Positive.m_numberLength, Negative.m_numberLength);
+                    for (i++; i < limit && (digit = Positive.m_digits[i] ^ ~Negative.m_digits[i]) == 0; i++)
                         ;
                     if (digit == 0)
                     {
                         // shorter has only the remaining virtual sign bits
-                        for (; i < Positive._numberLength && (digit = ~Positive._digits[i]) == 0; i++)
+                        for (; i < Positive.m_numberLength && (digit = ~Positive.m_digits[i]) == 0; i++)
                         {
                             ;
                         }
-                        for (; i < Negative._numberLength && (digit = ~Negative._digits[i]) == 0; i++)
+                        for (; i < Negative.m_numberLength && (digit = ~Negative.m_digits[i]) == 0; i++)
                         {
                             ;
                         }
@@ -766,13 +766,13 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 i++;
             }
 
-            limit = System.Math.Min(Negative._numberLength, Positive._numberLength);
+            limit = System.Math.Min(Negative.m_numberLength, Positive.m_numberLength);
             for (; i < limit; i++)
-                resDigits[i] = ~(~Negative._digits[i] ^ Positive._digits[i]);
-            for (; i < Positive._numberLength; i++)
-                resDigits[i] = Positive._digits[i];
-            for (; i < Negative._numberLength; i++)
-                resDigits[i] = Negative._digits[i];
+                resDigits[i] = ~(~Negative.m_digits[i] ^ Positive.m_digits[i]);
+            for (; i < Positive.m_numberLength; i++)
+                resDigits[i] = Positive.m_digits[i];
+            for (; i < Negative.m_numberLength; i++)
+                resDigits[i] = Negative.m_digits[i];
 
             BigInteger result = new BigInteger(-1, resLength, resDigits);
             result.CutOffLeadingZeroes();
@@ -784,7 +784,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             // PRE: val and that are negative
             // PRE: val has at least as many trailing zero digits as that
-            int resLength = System.Math.Max(Value._numberLength, X._numberLength);
+            int resLength = System.Math.Max(Value.m_numberLength, X.m_numberLength);
             int[] resDigits = new int[resLength];
             int iVal = Value.FirstNonzeroDigit;
             int iThat = X.FirstNonzeroDigit;
@@ -794,40 +794,40 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
             if (iVal == iThat)
             {
-                resDigits[i] = -Value._digits[i] ^ -X._digits[i];
+                resDigits[i] = -Value.m_digits[i] ^ -X.m_digits[i];
             }
             else
             {
-                resDigits[i] = -X._digits[i];
-                limit = System.Math.Min(X._numberLength, iVal);
+                resDigits[i] = -X.m_digits[i];
+                limit = System.Math.Min(X.m_numberLength, iVal);
                 for (i++; i < limit; i++)
-                    resDigits[i] = ~X._digits[i];
+                    resDigits[i] = ~X.m_digits[i];
 
                 // Remains digits in that?
-                if (i == X._numberLength)
+                if (i == X.m_numberLength)
                 {
                     //Jumping over the remaining zero to the first non one
                     for (; i < iVal; i++)
                         resDigits[i] = -1;
 
-                    resDigits[i] = Value._digits[i] - 1;
+                    resDigits[i] = Value.m_digits[i] - 1;
                 }
                 else
                 {
-                    resDigits[i] = -Value._digits[i] ^ ~X._digits[i];
+                    resDigits[i] = -Value.m_digits[i] ^ ~X.m_digits[i];
                 }
             }
 
-            limit = System.Math.Min(Value._numberLength, X._numberLength);
+            limit = System.Math.Min(Value.m_numberLength, X.m_numberLength);
             //Perform ^ between that al val until that ends
             for (i++; i < limit; i++)
-                resDigits[i] = Value._digits[i] ^ X._digits[i];
+                resDigits[i] = Value.m_digits[i] ^ X.m_digits[i];
 
             //Perform ^ between val digits and -1 until val ends
-            for (; i < Value._numberLength; i++)
-                resDigits[i] = Value._digits[i];
-            for (; i < X._numberLength; i++)
-                resDigits[i] = X._digits[i];
+            for (; i < Value.m_numberLength; i++)
+                resDigits[i] = Value.m_digits[i];
+            for (; i < X.m_numberLength; i++)
+                resDigits[i] = X.m_digits[i];
 
             BigInteger result = new BigInteger(1, resLength, resDigits);
             result.CutOffLeadingZeroes();
@@ -839,14 +839,14 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             // PRE: longer and shorter are positive;
             // PRE: longer has at least as many digits as shorter
-            int resLength = Longer._numberLength;
+            int resLength = Longer.m_numberLength;
             int[] resDigits = new int[resLength];
             int i = System.Math.Min(Longer.FirstNonzeroDigit, Shorter.FirstNonzeroDigit);
 
-            for (; i < Shorter._numberLength; i++)
-                resDigits[i] = Longer._digits[i] ^ Shorter._digits[i];
-            for (; i < Longer._numberLength; i++)
-                resDigits[i] = Longer._digits[i];
+            for (; i < Shorter.m_numberLength; i++)
+                resDigits[i] = Longer.m_digits[i] ^ Shorter.m_digits[i];
+            for (; i < Longer.m_numberLength; i++)
+                resDigits[i] = Longer.m_digits[i];
 
             BigInteger result = new BigInteger(1, resLength, resDigits);
             result.CutOffLeadingZeroes();

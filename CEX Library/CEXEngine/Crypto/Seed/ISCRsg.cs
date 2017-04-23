@@ -72,13 +72,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         #endregion
 
         #region Fields
-        private int _accululator = 0;
-        private int _cycCounter = 0;
-        private bool _isDisposed = false;
-        private int _lstResult = 0;
-        private int[] _rndResult = new int[MSIZE];
-        private uint _rslCounter = 0;
-        private int[] _wrkBuffer = new int[MSIZE];
+        private int m_accululator = 0;
+        private int m_cycCounter = 0;
+        private bool m_isDisposed = false;
+        private int m_lstResult = 0;
+        private int[] m_rndResult = new int[MSIZE];
+        private uint m_rslCounter = 0;
+        private int[] m_wrkBuffer = new int[MSIZE];
         #endregion
 
         #region Properties
@@ -109,8 +109,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
             // max pool draw is 1024 bytes
             byte[] rnd = new byte[MSIZE * 4];
             new EntropyPool().GetBytes(rnd);
-            _rndResult = new int[MSIZE];
-            Buffer.BlockCopy(rnd, 0, _rndResult, 0, MSIZE * 4);
+            m_rndResult = new int[MSIZE];
+            Buffer.BlockCopy(rnd, 0, m_rndResult, 0, MSIZE * 4);
             Initialize(true);
         }
 
@@ -127,7 +127,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
                 throw new CryptoRandomException("ISCRsg:CTor", "The seed array length must be between 1 and 256 int32 values!");
 
             int len = Seed.Length > MSIZE ? MSIZE : Seed.Length;
-            Buffer.BlockCopy(Seed, 0, _rndResult, 0, len * SIZE32);
+            Buffer.BlockCopy(Seed, 0, m_rndResult, 0, len * SIZE32);
             Initialize(true);
         }
         #endregion
@@ -190,26 +190,26 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
             {
                 if (MixState)
                 {
-                    A += _rndResult[ctr];
-                    B += _rndResult[ctr + 1];
-                    C += _rndResult[ctr + 2];
-                    D += _rndResult[ctr + 3];
-                    E += _rndResult[ctr + 4];
-                    F += _rndResult[ctr + 5];
-                    G += _rndResult[ctr + 6];
-                    H += _rndResult[ctr + 7];
+                    A += m_rndResult[ctr];
+                    B += m_rndResult[ctr + 1];
+                    C += m_rndResult[ctr + 2];
+                    D += m_rndResult[ctr + 3];
+                    E += m_rndResult[ctr + 4];
+                    F += m_rndResult[ctr + 5];
+                    G += m_rndResult[ctr + 6];
+                    H += m_rndResult[ctr + 7];
                 }
 
                 Mix(ref A, ref B, ref C, ref D, ref E, ref F, ref G, ref H);
 
-                _wrkBuffer[ctr] = A;
-                _wrkBuffer[ctr + 1] = B;
-                _wrkBuffer[ctr + 2] = C;
-                _wrkBuffer[ctr + 3] = D;
-                _wrkBuffer[ctr + 4] = E;
-                _wrkBuffer[ctr + 5] = F;
-                _wrkBuffer[ctr + 6] = G;
-                _wrkBuffer[ctr + 7] = H;
+                m_wrkBuffer[ctr] = A;
+                m_wrkBuffer[ctr + 1] = B;
+                m_wrkBuffer[ctr + 2] = C;
+                m_wrkBuffer[ctr + 3] = D;
+                m_wrkBuffer[ctr + 4] = E;
+                m_wrkBuffer[ctr + 5] = F;
+                m_wrkBuffer[ctr + 6] = G;
+                m_wrkBuffer[ctr + 7] = H;
                 ctr += 8;
             }
 
@@ -219,25 +219,25 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
                 ctr = 0;
                 while (ctr != MSIZE)
                 {
-                    A += _wrkBuffer[ctr];
-                    B += _wrkBuffer[ctr + 1];
-                    C += _wrkBuffer[ctr + 2];
-                    D += _wrkBuffer[ctr + 3];
-                    E += _wrkBuffer[ctr + 4];
-                    F += _wrkBuffer[ctr + 5];
-                    G += _wrkBuffer[ctr + 6];
-                    H += _wrkBuffer[ctr + 7];
+                    A += m_wrkBuffer[ctr];
+                    B += m_wrkBuffer[ctr + 1];
+                    C += m_wrkBuffer[ctr + 2];
+                    D += m_wrkBuffer[ctr + 3];
+                    E += m_wrkBuffer[ctr + 4];
+                    F += m_wrkBuffer[ctr + 5];
+                    G += m_wrkBuffer[ctr + 6];
+                    H += m_wrkBuffer[ctr + 7];
 
                     Mix(ref A, ref B, ref C, ref D, ref E, ref F, ref G, ref H);
 
-                    _wrkBuffer[ctr] = A;
-                    _wrkBuffer[ctr + 1] = B;
-                    _wrkBuffer[ctr + 2] = C;
-                    _wrkBuffer[ctr + 3] = D;
-                    _wrkBuffer[ctr + 4] = E;
-                    _wrkBuffer[ctr + 5] = F;
-                    _wrkBuffer[ctr + 6] = G;
-                    _wrkBuffer[ctr + 7] = H;
+                    m_wrkBuffer[ctr] = A;
+                    m_wrkBuffer[ctr + 1] = B;
+                    m_wrkBuffer[ctr + 2] = C;
+                    m_wrkBuffer[ctr + 3] = D;
+                    m_wrkBuffer[ctr + 4] = E;
+                    m_wrkBuffer[ctr + 5] = F;
+                    m_wrkBuffer[ctr + 6] = G;
+                    m_wrkBuffer[ctr + 7] = H;
                     ctr += 8;
                 }
             }
@@ -252,12 +252,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         /// <returns>A pseudo random 32 bit integer</returns>
         public int Next()
         {
-            if (0 == _rslCounter--)
+            if (0 == m_rslCounter--)
             {
                 Generate();
-                _rslCounter = MSIZE - 1;
+                m_rslCounter = MSIZE - 1;
             }
-            return _rndResult[_rslCounter];
+            return m_rndResult[m_rslCounter];
         }
 
         /// <summary>
@@ -276,67 +276,67 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 	        int i = 0;
 	        int j = SSZ - 1;
 	        int X, Y;
-	        _lstResult += ++_cycCounter;
+	        m_lstResult += ++m_cycCounter;
 
 	        while (i != SSZ)
 	        {
-		        X = _wrkBuffer[i];
-		        _accululator ^= _accululator << 13;
-		        _accululator += _wrkBuffer[++j];
-		        _wrkBuffer[i] = Y = _wrkBuffer[(X & MASK) >> 2] + _accululator + _lstResult;
-		        _rndResult[i] = _lstResult = _wrkBuffer[((Y >> SIZE64) & MASK) >> 2] + X;
+		        X = m_wrkBuffer[i];
+		        m_accululator ^= m_accululator << 13;
+		        m_accululator += m_wrkBuffer[++j];
+		        m_wrkBuffer[i] = Y = m_wrkBuffer[(X & MASK) >> 2] + m_accululator + m_lstResult;
+		        m_rndResult[i] = m_lstResult = m_wrkBuffer[((Y >> SIZE64) & MASK) >> 2] + X;
 
-		        X = _wrkBuffer[++i];
-		        _accululator ^= (int)((uint)_accululator >> 6);
-		        _accululator += _wrkBuffer[++j];
-		        _wrkBuffer[i] = Y = _wrkBuffer[(X & MASK) >> 2] + _accululator + _lstResult;
-		        _rndResult[i] = _lstResult = _wrkBuffer[((Y >> SIZE64) & MASK) >> 2] + X;
+		        X = m_wrkBuffer[++i];
+		        m_accululator ^= (int)((uint)m_accululator >> 6);
+		        m_accululator += m_wrkBuffer[++j];
+		        m_wrkBuffer[i] = Y = m_wrkBuffer[(X & MASK) >> 2] + m_accululator + m_lstResult;
+		        m_rndResult[i] = m_lstResult = m_wrkBuffer[((Y >> SIZE64) & MASK) >> 2] + X;
 
-		        X = _wrkBuffer[++i];
-		        _accululator ^= _accululator << 2;
-		        _accululator += _wrkBuffer[++j];
-		        _wrkBuffer[i] = Y = _wrkBuffer[(X & MASK) >> 2] + _accululator + _lstResult;
-		        _rndResult[i] = _lstResult = _wrkBuffer[((Y >> SIZE64) & MASK) >> 2] + X;
+		        X = m_wrkBuffer[++i];
+		        m_accululator ^= m_accululator << 2;
+		        m_accululator += m_wrkBuffer[++j];
+		        m_wrkBuffer[i] = Y = m_wrkBuffer[(X & MASK) >> 2] + m_accululator + m_lstResult;
+		        m_rndResult[i] = m_lstResult = m_wrkBuffer[((Y >> SIZE64) & MASK) >> 2] + X;
 
-		        X = _wrkBuffer[++i];
-		        _accululator ^= (int)((uint)_accululator >> 16);
-		        _accululator += _wrkBuffer[++j];
-		        _wrkBuffer[i] = Y = _wrkBuffer[(X & MASK) >> 2] + _accululator + _lstResult;
-		        _rndResult[i] = _lstResult = _wrkBuffer[((Y >> SIZE64) & MASK) >> 2] + X;
+		        X = m_wrkBuffer[++i];
+		        m_accululator ^= (int)((uint)m_accululator >> 16);
+		        m_accululator += m_wrkBuffer[++j];
+		        m_wrkBuffer[i] = Y = m_wrkBuffer[(X & MASK) >> 2] + m_accululator + m_lstResult;
+		        m_rndResult[i] = m_lstResult = m_wrkBuffer[((Y >> SIZE64) & MASK) >> 2] + X;
 		        ++i;
 	        }
 
 	        j = 0;
 	        while (j != SSZ)
 	        {
-		        X = _wrkBuffer[i];
-		        _accululator ^= _accululator << 13;
-		        _accululator += _wrkBuffer[j];
-		        _wrkBuffer[i] = Y = _wrkBuffer[(X & MASK) >> 2] + _accululator + _lstResult;
-		        _rndResult[i] = _lstResult = _wrkBuffer[((Y >> SIZE64) & MASK) >> 2] + X;
+		        X = m_wrkBuffer[i];
+		        m_accululator ^= m_accululator << 13;
+		        m_accululator += m_wrkBuffer[j];
+		        m_wrkBuffer[i] = Y = m_wrkBuffer[(X & MASK) >> 2] + m_accululator + m_lstResult;
+		        m_rndResult[i] = m_lstResult = m_wrkBuffer[((Y >> SIZE64) & MASK) >> 2] + X;
 
-		        X = _wrkBuffer[++i];
-		        _accululator ^= (int)((uint)_accululator >> 6);
-		        _accululator += _wrkBuffer[++j];
-		        _wrkBuffer[i] = Y = _wrkBuffer[(X & MASK) >> 2] + _accululator + _lstResult;
-		        _rndResult[i] = _lstResult = _wrkBuffer[((Y >> SIZE64) & MASK) >> 2] + X;
+		        X = m_wrkBuffer[++i];
+		        m_accululator ^= (int)((uint)m_accululator >> 6);
+		        m_accululator += m_wrkBuffer[++j];
+		        m_wrkBuffer[i] = Y = m_wrkBuffer[(X & MASK) >> 2] + m_accululator + m_lstResult;
+		        m_rndResult[i] = m_lstResult = m_wrkBuffer[((Y >> SIZE64) & MASK) >> 2] + X;
 
-		        X = _wrkBuffer[++i];
-		        _accululator ^= _accululator << 2;
-		        _accululator += _wrkBuffer[++j];
-		        _wrkBuffer[i] = Y = _wrkBuffer[(X & MASK) >> 2] + _accululator + _lstResult;
-		        _rndResult[i] = _lstResult = _wrkBuffer[((Y >> SIZE64) & MASK) >> 2] + X;
+		        X = m_wrkBuffer[++i];
+		        m_accululator ^= m_accululator << 2;
+		        m_accululator += m_wrkBuffer[++j];
+		        m_wrkBuffer[i] = Y = m_wrkBuffer[(X & MASK) >> 2] + m_accululator + m_lstResult;
+		        m_rndResult[i] = m_lstResult = m_wrkBuffer[((Y >> SIZE64) & MASK) >> 2] + X;
 
-		        X = _wrkBuffer[++i];
-		        _accululator ^= (int)((uint)_accululator >> 16);
-		        _accululator += _wrkBuffer[++j];
-		        _wrkBuffer[i] = Y = _wrkBuffer[(X & MASK) >> 2] + _accululator + _lstResult;
-		        _rndResult[i] = _lstResult = _wrkBuffer[((Y >> SIZE64) & MASK) >> 2] + X;
+		        X = m_wrkBuffer[++i];
+		        m_accululator ^= (int)((uint)m_accululator >> 16);
+		        m_accululator += m_wrkBuffer[++j];
+		        m_wrkBuffer[i] = Y = m_wrkBuffer[(X & MASK) >> 2] + m_accululator + m_lstResult;
+		        m_rndResult[i] = m_lstResult = m_wrkBuffer[((Y >> SIZE64) & MASK) >> 2] + X;
 		        ++i;
 		        ++j;
 	        }
 
-	        _rslCounter = MSIZE;
+	        m_rslCounter = MSIZE;
         }
 
         private void Mix(ref int A, ref int B, ref int C, ref int D, ref int E, ref int F, ref int G, ref int H)
@@ -380,29 +380,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    _accululator = 0;
-                    _cycCounter = 0;
-                    _lstResult = 0;
-                    _rslCounter = 0;
+                    m_accululator = 0;
+                    m_cycCounter = 0;
+                    m_lstResult = 0;
+                    m_rslCounter = 0;
 
-                    if (_rndResult != null)
+                    if (m_rndResult != null)
                     {
-                        Array.Clear(_rndResult, 0, _rndResult.Length);
-                        _rndResult = null;
+                        Array.Clear(m_rndResult, 0, m_rndResult.Length);
+                        m_rndResult = null;
                     }
-                    if (_wrkBuffer != null)
+                    if (m_wrkBuffer != null)
                     {
-                        Array.Clear(_wrkBuffer, 0, _wrkBuffer.Length);
-                        _wrkBuffer = null;
+                        Array.Clear(m_wrkBuffer, 0, m_wrkBuffer.Length);
+                        m_wrkBuffer = null;
                     }
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

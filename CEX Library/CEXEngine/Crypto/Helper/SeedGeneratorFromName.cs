@@ -30,8 +30,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
                     return new ISCRsg();
                 case SeedGenerators.SP20Rsg:
                     return new SP20Rsg();
-                case SeedGenerators.XSPRsg:
-                    return new XSPRsg();
                 default:
                     throw new CryptoProcessingException("SeedGeneratorFromName:GetInstance", "The specified generator type is unrecognized!");
             }

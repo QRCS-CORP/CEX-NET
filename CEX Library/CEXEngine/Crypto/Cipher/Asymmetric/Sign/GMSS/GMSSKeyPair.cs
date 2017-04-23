@@ -54,9 +54,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
-        private IAsymmetricKey _publicKey;
-        private IAsymmetricKey _privateKey;
+        private bool m_isDisposed = false;
+        private IAsymmetricKey m_publicKey;
+        private IAsymmetricKey m_privateKey;
         #endregion
 
         #region Properties
@@ -73,7 +73,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// </summary>
         public IAsymmetricKey PublicKey
         {
-            get { return _publicKey; }
+            get { return m_publicKey; }
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// </summary>
         public IAsymmetricKey PrivateKey
         {
-            get { return _privateKey; }
+            get { return m_privateKey; }
         }
         #endregion
 
@@ -101,10 +101,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             if (!(PrivateKey is GMSSPrivateKey))
                 throw new CryptoAsymmetricSignException("GMSSKeyPair:Ctor", "Not a valid GMSS Private key!", new InvalidDataException());
 
-            _publicKey = (GMSSPublicKey)PublicKey;
-            _privateKey = (GMSSPrivateKey)PrivateKey;
-            _publicKey = PublicKey;
-            _privateKey = PrivateKey;
+            m_publicKey = (GMSSPublicKey)PublicKey;
+            m_privateKey = (GMSSPrivateKey)PrivateKey;
+            m_publicKey = PublicKey;
+            m_privateKey = PrivateKey;
         }
 
         /// <summary>
@@ -117,9 +117,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         public GMSSKeyPair(IAsymmetricKey Key)
         {
             if (Key is GMSSPublicKey)
-                _publicKey = (GMSSPublicKey)Key;
+                m_publicKey = (GMSSPublicKey)Key;
             else if (Key is GMSSPrivateKey)
-                _privateKey = (GMSSPrivateKey)Key;
+                m_privateKey = (GMSSPrivateKey)Key;
             else
                 throw new CryptoAsymmetricSignException("GMSSKeyPair:Ctor", "Not a valid GMSS key!", new InvalidDataException());
         }
@@ -137,7 +137,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// <returns>The IAsymmetricKeyPair copy</returns>
         public object Clone()
         {
-            return new GMSSKeyPair((IAsymmetricKey)_publicKey.Clone(), (IAsymmetricKey)_privateKey.Clone());
+            return new GMSSKeyPair((IAsymmetricKey)m_publicKey.Clone(), (IAsymmetricKey)m_privateKey.Clone());
         }
         #endregion
 
@@ -153,18 +153,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_privateKey != null)
-                        ((GMSSPrivateKey)_privateKey).Dispose();
-                    if (_publicKey != null)
-                        ((GMSSPublicKey)_publicKey).Dispose();
+                    if (m_privateKey != null)
+                        ((GMSSPrivateKey)m_privateKey).Dispose();
+                    if (m_publicKey != null)
+                        ((GMSSPublicKey)m_publicKey).Dispose();
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

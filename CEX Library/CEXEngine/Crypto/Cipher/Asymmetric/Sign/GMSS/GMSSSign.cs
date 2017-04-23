@@ -102,9 +102,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         #endregion
 
         #region Fields
-        private IAsymmetricKey _asmKey;
-        private bool _isDisposed = false;
-        private bool _isInitialized = false;
+        private IAsymmetricKey m_asmKey;
+        private bool m_isDisposed = false;
+        private bool m_isInitialized = false;
         // The raw GMSS public key
         private byte[] _pubKeyBytes;
         // Hash function for the construction of the authentication trees
@@ -135,7 +135,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// </summary>
         public bool IsInitialized
         {
-            get { return _isInitialized; }
+            get { return m_isInitialized; }
         }
 
         /// <summary>
@@ -147,10 +147,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         {
             get 
             { 
-                if (!_isInitialized)
+                if (!m_isInitialized)
                     throw new CryptoAsymmetricSignException("GMSSSign:IsSigner", "The signer has not been initialized!", new InvalidOperationException());
 
-                return (_asmKey is GMSSPrivateKey);
+                return (m_asmKey is GMSSPrivateKey);
             }
         }
 
@@ -205,8 +205,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                 throw new CryptoAsymmetricSignException("GMSSSign:Initialize", "The key pair is not a valid GMSS key pair!", new InvalidDataException());
 
             Reset();
-            _asmKey = AsmKey;
-            _isInitialized = true;
+            m_asmKey = AsmKey;
+            m_isInitialized = true;
 
             if (AsmKey is GMSSPrivateKey)
                 InitSign();
@@ -219,7 +219,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// </summary>
         public void Reset()
         {
-            //_rndEngine.Reset();
+            //m_rndEngine.Reset();
         }
 
         /// <summary>
@@ -233,11 +233,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// <exception cref="CryptoAsymmetricSignException">Thrown if an invalid key is used, or signer has not been initialized</exception>
         public byte[] Sign(Stream InputStream)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoAsymmetricSignException("GMSSSign:Sign", "The signer has not been initialized!", new InvalidOperationException());
-            if (_asmKey == null)
+            if (m_asmKey == null)
                 throw new CryptoAsymmetricSignException("GMSSSign:Sign", "The private key is invalid!", new InvalidDataException());
-            if (!(_asmKey is GMSSPrivateKey))
+            if (!(m_asmKey is GMSSPrivateKey))
                 throw new CryptoAsymmetricSignException("GMSSSign:Sign", "The private key is invalid!", new InvalidDataException());
 
             byte[] data = ((MemoryStream)InputStream).ToArray();
@@ -260,11 +260,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         {
             if (Input.Length - Offset < Length)
                 throw new CryptoAsymmetricSignException("GMSSSign:Sign", "The input array is too short!", new ArgumentException());
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoAsymmetricSignException("GMSSSign:Sign", "The signer has not been initialized!", new InvalidOperationException());
-            if (_asmKey == null)
+            if (m_asmKey == null)
                 throw new CryptoAsymmetricSignException("GMSSSign:Sign", "The private key is invalid!", new InvalidDataException());
-            if (!(_asmKey is GMSSPrivateKey))
+            if (!(m_asmKey is GMSSPrivateKey))
                 throw new CryptoAsymmetricSignException("GMSSSign:Sign", "The private key is invalid!", new InvalidDataException());
 
             byte[] data = new byte[Length];
@@ -285,11 +285,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// <exception cref="CryptoAsymmetricSignException">Thrown if signer is not initialized, or the key is invalid</exception>
         public bool Verify(Stream InputStream, byte[] Code)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoAsymmetricSignException("GMSSSign:Verify", "The signer has not been initialized!", new InvalidOperationException());
-            if (_asmKey == null)
+            if (m_asmKey == null)
                 throw new CryptoAsymmetricSignException("GMSSSign:Verify", "The public key is invalid!", new InvalidDataException());
-            if (!(_asmKey is GMSSPublicKey))
+            if (!(m_asmKey is GMSSPublicKey))
                 throw new CryptoAsymmetricSignException("GMSSSign:Verify", "The public key is invalid!", new InvalidDataException());
 
             byte[] data = ((MemoryStream)InputStream).ToArray();
@@ -313,11 +313,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         {
             if (Input.Length - Offset < Length)
                 throw new CryptoAsymmetricSignException("GMSSSign:Verify", "The input array is too short!", new ArgumentOutOfRangeException());
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoAsymmetricSignException("GMSSSign:Verify", "The signer has not been initialized!", new InvalidOperationException());
-            if (_asmKey == null)
+            if (m_asmKey == null)
                 throw new CryptoAsymmetricSignException("GMSSSign:Verify", "The public key is invalid!", new InvalidDataException());
-            if (!(_asmKey is GMSSPublicKey))
+            if (!(m_asmKey is GMSSPublicKey))
                 throw new CryptoAsymmetricSignException("GMSSSign:Verify", "The public key is invalid!", new InvalidDataException());
 
             byte[] data = new byte[Length];
@@ -335,7 +335,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         {
             _msgDigestTrees.Reset();
             // set private key and take from it ots key, auth, tree and key counter, rootSign
-            GMSSPrivateKey gmssPrivateKey = (GMSSPrivateKey)_asmKey;
+            GMSSPrivateKey gmssPrivateKey = (GMSSPrivateKey)m_asmKey;
 
             if (gmssPrivateKey.IsUsed)
                 throw new Exception("Private key already used");
@@ -387,7 +387,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         private void InitVerify()
         {
             _msgDigestTrees.Reset();
-            GMSSPublicKey gmssPublicKey = (GMSSPublicKey)_asmKey;
+            GMSSPublicKey gmssPublicKey = (GMSSPublicKey)m_asmKey;
             _pubKeyBytes = gmssPublicKey.PublicKey;
             // get numLayer
             _numLayer = _gmssPS.NumLayers;
@@ -589,7 +589,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
@@ -623,7 +623,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

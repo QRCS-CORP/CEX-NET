@@ -11,7 +11,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
     internal class Resultant : IDisposable
     {
         #region Private Fields
-        private bool _isDisposed = false;
+        private bool m_isDisposed = false;
         #endregion
 
         #region Public Fields
@@ -56,7 +56,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
@@ -67,7 +67,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

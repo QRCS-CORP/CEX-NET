@@ -75,11 +75,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         #endregion
 
         #region Fields
-        private IDigest _digest;
-        private bool _disposeEngine = true;
-        private bool _isDisposed = false;
-        private int _position;
-        private byte[] _rndData;
+        private IDigest m_digest;
+        private bool m_disposeEngine = true;
+        private bool m_isDisposed = false;
+        private int m_position;
+        private byte[] m_rndData;
         #endregion
 
         #region Properties
@@ -124,19 +124,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
             try
             {
-                _disposeEngine = DisposeEngine;
+                m_disposeEngine = DisposeEngine;
                 PBKDF2 pkcs = new PBKDF2(Digest, Iterations, false);
-                _digest = Digest;
+                m_digest = Digest;
                 pkcs.Initialize(Salt, Passphrase);
-                _rndData = new byte[_digest.BlockSize];
-                pkcs.Generate(_rndData);
+                m_rndData = new byte[m_digest.BlockSize];
+                pkcs.Generate(m_rndData);
             }
             catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
 
-            _position = 0;
+            m_position = 0;
         }
 
         private PBPRng()
@@ -167,15 +167,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
             try
             {
-                branch._digest = Digest;
+                branch.m_digest = Digest;
             }
             catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
 
-            branch._rndData = (byte[])_rndData.Clone();
-            branch._rndData[0]++;
+            branch.m_rndData = (byte[])m_rndData.Clone();
+            branch.m_rndData[0]++;
 
             return branch;
         }
@@ -237,13 +237,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
             int value = 0;
             for (int i = 0; i < 32; i += 8)
             {
-                if (_position >= _rndData.Length)
+                if (m_position >= m_rndData.Length)
                 {
-                    _rndData = _digest.ComputeHash(_rndData);
-                    _position = 0;
+                    m_rndData = m_digest.ComputeHash(m_rndData);
+                    m_position = 0;
                 }
-                value = (value << 8) | (_rndData[_position] & 0xFF);
-                _position++;
+                value = (value << 8) | (m_rndData[m_position] & 0xFF);
+                m_position++;
             }
 
             return value;
@@ -339,8 +339,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// </summary>
         public void Reset()
         {
-            Array.Clear(_rndData, 0, _rndData.Length);
-            _digest.Reset();
+            Array.Clear(m_rndData, 0, m_rndData.Length);
+            m_digest.Reset();
         }
         #endregion
 
@@ -400,19 +400,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
-                if (_digest != null && _disposeEngine)
+                if (m_digest != null && m_disposeEngine)
                 {
-                    _digest.Dispose();
-                    _digest = null;
+                    m_digest.Dispose();
+                    m_digest = null;
                 }
-                if (_rndData != null)
+                if (m_rndData != null)
                 {
-                    Array.Clear(_rndData, 0, _rndData.Length);
-                    _rndData = null;
+                    Array.Clear(m_rndData, 0, m_rndData.Length);
+                    m_rndData = null;
                 }
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

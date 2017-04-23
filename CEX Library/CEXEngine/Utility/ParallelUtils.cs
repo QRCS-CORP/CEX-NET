@@ -17,7 +17,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
     public class ParallelUtils
     {
         #region Fields
-        private static bool _frcLinear = false;
+        private static bool m_frcLinear = false;
         #endregion
 
         #region Properties
@@ -26,8 +26,8 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// </summary>
         public static bool ForceLinear
         {
-            get { return _frcLinear; }
-            set { _frcLinear = value; }
+            get { return m_frcLinear; }
+            set { m_frcLinear = value; }
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// </summary>
         public static bool IsParallel
         {
-            get { return Environment.ProcessorCount > 1 && _frcLinear == false; }
+            get { return Environment.ProcessorCount > 1 && m_frcLinear == false; }
         }
 
         /// <summary>

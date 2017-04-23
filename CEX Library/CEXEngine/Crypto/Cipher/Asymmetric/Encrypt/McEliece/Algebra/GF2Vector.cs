@@ -17,7 +17,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
     {
         #region Fields
         // holds the elements of this vector
-        private int[] _elements;
+        private int[] m_elements;
         #endregion
 
         #region Properties
@@ -26,7 +26,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public int[] VectorArray
         {
-            get { return _elements; }
+            get { return m_elements; }
         }
         #endregion
 
@@ -42,7 +42,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 throw new ArithmeticException("Negative length.");
 
             this.Length = Length;
-            _elements = new int[(Length + 31) >> 5];
+            m_elements = new int[(Length + 31) >> 5];
         }
 
         /// <summary>
@@ -56,18 +56,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             this.Length = Length;
 
             int size = (Length + 31) >> 5;
-            _elements = new int[size];
+            m_elements = new int[size];
 
             // generate random elements
             for (int i = size - 1; i >= 0; i--)
-                _elements[i] = SecRnd.Next();
+                m_elements[i] = SecRnd.Next();
 
             // erase unused bits
             int r = Length & 0x1f;
 
             // erase unused bits
             if (r != 0)
-                _elements[size - 1] &= (1 << r) - 1;
+                m_elements[size - 1] &= (1 << r) - 1;
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             this.Length = Length;
 
             int size = (Length + 31) >> 5;
-            _elements = new int[size];
+            m_elements = new int[size];
 
             int[] help = new int[Length];
             for (int i = 0; i < Length; i++)
@@ -120,13 +120,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (V.Length != size)
                 throw new ArithmeticException("GF2Vector: length mismatch!");
 
-            this._elements = IntUtils.DeepCopy(V);
+            this.m_elements = IntUtils.DeepCopy(V);
 
             int r = Length & 0x1f;
 
             // erase unused bits
             if (r != 0)
-                this._elements[size - 1] &= (1 << r) - 1;
+                this.m_elements[size - 1] &= (1 << r) - 1;
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public GF2Vector(GF2Vector G)
         {
             this.Length = G.Length;
-            this._elements = IntUtils.DeepCopy(G._elements);
+            this.m_elements = IntUtils.DeepCopy(G.m_elements);
         }
 
         /// <summary>
@@ -149,7 +149,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Length">The length of the vector</param>
         public GF2Vector(int[] V, int Length)
         {
-            this._elements = V;
+            this.m_elements = V;
             this.Length = Length;
         }
         #endregion
@@ -172,9 +172,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
 
             for (int i = 0; i < k; i++)
             {
-                int e = _elements[SetJ[i] >> 5] & (1 << (SetJ[i] & 0x1f));
+                int e = m_elements[SetJ[i] >> 5] & (1 << (SetJ[i] & 0x1f));
                 if (e != 0)
-                    result._elements[i >> 5] |= 1 << (i & 0x1f);
+                    result.m_elements[i >> 5] |= 1 << (i & 0x1f);
             }
 
             return result;
@@ -200,9 +200,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             int q = K >> 5;
             int r = K & 0x1f;
 
-            Array.Copy(_elements, 0, result._elements, 0, q);
+            Array.Copy(m_elements, 0, result.m_elements, 0, q);
             if (r != 0)
-                result._elements[q] = _elements[q] & ((1 << r) - 1);
+                result.m_elements[q] = m_elements[q] & ((1 << r) - 1);
 
             return result;
         }
@@ -234,16 +234,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             {
                 // process all but last word
                 for (int i = 0; i < length - 1; i++)
-                    result._elements[i] = (IntUtils.URShift(_elements[ind++], r)) | (_elements[ind] << (32 - r));
+                    result.m_elements[i] = (IntUtils.URShift(m_elements[ind++], r)) | (m_elements[ind] << (32 - r));
                 // process last word
-                result._elements[length - 1] = IntUtils.URShift(_elements[ind++], r);
-                if (ind < _elements.Length)
-                    result._elements[length - 1] |= _elements[ind] << (32 - r);
+                result.m_elements[length - 1] = IntUtils.URShift(m_elements[ind++], r);
+                if (ind < m_elements.Length)
+                    result.m_elements[length - 1] |= m_elements[ind] << (32 - r);
             }
             else
             {
                 // no shift necessary
-                Array.Copy(_elements, q, result._elements, 0, length);
+                Array.Copy(m_elements, q, result.m_elements, 0, length);
             }
 
             return result;
@@ -264,7 +264,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             int q = Index >> 5;
             int r = Index & 0x1f;
 
-            return IntUtils.URShift((_elements[q] & (1 << r)), r);
+            return IntUtils.URShift((m_elements[q] & (1 << r)), r);
         }
 
         /// <summary>
@@ -275,9 +275,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public int HammingWeight()
         {
             int weight = 0;
-            for (int i = 0; i < _elements.Length; i++)
+            for (int i = 0; i < m_elements.Length; i++)
             {
-                int e = _elements[i];
+                int e = m_elements[i];
                 for (int j = 0; j < 32; j++)
                 {
                     int b = e & 1;
@@ -322,7 +322,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (Index >= Length)
                 throw new Exception();
             
-            _elements[Index >> 5] |= 1 << (Index & 0x1f);
+            m_elements[Index >> 5] |= 1 << (Index & 0x1f);
         }
 
         /// <summary>
@@ -348,7 +348,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                     int q = IntUtils.URShift(count, 5);
                     int r = count & 0x1f;
 
-                    int e = (IntUtils.URShift(_elements[q], r)) & 1;
+                    int e = (IntUtils.URShift(m_elements[q], r)) & 1;
                     if (e == 1)
                         result[i] ^= 1 << j;
                     
@@ -376,10 +376,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (Length != otherVec.Length)
                 throw new ArithmeticException("GF2Vector: Length mismatch!");
 
-            int[] vec = IntUtils.DeepCopy(((GF2Vector)V)._elements);
+            int[] vec = IntUtils.DeepCopy(((GF2Vector)V).m_elements);
 
             for (int i = vec.Length - 1; i >= 0; i--)
-                vec[i] ^= _elements[i];
+                vec[i] ^= m_elements[i];
 
             return new GF2Vector(Length, vec);
         }
@@ -398,7 +398,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             GF2Vector otherVec = (GF2Vector)Obj;
             if (Length != otherVec.Length)
                 return false;
-            if (!Compare.IsEqual(_elements, otherVec._elements))
+            if (!Compare.IsEqual(m_elements, otherVec.m_elements))
                 return false;
 
             return true;
@@ -412,7 +412,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public override byte[] GetEncoded()
         {
             int byteLen = (Length + 7) >> 3;
-            return LittleEndian.ToByteArray(_elements, byteLen);
+            return LittleEndian.ToByteArray(m_elements, byteLen);
         }
         
         /// <summary>
@@ -423,7 +423,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public override int GetHashCode()
         {
             int hash = Length * 31;
-            hash += _elements.GetHashCode();
+            hash += m_elements.GetHashCode();
 
             return hash;
         }
@@ -434,9 +434,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns></returns>
         public override bool IsZero()
         {
-            for (int i = _elements.Length - 1; i >= 0; i--)
+            for (int i = m_elements.Length - 1; i >= 0; i--)
             {
-                if (_elements[i] != 0)
+                if (m_elements[i] != 0)
                     return false;
             }
             return true;
@@ -459,9 +459,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
 
             for (int i = 0; i < pVec.Length; i++)
             {
-                int e = _elements[pVec[i] >> 5] & (1 << (pVec[i] & 0x1f));
+                int e = m_elements[pVec[i] >> 5] & (1 << (pVec[i] & 0x1f));
                 if (e != 0)
-                    result._elements[i >> 5] |= 1 << (i & 0x1f);
+                    result.m_elements[i >> 5] |= 1 << (i & 0x1f);
             }
 
             return result;
@@ -483,7 +483,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 }
                 int q = i >> 5;
                 int r = i & 0x1f;
-                int bit = _elements[q] & (1 << r);
+                int bit = m_elements[q] & (1 << r);
                 if (bit == 0)
                 {
                     buf.Append('0');

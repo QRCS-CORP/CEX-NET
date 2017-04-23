@@ -55,8 +55,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
-        private byte[] _publicKey;
+        private bool m_isDisposed = false;
+        private byte[] m_publicKey;
         #endregion
 
         #region Properties
@@ -65,7 +65,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// </summary>
         public byte[] PublicKey
         {
-            get { return _publicKey; }
+            get { return m_publicKey; }
         }
         #endregion
 
@@ -93,7 +93,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             {
                 BinaryReader reader = new BinaryReader(KeyStream);
                 int len = reader.ReadInt32();
-                _publicKey = reader.ReadBytes(len);
+                m_publicKey = reader.ReadBytes(len);
             }
             catch (Exception ex)
             {
@@ -160,8 +160,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         {
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
 
-            writer.Write(_publicKey.Length);
-            writer.Write(_publicKey);
+            writer.Write(m_publicKey.Length);
+            writer.Write(m_publicKey);
             writer.BaseStream.Seek(0, SeekOrigin.Begin);
 
             return (MemoryStream)writer.BaseStream;
@@ -232,7 +232,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
 
             GMSSPublicKey other = (GMSSPublicKey)Obj;
 
-            if (!Compare.IsEqual(_publicKey, other.PublicKey))
+            if (!Compare.IsEqual(m_publicKey, other.PublicKey))
                 return false;
 
             return true;
@@ -245,7 +245,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// <returns>The hash code</returns>
         public override int GetHashCode()
         {
-            return CEXEngine.Utility.ArrayUtils.GetHashCode(_publicKey);
+            return CEXEngine.Utility.ArrayUtils.GetHashCode(m_publicKey);
         }
         #endregion
 
@@ -257,7 +257,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// <returns>GMSSPublicKey copy</returns>
         public object Clone()
         {
-            return new GMSSPublicKey(_publicKey);
+            return new GMSSPublicKey(m_publicKey);
         }
 
         /// <summary>
@@ -283,19 +283,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_publicKey != null)
+                    if (m_publicKey != null)
                     {
-                        Array.Clear(_publicKey, 0, _publicKey.Length);
-                        _publicKey = null;
+                        Array.Clear(m_publicKey, 0, m_publicKey.Length);
+                        m_publicKey = null;
                     }
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

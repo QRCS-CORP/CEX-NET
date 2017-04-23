@@ -57,7 +57,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
+        private bool m_isDisposed = false;
         // the inverse of A1, (n-v1 x n-v1 matrix)
         private short[][] _a1Inv;
         // translation vector of L1
@@ -436,7 +436,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
@@ -477,7 +477,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

@@ -97,11 +97,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         // The Winternitz Parameter 'w' of each layer
         private int[] _winternitzParameter;
         // The parameter K needed for the authentication path computation
-        private int[] _K;
-        private byte[] _oId;
-        private bool _isDisposed = false;
-        private Digests _dgtEngineType = Digests.SHA512;
-        private Prngs _rndEngineType = Prngs.CTRPrng;
+        private int[] m_K;
+        private byte[] m_oId;
+        private bool m_isDisposed = false;
+        private Digests m_dgtEngineType = Digests.SHA512;
+        private Prngs m_rndEngineType = Prngs.CTRPrng;
         #endregion
 
         #region Properties
@@ -110,8 +110,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// </summary>
         public Digests DigestEngine
         {
-            get { return _dgtEngineType; }
-            private set { _dgtEngineType = value; }
+            get { return m_dgtEngineType; }
+            private set { m_dgtEngineType = value; }
         }
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// </summary>
         public int[] K
         {
-            get { return _K; }
+            get { return m_K; }
         }
 
         /// <summary>
@@ -151,8 +151,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// </summary>
         public byte[] OId
         {
-            get { return _oId; }
-            private set { _oId = value; }
+            get { return m_oId; }
+            private set { m_oId = value; }
         }
 
         /// <summary>
@@ -160,8 +160,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// </summary>
         public Prngs RandomEngine
         {
-            get { return _rndEngineType; }
-            private set { _rndEngineType = value; }
+            get { return m_rndEngineType; }
+            private set { m_rndEngineType = value; }
         }
         /// <summary>
         /// Get: Returns the array of WinternitzParameter (for each layer) of the authentication trees
@@ -193,9 +193,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             if (OId[0] != (byte)AsymmetricEngines.GMSS)
                 throw new CryptoAsymmetricException("GMSSParameters:Ctor", string.Format("The OId is invalid, first byte must be family designator ({0})!", AsymmetricEngines.GMSS, new ArgumentException()));
 
-            _oId = OId;
-            _dgtEngineType = Digest;
-            _rndEngineType = RandomEngine;
+            m_oId = OId;
+            m_dgtEngineType = Digest;
+            m_rndEngineType = RandomEngine;
             Initialize(NumLayers, HeightOfTrees, WinternitzParameter, K);
         }
                 
@@ -213,16 +213,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                 BinaryReader reader = new BinaryReader(ParamStream);
                 int len;
 
-                _oId = reader.ReadBytes(OID_SIZE);
-                _dgtEngineType = (Digests)reader.ReadByte();
-                _rndEngineType = (Prngs)reader.ReadByte();
+                m_oId = reader.ReadBytes(OID_SIZE);
+                m_dgtEngineType = (Digests)reader.ReadByte();
+                m_rndEngineType = (Prngs)reader.ReadByte();
                 _numLayers = reader.ReadInt32();
                 len = reader.ReadInt32();
                 _heightOfTrees = ArrayUtils.ToArray32(reader.ReadBytes(len));
                 len = reader.ReadInt32();
                 _winternitzParameter = ArrayUtils.ToArray32(reader.ReadBytes(len));
                 len = reader.ReadInt32();
-                _K = ArrayUtils.ToArray32(reader.ReadBytes(len));
+                m_K = ArrayUtils.ToArray32(reader.ReadBytes(len));
             }
             catch (Exception ex)
             {
@@ -332,9 +332,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
             byte[] data;
 
-            writer.Write(_oId);
-            writer.Write((byte)_dgtEngineType);
-            writer.Write((byte)_rndEngineType);
+            writer.Write(m_oId);
+            writer.Write((byte)m_dgtEngineType);
+            writer.Write((byte)m_rndEngineType);
             writer.Write(_numLayers);
 
             data = ArrayUtils.ToBytes(_heightOfTrees);
@@ -345,7 +345,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             writer.Write(data.Length);
             writer.Write(data);
 
-            data = ArrayUtils.ToBytes(_K);
+            data = ArrayUtils.ToBytes(m_K);
             writer.Write(data.Length);
             writer.Write(data);
             writer.Seek(0, SeekOrigin.Begin);
@@ -420,7 +420,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
 
             _heightOfTrees = ArrayUtils.Clone(HeightOfTrees);
             _winternitzParameter = ArrayUtils.Clone(WinternitzParameter);
-            _K = ArrayUtils.Clone(K);
+            m_K = ArrayUtils.Clone(K);
         }
         #endregion
 
@@ -434,8 +434,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         {
             int hash = ArrayUtils.GetHashCode(_heightOfTrees);
             hash += ArrayUtils.GetHashCode(_winternitzParameter);
-            hash += ArrayUtils.GetHashCode(_K);
-            hash += 31 * (int)_dgtEngineType;
+            hash += ArrayUtils.GetHashCode(m_K);
+            hash += 31 * (int)m_dgtEngineType;
             hash += 31 * _numLayers;
 
             return hash;
@@ -461,11 +461,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                 return false;
             if (!Compare.IsEqual(_winternitzParameter, other.WinternitzParameter))
                 return false;
-            if (!Compare.IsEqual(_K, other.K))
+            if (!Compare.IsEqual(m_K, other.K))
                 return false;
             if (_numLayers != other.NumLayers)
                 return false;
-            if (_dgtEngineType != other.DigestEngine)
+            if (m_dgtEngineType != other.DigestEngine)
                 return false;
 
             return true;
@@ -480,7 +480,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         /// <returns>The GMSSParameters copy</returns>
         public object Clone()
         {
-            return new GMSSParameters(_oId, _numLayers, _heightOfTrees, _winternitzParameter, _K, _dgtEngineType, _rndEngineType);
+            return new GMSSParameters(m_oId, _numLayers, _heightOfTrees, _winternitzParameter, m_K, m_dgtEngineType, m_rndEngineType);
         }
 
         /// <summary>
@@ -506,18 +506,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    _dgtEngineType = Digests.SHA256;
-                    _rndEngineType = Prngs.CTRPrng;
+                    m_dgtEngineType = Digests.SHA256;
+                    m_rndEngineType = Prngs.CTRPrng;
                     _numLayers = 0;
 
-                    if (_oId != null)
+                    if (m_oId != null)
                     {
-                        Array.Clear(_oId, 0, _oId.Length);
-                        _oId = null;
+                        Array.Clear(m_oId, 0, m_oId.Length);
+                        m_oId = null;
                     }
                     if (_heightOfTrees != null)
                     {
@@ -529,15 +529,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                         Array.Clear(_winternitzParameter, 0, _winternitzParameter.Length);
                         _winternitzParameter = null;
                     }
-                    if (_K != null)
+                    if (m_K != null)
                     {
-                        Array.Clear(_K, 0, _K.Length);
-                        _K = null;
+                        Array.Clear(m_K, 0, m_K.Length);
+                        m_K = null;
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

@@ -104,14 +104,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         #endregion
 
         #region Fields
-        private int _N;
-        private int _Q;
-        private double _Sigma;
-        private int _mFp;
-        private byte[] _oId = new byte[OID_SIZE];
-        private bool _isDisposed = false;
-        private Digests _dgtEngineType = Digests.SHA512;
-        private Prngs _rndEngineType = Prngs.CTRPrng;
+        private int m_N;
+        private int m_Q;
+        private double m_Sigma;
+        private int m_mFp;
+        private byte[] m_oId = new byte[OID_SIZE];
+        private bool m_isDisposed = false;
+        private Digests m_dgtEngineType = Digests.SHA512;
+        private Prngs m_rndEngineType = Prngs.CTRPrng;
         #endregion
 
         #region Properties
@@ -130,8 +130,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <exception cref="CryptoAsymmetricException">Thrown if an invalid digest is specified</exception>
         public Digests Digest
         {
-            get { return _dgtEngineType; }
-            private set { _dgtEngineType = value; }
+            get { return m_dgtEngineType; }
+            private set { m_dgtEngineType = value; }
         }
 
         /// <summary>
@@ -139,8 +139,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// </summary>
         public byte[] OId
         {
-            get { return _oId; }
-            private set { _oId = value; }
+            get { return m_oId; }
+            private set { m_oId = value; }
         }
 
         /// <summary>
@@ -148,7 +148,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// </summary>
         public int MFP
         {
-            get { return _mFp; }
+            get { return m_mFp; }
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// </summary>
         public int N
         {
-            get { return _N; }
+            get { return m_N; }
         }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// </summary>
         public int Q
         {
-            get { return _Q; }
+            get { return m_Q; }
         }
 
         /// <summary>
@@ -172,8 +172,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// </summary>
         public Prngs RandomEngine
         {
-            get { return _rndEngineType; }
-            private set {_rndEngineType = value; }
+            get { return m_rndEngineType; }
+            private set {m_rndEngineType = value; }
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// </summary>
         public double Sigma
         {
-            get { return _Sigma; }
+            get { return m_Sigma; }
         }
         #endregion
 
@@ -228,13 +228,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             if (N == 256 && MFP > 16 || N == 512 && MFP > 32)
                 throw new CryptoAsymmetricException("RLWEParameters:Ctor", "MFP is invalid (forward padding can not be longer than half the maximum message size)!", new ArgumentOutOfRangeException());
 
-            _Sigma = Sigma;
-            _N = N;
-            _Q = Q;
+            m_Sigma = Sigma;
+            m_N = N;
+            m_Q = Q;
             Array.Copy(OId, this.OId, Math.Min(OId.Length, OID_SIZE));
-            _mFp = MFP;
-            _rndEngineType = Engine;
-            _dgtEngineType = PBDigest;
+            m_mFp = MFP;
+            m_rndEngineType = Engine;
+            m_dgtEngineType = PBDigest;
         }
 
         /// <summary>
@@ -251,13 +251,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
                 BinaryReader reader = new BinaryReader(ParamStream);
                 try
                 {
-                    _oId = reader.ReadBytes(OID_SIZE);
-                    _N = reader.ReadInt32();
-                    _Q = reader.ReadInt32();
-                    _Sigma = reader.ReadDouble();
-                    _mFp = reader.ReadInt32();
-                    _rndEngineType = (Prngs)reader.ReadInt32();
-                    _dgtEngineType = (Digests)reader.ReadInt32();
+                    m_oId = reader.ReadBytes(OID_SIZE);
+                    m_N = reader.ReadInt32();
+                    m_Q = reader.ReadInt32();
+                    m_Sigma = reader.ReadDouble();
+                    m_mFp = reader.ReadInt32();
+                    m_rndEngineType = (Prngs)reader.ReadInt32();
+                    m_dgtEngineType = (Digests)reader.ReadInt32();
                 }
                 catch
                 {
@@ -337,13 +337,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         public MemoryStream ToStream()
         {
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
-            writer.Write(_oId);
-            writer.Write(_N);
-            writer.Write(_Q);
-            writer.Write(_Sigma);
-            writer.Write(_mFp);
-            writer.Write((int)_rndEngineType);
-            writer.Write((int)_dgtEngineType);
+            writer.Write(m_oId);
+            writer.Write(m_N);
+            writer.Write(m_Q);
+            writer.Write(m_Sigma);
+            writer.Write(m_mFp);
+            writer.Write((int)m_rndEngineType);
+            writer.Write((int)m_dgtEngineType);
             writer.Seek(0, SeekOrigin.Begin);
 
             return (MemoryStream)writer.BaseStream;
@@ -405,12 +405,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int hash = 31 * _N;
-            hash += 31 * _Q;
-            hash += 31 * _mFp;
-            hash += (int)Math.Round(31 * _Sigma);
-            hash += 31 * (int)_rndEngineType;
-            hash += 31 * (int)_dgtEngineType;
+            int hash = 31 * m_N;
+            hash += 31 * m_Q;
+            hash += 31 * m_mFp;
+            hash += (int)Math.Round(31 * m_Sigma);
+            hash += 31 * (int)m_rndEngineType;
+            hash += 31 * (int)m_dgtEngineType;
 
             return hash;
         }
@@ -431,17 +431,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
 
             RLWEParameters other = (RLWEParameters)Obj;
 
-            if (_N != other.N)
+            if (m_N != other.N)
                 return false;
-            if (_Q != other.Q)
+            if (m_Q != other.Q)
                 return false;
-            if (_rndEngineType != other.RandomEngine)
+            if (m_rndEngineType != other.RandomEngine)
                 return false;
-            if (_dgtEngineType != other.Digest)
+            if (m_dgtEngineType != other.Digest)
                 return false;
-            if (_Sigma != other.Sigma)
+            if (m_Sigma != other.Sigma)
                 return false;
-            if (_mFp != other.MFP)
+            if (m_mFp != other.MFP)
                 return false;
 
             return true;
@@ -456,7 +456,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <returns>The RLWEParameters copy</returns>
         public object Clone()
         {
-            return new RLWEParameters(_oId, _N, _Q, _Sigma, _mFp, _rndEngineType, _dgtEngineType);
+            return new RLWEParameters(m_oId, m_N, m_Q, m_Sigma, m_mFp, m_rndEngineType, m_dgtEngineType);
         }
 
         /// <summary>
@@ -482,26 +482,26 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    _N = 0;
-                    _Q = 0;
-                    _Sigma = 0;
-                    _mFp = 0;
-                    _rndEngineType = Prngs.CTRPrng;
-                    _dgtEngineType = Digests.SHA512;
+                    m_N = 0;
+                    m_Q = 0;
+                    m_Sigma = 0;
+                    m_mFp = 0;
+                    m_rndEngineType = Prngs.CTRPrng;
+                    m_dgtEngineType = Digests.SHA512;
 
-                    if (_oId != null)
+                    if (m_oId != null)
                     {
-                        Array.Clear(_oId, 0, _oId.Length);
-                        _oId = null;
+                        Array.Clear(m_oId, 0, m_oId.Length);
+                        m_oId = null;
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

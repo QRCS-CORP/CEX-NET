@@ -32,16 +32,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         #endregion
 
         #region Fields
-        private IAsymmetricKey _asmKey;
-        private MPKCParameters _cprParams;
-        private IDigest _dgtEngine;
-        private bool _isDisposed = false;
-        private bool _isEncryption;
-        private int _maxPlainText;
-        private IRandom _rndEngine;
-        private int _K;
-        private int _N;
-        private int _T;
+        private IAsymmetricKey m_asmKey;
+        private MPKCParameters m_cprParams;
+        private IDigest m_dgtEngine;
+        private bool m_isDisposed = false;
+        private bool m_isEncryption;
+        private int m_maxPlainText;
+        private IRandom m_rndEngine;
+        private int m_K;
+        private int m_N;
+        private int m_T;
         #endregion
 
         #region Properties
@@ -50,7 +50,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         /// </summary>
         public int MaxPlainText
         {
-            get { return _maxPlainText; }
+            get { return m_maxPlainText; }
         }
         #endregion
 
@@ -62,8 +62,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         /// <param name="Paramaters">The cipher parameters</param>
         public FujisakiCipher(MPKCParameters Paramaters)
         {
-            _cprParams = Paramaters;
-            _dgtEngine = GetDigest(Paramaters.Digest);
+            m_cprParams = Paramaters;
+            m_dgtEngine = GetDigest(Paramaters.Digest);
         }
 
         /// <summary>
@@ -85,10 +85,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         /// <returns>The plain text</returns>
         public byte[] Decrypt(byte[] Input)
         {
-            if (_isEncryption)
+            if (m_isEncryption)
                 throw new CryptoAsymmetricException("FujisakiCipher:Decrypt", "The cipher is not initialized for decryption!", new ArgumentException());
 
-            int c1Len = (_N + 7) >> 3;
+            int c1Len = (m_N + 7) >> 3;
             int c2Len = Input.Length - c1Len;
 
             // split ciphertext (c1||c2)
@@ -97,15 +97,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
             byte[] c2 = c1c2[1];
 
             // decrypt c1 ...
-            GF2Vector hrmVec = GF2Vector.OS2VP(_N, c1);
-            GF2Vector[] decC1 = CCA2Primitives.Decrypt((MPKCPrivateKey)_asmKey, hrmVec);
+            GF2Vector hrmVec = GF2Vector.OS2VP(m_N, c1);
+            GF2Vector[] decC1 = CCA2Primitives.Decrypt((MPKCPrivateKey)m_asmKey, hrmVec);
             byte[] rBytes = decC1[0].GetEncoded();
             // ... and obtain error vector z
             GF2Vector z = decC1[1];
 
             byte[] mBytes;
             // get PRNG object..
-            using (KDF2Drbg sr0 = new KDF2Drbg(GetDigest(_cprParams.Digest)))
+            using (KDF2 sr0 = new KDF2(GetDigest(m_cprParams.Digest)))
             {
                 // seed PRNG with r'
                 sr0.Initialize(rBytes);
@@ -120,11 +120,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
 
             // compute H(r||m)
             byte[] rmBytes = ByteUtils.Concatenate(rBytes, mBytes);
-            byte[] hrm = new byte[_dgtEngine.DigestSize];
-            _dgtEngine.BlockUpdate(rmBytes, 0, rmBytes.Length);
-            _dgtEngine.DoFinal(hrm, 0);
+            byte[] hrm = new byte[m_dgtEngine.DigestSize];
+            m_dgtEngine.BlockUpdate(rmBytes, 0, rmBytes.Length);
+            m_dgtEngine.DoFinal(hrm, 0);
             // compute Conv(H(r||m))
-            hrmVec = CCA2Conversions.Encode(_N, _T, hrm);
+            hrmVec = CCA2Conversions.Encode(m_N, m_T, hrm);
 
             // check that Conv(H(m||r)) = z
             if (!hrmVec.Equals(z))
@@ -143,29 +143,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         /// <returns>The cipher text</returns>
         public byte[] Encrypt(byte[] Input)
         {
-            if (!_isEncryption)
+            if (!m_isEncryption)
                 throw new CryptoAsymmetricException("FujisakiCipher:Encrypt", "The cipher is not initialized for encryption!", new ArgumentException());
 
             // generate random vector r of length k bits
-            GF2Vector r = new GF2Vector(_K, _rndEngine);
+            GF2Vector r = new GF2Vector(m_K, m_rndEngine);
             // convert r to byte array
             byte[] rBytes = r.GetEncoded();
             // compute (r||input)
             byte[] rm = ByteUtils.Concatenate(rBytes, Input);
 
             // compute H(r||input)
-            _dgtEngine.BlockUpdate(rm, 0, rm.Length);
-            byte[] hrm = new byte[_dgtEngine.DigestSize];
-            _dgtEngine.DoFinal(hrm, 0);
+            m_dgtEngine.BlockUpdate(rm, 0, rm.Length);
+            byte[] hrm = new byte[m_dgtEngine.DigestSize];
+            m_dgtEngine.DoFinal(hrm, 0);
             // convert H(r||input) to error vector z
-            GF2Vector z = CCA2Conversions.Encode(_N, _T, hrm);
+            GF2Vector z = CCA2Conversions.Encode(m_N, m_T, hrm);
 
             // compute c1 = E(r, z)
-            byte[] c1 = CCA2Primitives.Encrypt((MPKCPublicKey)_asmKey, r, z).GetEncoded();
+            byte[] c1 = CCA2Primitives.Encrypt((MPKCPublicKey)m_asmKey, r, z).GetEncoded();
             byte[] c2;
 
             // get PRNG object
-            using (KDF2Drbg sr0 = new KDF2Drbg(GetDigest(_cprParams.Digest)))
+            using (KDF2 sr0 = new KDF2(GetDigest(m_cprParams.Digest)))
             {
                 // seed PRNG with r'
                 sr0.Initialize(rBytes);
@@ -208,23 +208,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
             if (!(AsmKey is MPKCPublicKey) && !(AsmKey is MPKCPrivateKey))
                 throw new CryptoAsymmetricException("FujisakiCipher:Initialize", "The key is not a valid McEliece key!", new InvalidDataException());
 
-            _isEncryption = (AsmKey is MPKCPublicKey);
+            m_isEncryption = (AsmKey is MPKCPublicKey);
 
-            _asmKey = AsmKey;
+            m_asmKey = AsmKey;
 
-            if (_isEncryption)
+            if (m_isEncryption)
             {
-                _rndEngine = GetPrng(_cprParams.RandomEngine);
-                _N = ((MPKCPublicKey)AsmKey).N;
-                _K = ((MPKCPublicKey)AsmKey).K;
-                _T = ((MPKCPublicKey)AsmKey).T;
-                _maxPlainText = (((MPKCPublicKey)AsmKey).K >> 3);
+                m_rndEngine = GetPrng(m_cprParams.RandomEngine);
+                m_N = ((MPKCPublicKey)AsmKey).N;
+                m_K = ((MPKCPublicKey)AsmKey).K;
+                m_T = ((MPKCPublicKey)AsmKey).T;
+                m_maxPlainText = (((MPKCPublicKey)AsmKey).K >> 3);
             }
             else
             {
-                _N = ((MPKCPrivateKey)AsmKey).N;
-                _K = ((MPKCPrivateKey)AsmKey).K;
-                _T = ((MPKCPrivateKey)AsmKey).T;
+                m_N = ((MPKCPrivateKey)AsmKey).N;
+                m_K = ((MPKCPrivateKey)AsmKey).K;
+                m_T = ((MPKCPrivateKey)AsmKey).T;
             }
         }
         #endregion
@@ -281,27 +281,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_dgtEngine != null)
+                    if (m_dgtEngine != null)
                     {
-                        _dgtEngine.Dispose();
-                        _dgtEngine = null;
+                        m_dgtEngine.Dispose();
+                        m_dgtEngine = null;
                     }
-                    if (_rndEngine != null)
+                    if (m_rndEngine != null)
                     {
-                        _rndEngine.Dispose();
-                        _rndEngine = null;
+                        m_rndEngine.Dispose();
+                        m_rndEngine = null;
                     }
-                    _K = 0;
-                    _N = 0;
-                    _T = 0;
+                    m_K = 0;
+                    m_N = 0;
+                    m_T = 0;
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

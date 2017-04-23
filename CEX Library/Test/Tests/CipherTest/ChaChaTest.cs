@@ -107,7 +107,7 @@ namespace VTDev.Projects.CEX.Test.Tests
             byte[] dec = new byte[2048];
             rng.Dispose();
 
-            using (ChaCha chacha = new ChaCha(10))
+            using (ChaCha20 chacha = new ChaCha20(10))
             {
                 // encrypt linear
                 chacha.Initialize(new KeyParams(key, iv));
@@ -128,7 +128,7 @@ namespace VTDev.Projects.CEX.Test.Tests
         {
             byte[] outBytes = new byte[Input.Length];
 
-            using (ChaCha chacha = new ChaCha(Rounds))
+            using (ChaCha20 chacha = new ChaCha20(Rounds))
             {
                 chacha.Initialize(new KeyParams(Key, Vector));
                 chacha.Transform(Input, 0, outBytes, 0, Input.Length);

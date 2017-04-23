@@ -50,14 +50,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         #endregion
 
         #region Fields
-        private bool _fastFp;
-        private bool _isDisposed = false;
-        private TernaryPolynomialType _polyType;
-        private bool _sparse;
-        private IntegerPolynomial _FP;
-        private int _N;
-        private int _Q;
-        private IPolynomial _T;
+        private bool m_fastFp;
+        private bool m_isDisposed = false;
+        private TernaryPolynomialType m_polyType;
+        private bool m_sparse;
+        private IntegerPolynomial m_FP;
+        private int m_N;
+        private int m_Q;
+        private IPolynomial m_T;
         #endregion
 
         #region Properties
@@ -74,7 +74,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int N
         {
-            get { return _N; }
+            get { return m_N; }
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int Q
         {
-            get { return _Q; }
+            get { return m_Q; }
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         internal TernaryPolynomialType PolyType
         {
-            get { return _polyType; }
+            get { return m_polyType; }
         }
 
         /// <summary>
@@ -99,8 +99,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         internal IPolynomial T
         {
-            get { return _T; }
-            set { _T = value; }
+            get { return m_T; }
+            set { m_T = value; }
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         internal IntegerPolynomial FP
         {
-            get { return _FP; }
+            get { return m_FP; }
         }
         #endregion
 
@@ -126,13 +126,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <param name="PolyType">PolyType type of the polynomial <c>T</c></param>
         internal NTRUPrivateKey(IPolynomial T, IntegerPolynomial FP, int N, int Q, bool Sparse, bool FastFp, TernaryPolynomialType PolyType)
         {
-            _T = T;
-            _FP = FP;
-            _N = N;
-            _Q = Q;
-            _sparse = Sparse;
-            _fastFp = FastFp;
-            _polyType = PolyType;
+            m_T = T;
+            m_FP = FP;
+            m_N = N;
+            m_Q = Q;
+            m_sparse = Sparse;
+            m_fastFp = FastFp;
+            m_polyType = PolyType;
         }
 
         /// <summary>
@@ -149,28 +149,28 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
             try
             {
                 // ins.Position = 0; wrong here, ins pos is wrong
-                _N = IntUtils.ReadShort(KeyStream);
-                _Q = IntUtils.ReadShort(KeyStream);
+                m_N = IntUtils.ReadShort(KeyStream);
+                m_Q = IntUtils.ReadShort(KeyStream);
                 byte flags = dataStream.ReadByte();
-                _sparse = (flags & 1) != 0;
-                _fastFp = (flags & 2) != 0;
+                m_sparse = (flags & 1) != 0;
+                m_fastFp = (flags & 2) != 0;
 
-                _polyType = (flags & 4) == 0 ? 
+                m_polyType = (flags & 4) == 0 ? 
                     TernaryPolynomialType.SIMPLE : 
                     TernaryPolynomialType.PRODUCT;
 
                 if (PolyType == TernaryPolynomialType.PRODUCT)
                 {
-                    _T = ProductFormPolynomial.FromBinary(KeyStream, N);
+                    m_T = ProductFormPolynomial.FromBinary(KeyStream, N);
                 }
                 else
                 {
                     IntegerPolynomial fInt = IntegerPolynomial.FromBinary3Tight(KeyStream, N);
 
-                    if (_sparse)
-                        _T = new SparseTernaryPolynomial(fInt);
+                    if (m_sparse)
+                        m_T = new SparseTernaryPolynomial(fInt);
                     else
-                        _T = new DenseTernaryPolynomial(fInt);
+                        m_T = new DenseTernaryPolynomial(fInt);
                 }
             }
             catch (Exception ex)
@@ -238,7 +238,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <returns>The encoded NTRUPrivateKey</returns>
         public byte[] ToBytes()
         {
-            int flags = (_sparse ? 1 : 0) + (_fastFp ? 2 : 0) + (PolyType == TernaryPolynomialType.PRODUCT ? 4 : 0);
+            int flags = (m_sparse ? 1 : 0) + (m_fastFp ? 2 : 0) + (PolyType == TernaryPolynomialType.PRODUCT ? 4 : 0);
             byte[] flagsByte = new byte[] { (byte)flags };
             byte[] tBin;
 
@@ -314,14 +314,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         private void Initialize()
         {
             // Initializes fp from t
-            if (_fastFp)
+            if (m_fastFp)
             {
-                _FP = new IntegerPolynomial(N);
-                _FP.Coeffs[0] = 1;
+                m_FP = new IntegerPolynomial(N);
+                m_FP.Coeffs[0] = 1;
             }
             else
             {
-                _FP = T.ToIntegerPolynomial().InvertF3();
+                m_FP = T.ToIntegerPolynomial().InvertF3();
             }
         }
         #endregion
@@ -335,11 +335,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         public override int GetHashCode()
         {
             int hash = 31 * N;
-            hash += 31 * (_fastFp ? 1231 : 1237);
+            hash += 31 * (m_fastFp ? 1231 : 1237);
             hash += 31 *  ((FP == null) ? 0 : FP.GetHashCode());
             hash += 31 * (int)PolyType;
             hash += 31 * Q;
-            hash += 31 * (_sparse ? 1231 : 1237);
+            hash += 31 * (m_sparse ? 1231 : 1237);
             hash += 31 * ((T == null) ? 0 : T.GetHashCode());
 
             return hash;
@@ -362,7 +362,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
             NTRUPrivateKey other = (NTRUPrivateKey)obj;
             if (N != other.N)
                 return false;
-            if (_fastFp != other._fastFp)
+            if (m_fastFp != other.m_fastFp)
                 return false;
 
             if (FP == null)
@@ -379,7 +379,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
                 return false;
             if (Q != other.Q)
                 return false;
-            if (_sparse != other._sparse)
+            if (m_sparse != other.m_sparse)
                 return false;
 
             if (T == null)
@@ -404,7 +404,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <returns>NTRUPrivateKey copy</returns>
         public object Clone()
         {
-            return new NTRUPrivateKey(_T, _FP, _N, _Q, _sparse, _fastFp, _polyType);
+            return new NTRUPrivateKey(m_T, m_FP, m_N, m_Q, m_sparse, m_fastFp, m_polyType);
         }
 
         /// <summary>
@@ -430,18 +430,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    _N = 0;
-                    _Q = 0;
-                    _T.Clear();
-                    _FP.Clear();
+                    m_N = 0;
+                    m_Q = 0;
+                    m_T.Clear();
+                    m_FP.Clear();
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

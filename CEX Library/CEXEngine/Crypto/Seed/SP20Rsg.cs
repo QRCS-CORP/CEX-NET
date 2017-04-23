@@ -75,9 +75,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
-        private byte[] _stateSeed;
-        private SP20Drbg _rndGenerator;
+        private bool m_isDisposed = false;
+        private byte[] m_stateSeed;
+        private SBG m_rndGenerator;
         #endregion
 
         #region Properties
@@ -105,8 +105,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         /// </summary>
         public SP20Rsg()
         {
-            _stateSeed = new byte[SEED40];
-            new EntropyPool().GetBytes(_stateSeed);
+            m_stateSeed = new byte[SEED40];
+            new EntropyPool().GetBytes(m_stateSeed);
             Reset();
         }
 
@@ -122,8 +122,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
             if (Seed.Length != SEED24 && Seed.Length != SEED40)
                 throw new CryptoRandomException("SP20Rsg:Ctor", "The seed array length must be either 24 or 40 bytes exactly!");
 
-            _stateSeed = new byte[Seed.Length];
-            Array.Copy(Seed, _stateSeed, Seed.Length);
+            m_stateSeed = new byte[Seed.Length];
+            Array.Copy(Seed, m_stateSeed, Seed.Length);
             Reset();
         }
 
@@ -148,7 +148,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         {
             byte[] data = new byte[Size];
 
-            _rndGenerator.Generate(data);
+            m_rndGenerator.Generate(data);
 
             return data;
         }
@@ -160,7 +160,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         /// <param name="Output">The destination array</param>
         public void GetBytes(byte[] Output)
         {
-            _rndGenerator.Generate(Output);
+            m_rndGenerator.Generate(Output);
         }
 
         /// <summary>
@@ -168,14 +168,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         /// </summary>
         public void Reset()
         {
-            if (_rndGenerator != null)
+            if (m_rndGenerator != null)
             {
-                _rndGenerator.Dispose();
-                _rndGenerator = null;
+                m_rndGenerator.Dispose();
+                m_rndGenerator = null;
             }
 
-            _rndGenerator = new SP20Drbg(20);
-            _rndGenerator.Initialize(_stateSeed);
+            m_rndGenerator = new SBG(20);
+            m_rndGenerator.Initialize(m_stateSeed);
         }
         #endregion
 
@@ -191,24 +191,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_rndGenerator != null)
+                    if (m_rndGenerator != null)
                     {
-                        _rndGenerator.Dispose();
-                        _rndGenerator = null;
+                        m_rndGenerator.Dispose();
+                        m_rndGenerator = null;
                     }
-                    if (_stateSeed != null)
+                    if (m_stateSeed != null)
                     {
-                        Array.Clear(_stateSeed, 0, _stateSeed.Length);
-                        _stateSeed = null;
+                        Array.Clear(m_stateSeed, 0, m_stateSeed.Length);
+                        m_stateSeed = null;
                     }
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

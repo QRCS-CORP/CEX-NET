@@ -11,9 +11,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
     {
         #region Fields
         // keeps the coefficients of this polynomial
-        private GF2nElement[] _coeff; 
+        private GF2nElement[] m_coeff; 
         // the size of this polynomial
-        private int _size;
+        private int m_Size;
         #endregion
 
         #region Properties
@@ -24,9 +24,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         {
             get
             {
-                for (int i = _size - 1; i >= 0; i--)
+                for (int i = m_Size - 1; i >= 0; i--)
                 {
-                    if (!_coeff[i].IsZero())
+                    if (!m_coeff[i].IsZero())
                         return i;
                 }
 
@@ -39,7 +39,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public int Size
         {
-            get { return _size; }
+            get { return m_Size; }
         }
         #endregion
 
@@ -52,11 +52,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Element">A GF2nElement</param>
         public GF2nPolynomial(int Degree, GF2nElement Element)
         {
-            _size = Degree;
-            _coeff = new GF2nElement[_size];
+            m_Size = Degree;
+            m_coeff = new GF2nElement[m_Size];
 
-            for (int i = 0; i < _size; i++)
-                _coeff[i] = (GF2nElement)Element.Clone();
+            for (int i = 0; i < m_Size; i++)
+                m_coeff[i] = (GF2nElement)Element.Clone();
         }
 
         /// <summary>
@@ -66,8 +66,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Degree">The maximum degree + 1</param>
         private GF2nPolynomial(int Degree)
         {
-            _size = Degree;
-            _coeff = new GF2nElement[_size];
+            m_Size = Degree;
+            m_coeff = new GF2nElement[m_Size];
         }
 
         /// <summary>
@@ -78,11 +78,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public GF2nPolynomial(GF2nPolynomial G)
         {
             int i;
-            _coeff = new GF2nElement[G._size];
-            _size = G._size;
+            m_coeff = new GF2nElement[G.m_Size];
+            m_Size = G.m_Size;
 
-            for (i = 0; i < _size; i++)
-                _coeff[i] = (GF2nElement)G._coeff[i].Clone();
+            for (i = 0; i < m_Size; i++)
+                m_coeff[i] = (GF2nElement)G.m_coeff[i].Clone();
         }
 
         /// <summary>
@@ -93,28 +93,28 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="B1">The field</param>
         public GF2nPolynomial(GF2Polynomial G, GF2nField B1)
         {
-            _size = B1.Degree + 1;
-            _coeff = new GF2nElement[_size];
+            m_Size = B1.Degree + 1;
+            m_coeff = new GF2nElement[m_Size];
             int i;
 
             if (B1 is GF2nONBField)
             {
-                for (i = 0; i < _size; i++)
+                for (i = 0; i < m_Size; i++)
                 {
                     if (G.TestBit(i))
-                        _coeff[i] = GF2nONBElement.One((GF2nONBField)B1);
+                        m_coeff[i] = GF2nONBElement.One((GF2nONBField)B1);
                     else
-                        _coeff[i] = GF2nONBElement.Zero((GF2nONBField)B1);
+                        m_coeff[i] = GF2nONBElement.Zero((GF2nONBField)B1);
                 }
             }
             else if (B1 is GF2nPolynomialField)
             {
-                for (i = 0; i < _size; i++)
+                for (i = 0; i < m_Size; i++)
                 {
                     if (G.TestBit(i))
-                        _coeff[i] = GF2nPolynomialElement.One((GF2nPolynomialField)B1);
+                        m_coeff[i] = GF2nPolynomialElement.One((GF2nPolynomialField)B1);
                     else
-                        _coeff[i] = GF2nPolynomialElement.Zero((GF2nPolynomialField)B1);
+                        m_coeff[i] = GF2nPolynomialElement.Zero((GF2nPolynomialField)B1);
                 }
             }
             else
@@ -141,9 +141,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 int i;
 
                 for (i = 0; i < P.Size; i++)
-                    result._coeff[i] = (GF2nElement)_coeff[i].Add(P._coeff[i]);
+                    result.m_coeff[i] = (GF2nElement)m_coeff[i].Add(P.m_coeff[i]);
                 for (; i < Size; i++)
-                    result._coeff[i] = _coeff[i];
+                    result.m_coeff[i] = m_coeff[i];
             }
             else
             {
@@ -151,9 +151,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 int i;
 
                 for (i = 0; i < Size; i++)
-                    result._coeff[i] = (GF2nElement)_coeff[i].Add(P._coeff[i]);
+                    result.m_coeff[i] = (GF2nElement)m_coeff[i].Add(P.m_coeff[i]);
                 for (; i < P.Size; i++)
-                    result._coeff[i] = P._coeff[i];
+                    result.m_coeff[i] = P.m_coeff[i];
             }
 
             return result;
@@ -164,8 +164,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public void AssignZeroToElements()
         {
-            for (int i = 0; i < _size; i++)
-                _coeff[i].AssignZero();
+            for (int i = 0; i < m_Size; i++)
+                m_coeff[i].AssignZero();
         }
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns the GF2nElement stored as coefficient <c>Index</c></returns>
         public GF2nElement At(int Index)
         {
-            return _coeff[Index];
+            return m_coeff[Index];
         }
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             GF2nPolynomial shift;
             GF2nElement factor;
             int bDegree = B.Degree;
-            GF2nElement inv = (GF2nElement)B._coeff[bDegree].Invert();
+            GF2nElement inv = (GF2nElement)B.m_coeff[bDegree].Invert();
 
             if (a.Degree < bDegree)
             {
@@ -213,12 +213,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
 
             while (i >= 0)
             {
-                factor = (GF2nElement)a._coeff[a.Degree].Multiply(inv);
+                factor = (GF2nElement)a.m_coeff[a.Degree].Multiply(inv);
                 shift = B.ScalarMultiply(factor);
                 shift.ShiftThisLeft(i);
                 a = a.Add(shift);
                 a.Shrink();
-                result[0]._coeff[i] = (GF2nElement)factor.Clone();
+                result[0].m_coeff[i] = (GF2nElement)factor.Clone();
                 i = a.Degree - bDegree;
             }
 
@@ -234,27 +234,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="K">The new maximum degree</param>
         public void Enlarge(int K)
         {
-            if (K <= _size)
+            if (K <= m_Size)
                 return;
             
             int i;
             GF2nElement[] res = new GF2nElement[K];
-            Array.Copy(_coeff, 0, res, 0, _size);
-            GF2nField f = _coeff[0].GetField();
+            Array.Copy(m_coeff, 0, res, 0, m_Size);
+            GF2nField f = m_coeff[0].GetField();
 
-            if (_coeff[0] is GF2nPolynomialElement)
+            if (m_coeff[0] is GF2nPolynomialElement)
             {
-                for (i = _size; i < K; i++)
+                for (i = m_Size; i < K; i++)
                     res[i] = GF2nPolynomialElement.Zero((GF2nPolynomialField)f);
             }
-            else if (_coeff[0] is GF2nONBElement)
+            else if (m_coeff[0] is GF2nONBElement)
             {
-                for (i = _size; i < K; i++)
+                for (i = m_Size; i < K; i++)
                     res[i] = GF2nONBElement.Zero((GF2nONBField)f);
             }
 
-            _size = K;
-            _coeff = res;
+            m_Size = K;
+            m_coeff = res;
         }
 
         /// <summary>
@@ -281,7 +281,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 b = c;
             }
 
-            alpha = a._coeff[a.Degree];
+            alpha = a.m_coeff[a.Degree];
             result = a.ScalarMultiply((GF2nElement)alpha.Invert());
 
             return result;
@@ -295,11 +295,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public bool IsZero()
         {
             int i;
-            for (i = 0; i < _size; i++)
+            for (i = 0; i < m_Size; i++)
             {
-                if (_coeff[i] != null)
+                if (m_coeff[i] != null)
                 {
-                    if (!_coeff[i].IsZero())
+                    if (!m_coeff[i].IsZero())
                         return false;
                 }
             }
@@ -327,10 +327,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             {
                 for (j = 0; j < P.Size; j++)
                 {
-                    if (result._coeff[i + j] == null)
-                        result._coeff[i + j] = (GF2nElement)_coeff[i].Multiply(P._coeff[j]);
+                    if (result.m_coeff[i + j] == null)
+                        result.m_coeff[i + j] = (GF2nElement)m_coeff[i].Multiply(P.m_coeff[j]);
                     else
-                        result._coeff[i + j] = (GF2nElement)result._coeff[i + j].Add(_coeff[i].Multiply(P._coeff[j]));
+                        result.m_coeff[i + j] = (GF2nElement)result.m_coeff[i + j].Add(m_coeff[i].Multiply(P.m_coeff[j]));
                 }
             }
 
@@ -404,7 +404,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             GF2nPolynomial result = new GF2nPolynomial(Size);
 
             for (int i = 0; i < Size; i++)
-                result._coeff[i] = (GF2nElement)_coeff[i].Multiply(E);
+                result.m_coeff[i] = (GF2nElement)m_coeff[i].Multiply(E);
 
             return result;
         }
@@ -420,7 +420,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (!(E is GF2nPolynomialElement) && !(E is GF2nONBElement))
                 throw new ArgumentException("GF2nPolynomial: PolynomialGF2n.Set f must be an instance of either GF2nPolynomialElement or GF2nONBElement!");
             
-            _coeff[Index] = (GF2nElement)E.Clone();
+            m_coeff[Index] = (GF2nElement)E.Clone();
         }
 
         /// <summary>
@@ -435,11 +435,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (N <= 0)
                 return new GF2nPolynomial(this);
             
-            GF2nPolynomial result = new GF2nPolynomial(_size + N, _coeff[0]);
+            GF2nPolynomial result = new GF2nPolynomial(m_Size + N, m_coeff[0]);
             result.AssignZeroToElements();
 
-            for (int i = 0; i < _size; i++)
-                result._coeff[i + N] = _coeff[i];
+            for (int i = 0; i < m_Size; i++)
+                result.m_coeff[i + N] = m_coeff[i];
             
             return result;
         }
@@ -454,22 +454,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (N > 0)
             {
                 int i;
-                int oldSize = _size;
-                GF2nField f = _coeff[0].GetField();
-                Enlarge(_size + N);
+                int oldSize = m_Size;
+                GF2nField f = m_coeff[0].GetField();
+                Enlarge(m_Size + N);
 
                 for (i = oldSize - 1; i >= 0; i--)
-                    _coeff[i + N] = _coeff[i];
+                    m_coeff[i + N] = m_coeff[i];
                 
-                if (_coeff[0] is GF2nPolynomialElement)
+                if (m_coeff[0] is GF2nPolynomialElement)
                 {
                     for (i = N - 1; i >= 0; i--)
-                        _coeff[i] = GF2nPolynomialElement.Zero((GF2nPolynomialField)f);
+                        m_coeff[i] = GF2nPolynomialElement.Zero((GF2nPolynomialField)f);
                 }
-                else if (_coeff[0] is GF2nONBElement)
+                else if (m_coeff[0] is GF2nONBElement)
                 {
                     for (i = N - 1; i >= 0; i--)
-                        _coeff[i] = GF2nONBElement.Zero((GF2nONBField)f);
+                        m_coeff[i] = GF2nONBElement.Zero((GF2nONBField)f);
                 }
             }
         }
@@ -479,19 +479,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public void Shrink()
         {
-            int i = _size - 1;
-            while (_coeff[i].IsZero() && (i > 0))
+            int i = m_Size - 1;
+            while (m_coeff[i].IsZero() && (i > 0))
             {
                 i--;
             }
             i++;
 
-            if (i < _size)
+            if (i < m_Size)
             {
                 GF2nElement[] res = new GF2nElement[i];
-                Array.Copy(_coeff, 0, res, 0, i);
-                _coeff = res;
-                _size = i;
+                Array.Copy(m_coeff, 0, res, 0, i);
+                m_coeff = res;
+                m_Size = i;
             }
         }
         #endregion
@@ -514,9 +514,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (Degree != otherPol.Degree)
                 return false;
 
-            for (int i = 0; i < _size; i++)
+            for (int i = 0; i < m_Size; i++)
             {
-                if (!_coeff[i].Equals(otherPol._coeff[i]))
+                if (!m_coeff[i].Equals(otherPol.m_coeff[i]))
                     return false;
             }
 
@@ -530,7 +530,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The hash code</returns>
         public override int GetHashCode()
         {
-            return Degree * 31 + _coeff.GetHashCode();
+            return Degree * 31 + m_coeff.GetHashCode();
         }
         #endregion
     }

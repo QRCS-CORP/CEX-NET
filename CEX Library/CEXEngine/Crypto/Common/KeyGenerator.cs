@@ -75,14 +75,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
-        private IDigest _hashEngine;
-        private ISeed _seedEngine;
-        private Digests _dgtType;
-        private SeedGenerators _seedType;
-        private byte[] _ctrVector = null;
-        private int _ctrLength = 0;
-        private CounterAlignmentSizes _rotationalAlignment = CounterAlignmentSizes.RAP32;
+        private bool m_isDisposed = false;
+        private IDigest m_hashEngine;
+        private ISeed m_seedEngine;
+        private Digests m_dgtType;
+        private SeedGenerators m_seedType;
+        private byte[] m_ctrVector = null;
+        private int m_ctrLength = 0;
+        private CounterAlignmentSizes m_rotationalAlignment = CounterAlignmentSizes.RAP32;
         #endregion
 
         #region Properties
@@ -91,8 +91,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// </summary>
         public Digests HashEngine 
         {
-            get { return _dgtType; }
-            private set { _dgtType = value; } 
+            get { return m_dgtType; }
+            private set { m_dgtType = value; } 
         }
 
         /// <summary>
@@ -104,8 +104,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// </summary>
         public CounterAlignmentSizes RotationalAlignment
         {
-            get { return _rotationalAlignment; }
-            set { _rotationalAlignment = value; }
+            get { return m_rotationalAlignment; }
+            set { m_rotationalAlignment = value; }
         }
 
         /// <summary>
@@ -113,8 +113,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// </summary>
         public SeedGenerators SeedEngine 
         {
-            get { return _seedType; }
-            private set { _seedType = value; }
+            get { return m_seedType; }
+            private set { m_seedType = value; }
         }
         #endregion
 
@@ -130,9 +130,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         public KeyGenerator(SeedGenerators SeedEngine = SeedGenerators.CSPRsg, Digests DigestEngine = Digests.SHA512)
         {
             // default engines
-            _seedType = SeedEngine;
-            _dgtType = DigestEngine;
-            _ctrLength = 0;
+            m_seedType = SeedEngine;
+            m_dgtType = DigestEngine;
+            m_ctrLength = 0;
 
             // initialize the generators
             Reset();
@@ -157,10 +157,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
             if (Counter.Length % 4 != 0 || Counter.Length > CTRMAX_SIZE || (Counter.Length < CTRMIN_SIZE && Counter.Length != 0))
                 throw new CryptoGeneratorException("KeyGenerator:Ctor", "The counter size must be either 0, or between 16 and 32", new ArgumentException());
 
-            _seedType = SeedEngine;
-            _dgtType = DigestEngine;
-            _ctrVector = Counter;
-            _ctrLength = Counter.Length;
+            m_seedType = SeedEngine;
+            m_dgtType = DigestEngine;
+            m_ctrVector = Counter;
+            m_ctrLength = Counter.Length;
 
             // initialize the generators
             Reset();
@@ -230,33 +230,33 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// </summary>
         public void Reset()
         {
-            if (_seedEngine != null)
+            if (m_seedEngine != null)
             {
-                _seedEngine.Dispose();
-                _seedEngine = null;
+                m_seedEngine.Dispose();
+                m_seedEngine = null;
             }
-            _seedEngine = SeedGeneratorFromName.GetInstance(SeedEngine);
+            m_seedEngine = SeedGeneratorFromName.GetInstance(SeedEngine);
 
             // reset hash engine
-            if (_hashEngine != null)
+            if (m_hashEngine != null)
             {
-                _hashEngine.Dispose();
-                _hashEngine = null;
+                m_hashEngine.Dispose();
+                m_hashEngine = null;
             }
-            _hashEngine = DigestFromName.GetInstance(HashEngine);
+            m_hashEngine = DigestFromName.GetInstance(HashEngine);
 
             // if absent, generate the initial counter
-		    if (_ctrLength == 0)
+		    if (m_ctrLength == 0)
 		    {
-                if (_hashEngine.BlockSize < 72)
-                    _ctrLength = CTRDEF_SIZE;
+                if (m_hashEngine.BlockSize < 72)
+                    m_ctrLength = CTRDEF_SIZE;
                 else
-                    _ctrLength = CTRMAX_SIZE;
+                    m_ctrLength = CTRMAX_SIZE;
 
-                _ctrVector = new byte[_ctrLength];
+                m_ctrVector = new byte[m_ctrLength];
 
                 using (CSPRsg pool =  new CSPRsg())
-                    _ctrVector = pool.GetBytes(_ctrLength);
+                    m_ctrVector = pool.GetBytes(m_ctrLength);
 		    }
         }
         #endregion
@@ -306,26 +306,26 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
 
             // since the generator has already been initialized, so long as the sum extraction length is less
             // than the generators maximum output length, using unique seed material on each key is worth the computational expense.
-            byte[] seed = _seedEngine.GetBytes((_hashEngine.BlockSize * 2) - _ctrLength);
+            byte[] seed = m_seedEngine.GetBytes((m_hashEngine.BlockSize * 2) - m_ctrLength);
             // rotate the counter at 32 bit intervals
-            Rotate(_ctrVector);
+            Rotate(m_ctrVector);
             // prepend the counter to the seed
-            seed = ArrayUtils.Concat(_ctrVector, seed);
+            seed = ArrayUtils.Concat(m_ctrVector, seed);
 
             // special case for sha-2
-            if (_dgtType == Digests.SHA256 || _dgtType == Digests.SHA512)
+            if (m_dgtType == Digests.SHA256 || m_dgtType == Digests.SHA512)
             {
                 // hmac key size is digest hash size: rfc 2104
-                byte[] key = _seedEngine.GetBytes(_hashEngine.DigestSize);
+                byte[] key = m_seedEngine.GetBytes(m_hashEngine.DigestSize);
 
                 // set hmac to *not* dispose of underlying digest
-                using (HMAC mac = new HMAC(_hashEngine, key, false))
+                using (HMAC mac = new HMAC(m_hashEngine, key, false))
                     return mac.ComputeMac(seed);
             }
             else
             {
                 // other implemented digests do not require hmac
-                return _hashEngine.ComputeHash(seed);
+                return m_hashEngine.ComputeHash(seed);
             }
         }
 
@@ -360,29 +360,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_ctrVector != null)
+                    if (m_ctrVector != null)
                     {
-                        Array.Clear(_ctrVector, 0, _ctrVector.Length);
-                        _ctrVector = null;
+                        Array.Clear(m_ctrVector, 0, m_ctrVector.Length);
+                        m_ctrVector = null;
                     }
-                    if (_hashEngine != null)
+                    if (m_hashEngine != null)
                     {
-                        _hashEngine.Dispose();
-                        _hashEngine = null;
+                        m_hashEngine.Dispose();
+                        m_hashEngine = null;
                     }
-                    if (_seedEngine != null)
+                    if (m_seedEngine != null)
                     {
-                        _seedEngine.Dispose();
-                        _seedEngine = null;
+                        m_seedEngine.Dispose();
+                        m_seedEngine = null;
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

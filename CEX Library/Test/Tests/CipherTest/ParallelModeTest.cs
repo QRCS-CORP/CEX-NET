@@ -331,22 +331,15 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
             byte[] inBlock = new byte[BlockSize];
             byte[] outBlock = new byte[BlockSize];
 
-            if (Cipher.Name == "CTR")
+            for (int i = 0; i < blocks; i++)
             {
-                Cipher.Transform(Input, outData);
+                Buffer.BlockCopy(Input, i * BlockSize, inBlock, 0, BlockSize);
+                Cipher.Transform(inBlock, outBlock);
+                Buffer.BlockCopy(outBlock, 0, outData, i * BlockSize, BlockSize);
             }
-            else
-            {
-                for (int i = 0; i < blocks; i++)
-                {
-                    Buffer.BlockCopy(Input, i * BlockSize, inBlock, 0, BlockSize);
-                    Cipher.Transform(inBlock, outBlock);
-                    Buffer.BlockCopy(outBlock, 0, outData, i * BlockSize, BlockSize);
-                }
 
-                if (blocks * BlockSize < Input.Length)
-                    Cipher.Transform(Input, blocks * BlockSize, outData, blocks * BlockSize);
-            }
+            if (blocks * BlockSize < Input.Length)
+                Cipher.Transform(Input, blocks * BlockSize, outData, blocks * BlockSize);
 
             return outData;
         }

@@ -114,12 +114,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         #endregion
 
         #region Fields
-        private int _blockSize = 0;
-        private byte[] _buffer;
-        private int _bufferIndex = 0;
-        private int _digestSize = 0;
-        private bool _isDisposed = false;
-        private ulong[] _state = new ulong[25];
+        private int m_blockSize = 0;
+        private byte[] m_buffer;
+        private int m_bufferIndex = 0;
+        private int m_digestSize = 0;
+        private bool m_isDisposed = false;
+        private ulong[] m_state = new ulong[25];
         #endregion
 
         #region Properties
@@ -128,7 +128,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// </summary>
         public int BlockSize
         {
-            get { return _blockSize; }
+            get { return m_blockSize; }
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// </summary>
         public int DigestSize
         {
-            get { return _digestSize; }
+            get { return m_digestSize; }
         }
 
         /// <summary>
@@ -166,11 +166,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         {
             // test for legal sizes; default at 512
             if (DigestSize == 384)
-                _digestSize = 384 / 8;
+                m_digestSize = 384 / 8;
             else
-                _digestSize = 512 / 8;
+                m_digestSize = 512 / 8;
 
-            _blockSize = 200 - (_digestSize * 2);//64=72
+            m_blockSize = 200 - (m_digestSize * 2);//64=72
             Initialize();
         }
 
@@ -198,30 +198,30 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             if ((InOffset + Length) > Input.Length)
                 throw new CryptoHashException("Keccak512:BlockUpdate", "The Input buffer is too short!", new ArgumentOutOfRangeException());
 
-            if (_bufferIndex != 0)
+            if (m_bufferIndex != 0)
             {
-                if (Length + _bufferIndex >= _blockSize)
+                if (Length + m_bufferIndex >= m_blockSize)
                 {
-                    int chunkSize = _blockSize - _bufferIndex;
-                    Buffer.BlockCopy(Input, InOffset, _buffer, _bufferIndex, chunkSize);
-                    TransformBlock(_buffer, 0);
+                    int chunkSize = m_blockSize - m_bufferIndex;
+                    Buffer.BlockCopy(Input, InOffset, m_buffer, m_bufferIndex, chunkSize);
+                    TransformBlock(m_buffer, 0);
                     Length -= chunkSize;
                     InOffset += chunkSize;
-                    _bufferIndex = 0;
+                    m_bufferIndex = 0;
                 }
             }
 
-            while (Length >= _buffer.Length)
+            while (Length >= m_buffer.Length)
             {
                 TransformBlock(Input, InOffset);
-                InOffset += _buffer.Length;
-                Length -= _buffer.Length;
+                InOffset += m_buffer.Length;
+                Length -= m_buffer.Length;
             }
 
             if (Length > 0)
             {
-                Buffer.BlockCopy(Input, InOffset, _buffer, _bufferIndex, Length);
-                _bufferIndex += Length;
+                Buffer.BlockCopy(Input, InOffset, m_buffer, m_bufferIndex, Length);
+                m_bufferIndex += Length;
             }
         }
 
@@ -257,19 +257,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             if (Output.Length - OutOffset < DigestSize)
                 throw new CryptoHashException("Keccak512:DoFinal", "The Output buffer is too short!", new ArgumentOutOfRangeException());
 
-            Array.Clear(_buffer, _bufferIndex, _buffer.Length - _bufferIndex); 
-            _buffer[_bufferIndex] = 1;
-            _buffer[BlockSize - 1] |= 128;
+            Array.Clear(m_buffer, m_bufferIndex, m_buffer.Length - m_bufferIndex); 
+            m_buffer[m_bufferIndex] = 1;
+            m_buffer[BlockSize - 1] |= 128;
 
-            TransformBlock(_buffer, 0);
+            TransformBlock(m_buffer, 0);
 
-            _state[1] = ~_state[1];
-            _state[2] = ~_state[2];
-            _state[8] = ~_state[8];
-            _state[12] = ~_state[12];
-            _state[17] = ~_state[17];
+            m_state[1] = ~m_state[1];
+            m_state[2] = ~m_state[2];
+            m_state[8] = ~m_state[8];
+            m_state[12] = ~m_state[12];
+            m_state[17] = ~m_state[17];
 
-            Buffer.BlockCopy(ULongsToBytes(_state, 0, _state.Length), 0, Output, OutOffset, _digestSize);
+            Buffer.BlockCopy(ULongsToBytes(m_state, 0, m_state.Length), 0, Output, OutOffset, m_digestSize);
             Initialize();
 
             return DigestSize;
@@ -297,15 +297,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         #region Private Methods
         private void Initialize()
         {
-            Array.Clear(_state, 0, 25);
-            _buffer = new byte[_blockSize];
-            _bufferIndex = 0;
-            _state[1] = ulong.MaxValue;
-            _state[2] = ulong.MaxValue;
-            _state[8] = ulong.MaxValue;
-            _state[12] = ulong.MaxValue;
-            _state[17] = ulong.MaxValue;
-            _state[20] = ulong.MaxValue;
+            Array.Clear(m_state, 0, 25);
+            m_buffer = new byte[m_blockSize];
+            m_bufferIndex = 0;
+            m_state[1] = ulong.MaxValue;
+            m_state[2] = ulong.MaxValue;
+            m_state[8] = ulong.MaxValue;
+            m_state[12] = ulong.MaxValue;
+            m_state[17] = ulong.MaxValue;
+            m_state[20] = ulong.MaxValue;
         }
 
         private void TransformBlock(byte[] Data, int Index)
@@ -313,7 +313,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             ulong[] data = BytesToULongs(Data, Index, BlockSize);
 
             for (int j = 0; j < BlockSize / 8; j++)
-                _state[j] ^= data[j];
+                m_state[j] ^= data[j];
 
             ulong Aba, Abe, Abi, Abo, Abu;
             ulong Aga, Age, Agi, Ago, Agu;
@@ -333,31 +333,31 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             ulong Ema, Eme, Emi, Emo, Emu;
             ulong Esa, Ese, Esi, Eso, Esu;
 
-            Aba = _state[0];
-            Abe = _state[1];
-            Abi = _state[2];
-            Abo = _state[3];
-            Abu = _state[4];
-            Aga = _state[5];
-            Age = _state[6];
-            Agi = _state[7];
-            Ago = _state[8];
-            Agu = _state[9];
-            Aka = _state[10];
-            Ake = _state[11];
-            Aki = _state[12];
-            Ako = _state[13];
-            Aku = _state[14];
-            Ama = _state[15];
-            Ame = _state[16];
-            Ami = _state[17];
-            Amo = _state[18];
-            Amu = _state[19];
-            Asa = _state[20];
-            Ase = _state[21];
-            Asi = _state[22];
-            Aso = _state[23];
-            Asu = _state[24];
+            Aba = m_state[0];
+            Abe = m_state[1];
+            Abi = m_state[2];
+            Abo = m_state[3];
+            Abu = m_state[4];
+            Aga = m_state[5];
+            Age = m_state[6];
+            Agi = m_state[7];
+            Ago = m_state[8];
+            Agu = m_state[9];
+            Aka = m_state[10];
+            Ake = m_state[11];
+            Aki = m_state[12];
+            Ako = m_state[13];
+            Aku = m_state[14];
+            Ama = m_state[15];
+            Ame = m_state[16];
+            Ami = m_state[17];
+            Amo = m_state[18];
+            Amu = m_state[19];
+            Asa = m_state[20];
+            Ase = m_state[21];
+            Asi = m_state[22];
+            Aso = m_state[23];
+            Asu = m_state[24];
 
             Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
             Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
@@ -2884,31 +2884,31 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             Aso = Bso ^ (Bsu | Bsa);
             Asu = Bsu ^ (Bsa & Bse);
 
-            _state[0] = Aba;
-            _state[1] = Abe;
-            _state[2] = Abi;
-            _state[3] = Abo;
-            _state[4] = Abu;
-            _state[5] = Aga;
-            _state[6] = Age;
-            _state[7] = Agi;
-            _state[8] = Ago;
-            _state[9] = Agu;
-            _state[10] = Aka;
-            _state[11] = Ake;
-            _state[12] = Aki;
-            _state[13] = Ako;
-            _state[14] = Aku;
-            _state[15] = Ama;
-            _state[16] = Ame;
-            _state[17] = Ami;
-            _state[18] = Amo;
-            _state[19] = Amu;
-            _state[20] = Asa;
-            _state[21] = Ase;
-            _state[22] = Asi;
-            _state[23] = Aso;
-            _state[24] = Asu;
+            m_state[0] = Aba;
+            m_state[1] = Abe;
+            m_state[2] = Abi;
+            m_state[3] = Abo;
+            m_state[4] = Abu;
+            m_state[5] = Aga;
+            m_state[6] = Age;
+            m_state[7] = Agi;
+            m_state[8] = Ago;
+            m_state[9] = Agu;
+            m_state[10] = Aka;
+            m_state[11] = Ake;
+            m_state[12] = Aki;
+            m_state[13] = Ako;
+            m_state[14] = Aku;
+            m_state[15] = Ama;
+            m_state[16] = Ame;
+            m_state[17] = Ami;
+            m_state[18] = Amo;
+            m_state[19] = Amu;
+            m_state[20] = Asa;
+            m_state[21] = Ase;
+            m_state[22] = Asi;
+            m_state[23] = Aso;
+            m_state[24] = Asu;
         }
         #endregion
 
@@ -2942,24 +2942,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_state != null)
+                    if (m_state != null)
                     {
-                        Array.Clear(_state, 0, _state.Length);
-                        _state = null;
+                        Array.Clear(m_state, 0, m_state.Length);
+                        m_state = null;
                     }
-                    if (_buffer != null)
+                    if (m_buffer != null)
                     {
-                        Array.Clear(_buffer, 0, _buffer.Length);
-                        _buffer = null;
+                        Array.Clear(m_buffer, 0, m_buffer.Length);
+                        m_buffer = null;
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

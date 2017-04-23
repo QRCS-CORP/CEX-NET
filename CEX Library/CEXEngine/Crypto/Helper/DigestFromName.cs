@@ -19,22 +19,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
         /// <returns>An initialized digest</returns>
         /// 
         /// <exception cref="CryptoProcessingException">Thrown if the enumeration name is not supported</exception>
-        public static IDigest GetInstance(Digests DigestType)
+        public static IDigest GetInstance(Digests DigestType, bool Parallel = false)
         {
 	        switch (DigestType)
 	        {
-	            case Digests.Blake256:
-		            return new Blake256();
                 case Digests.Blake2S256:
-                    return new Blake2Sp256();
-                case Digests.Blake2SP256:
-                    return new Blake2Sp256(true);
-                case Digests.Blake512:
-		            return new Blake512();
+                    return new Blake2S256(Parallel);
                 case Digests.Blake2B512:
-                    return new Blake2Bp512();
-                case Digests.Blake2BP512:
-                    return new Blake2Bp512(true);
+                    return new Blake2B512(Parallel);
                 case Digests.Keccak256:
 		            return new Keccak256();
 	            case Digests.Keccak512:
@@ -67,15 +59,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
             {
                 case Digests.Skein256:
                     return 32;
-                case Digests.Blake256:
                 case Digests.Blake2S256:
-                case Digests.Blake2SP256:
                 case Digests.SHA256:
                 case Digests.Skein512:
                     return 64;
-                case Digests.Blake512:
                 case Digests.Blake2B512:
-                case Digests.Blake2BP512:
                 case Digests.SHA512:
                 case Digests.Skein1024:
                     return 128;
@@ -101,22 +89,49 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
         {
             switch (DigestType)
             {
-                case Digests.Blake256:
                 case Digests.Blake2S256:
-                case Digests.Blake2SP256:
                 case Digests.Keccak256:
                 case Digests.SHA256:
                 case Digests.Skein256:
                     return 32;
-                case Digests.Blake512:
                 case Digests.Blake2B512:
-                case Digests.Blake2BP512:
                 case Digests.Keccak512:
                 case Digests.SHA512:
                 case Digests.Skein512:
                     return 64;
                 case Digests.Skein1024:
                     return 128;
+                case Digests.None:
+                    return 0;
+                default:
+                    throw new CryptoSymmetricException("DigestFromName:GetDigestSize", "The digest type is not supported!", new ArgumentException());
+            }
+        }
+
+        /// <summary>
+        /// Get the size of internal padding applied to the last block during the hash finalizer
+        /// </summary>
+        /// 
+        /// <param name="DigestType">The Digest enumeration member</param>
+        /// 
+        /// <returns>The padding size size in bytes</returns>
+        public static int GetPaddingSize(Digests DigestType)
+        {
+            switch (DigestType)
+            {
+                case Digests.Blake2B512:
+                case Digests.Blake2S256:
+                case Digests.Skein256:
+                case Digests.Skein512:
+                case Digests.Skein1024:
+                    return 0;
+                case Digests.Keccak256:
+                case Digests.Keccak512:
+                    return 1;
+                case Digests.SHA256:
+                    return 9;
+                case Digests.SHA512:
+                    return 17;
                 case Digests.None:
                     return 0;
                 default:

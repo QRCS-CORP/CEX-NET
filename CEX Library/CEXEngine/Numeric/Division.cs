@@ -162,9 +162,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         internal static BigInteger[] DivideAndRemainderByInteger(BigInteger Value, int Divisor, int DivisorSign)
         {
             // res[0] is a quotient and res[1] is a remainder:
-            int[] valDigits = Value._digits;
-            int valLen = Value._numberLength;
-            int valSign = Value._sign;
+            int[] valDigits = Value.m_digits;
+            int valLen = Value.m_numberLength;
+            int valSign = Value.m_sign;
             if (valLen == 1)
             {
                 long a = (valDigits[0] & 0xffffffffL);
@@ -290,7 +290,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             BigInteger y = (x2.Subtract(x1)).Multiply(qInv);
             InplaceModPow2(y, j);
 
-            if (y._sign < 0)
+            if (y.m_sign < 0)
                 y = y.Add(BigInteger.GetPowerOfTwo(j));
             
             // STEP 5: Compute and return: x1 + q * y
@@ -328,7 +328,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             { // INV: op2 >= op1 && both are odd unless op1 = 0
 
                 // Optimization for small operands (op2.bitLength() < 64) implies by INV (op1.bitLength() < 64)
-                if ((Y._numberLength == 1) || ((Y._numberLength == 2) && (Y._digits[1] > 0)))
+                if ((Y.m_numberLength == 1) || ((Y.m_numberLength == 2) && (Y.m_digits[1] > 0)))
                 {
                     Y = BigInteger.ValueOf(Division.GcdBinary(X.ToInt64(), Y.ToInt64()));
                     break;
@@ -336,7 +336,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
                 // Implements one step of the Euclidean algorithm
                 // To reduce one operand if it's much smaller than the other one
-                if (Y._numberLength > X._numberLength * 1.2)
+                if (Y.m_numberLength > X.m_numberLength * 1.2)
                 {
                     Y = Y.Remainder(X);
 
@@ -357,7 +357,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 swap = Y;
                 Y = X;
                 X = swap;
-            } while (X._sign != 0);
+            } while (X.m_sign != 0);
 
             return Y.ShiftLeft(pow2Count);
         }
@@ -411,13 +411,13 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             int fd = N >> 5;
             int leadingZeros;
 
-            if ((X._numberLength < fd) || (X.BitLength <= N))
+            if ((X.m_numberLength < fd) || (X.BitLength <= N))
             {
                 return;
             }
             leadingZeros = 32 - (N & 31);
-            X._numberLength = fd + 1;
-            X._digits[fd] &= (leadingZeros < 32) ? (IntUtils.URShift(-1, leadingZeros)) : 0;
+            X.m_numberLength = fd + 1;
+            X.m_digits[fd] &= (leadingZeros < 32) ? (IntUtils.URShift(-1, leadingZeros)) : 0;
             X.CutOffLeadingZeroes();
         }
 
@@ -432,23 +432,23 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         internal static BigInteger ModInverseMontgomery(BigInteger X, BigInteger P)
         {
             // ZERO hasn't inverse
-            if (X._sign == 0)
+            if (X.m_sign == 0)
                 throw new ArithmeticException("BigInteger not invertible!");
 
             // montgomery inverse require even modulo
             if (!P.TestBit(0))
                 return ModInverseLorencz(X, P);
 
-            int m = P._numberLength * 32;
+            int m = P.m_numberLength * 32;
             // PRE: a \in [1, p - 1]
             BigInteger u, v, r, s;
             u = P.Copy();  // make copy to use inplace method
             v = X.Copy();
 
-            int max = System.Math.Max(v._numberLength, u._numberLength);
+            int max = System.Math.Max(v.m_numberLength, u.m_numberLength);
             r = new BigInteger(1, 1, new int[max + 1]);
             s = new BigInteger(1, 1, new int[max + 1]);
-            s._digits[0] = 1;
+            s.m_digits[0] = 1;
 
             int k = 0;
             int lsbu = u.LowestSetBit;
@@ -470,7 +470,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 k += lsbv - lsbu;
             }
 
-            r._sign = 1;
+            r.m_sign = 1;
             while (v.Signum() > 0)
             {
                 // INV v >= 0, u >= 0, v odd, u odd (except last iteration when v is even (0))
@@ -566,7 +566,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         internal static BigInteger OddModPow(BigInteger X, BigInteger Y, BigInteger Modulus)
         {
             // PRE: (base > 0), (exponent > 0), (modulus > 0) and (odd modulus)
-            int k = (Modulus._numberLength << 5); // r = 2^k
+            int k = (Modulus.m_numberLength << 5); // r = 2^k
             // n-residue of base [base * r (mod modulus)]
             BigInteger a2 = X.ShiftLeft(k).Mod(Modulus);
             // n-residue of base [1 * r (mod modulus)]
@@ -576,7 +576,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
             int n2 = CalcN(Modulus);
 
-            if (Modulus._numberLength == 1)
+            if (Modulus.m_numberLength == 1)
                 res = SquareAndMultiply(x2, a2, Y, Modulus, n2);
             else
                 res = SlidingWindow(x2, a2, Y, Modulus, n2);
@@ -594,7 +594,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>Returns Divide % Divisor</returns>
         internal static int Remainder(BigInteger X, int Divisor)
         {
-            return RemainderArrayByInt(X._digits, X._numberLength, Divisor);
+            return RemainderArrayByInt(X.m_digits, X.m_numberLength, Divisor);
         }
 
         /// <summary>
@@ -625,7 +625,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         private static int CalcN(BigInteger X)
         {
             // calculate the first digit of the inverse
-            long m0 = X._digits[0] & 0xFFFFFFFFL;
+            long m0 = X.m_digits[0] & 0xFFFFFFFFL;
             long n2 = 1L; // this is a'[0]
             long powerOfTwo = 2L;
 
@@ -694,12 +694,12 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         private static BigInteger FinalSubtraction(int[] Result, BigInteger Modulus)
         {
             // Performs the  reduction of the Montgomery algorithm skipping leading zeros
-            int modulusLen = Modulus._numberLength;
+            int modulusLen = Modulus.m_numberLength;
             bool doSub = Result[modulusLen] != 0;
 
             if (!doSub)
             {
-                int[] modulusDigits = Modulus._digits;
+                int[] modulusDigits = Modulus.m_digits;
                 doSub = true;
                 for (int i = modulusLen - 1; i >= 0; i--)
                 {
@@ -726,7 +726,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             // Calculate how many iteration of Lorencz's algorithm would perform the same operation
             int i = N - 1;
-            if (X._sign > 0)
+            if (X.m_sign > 0)
             {
                 while (!X.TestBit(i))
                     i--;
@@ -746,12 +746,12 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             // return X == Abs(2^exp)
             bool result = false;
-            result = (Y >> 5 == X._numberLength - 1) && (X._digits[X._numberLength - 1] == 1 << (Y & 31));
+            result = (Y >> 5 == X.m_numberLength - 1) && (X.m_digits[X.m_numberLength - 1] == 1 << (Y & 31));
 
             if (result)
             {
-                for (int i = 0; result && i < X._numberLength - 1; i++)
-                    result = X._digits[i] == 0;
+                for (int i = 0; result && i < X.m_numberLength - 1; i++)
+                    result = X.m_digits[i] == 0;
             }
 
             return result;
@@ -761,17 +761,17 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             // Based on "New Algorithm for Classical Modular Inverse" Róbert Lórencz. LNCS 2523 (2002)
             // PRE: a is coprime with modulo, a < modulo
-            int max = System.Math.Max(X._numberLength, Modulo._numberLength);
+            int max = System.Math.Max(X.m_numberLength, Modulo.m_numberLength);
             int[] uDigits = new int[max + 1]; // enough place to make all the inplace operation
             int[] vDigits = new int[max + 1];
-            Array.Copy(Modulo._digits, 0, uDigits, 0, Modulo._numberLength);
-            Array.Copy(X._digits, 0, vDigits, 0, X._numberLength);
+            Array.Copy(Modulo.m_digits, 0, uDigits, 0, Modulo.m_numberLength);
+            Array.Copy(X.m_digits, 0, vDigits, 0, X.m_numberLength);
 
-            BigInteger u = new BigInteger(Modulo._sign, Modulo._numberLength, uDigits);
-            BigInteger v = new BigInteger(X._sign, X._numberLength, vDigits);
+            BigInteger u = new BigInteger(Modulo.m_sign, Modulo.m_numberLength, uDigits);
+            BigInteger v = new BigInteger(X.m_sign, X.m_numberLength, vDigits);
             BigInteger r = new BigInteger(0, 1, new int[max + 1]); // BigInteger.ZERO;
             BigInteger s = new BigInteger(1, 1, new int[max + 1]);
-            s._digits[0] = 1;
+            s.m_digits[0] = 1;
             // r == 0 && s == 1, but with enough place
 
             int coefU = 0, coefV = 0;
@@ -873,16 +873,16 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             // PRE: (x > 0), (x is odd), and (n > 0)
             BigInteger y = new BigInteger(1, new int[1 << N]);
-            y._numberLength = 1;
-            y._digits[0] = 1;
-            y._sign = 1;
+            y.m_numberLength = 1;
+            y.m_digits[0] = 1;
+            y.m_sign = 1;
 
             for (int i = 1; i < N; i++)
             {
                 if (BitLevel.TestBit(X.Multiply(y), i))
                 {
                     // Adding 2^i to y (setting the i-th bit)
-                    y._digits[i >> 5] |= (1 << (i & 31));
+                    y.m_digits[i >> 5] |= (1 << (i & 31));
                 }
             }
             return y;
@@ -892,9 +892,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             // Implements the Montgomery Product of two integers represented by int arrays
             // The arrays are supposed in little endian notation
-            int modulusLen = Modulus._numberLength;
+            int modulusLen = Modulus.m_numberLength;
             int[] res = new int[(modulusLen << 1) + 1];
-            Multiplication.MultiplyArraysPAP(X._digits, System.Math.Min(modulusLen, X._numberLength), Y._digits, System.Math.Min(modulusLen, Y._numberLength), res);
+            Multiplication.MultiplyArraysPAP(X.m_digits, System.Math.Min(modulusLen, X.m_numberLength), Y.m_digits, System.Math.Min(modulusLen, Y.m_numberLength), res);
             MonReduction(res, Modulus, N2);
 
             return FinalSubtraction(res, Modulus);
@@ -903,8 +903,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         private static void MonReduction(int[] Result, BigInteger Modulus, int N2)
         {
             // res + m*modulus_digits
-            int[] modulus_digits = Modulus._digits;
-            int modulusLen = Modulus._numberLength;
+            int[] modulus_digits = Modulus.m_digits;
+            int modulusLen = Modulus.m_numberLength;
             long outerCarry = 0;
 
             for (int i = 0; i < modulusLen; i++)

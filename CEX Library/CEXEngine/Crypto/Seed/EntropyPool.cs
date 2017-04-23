@@ -55,7 +55,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
     /// </example>
     /// 
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.Keccak512"/>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator"/>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Generator.IDrbg"/>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Prng.IRandom"/>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Seed.ISeed"/>
     /// 
@@ -196,9 +196,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         #endregion
 
         #region Fields
-        private bool _isDestroyed = false;
-        private PoolItem[] _entropyQueue;
-        private PoolItem[] _statePool;
+        private bool m_isDestroyed = false;
+        private PoolItem[] m_entropyQueue;
+        private PoolItem[] m_statePool;
         #endregion
 
         #region Constructor
@@ -207,13 +207,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         /// </summary>
         public EntropyPool()
         {
-            _entropyQueue = new PoolItem[POOLCOUNT];
-            _statePool = new PoolItem[POOLCOUNT];
+            m_entropyQueue = new PoolItem[POOLCOUNT];
+            m_statePool = new PoolItem[POOLCOUNT];
 
             for (int i = 0; i < POOLCOUNT; ++i)
-                _entropyQueue[i] = new PoolItem(POOLSIZE);
+                m_entropyQueue[i] = new PoolItem(POOLSIZE);
             for (int i = 0; i < POOLCOUNT; ++i)
-                _statePool[i] = new PoolItem(STATESIZE);
+                m_statePool[i] = new PoolItem(STATESIZE);
 
             Reset();
         }
@@ -233,17 +233,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         /// </summary>
         public void Destroy()
         {
-            if (!_isDestroyed)
+            if (!m_isDestroyed)
             {
-                if (_entropyQueue.Length != 0)
+                if (m_entropyQueue.Length != 0)
                 {
-                    for (int i = 0; i < _entropyQueue.Length; ++i)
-                        _entropyQueue[i].Reset();
+                    for (int i = 0; i < m_entropyQueue.Length; ++i)
+                        m_entropyQueue[i].Reset();
                 }
-                if (_statePool.Length != 0)
+                if (m_statePool.Length != 0)
                 {
-                    for (int i = 0; i < _statePool.Length; ++i)
-                        _statePool[i].Reset();
+                    for (int i = 0; i < m_statePool.Length; ++i)
+                        m_statePool[i].Reset();
                 }
             }
         }
@@ -268,13 +268,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
                     index = 0;
 
                 // fulfill request by rotating through queues, consuming each member
-                if (_entropyQueue[index].Position != _entropyQueue[index].Length)
+                if (m_entropyQueue[index].Position != m_entropyQueue[index].Length)
                 {
-                    int sze = _entropyQueue[index].Length - _entropyQueue[index].Position;
+                    int sze = m_entropyQueue[index].Length - m_entropyQueue[index].Position;
                     if (sze > len)
                         sze = len;
 
-                    Buffer.BlockCopy(_entropyQueue[index].Read(sze), 0, Output, offset, sze);
+                    Buffer.BlockCopy(m_entropyQueue[index].Read(sze), 0, Output, offset, sze);
                     offset += sze;
                     len -= sze;
                     ++index;
@@ -282,13 +282,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
                 else
                 {
                     // check for empty queue
-                    for (int i = 0; i < _entropyQueue.Length; ++i)
+                    for (int i = 0; i < m_entropyQueue.Length; ++i)
                     {
-                        if (_entropyQueue[i].Position != _entropyQueue[i].Length)
+                        if (m_entropyQueue[i].Position != m_entropyQueue[i].Length)
                         {
                             break;
                         }
-                        else if (i == _entropyQueue.Length - 1)
+                        else if (i == m_entropyQueue.Length - 1)
                         {
                             // need more state
                             Reset();
@@ -330,26 +330,26 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
             // distribute bytes round robin across 8 pools
             Distribute(state);
 
-            for (int i = 0; i < _entropyQueue.Length; ++i)
+            for (int i = 0; i < m_entropyQueue.Length; ++i)
             {
                 int len = 0;
                 // length diff from min input block
-                if (_statePool[i].Position < MINSTATE)
-                    len = (MINSTATE - _statePool[i].Position);
+                if (m_statePool[i].Position < MINSTATE)
+                    len = (MINSTATE - m_statePool[i].Position);
                 else // block align + 2
-                    len = (_statePool[i].Position % BLOCKSIZE) + (2 * BLOCKSIZE);
+                    len = (m_statePool[i].Position % BLOCKSIZE) + (2 * BLOCKSIZE);
 
                 // add csp random fill
                 byte[] rnd = new byte[len];
                 using (CSPRsg gen = new CSPRsg())
                     gen.GetBytes(rnd);
 
-                _statePool[i].Write(rnd);
+                m_statePool[i].Write(rnd);
 
                 // compress the state with keccak and add member to entropy queue
-                _entropyQueue[i].Write(Compress(_statePool[i].State, _statePool[i].Position));
+                m_entropyQueue[i].Write(Compress(m_statePool[i].State, m_statePool[i].Position));
                 // reset queue position
-                _entropyQueue[i].Position = 0;
+                m_entropyQueue[i].Position = 0;
             }
         }
         #endregion
@@ -381,7 +381,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
                         index = 0;
 
                     // add 1 byte
-                    _statePool[index].Write(State[ctr]);
+                    m_statePool[index].Write(State[ctr]);
                     ++index;
                     ++ctr;
                 }

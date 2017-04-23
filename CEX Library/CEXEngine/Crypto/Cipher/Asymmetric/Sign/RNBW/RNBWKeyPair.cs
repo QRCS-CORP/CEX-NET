@@ -54,9 +54,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
-        private IAsymmetricKey _publicKey;
-        private IAsymmetricKey _privateKey;
+        private bool m_isDisposed = false;
+        private IAsymmetricKey m_publicKey;
+        private IAsymmetricKey m_privateKey;
         #endregion
 
         #region Properties
@@ -73,7 +73,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         /// </summary>
         public IAsymmetricKey PublicKey
         {
-            get { return _publicKey; }
+            get { return m_publicKey; }
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         /// </summary>
         public IAsymmetricKey PrivateKey
         {
-            get { return _privateKey; }
+            get { return m_privateKey; }
         }
         #endregion
 
@@ -101,10 +101,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
             if (!(PrivateKey is RNBWPrivateKey))
                 throw new CryptoAsymmetricSignException("RNBWKeyPair:Ctor", "Not a valid RNBW Private key!", new InvalidDataException());
 
-            _publicKey = (RNBWPublicKey)PublicKey;
-            _privateKey = (RNBWPrivateKey)PrivateKey;
-            _publicKey = PublicKey;
-            _privateKey = PrivateKey;
+            m_publicKey = (RNBWPublicKey)PublicKey;
+            m_privateKey = (RNBWPrivateKey)PrivateKey;
+            m_publicKey = PublicKey;
+            m_privateKey = PrivateKey;
         }
 
         /// <summary>
@@ -117,9 +117,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         public RNBWKeyPair(IAsymmetricKey Key)
         {
             if (Key is RNBWPublicKey)
-                _publicKey = (RNBWPublicKey)Key;
+                m_publicKey = (RNBWPublicKey)Key;
             else if (Key is RNBWPrivateKey)
-                _privateKey = (RNBWPrivateKey)Key;
+                m_privateKey = (RNBWPrivateKey)Key;
             else
                 throw new CryptoAsymmetricSignException("RNBWKeyPair:Ctor", "Not a valid RNBW key!", new InvalidDataException());
         }
@@ -137,7 +137,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         /// <returns>The IAsymmetricKeyPair copy</returns>
         public object Clone()
         {
-            return new RNBWKeyPair((IAsymmetricKey)_publicKey.Clone(), (IAsymmetricKey)_privateKey.Clone());
+            return new RNBWKeyPair((IAsymmetricKey)m_publicKey.Clone(), (IAsymmetricKey)m_privateKey.Clone());
         }
         #endregion
 
@@ -153,18 +153,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_privateKey != null)
-                        ((RNBWPrivateKey)_privateKey).Dispose();
-                    if (_publicKey != null)
-                        ((RNBWPublicKey)_publicKey).Dispose();
+                    if (m_privateKey != null)
+                        ((RNBWPrivateKey)m_privateKey).Dispose();
+                    if (m_publicKey != null)
+                        ((RNBWPublicKey)m_publicKey).Dispose();
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

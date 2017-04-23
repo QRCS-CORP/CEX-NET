@@ -165,11 +165,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         #endregion
 
         #region Fields
-        private CipherStream _cipherStream;
-        private bool _isDisposed = false;
-        private Stream _keyStream;
-        private long _progressTotal = 0;
-        private VolumeKey _volumeKey;
+        private CipherStream m_cipherStream;
+        private bool m_isDisposed = false;
+        private Stream m_keyStream;
+        private long m_progressTotal = 0;
+        private VolumeKey m_volumeKey;
         #endregion
 
         #region Properties
@@ -178,8 +178,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// </summary>
         public bool IsParallel
         {
-            get { return _cipherStream.IsParallel; }
-            set { _cipherStream.IsParallel = value; }
+            get { return m_cipherStream.IsParallel; }
+            set { m_cipherStream.IsParallel = value; }
         }
 
         /// <summary>
@@ -187,8 +187,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// </summary>
         public CipherStream.BlockProfiles ParallelBlockProfile
         {
-            get { return _cipherStream.ParallelBlockProfile; }
-            set { _cipherStream.ParallelBlockProfile = value; }
+            get { return m_cipherStream.ParallelBlockProfile; }
+            set { m_cipherStream.ParallelBlockProfile = value; }
         }
 
         /// <summary>
@@ -199,12 +199,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// or the size is less than ParallelMinimumSize or more than ParallelMaximumSize values</exception>
         public int ParallelBlockSize
         {
-            get { return _cipherStream.ParallelBlockSize; }
+            get { return m_cipherStream.ParallelBlockSize; }
             set
             {
                 try
                 {
-                    _cipherStream.ParallelBlockSize = value;
+                    m_cipherStream.ParallelBlockSize = value;
                 }
                 catch (Exception ex)
                 {
@@ -218,7 +218,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// </summary>
         public int ParallelMaximumSize
         {
-            get { return _cipherStream.ParallelMaximumSize; }
+            get { return m_cipherStream.ParallelMaximumSize; }
         }
 
         /// <summary>
@@ -226,7 +226,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// </summary>
         public int ParallelMinimumSize
         {
-            get { return _cipherStream.ParallelMinimumSize; }
+            get { return m_cipherStream.ParallelMinimumSize; }
         }
         #endregion
 
@@ -359,7 +359,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         {
             FileStream inpStream = GetStream(InputPath, true);
             VolumeHeader vh = GetHeader(inpStream);
-            KeyParams key = VolumeKey.FromId(_keyStream, vh.FileId);
+            KeyParams key = VolumeKey.FromId(m_keyStream, vh.FileId);
 
             if (key == null)
             {
@@ -377,11 +377,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
                 }
                 else
                 {
-                    _volumeKey.State[_volumeKey.GetIndex(vh.FileId)] = (byte)VolumeKeyStates.Decrypted;
-                    _cipherStream.ProgressPercent += OnCipherProgress;
-                    _cipherStream.Initialize(false, key);
-                    _cipherStream.Write(inpStream, outStream);
-                    _cipherStream.ProgressPercent -= OnCipherProgress;
+                    m_volumeKey.State[m_volumeKey.GetIndex(vh.FileId)] = (byte)VolumeKeyStates.Decrypted;
+                    m_cipherStream.ProgressPercent += OnCipherProgress;
+                    m_cipherStream.Initialize(false, key);
+                    m_cipherStream.Write(inpStream, outStream);
+                    m_cipherStream.ProgressPercent -= OnCipherProgress;
                     outStream.SetLength(outStream.Length - VolumeHeader.GetHeaderSize);
                     inpStream.Dispose();
                     outStream.Dispose();
@@ -404,7 +404,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
             InitializeProgress(FilePaths);
 
-            if (_progressTotal < 1)
+            if (m_progressTotal < 1)
                 throw new CryptoProcessingException("VolumeCipher:Initialize", "The files are all zero bytes!", new ArgumentException());
 
             long prgCtr = 0;
@@ -413,7 +413,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             {
                 FileStream inpStream = GetStream(FilePaths[i], true);
                 VolumeHeader vh = GetHeader(inpStream);
-                KeyParams key = VolumeKey.FromId(_keyStream, vh.FileId);
+                KeyParams key = VolumeKey.FromId(m_keyStream, vh.FileId);
 
                 // user dropped a file in, notify or log
                 if (key == null)
@@ -432,9 +432,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
                     }
                     else
                     {
-                        _volumeKey.State[_volumeKey.GetIndex(vh.FileId)] = (byte)VolumeKeyStates.Decrypted;
-                        _cipherStream.Initialize(false, key);
-                        _cipherStream.Write(inpStream, outStream);
+                        m_volumeKey.State[m_volumeKey.GetIndex(vh.FileId)] = (byte)VolumeKeyStates.Decrypted;
+                        m_cipherStream.Initialize(false, key);
+                        m_cipherStream.Write(inpStream, outStream);
                         outStream.SetLength(outStream.Length - VolumeHeader.GetHeaderSize);
 
                         prgCtr += inpStream.Position;
@@ -458,20 +458,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         {
             if (FilePaths.Length < 1)
                 throw new CryptoProcessingException("VolumeCipher:Transform", "The file paths list is empty!", new ArgumentException());
-            if (_volumeKey.KeyCount() < FilePaths.Length)
+            if (m_volumeKey.KeyCount() < FilePaths.Length)
                 throw new CryptoProcessingException("VolumeCipher:Transform", "Not enough keys in the volume key to encrypt this directory!", new ArgumentException());
             
             InitializeProgress(FilePaths);
 
-            if (_progressTotal < 1)
+            if (m_progressTotal < 1)
                 throw new CryptoProcessingException("VolumeCipher:Initialize", "The files are all zero bytes!", new ArgumentException());
 
             long prgCtr = 0;
 
             for (int i = 0; i < FilePaths.Length; ++i)
             {
-                int index = _volumeKey.NextSubKey();
-                KeyParams key = VolumeKey.AtIndex(_keyStream, index);
+                int index = m_volumeKey.NextSubKey();
+                KeyParams key = VolumeKey.AtIndex(m_keyStream, index);
 
                 if (key == null)
                 {
@@ -490,12 +490,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
                     }
                     else
                     {
-                        _volumeKey.State[index] = (byte)VolumeKeyStates.Encrypted;
-                        _cipherStream.Initialize(true, key);
-                        _cipherStream.Write(inpStream, outStream);
+                        m_volumeKey.State[index] = (byte)VolumeKeyStates.Encrypted;
+                        m_cipherStream.Initialize(true, key);
+                        m_cipherStream.Write(inpStream, outStream);
 
                         // write the header
-                        VolumeHeader vh = new VolumeHeader(_volumeKey.Tag, _volumeKey.FileId[index]);
+                        VolumeHeader vh = new VolumeHeader(m_volumeKey.Tag, m_volumeKey.FileId[index]);
                         outStream.Write(vh.ToBytes(), 0, VolumeHeader.GetHeaderSize);
 
                         prgCtr += inpStream.Position;
@@ -516,10 +516,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// <param name="FileId">The files key id</param>
         public void Encrypt(string FilePath, int FileId)
         {
-            if (_progressTotal < 1)
+            if (m_progressTotal < 1)
                 throw new CryptoProcessingException("VolumeCipher:Initialize", "The files are all zero bytes!", new ArgumentException());
 
-            KeyParams key = VolumeKey.FromId(_keyStream, FileId);
+            KeyParams key = VolumeKey.FromId(m_keyStream, FileId);
 
             if (key == null)
             {
@@ -538,15 +538,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
                 }
                 else
                 {
-                    int index = _volumeKey.GetIndex(FileId);
-                    _volumeKey.State[index] = (byte)VolumeKeyStates.Encrypted;
-                    _cipherStream.Initialize(true, key);
-                    _cipherStream.ProgressPercent += OnCipherProgress;
-                    _cipherStream.Write(inpStream, outStream);
-                    _cipherStream.ProgressPercent -= OnCipherProgress;
+                    int index = m_volumeKey.GetIndex(FileId);
+                    m_volumeKey.State[index] = (byte)VolumeKeyStates.Encrypted;
+                    m_cipherStream.Initialize(true, key);
+                    m_cipherStream.ProgressPercent += OnCipherProgress;
+                    m_cipherStream.Write(inpStream, outStream);
+                    m_cipherStream.ProgressPercent -= OnCipherProgress;
 
                     // write the header
-                    VolumeHeader vh = new VolumeHeader(_volumeKey.Tag, _volumeKey.FileId[index]);
+                    VolumeHeader vh = new VolumeHeader(m_volumeKey.Tag, m_volumeKey.FileId[index]);
                     outStream.Write(vh.ToBytes(), 0, VolumeHeader.GetHeaderSize);
 
                     inpStream.Dispose();
@@ -563,17 +563,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// <param name="KeyStream">A stream containing a volume key</param>
         public void Initialize(Stream KeyStream)
         {
-            _keyStream = KeyStream;
-            _volumeKey = new VolumeKey(KeyStream);
+            m_keyStream = KeyStream;
+            m_volumeKey = new VolumeKey(KeyStream);
 
-            if (!CipherDescription.IsValid(_volumeKey.Description))
+            if (!CipherDescription.IsValid(m_volumeKey.Description))
                 throw new CryptoProcessingException("VolumeCipher:Initialize", "The key Header is invalid!", new ArgumentException());
 
-            CipherDescription dsc = _volumeKey.Description;
+            CipherDescription dsc = m_volumeKey.Description;
 
             try
             {
-                _cipherStream = new CipherStream(dsc);
+                m_cipherStream = new CipherStream(dsc);
             }
             catch (Exception ex)
             {
@@ -588,17 +588,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             if (ProgressPercent == null)
                 return;
 
-            if (_progressTotal != Processed)
+            if (m_progressTotal != Processed)
             {
-                double progress = 100.0 * ((double)Processed / _progressTotal);
+                double progress = 100.0 * ((double)Processed / m_progressTotal);
                 if (progress > 100.0)
                     progress = 100.0;
 
-                ProgressPercent(this, new ProgressEventArgs(_progressTotal, (int)progress));
+                ProgressPercent(this, new ProgressEventArgs(m_progressTotal, (int)progress));
             }
             else
             {
-                ProgressPercent(this, new ProgressEventArgs(_progressTotal, 100));
+                ProgressPercent(this, new ProgressEventArgs(m_progressTotal, 100));
             }
         }
 
@@ -629,7 +629,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         private void InitializeProgress(string[] FilePaths)
         {
             for (int i = 0; i < FilePaths.Length; i++)
-                _progressTotal += FileTools.GetSize(FilePaths[i]);
+                m_progressTotal += FileTools.GetSize(FilePaths[i]);
         }
 
         private void OnCipherProgress(object sender, CipherStream.ProgressEventArgs args)
@@ -640,9 +640,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void UpdateKey()
         {
-            byte[] ks = _volumeKey.ToBytes();
-            _keyStream.Seek(0, SeekOrigin.Begin);
-            _keyStream.Write(ks, 0, ks.Length);
+            byte[] ks = m_volumeKey.ToBytes();
+            m_keyStream.Seek(0, SeekOrigin.Begin);
+            m_keyStream.Write(ks, 0, ks.Length);
         }
         #endregion
 
@@ -658,18 +658,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
   
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    _progressTotal = 0;
-                    _volumeKey.Reset();
-                    if (_cipherStream != null)
-                        _cipherStream.Dispose();
+                    m_progressTotal = 0;
+                    m_volumeKey.Reset();
+                    if (m_cipherStream != null)
+                        m_cipherStream.Dispose();
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

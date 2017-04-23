@@ -1,6 +1,5 @@
 ﻿#region Directives
 using System;
-using System.IO;
 using Test.Tests;
 using VTDev.Projects.CEX.Test;
 using VTDev.Projects.CEX.Test.Tests;
@@ -30,7 +29,7 @@ namespace Test
             Console.Title = "CEX Test Suite";
             Console.BufferHeight = 600;
             //GetHXVectors();
-            RunTest(new TwofishTest());
+
             Console.WriteLine("**********************************************");
             Console.WriteLine("* CEX Version 1.5                            *");
             Console.WriteLine("*                                            *");
@@ -63,7 +62,6 @@ namespace Test
             Console.WriteLine("");
 
             Console.WriteLine("******TESTING MESSAGE DIGESTS******");
-            RunTest(new BlakeTest());
             RunTest(new Blake2Test());
             RunTest(new KeccakTest());
             RunTest(new Sha2Test());
@@ -72,7 +70,6 @@ namespace Test
 
             Console.WriteLine("******TESTING MESSAGE AUTHENTICATION CODE GENERATORS******");
             RunTest(new HMacTest());
-            RunTest(new VmpcMacTest());
             RunTest(new CMacTest());
             Console.WriteLine("");
 
@@ -92,7 +89,6 @@ namespace Test
 
             Console.WriteLine("******TESTING PSEUDO RANDOM SEED GENERATORS******");
             RunTest(new ISCRsgTest());
-            RunTest(new XSPRsgTest());
             Console.WriteLine("");
 
             Console.WriteLine("******TESTING PSEUDO RANDOM NUMBER GENERATORS******");
@@ -283,12 +279,13 @@ namespace Test
             Console.WriteLine("Uses the SHA512 HMAC with a 96 byte key");
             Console.WriteLine("");
 
-            // RHX: r14, sha512 -2ac5dd436cb2a1c976b25a1edaf1f650
+            // *V1.5x* Note: breaking changes with hkdf key schedule function ver 1.2 produce new vectors
+            // RHX: r14, sha512 -a36e01f66404b6af9ed09ea6e4faaff2
             string s = t.GetHXVector(VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockCiphers.Rijndael,
                 VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests.SHA512,
                 VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts.R14);
             Console.WriteLine("RHX: r14, sha512: " + s);
-            // RHX: r22, sha512 -497bef5ccb4faee957b7946705c3dc10
+            // RHX: r22, sha512 -43b4418a1d0b32aeff34df0c189556c4
             s = t.GetHXVector(VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockCiphers.Rijndael,
                 VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests.SHA512,
                 VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts.R22);
@@ -306,26 +303,27 @@ namespace Test
                 VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts.R22, 32);
             Console.WriteLine("Rijndael: r22, k512, b32, none: " + s);
 
-            // SHX: r32, sha512 -6f4309f375cad2e65fcfa28091ceed17
+            // *V1.5x* Note: breaking changes to serpent, moved from big endian to little endian in rounds processing
+            // SHX: r32, sha512 -b47cc603a10d3c41d93bb98352611635
             s = t.GetHXVector(VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockCiphers.Serpent,
                 VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests.SHA512,
                 VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts.R32);
             Console.WriteLine("SHX: r32, sha512: " + s);
-            // SHX: r40, sha512 -9dcd48706592211eb48d659b9df8824f
+            // SHX: r40, sha512 -eb0942fc83099a30835b479bde4bcf31
             s = t.GetHXVector(VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockCiphers.Serpent,
                 VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests.SHA512,
                 VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts.R40);
             Console.WriteLine("SHX: r40, sha512: " + s);
-            // Serpent: r40, none -9c41b8c6fba7154b95afc7c8a5449687
+            // Serpent: r40, none -71c6c606b65798621dd19fa0f5e7acb0
             s = t.Get512Vector(VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockCiphers.Serpent, 
                 VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts.R40);
             Console.WriteLine("Serpent: r40, none: " + s);
-            // THX: r16, sha512 -0b97de0f11367d25ad45d3293072e2bb
+            // THX: r16, sha512 -b8ee1fec4b6caf2607a84b52934fd3d3
             s = t.GetHXVector(VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockCiphers.Twofish,
                 VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests.SHA512,
                 VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts.R16);
             Console.WriteLine("THX: r16, sha512: " + s);
-            // THX: r20, sha512 -e0ec1b5807ed879a88a18244237e8bad
+            // THX: r20, sha512 -1870b32752892a6857f798751a8cc5fd
             s = t.GetHXVector(VTDev.Libraries.CEXEngine.Crypto.Enumeration.BlockCiphers.Twofish,
                 VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests.SHA512,
                 VTDev.Libraries.CEXEngine.Crypto.Enumeration.RoundCounts.R20);

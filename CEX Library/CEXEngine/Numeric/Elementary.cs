@@ -33,21 +33,21 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             int[] resDigits;
             int resSign;
-            int op1Sign = A._sign;
-            int op2Sign = B._sign;
+            int op1Sign = A.m_sign;
+            int op2Sign = B.m_sign;
 
             if (op1Sign == 0)
                 return B;
             if (op2Sign == 0)
                 return A;
 
-            int op1Len = A._numberLength;
-            int op2Len = B._numberLength;
+            int op1Len = A.m_numberLength;
+            int op2Len = B.m_numberLength;
 
             if (op1Len + op2Len == 2)
             {
-                long a = (A._digits[0] & 0xFFFFFFFFL);
-                long b = (B._digits[0] & 0xFFFFFFFFL);
+                long a = (A.m_digits[0] & 0xFFFFFFFFL);
+                long b = (B.m_digits[0] & 0xFFFFFFFFL);
                 long res;
                 int valueLo;
                 int valueHi;
@@ -70,15 +70,15 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 resSign = op1Sign;
                 // an augend should not be shorter than addend
                 resDigits = (op1Len >= op2Len) ?
-                    Add(A._digits, op1Len, B._digits, op2Len) :
-                    Add(B._digits, op2Len, A._digits, op1Len);
+                    Add(A.m_digits, op1Len, B.m_digits, op2Len) :
+                    Add(B.m_digits, op2Len, A.m_digits, op1Len);
             }
             else
             {
                 // signs are different
                 int cmp = ((op1Len != op2Len) ?
                     ((op1Len > op2Len) ? 1 : -1) :
-                    CompareArrays(A._digits, B._digits, op1Len));
+                    CompareArrays(A.m_digits, B.m_digits, op1Len));
 
                 if (cmp == BigInteger.EQUALS)
                     return BigInteger.Zero;
@@ -87,12 +87,12 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 if (cmp == BigInteger.GREATER)
                 {
                     resSign = op1Sign;
-                    resDigits = Subtract(A._digits, op1Len, B._digits, op2Len);
+                    resDigits = Subtract(A.m_digits, op1Len, B.m_digits, op2Len);
                 }
                 else
                 {
                     resSign = op2Sign;
-                    resDigits = Subtract(B._digits, op2Len, A._digits, op1Len);
+                    resDigits = Subtract(B.m_digits, op2Len, A.m_digits, op1Len);
                 }
             }
             BigInteger result = new BigInteger(resSign, resDigits.Length, resDigits);
@@ -132,32 +132,32 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <param name="B">The addend</param>
         internal static void CompleteInPlaceAdd(BigInteger A, BigInteger B)
         {
-            if (A._sign == 0)
+            if (A.m_sign == 0)
             {
-                Array.Copy(B._digits, 0, A._digits, 0, B._numberLength);
+                Array.Copy(B.m_digits, 0, A.m_digits, 0, B.m_numberLength);
             }
-            else if (B._sign == 0)
+            else if (B.m_sign == 0)
             {
                 return;
             }
-            else if (A._sign == B._sign)
+            else if (A.m_sign == B.m_sign)
             {
-                Add(A._digits, A._digits, A._numberLength, B._digits, B._numberLength);
+                Add(A.m_digits, A.m_digits, A.m_numberLength, B.m_digits, B.m_numberLength);
             }
             else
             {
-                int sign = UnsignedArraysCompare(A._digits, B._digits, A._numberLength, B._numberLength);
+                int sign = UnsignedArraysCompare(A.m_digits, B.m_digits, A.m_numberLength, B.m_numberLength);
                 if (sign > 0)
                 {
-                    Subtract(A._digits, A._digits, A._numberLength, B._digits, B._numberLength);
+                    Subtract(A.m_digits, A.m_digits, A.m_numberLength, B.m_digits, B.m_numberLength);
                 }
                 else
                 {
-                    InverseSubtract(A._digits, A._digits, A._numberLength, B._digits, B._numberLength);
-                    A._sign = -A._sign;
+                    InverseSubtract(A.m_digits, A.m_digits, A.m_numberLength, B.m_digits, B.m_numberLength);
+                    A.m_sign = -A.m_sign;
                 }
             }
-            A._numberLength = System.Math.Max(A._numberLength, B._numberLength) + 1;
+            A.m_numberLength = System.Math.Max(A.m_numberLength, B.m_numberLength) + 1;
             A.CutOffLeadingZeroes();
             A.UnCache();
         }
@@ -173,32 +173,32 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             int resultSign = A.CompareTo(B);
 
-            if (A._sign == 0)
+            if (A.m_sign == 0)
             {
-                Array.Copy(B._digits, 0, A._digits, 0, B._numberLength);
-                A._sign = -B._sign;
+                Array.Copy(B.m_digits, 0, A.m_digits, 0, B.m_numberLength);
+                A.m_sign = -B.m_sign;
             }
-            else if (A._sign != B._sign)
+            else if (A.m_sign != B.m_sign)
             {
-                Add(A._digits, A._digits, A._numberLength, B._digits, B._numberLength);
-                A._sign = resultSign;
+                Add(A.m_digits, A.m_digits, A.m_numberLength, B.m_digits, B.m_numberLength);
+                A.m_sign = resultSign;
             }
             else
             {
-                int sign = UnsignedArraysCompare(A._digits,
-                        B._digits, A._numberLength, B._numberLength);
+                int sign = UnsignedArraysCompare(A.m_digits,
+                        B.m_digits, A.m_numberLength, B.m_numberLength);
                 if (sign > 0)
                 {
-                    Subtract(A._digits, A._digits, A._numberLength, B._digits, B._numberLength);	// op1 = op1 - op2
+                    Subtract(A.m_digits, A.m_digits, A.m_numberLength, B.m_digits, B.m_numberLength);	// op1 = op1 - op2
                     // op1.sign remains equal
                 }
                 else
                 {
-                    InverseSubtract(A._digits, A._digits, A._numberLength, B._digits, B._numberLength);	// op1 = op2 - op1
-                    A._sign = -A._sign;
+                    InverseSubtract(A.m_digits, A.m_digits, A.m_numberLength, B.m_digits, B.m_numberLength);	// op1 = op2 - op1
+                    A.m_sign = -A.m_sign;
                 }
             }
-            A._numberLength = System.Math.Max(A._numberLength, B._numberLength) + 1;
+            A.m_numberLength = System.Math.Max(A.m_numberLength, B.m_numberLength) + 1;
             A.CutOffLeadingZeroes();
             A.UnCache();
         }
@@ -214,8 +214,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         internal static void InplaceAdd(BigInteger A, BigInteger B)
         {
             // op1 >= op2 > 0
-            Add(A._digits, A._digits, A._numberLength, B._digits, B._numberLength);
-            A._numberLength = System.Math.Min(System.Math.Max(A._numberLength, B._numberLength) + 1, A._digits.Length);
+            Add(A.m_digits, A.m_digits, A.m_numberLength, B.m_digits, B.m_numberLength);
+            A.m_numberLength = System.Math.Min(System.Math.Max(A.m_numberLength, B.m_numberLength) + 1, A.m_digits.Length);
             A.CutOffLeadingZeroes();
             A.UnCache();
         }
@@ -251,11 +251,11 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <param name="Addend">The addend</param>
         internal static void InplaceAdd(BigInteger A, int Addend)
         {
-            int carry = InplaceAdd(A._digits, A._numberLength, Addend);
+            int carry = InplaceAdd(A.m_digits, A.m_numberLength, Addend);
             if (carry == 1)
             {
-                A._digits[A._numberLength] = 1;
-                A._numberLength++;
+                A.m_digits[A.m_numberLength] = 1;
+                A.m_numberLength++;
             }
 
             A.UnCache();
@@ -272,8 +272,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         internal static void InplaceSubtract(BigInteger A, BigInteger B)
         {
             // PRE: op1 >= op2 > 0
-            Subtract(A._digits, A._digits, A._numberLength, B._digits,
-                    B._numberLength);
+            Subtract(A.m_digits, A.m_digits, A.m_numberLength, B.m_digits,
+                    B.m_numberLength);
             A.CutOffLeadingZeroes();
             A.UnCache();
         }
@@ -285,20 +285,20 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             int resSign;
             int[] resDigits;
-            int op1Sign = A._sign;
-            int op2Sign = B._sign;
+            int op1Sign = A.m_sign;
+            int op2Sign = B.m_sign;
 
             if (op2Sign == 0)
                 return A;
             if (op1Sign == 0)
                 return B.Negate();
 
-            int op1Len = A._numberLength;
-            int op2Len = B._numberLength;
+            int op1Len = A.m_numberLength;
+            int op2Len = B.m_numberLength;
             if (op1Len + op2Len == 2)
             {
-                long a = (A._digits[0] & 0xFFFFFFFFL);
-                long b = (B._digits[0] & 0xFFFFFFFFL);
+                long a = (A.m_digits[0] & 0xFFFFFFFFL);
+                long b = (B.m_digits[0] & 0xFFFFFFFFL);
 
                 if (op1Sign < 0)
                     a = -a;
@@ -309,14 +309,14 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             }
             int cmp = ((op1Len != op2Len) ?
                 ((op1Len > op2Len) ? 1 : -1) :
-                Elementary.CompareArrays(A._digits, B._digits, op1Len));
+                Elementary.CompareArrays(A.m_digits, B.m_digits, op1Len));
 
             if (cmp == BigInteger.LESS)
             {
                 resSign = -op2Sign;
                 resDigits = (op1Sign == op2Sign) ?
-                    Subtract(B._digits, op2Len, A._digits, op1Len) :
-                    Add(B._digits, op2Len, A._digits, op1Len);
+                    Subtract(B.m_digits, op2Len, A.m_digits, op1Len) :
+                    Add(B.m_digits, op2Len, A.m_digits, op1Len);
             }
             else
             {
@@ -326,11 +326,11 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                     if (cmp == BigInteger.EQUALS)
                         return BigInteger.Zero;
 
-                    resDigits = Subtract(A._digits, op1Len, B._digits, op2Len);
+                    resDigits = Subtract(A.m_digits, op1Len, B.m_digits, op2Len);
                 }
                 else
                 {
-                    resDigits = Add(A._digits, op1Len, B._digits, op2Len);
+                    resDigits = Add(A.m_digits, op1Len, B.m_digits, op2Len);
                 }
             }
             BigInteger res = new BigInteger(resSign, resDigits.Length, resDigits);

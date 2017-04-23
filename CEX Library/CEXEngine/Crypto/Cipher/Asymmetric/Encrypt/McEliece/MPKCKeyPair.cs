@@ -17,9 +17,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
-        private IAsymmetricKey _publicKey;
-        private IAsymmetricKey _privateKey;
+        private bool m_isDisposed = false;
+        private IAsymmetricKey m_publicKey;
+        private IAsymmetricKey m_privateKey;
         #endregion
 
         #region Properties
@@ -36,7 +36,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public IAsymmetricKey PublicKey
         {
-            get { return _publicKey; }
+            get { return m_publicKey; }
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public IAsymmetricKey PrivateKey
         {
-            get { return _privateKey; }
+            get { return m_privateKey; }
         }
         #endregion
 
@@ -57,8 +57,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <param name="PrivateKey">The corresponding private key</param>
         public MPKCKeyPair(IAsymmetricKey PublicKey, IAsymmetricKey PrivateKey)
         {
-            _publicKey = PublicKey;
-            _privateKey = PrivateKey;
+            m_publicKey = PublicKey;
+            m_privateKey = PrivateKey;
         }
 
         /// <summary>
@@ -71,9 +71,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         public MPKCKeyPair(IAsymmetricKey Key)
         {
             if (Key is MPKCPublicKey)
-                _publicKey = (MPKCPublicKey)Key;
+                m_publicKey = (MPKCPublicKey)Key;
             else if (Key is MPKCPrivateKey)
-                _privateKey = (MPKCPrivateKey)Key;
+                m_privateKey = (MPKCPrivateKey)Key;
             else
                 throw new CryptoAsymmetricException("MPKCKeyPair:Ctor", "Not a valid McEliece key!", new ArgumentException());
         }
@@ -86,8 +86,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <param name="KeyStream">An input stream containing an encoded key pair</param>
         public MPKCKeyPair(MemoryStream KeyStream)
         {
-            _publicKey = new MPKCPublicKey(KeyStream);
-            _privateKey = new MPKCPrivateKey(KeyStream);
+            m_publicKey = new MPKCPublicKey(KeyStream);
+            m_privateKey = new MPKCPrivateKey(KeyStream);
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <returns>The IAsymmetricKeyPair copy</returns>
         public object Clone()
         {
-            return new MPKCKeyPair((IAsymmetricKey)_publicKey.Clone(), (IAsymmetricKey)_privateKey.Clone());
+            return new MPKCKeyPair((IAsymmetricKey)m_publicKey.Clone(), (IAsymmetricKey)m_privateKey.Clone());
         }
         #endregion
 
@@ -130,18 +130,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_privateKey != null)
-                        ((MPKCPrivateKey)_privateKey).Dispose();
-                    if (_publicKey != null)
-                        ((MPKCPublicKey)_publicKey).Dispose();
+                    if (m_privateKey != null)
+                        ((MPKCPrivateKey)m_privateKey).Dispose();
+                    if (m_publicKey != null)
+                        ((MPKCPublicKey)m_publicKey).Dispose();
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

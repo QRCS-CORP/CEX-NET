@@ -14,9 +14,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
     {
         #region Fields
         //he finite field this vector is defined over
-        private GF2mField _field;
+        private GF2mField m_field;
         // the element array
-        private int[] _vector;
+        private int[] m_vector;
         #endregion
 
         #region Properties
@@ -25,7 +25,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public GF2mField Field
         {
-            get { return _field; }
+            get { return m_field; }
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public int[] IntArrayForm
         {
-            get { return IntUtils.DeepCopy(_vector); }
+            get { return IntUtils.DeepCopy(m_vector); }
         }
         #endregion
 
@@ -46,7 +46,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="V">An array with elements of vector</param>
         public GF2mVector(GF2mField Field, byte[] V)
         {
-            _field = new GF2mField(Field);
+            m_field = new GF2mField(Field);
 
             // decode vector
             int d = 8;
@@ -61,15 +61,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 throw new ArgumentException("GF2mVector: Byte array is not an encoded vector over the given finite field!");
 
             Length = V.Length / count;
-            _vector = new int[Length];
+            m_vector = new int[Length];
             count = 0;
 
-            for (int i = 0; i < _vector.Length; i++)
+            for (int i = 0; i < m_vector.Length; i++)
             {
                 for (int j = 0; j < d; j += 8)
-                    _vector[i] |= (V[count++] & 0xff) << j;
+                    m_vector[i] |= (V[count++] & 0xff) << j;
                 
-                if (!Field.IsElementOfThisField(_vector[i]))
+                if (!Field.IsElementOfThisField(m_vector[i]))
                     throw new ArgumentException("GF2mVector: Byte array is not an encoded vector over the given finite field!");
             }
         }
@@ -82,14 +82,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Vector">The element array</param>
         public GF2mVector(GF2mField Field, int[] Vector)
         {
-            _field = Field;
+            m_field = Field;
             Length = Vector.Length;
             for (int i = Vector.Length - 1; i >= 0; i--)
             {
                 if (!Field.IsElementOfThisField(Vector[i]))
                     throw new ArithmeticException("Element array is not specified over the given finite field.");
             }
-            _vector = IntUtils.DeepCopy(Vector);
+            m_vector = IntUtils.DeepCopy(Vector);
         }
 
         /// <summary>
@@ -99,9 +99,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="GF">The GF2mVector to copy</param>
         public GF2mVector(GF2mVector GF)
         {
-            _field = new GF2mField(GF._field);
+            m_field = new GF2mField(GF.m_field);
             Length = GF.Length;
-            _vector = IntUtils.DeepCopy(GF._vector);
+            m_vector = IntUtils.DeepCopy(GF.m_vector);
         }
         #endregion
 
@@ -132,7 +132,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             
             GF2mVector otherVec = (GF2mVector)Obj;
 
-            if (!_field.Equals(otherVec.Field))
+            if (!m_field.Equals(otherVec.Field))
                 return false;
 
             return Compare.IsEqual(IntArrayForm, otherVec.IntArrayForm);
@@ -147,18 +147,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         {
             int d = 8;
             int count = 1;
-            while (_field.Degree > d)
+            while (m_field.Degree > d)
             {
                 count++;
                 d += 8;
             }
 
-            byte[] res = new byte[_vector.Length * count];
+            byte[] res = new byte[m_vector.Length * count];
             count = 0;
-            for (int i = 0; i < _vector.Length; i++)
+            for (int i = 0; i < m_vector.Length; i++)
             {
                 for (int j = 0; j < d; j += 8)
-                    res[count++] = (byte)(IntUtils.URShift(_vector[i], j));
+                    res[count++] = (byte)(IntUtils.URShift(m_vector[i], j));
             }
 
             return res;
@@ -171,8 +171,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The hsh code</returns>
         public override int GetHashCode()
         {
-            int hash = _field.GetHashCode();
-            hash += _vector.GetHashCode();
+            int hash = m_field.GetHashCode();
+            hash += m_vector.GetHashCode();
 
             return hash;
         }
@@ -184,9 +184,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns <c>true</c> if this is a zero vector</returns>
         public override bool IsZero()
         {
-            for (int i = _vector.Length - 1; i >= 0; i--)
+            for (int i = m_vector.Length - 1; i >= 0; i--)
             {
-                if (_vector[i] != 0)
+                if (m_vector[i] != 0)
                     return false;
             }
 
@@ -208,9 +208,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
 
             int[] result = new int[Length];
             for (int i = 0; i < pVec.Length; i++)
-                result[i] = _vector[pVec[i]];
+                result[i] = m_vector[pVec[i]];
 
-            return new GF2mVector(_field, result);
+            return new GF2mVector(m_field, result);
         }
 
         /// <summary>
@@ -221,13 +221,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public override String ToString()
         {
             StringBuilder buf = new StringBuilder();
-            for (int i = 0; i < _vector.Length; i++)
+            for (int i = 0; i < m_vector.Length; i++)
             {
-                for (int j = 0; j < _field.Degree; j++)
+                for (int j = 0; j < m_field.Degree; j++)
                 {
                     int r = j & 0x1f;
                     int bitMask = 1 << r;
-                    int coeff = _vector[i] & bitMask;
+                    int coeff = m_vector[i] & bitMask;
 
                     if (coeff != 0)
                         buf.Append('1');

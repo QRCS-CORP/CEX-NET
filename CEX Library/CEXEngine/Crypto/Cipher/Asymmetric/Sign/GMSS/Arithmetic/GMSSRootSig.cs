@@ -21,7 +21,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         private IDigest _msgDigestOTS;
         // The length of the message digest and private key
         private int _mdSize;
-        private int _keySize;
+        private int m_keySize;
         // The private key
         private byte[] _privateKeyOTS;
         // The message bytes
@@ -35,7 +35,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         // Sizes of the message
         private int _msgSize;
         // Some precalculated values
-        private int _K;
+        private int m_K;
         // Some variables for storing the actual status of distributed signing
         private int _R;
         private int _testCtr;
@@ -52,7 +52,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         private int _height;
         // The current intern OTSseed
         private byte[] _otsSeed;
-        private bool _isDisposed = false;
+        private bool m_isDisposed = false;
         #endregion
  
         #region Constructor
@@ -72,12 +72,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             _iI = StatInt[2];
             _R = StatInt[3];
             _steps = StatInt[4];
-            _keySize = StatInt[5];
+            m_keySize = StatInt[5];
             _height = StatInt[6];
             _W = StatInt[7];
             _chkSum = StatInt[8];
             _mdSize = _msgDigestOTS.DigestSize;
-            _K = (1 << _W) - 1;
+            m_K = (1 << _W) - 1;
             int mdsizeBit = _mdSize << 3;
             _msgSize = (int)Math.Ceiling((double)(mdsizeBit) / (double)_W);
             _privateKeyOTS = StatByte[0];
@@ -118,7 +118,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             _mdSize = _msgDigestOTS.DigestSize;
             _W = W;
             _height = Height;
-            _K = (1 << W) - 1;
+            m_K = (1 << W) - 1;
             int mdsizeBit = _mdSize << 3;
             _msgSize = (int)Math.Ceiling((double)(mdsizeBit) / (double)W);
         }
@@ -164,7 +164,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                     // count necessary hashs in 'sumH'
                     for (int b = 0; b < dt; b++)
                     {
-                        sumH += messPart[a] & _K;
+                        sumH += messPart[a] & m_K;
                         messPart[a] = (byte)(IntUtils.URShift(messPart[a], _W));
                     }
                 }
@@ -174,7 +174,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                 // count necessary hashs in 'sumH'
                 for (int b = 0; b < checksumsize; b += _W)
                 {
-                    sumH += checkPart & _K;
+                    sumH += checkPart & m_K;
                     checkPart = IntUtils.URShift(checkPart, _W);
                 }
             } 
@@ -196,7 +196,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                     // count necessary hashs in 'sumH'
                     for (int j = 0; j < 8; j++)
                     {
-                        sumH += (int)(big8 & _K);
+                        sumH += (int)(big8 & m_K);
                         big8 = IntUtils.URShift(big8, _W);
                     }
                 }
@@ -214,7 +214,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                 // count necessary hashs in 'sumH'
                 for (int j = 0; j < dt; j += _W)
                 {
-                    sumH += (int)(big8 & _K);
+                    sumH += (int)(big8 & m_K);
                     big8 = IntUtils.URShift(big8, _W);
                 }
 
@@ -224,7 +224,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                 // count necessary hashs in 'sumH'
                 for (int i = 0; i < checksumsize; i += _W)
                 {
-                    sumH += checkPart & _K;
+                    sumH += checkPart & m_K;
                     checkPart = IntUtils.URShift(checkPart, _W);
                 }
             }
@@ -252,7 +252,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
 
                     big8 = IntUtils.URShift(big8, rest);
                     // count necessary hashs in 'sumH'
-                    sumH += ((int)big8 & _K);
+                    sumH += ((int)big8 & m_K);
 
                 }
                 // rest of message part
@@ -271,7 +271,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
 
                     big8 = IntUtils.URShift(big8, rest);
                     // count necessary hashs in 'sumH'
-                    sumH += ((int)big8 & _K);
+                    sumH += ((int)big8 & m_K);
                 }
                 // checksum part
                 _chkSum = (_msgSize << _W) - sumH;
@@ -280,17 +280,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                 // count necessary hashs in 'sumH'
                 for (int i = 0; i < checksumsize; i += _W)
                 {
-                    sumH += (checkPart & _K);
+                    sumH += (checkPart & m_K);
                     checkPart = IntUtils.URShift(checkPart, _W);
                 }
             }
 
             // calculate keysize
-            _keySize = _msgSize + (int)Math.Ceiling((double)checksumsize / (double)_W);
+            m_keySize = _msgSize + (int)Math.Ceiling((double)checksumsize / (double)_W);
             // calculate steps: 'keysize' times PRNG, 'sumH' times hashing, (1<<height)-1 updateSign() calls
-            _steps = (int)Math.Ceiling((double)(_keySize + sumH) / (double)((1 << _height)));
+            _steps = (int)Math.Ceiling((double)(m_keySize + sumH) / (double)((1 << _height)));
             // reset variables
-            _sgnCode = new byte[_keySize * _mdSize];
+            _sgnCode = new byte[m_keySize * _mdSize];
             _Counter = 0;
             _testCtr = 0;
             _iI = 0;
@@ -314,10 +314,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             for (int s = 0; s < _steps; s++)
             {
                 // generate the private key or perform the next hash
-                if (_Counter < _keySize)
+                if (_Counter < m_keySize)
                     OneStep();
                 
-                if (_Counter == _keySize)
+                if (_Counter == m_keySize)
                     return true;
             }
 
@@ -350,13 +350,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                     if (_iI < _mdSize)
                     { 
                         // for main message part
-                        _testCtr = _msgHash[_iI] & _K;
+                        _testCtr = _msgHash[_iI] & m_K;
                         _msgHash[_iI] = (byte)(IntUtils.URShift(_msgHash[_iI], _W));
                     }
                     else
                     { 
                         // for checksum part
-                        _testCtr = _chkSum & _K;
+                        _testCtr = _chkSum & m_K;
                         _chkSum = IntUtils.URShift(_chkSum, _W);
                     }
                 }
@@ -413,7 +413,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                     if (_Counter == _msgSize)
                         _big8 = _chkSum;
 
-                    _testCtr = (int)(_big8 & _K);
+                    _testCtr = (int)(_big8 & m_K);
                     // generate current OTSprivateKey
                     _privateKeyOTS = _gmssRand.NextSeed(_otsSeed);
                 }
@@ -466,12 +466,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                         }
                         // delete bits on the right side, which were used already by the last loop
                         _big8 = IntUtils.URShift(_big8, rest);
-                        _test8 = (_big8 & _K);
+                        _test8 = (_big8 & m_K);
                     }
                     // checksum part
                     else
                     {
-                        _test8 = (_chkSum & _K);
+                        _test8 = (_chkSum & m_K);
                         _chkSum = IntUtils.URShift(_chkSum, _W);
                     }
                     // generate current OTSprivateKey
@@ -546,7 +546,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             statInt[2] = _iI;
             statInt[3] = _R;
             statInt[4] = _steps;
-            statInt[5] = _keySize;
+            statInt[5] = m_keySize;
             statInt[6] = _height;
             statInt[7] = _W;
             statInt[8] = _chkSum;
@@ -596,7 +596,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
@@ -631,10 +631,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                         _otsSeed = null;
                     }
                     _mdSize = 0;
-                    _keySize = 0;
+                    m_keySize = 0;
                     _W = 0;
                     _msgSize = 0;
-                    _K = 0;
+                    m_K = 0;
                     _R = 0;
                     _testCtr = 0;
                     _Counter = 0;
@@ -647,7 +647,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

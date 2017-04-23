@@ -14,16 +14,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
     {
         #region Fields
         // number of bits stored in this GF2Polynomial
-        private int _length;
+        private int m_length;
         // number of int used in value
-        private int _blocks;
+        private int m_blocks;
         // storage
-        private int[] _value;
+        private int[] m_value;
         // Random source
-        private static Random _rand = new Random();
+        private static Random m_rand = new Random();
 
         // Lookup-Table for vectorMult: parity[a]= #1(a) mod 2 == 1
-        private static readonly bool[] _parity = 
+        private static readonly bool[] m_parity = 
         {
             false, true, true, false, true, false, false, true, true, false, false, true, false, true, true, false, 
             true, false, false, true, false, true, true, false, false, true, true, false, true, false, false, true, 
@@ -44,7 +44,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         };
 
         // Lookup-Table for Squaring: squaringTable[a]=a^2
-        private static readonly short[] _squaringTable = 
+        private static readonly short[] m_squaringTable = 
         {
             0x0000, 0x0001, 0x0004, 0x0005, 0x0010, 0x0011, 0x0014, 0x0015, 0x0040, 0x0041, 0x0044, 0x0045, 
             0x0050, 0x0051, 0x0054, 0x0055, 0x0100, 0x0101, 0x0104, 0x0105, 0x0110, 0x0111, 0x0114, 0x0115, 
@@ -71,7 +71,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         };
 
         // pre-computed Bitmask for fast masking, bitMask[a]=0x1 << a
-        private static readonly int[] _bitMask = 
+        private static readonly int[] m_bitMask = 
         {
             0x00000001, 0x00000002, 0x00000004, 0x00000008, 0x00000010, 0x00000020, 0x00000040, 
             0x00000080, 0x00000100, 0x00000200, 0x00000400, 0x00000800, 0x00001000, 0x00002000, 
@@ -81,7 +81,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         };
 
         // pre-computed Bitmask for fast masking, rightMask[a]=0xffffffff >>> (32-a)
-        private static readonly int[] _reverseRightMask = 
+        private static readonly int[] m_reverseRightMask = 
         {
             0x00000000, 0x00000001, 0x00000003, 0x00000007, 0x0000000f, 0x0000001f, 0x0000003f,
             0x0000007f, 0x000000ff, 0x000001ff, 0x000003ff, 0x000007ff, 0x00000fff, 0x00001fff, 
@@ -98,7 +98,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public int Length
         {
-            get { return _length; }
+            get { return m_length; }
         }
         #endregion
 
@@ -114,9 +114,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (l < 1)
                 l = 1;
             
-            _blocks = ((l - 1) >> 5) + 1;
-            _value = new int[_blocks];
-            _length = l;
+            m_blocks = ((l - 1) >> 5) + 1;
+            m_value = new int[m_blocks];
+            m_length = l;
         }
 
         /// <summary>
@@ -131,9 +131,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (l < 1)
                 l = 1;
             
-            _blocks = ((l - 1) >> 5) + 1;
-            _value = new int[_blocks];
-            _length = l;
+            m_blocks = ((l - 1) >> 5) + 1;
+            m_value = new int[m_blocks];
+            m_length = l;
             Randomize(Rand);
         }
 
@@ -150,9 +150,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (l < 1)
                 l = 1;
 
-            _blocks = ((l - 1) >> 5) + 1;
-            _value = new int[_blocks];
-            _length = l;
+            m_blocks = ((l - 1) >> 5) + 1;
+            m_value = new int[m_blocks];
+            m_length = l;
 
             if (Value.ToUpper().Equals("ZERO"))
                 AssignZero();
@@ -180,11 +180,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (leng < 1)
                 leng = 1;
             
-            _blocks = ((leng - 1) >> 5) + 1;
-            _value = new int[_blocks];
-            _length = leng;
-            int l = Math.Min(_blocks, Bs.Length);
-            Array.Copy(Bs, 0, _value, 0, l);
+            m_blocks = ((leng - 1) >> 5) + 1;
+            m_value = new int[m_blocks];
+            m_length = leng;
+            int l = Math.Min(m_blocks, Bs.Length);
+            Array.Copy(Bs, 0, m_value, 0, l);
             ZeroUnusedBits();
         }
 
@@ -200,29 +200,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (l < 1)
                 l = 1;
             
-            _blocks = ((l - 1) >> 5) + 1;
-            _value = new int[_blocks];
-            _length = l;
+            m_blocks = ((l - 1) >> 5) + 1;
+            m_value = new int[m_blocks];
+            m_length = l;
             int i, m;
-            int k = Math.Min(((Os.Length - 1) >> 2) + 1, _blocks);
+            int k = Math.Min(((Os.Length - 1) >> 2) + 1, m_blocks);
             for (i = 0; i < k - 1; i++)
             {
                 m = Os.Length - (i << 2) - 1;
-                _value[i] = (int)((Os[m]) & 0x000000ff);
-                _value[i] |= (int)((Os[m - 1] << 8) & 0x0000ff00);
-                _value[i] |= (int)((Os[m - 2] << 16) & 0x00ff0000);
-                _value[i] |= (int)((Os[m - 3] << 24) & 0xff000000);
+                m_value[i] = (int)((Os[m]) & 0x000000ff);
+                m_value[i] |= (int)((Os[m - 1] << 8) & 0x0000ff00);
+                m_value[i] |= (int)((Os[m - 2] << 16) & 0x00ff0000);
+                m_value[i] |= (int)((Os[m - 3] << 24) & 0xff000000);
             }
 
             i = k - 1;
             m = Os.Length - (i << 2) - 1;
-            _value[i] = Os[m] & 0x000000ff;
+            m_value[i] = Os[m] & 0x000000ff;
             if (m > 0)
-                _value[i] |= (Os[m - 1] << 8) & 0x0000ff00;
+                m_value[i] |= (Os[m - 1] << 8) & 0x0000ff00;
             if (m > 1)
-                _value[i] |= (Os[m - 2] << 16) & 0x00ff0000;
+                m_value[i] |= (Os[m - 2] << 16) & 0x00ff0000;
             if (m > 2)
-                _value[i] |= (int)((Os[m - 3] << 24) & 0xff000000);
+                m_value[i] |= (int)((Os[m - 3] << 24) & 0xff000000);
             
             ZeroUnusedBits();
             ReduceN();
@@ -240,9 +240,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (l < 1)
                 l = 1;
             
-            _blocks = ((l - 1) >> 5) + 1;
-            _value = new int[_blocks];
-            _length = l;
+            m_blocks = ((l - 1) >> 5) + 1;
+            m_value = new int[m_blocks];
+            m_length = l;
             int i;
             byte[] val = Bi.ToByteArray();
 
@@ -257,21 +257,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             int k = ((val.Length - 1) >> 2) + 1;
             for (i = 0; i < ov; i++)
             {
-                _value[k - 1] |= (val[i] & 0x000000ff) << ((ov - 1 - i) << 3);
+                m_value[k - 1] |= (val[i] & 0x000000ff) << ((ov - 1 - i) << 3);
             }
 
             int m = 0;
             for (i = 0; i <= (val.Length - 4) >> 2; i++)
             {
                 m = val.Length - 1 - (i << 2);
-                _value[i] = (int)((val[m]) & 0x000000ff);
-                _value[i] |= (int)(((val[m - 1]) << 8) & 0x0000ff00);
-                _value[i] |= (int)(((val[m - 2]) << 16) & 0x00ff0000);
-                _value[i] |= (int)(((val[m - 3]) << 24) & 0xff000000);
+                m_value[i] = (int)((val[m]) & 0x000000ff);
+                m_value[i] |= (int)(((val[m - 1]) << 8) & 0x0000ff00);
+                m_value[i] |= (int)(((val[m - 2]) << 16) & 0x00ff0000);
+                m_value[i] |= (int)(((val[m - 3]) << 24) & 0xff000000);
             }
 
-            if ((_length & 0x1f) != 0)
-                _value[_blocks - 1] &= _reverseRightMask[_length & 0x1f];
+            if ((m_length & 0x1f) != 0)
+                m_value[m_blocks - 1] &= m_reverseRightMask[m_length & 0x1f];
 
             ReduceN();
         }
@@ -283,9 +283,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="B">The GF2Polynomial to clone</param>
         public GF2Polynomial(GF2Polynomial B)
         {
-            _length = B._length;
-            _blocks = B._blocks;
-            _value = IntUtils.DeepCopy(B._value);
+            m_length = B.m_length;
+            m_blocks = B.m_blocks;
+            m_value = IntUtils.DeepCopy(B.m_value);
         }
         #endregion
 
@@ -297,7 +297,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Return a byte[] representing the value of this polynomial</returns>
         public byte[] ToByteArray()
         {
-            int k = ((_length - 1) >> 3) + 1;
+            int k = ((m_length - 1) >> 3) + 1;
             int ov = k & 0x03;
             int m;
             byte[] res = new byte[k];
@@ -306,15 +306,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             for (i = 0; i < (k >> 2); i++)
             {
                 m = k - (i << 2) - 1;
-                res[m] = (byte)((_value[i] & 0x000000ff));
-                res[m - 1] = (byte)(IntUtils.URShift((_value[i] & 0x0000ff00), 8));
-                res[m - 2] = (byte)(IntUtils.URShift((_value[i] & 0x00ff0000), 16));
-                res[m - 3] = (byte)(IntUtils.URShift((_value[i] & 0xff000000), 24));
+                res[m] = (byte)((m_value[i] & 0x000000ff));
+                res[m - 1] = (byte)(IntUtils.URShift((m_value[i] & 0x0000ff00), 8));
+                res[m - 2] = (byte)(IntUtils.URShift((m_value[i] & 0x00ff0000), 16));
+                res[m - 3] = (byte)(IntUtils.URShift((m_value[i] & 0xff000000), 24));
             }
             for (i = 0; i < ov; i++)
             {
                 m = (ov - i - 1) << 3;
-                res[i] = (byte)(IntUtils.URShift((_value[_blocks - 1] & (0x000000ff << m)), m));
+                res[i] = (byte)(IntUtils.URShift((m_value[m_blocks - 1] & (0x000000ff << m)), m));
             }
 
             return res;
@@ -327,7 +327,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns a FlexiBigInt representing the value of this polynomial</returns>
         public BigInteger ToFlexiBigInt()
         {
-            if (_length == 0 || IsZero())
+            if (m_length == 0 || IsZero())
                 return new BigInteger(0, new byte[0]);
             
             return new BigInteger(1, ToByteArray());
@@ -341,8 +341,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public int[] ToIntegerArray()
         {
             int[] result;
-            result = new int[_blocks];
-            Array.Copy(_value, 0, result, 0, _blocks);
+            result = new int[m_blocks];
+            Array.Copy(m_value, 0, result, 0, m_blocks);
 
             return result;
         }
@@ -363,31 +363,31 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
 
             if (Radix == 16)
             {
-                for (i = _blocks - 1; i >= 0; i--)
+                for (i = m_blocks - 1; i >= 0; i--)
                 {
-                    res += HEX_CHARS[(IntUtils.URShift(_value[i], 28)) & 0x0f];
-                    res += HEX_CHARS[(IntUtils.URShift(_value[i], 24)) & 0x0f];
-                    res += HEX_CHARS[(IntUtils.URShift(_value[i], 20)) & 0x0f];
-                    res += HEX_CHARS[(IntUtils.URShift(_value[i], 16)) & 0x0f];
-                    res += HEX_CHARS[(IntUtils.URShift(_value[i], 12)) & 0x0f];
-                    res += HEX_CHARS[(IntUtils.URShift(_value[i], 8)) & 0x0f];
-                    res += HEX_CHARS[(IntUtils.URShift(_value[i], 4)) & 0x0f];
-                    res += HEX_CHARS[(_value[i]) & 0x0f];
+                    res += HEX_CHARS[(IntUtils.URShift(m_value[i], 28)) & 0x0f];
+                    res += HEX_CHARS[(IntUtils.URShift(m_value[i], 24)) & 0x0f];
+                    res += HEX_CHARS[(IntUtils.URShift(m_value[i], 20)) & 0x0f];
+                    res += HEX_CHARS[(IntUtils.URShift(m_value[i], 16)) & 0x0f];
+                    res += HEX_CHARS[(IntUtils.URShift(m_value[i], 12)) & 0x0f];
+                    res += HEX_CHARS[(IntUtils.URShift(m_value[i], 8)) & 0x0f];
+                    res += HEX_CHARS[(IntUtils.URShift(m_value[i], 4)) & 0x0f];
+                    res += HEX_CHARS[(m_value[i]) & 0x0f];
                     res += " ";
                 }
             }
             else
             {
-                for (i = _blocks - 1; i >= 0; i--)
+                for (i = m_blocks - 1; i >= 0; i--)
                 {
-                    res += BIN_CHARS[(IntUtils.URShift(_value[i], 28)) & 0x0f];
-                    res += BIN_CHARS[(IntUtils.URShift(_value[i], 24)) & 0x0f];
-                    res += BIN_CHARS[(IntUtils.URShift(_value[i], 20)) & 0x0f];
-                    res += BIN_CHARS[(IntUtils.URShift(_value[i], 16)) & 0x0f];
-                    res += BIN_CHARS[(IntUtils.URShift(_value[i], 12)) & 0x0f];
-                    res += BIN_CHARS[(IntUtils.URShift(_value[i], 8)) & 0x0f];
-                    res += BIN_CHARS[(IntUtils.URShift(_value[i], 4)) & 0x0f];
-                    res += BIN_CHARS[(_value[i]) & 0x0f];
+                    res += BIN_CHARS[(IntUtils.URShift(m_value[i], 28)) & 0x0f];
+                    res += BIN_CHARS[(IntUtils.URShift(m_value[i], 24)) & 0x0f];
+                    res += BIN_CHARS[(IntUtils.URShift(m_value[i], 20)) & 0x0f];
+                    res += BIN_CHARS[(IntUtils.URShift(m_value[i], 16)) & 0x0f];
+                    res += BIN_CHARS[(IntUtils.URShift(m_value[i], 12)) & 0x0f];
+                    res += BIN_CHARS[(IntUtils.URShift(m_value[i], 8)) & 0x0f];
+                    res += BIN_CHARS[(IntUtils.URShift(m_value[i], 4)) & 0x0f];
+                    res += BIN_CHARS[(m_value[i]) & 0x0f];
                     res += " ";
                 }
             }
@@ -417,7 +417,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="B">GF2Polynomial to add to this GF2Polynomial</param>
         public void AddToThis(GF2Polynomial B)
         {
-            ExpandN(B._length);
+            ExpandN(B.m_length);
             XorThisBy(B);
         }
 
@@ -426,8 +426,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public void AssignAll()
         {
-            for (int i = 0; i < _blocks; i++)
-                _value[i] = unchecked((int)0xffffffff);
+            for (int i = 0; i < m_blocks; i++)
+                m_value[i] = unchecked((int)0xffffffff);
             
             ZeroUnusedBits();
         }
@@ -437,10 +437,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public void AssignOne()
         {
-            for (int i = 1; i < _blocks; i++)
-                _value[i] = 0x00;
+            for (int i = 1; i < m_blocks; i++)
+                m_value[i] = 0x00;
             
-            _value[0] = 0x01;
+            m_value[0] = 0x01;
         }
 
         /// <summary>
@@ -448,10 +448,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public void AssignX()
         {
-            for (int i = 1; i < _blocks; i++)
-                _value[i] = 0x00;
+            for (int i = 1; i < m_blocks; i++)
+                m_value[i] = 0x00;
             
-            _value[0] = 0x02;
+            m_value[0] = 0x02;
         }
 
         /// <summary>
@@ -459,8 +459,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public void AssignZero()
         {
-            for (int i = 0; i < _blocks; i++)
-                _value[i] = 0x00;
+            for (int i = 0; i < m_blocks; i++)
+                m_value[i] = 0x00;
         }
 
         /// <summary>
@@ -484,7 +484,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         {
             // a div b = q / r
             GF2Polynomial[] result = new GF2Polynomial[2];
-            GF2Polynomial q = new GF2Polynomial(_length);
+            GF2Polynomial q = new GF2Polynomial(m_length);
             GF2Polynomial a = new GF2Polynomial(this);
             GF2Polynomial b = new GF2Polynomial(G);
             GF2Polynomial j;
@@ -496,14 +496,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             a.ReduceN();
             b.ReduceN();
 
-            if (a._length < b._length)
+            if (a.m_length < b.m_length)
             {
                 result[0] = new GF2Polynomial(0);
                 result[1] = a;
                 return result;
             }
 
-            i = a._length - b._length;
+            i = a.m_length - b.m_length;
             q.ExpandN(i + 1);
 
             while (i >= 0)
@@ -512,7 +512,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 a.SubtractFromThis(j);
                 a.ReduceN();
                 q.XorBit(i);
-                i = a._length - b._length;
+                i = a.m_length - b.m_length;
             }
 
             result[0] = q;
@@ -530,30 +530,30 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         {
             int k;
             int[] bs;
-            if (_length >= I)
+            if (m_length >= I)
                 return;
 
-            _length = I;
+            m_length = I;
             k = (IntUtils.URShift((I - 1), 5)) + 1;
 
-            if (_blocks >= k)
+            if (m_blocks >= k)
                 return;
 
-            if (_value.Length >= k)
+            if (m_value.Length >= k)
             {
                 int j;
-                for (j = _blocks; j < k; j++)
-                    _value[j] = 0;
+                for (j = m_blocks; j < k; j++)
+                    m_value[j] = 0;
 
-                _blocks = k;
+                m_blocks = k;
                 return;
             }
 
             bs = new int[k];
-            Array.Copy(_value, 0, bs, 0, _blocks);
-            _blocks = k;
-            _value = null;
-            _value = bs;
+            Array.Copy(m_value, 0, bs, 0, m_blocks);
+            m_blocks = k;
+            m_value = null;
+            m_value = bs;
         }
 
         /// <summary>
@@ -565,10 +565,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns the bit at position <c>Index</c> if <c>Index</c> is a valid position, 0 otherwise</returns>
         public int GetBit(int Index)
         {
-            if (Index < 0 || Index > (_length - 1))
+            if (Index < 0 || Index > (m_length - 1))
                 return 0;
 
-            return ((_value[IntUtils.URShift(Index, 5)] & _bitMask[Index & 0x1f]) != 0) ? 1 : 0;
+            return ((m_value[IntUtils.URShift(Index, 5)] & m_bitMask[Index & 0x1f]) != 0) ? 1 : 0;
         }
 
         /// <summary>
@@ -640,8 +640,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             GF2Polynomial u, g;
             GF2Polynomial dummy;
             f.ReduceN();
-            d = f._length - 1;
-            u = new GF2Polynomial(f._length, "X");
+            d = f.m_length - 1;
+            u = new GF2Polynomial(f.m_length, "X");
 
             for (i = 1; i <= (d >> 1); i++)
             {
@@ -671,13 +671,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns true if this GF2Polynomial equals 'one' (<c>this</c> == 1)</returns>
         public bool IsOne()
         {
-            for (int i = 1; i < _blocks; i++)
+            for (int i = 1; i < m_blocks; i++)
             {
-                if (_value[i] != 0)
+                if (m_value[i] != 0)
                     return false;
             }
 
-            if (_value[0] != 0x01)
+            if (m_value[0] != 0x01)
                 return false;
             
             return true;
@@ -690,12 +690,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns true if this GF2Polynomial equals 'zero' (<c>this</c> == 0)</returns>
         public bool IsZero()
         {
-            if (_length == 0)
+            if (m_length == 0)
                 return true;
 
-            for (int i = 0; i < _blocks; i++)
+            for (int i = 0; i < m_blocks; i++)
             {
-                if (_value[i] != 0)
+                if (m_value[i] != 0)
                     return false;
             }
 
@@ -713,7 +713,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns a new GF2Polynomial (<c>this</c> * <c>B</c>)</returns>
         public GF2Polynomial Multiply(GF2Polynomial B)
         {
-            int n = Math.Max(_length, B._length);
+            int n = Math.Max(m_length, B.m_length);
             ExpandN(n);
             B.ExpandN(n);
 
@@ -730,7 +730,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns a new GF2Polynomial (<c>this</c> * <c>B</c>)</returns>
         public GF2Polynomial MultiplyClassic(GF2Polynomial B)
         {
-            GF2Polynomial result = new GF2Polynomial(Math.Max(_length, B._length) << 1);
+            GF2Polynomial result = new GF2Polynomial(Math.Max(m_length, B.m_length) << 1);
             GF2Polynomial[] m = new GF2Polynomial[32];
             int i, j;
             m[0] = new GF2Polynomial(this);
@@ -738,11 +738,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             for (i = 1; i <= 31; i++)
                 m[i] = m[i - 1].ShiftLeft();
             
-            for (i = 0; i < B._blocks; i++)
+            for (i = 0; i < B.m_blocks; i++)
             {
                 for (j = 0; j <= 31; j++)
                 {
-                    if ((B._value[i] & _bitMask[j]) != 0)
+                    if ((B.m_value[i] & m_bitMask[j]) != 0)
                         result.XorThisBy(m[j]);
                 }
 
@@ -763,7 +763,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public GF2Polynomial Quotient(GF2Polynomial G)
         {
             // a div b = q / r
-            GF2Polynomial q = new GF2Polynomial(_length);
+            GF2Polynomial q = new GF2Polynomial(m_length);
             GF2Polynomial a = new GF2Polynomial(this);
             GF2Polynomial b = new GF2Polynomial(G);
             GF2Polynomial j;
@@ -774,10 +774,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             
             a.ReduceN();
             b.ReduceN();
-            if (a._length < b._length)
+            if (a.m_length < b.m_length)
                 return new GF2Polynomial(0);
             
-            i = a._length - b._length;
+            i = a.m_length - b.m_length;
             q.ExpandN(i + 1);
 
             while (i >= 0)
@@ -786,7 +786,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 a.SubtractFromThis(j);
                 a.ReduceN();
                 q.XorBit(i);
-                i = a._length - b._length;
+                i = a.m_length - b.m_length;
             }
 
             return q;
@@ -797,8 +797,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public void Randomize()
         {
-            for (int i = 0; i < _blocks; i++)
-                _value[i] = _rand.Next();
+            for (int i = 0; i < m_blocks; i++)
+                m_value[i] = m_rand.Next();
             
             ZeroUnusedBits();
         }
@@ -810,8 +810,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Rand">The source of randomness</param>
         public void Randomize(Random Rand)
         {
-            for (int i = 0; i < _blocks; i++)
-                _value[i] = Rand.Next();
+            for (int i = 0; i < m_blocks; i++)
+                m_value[i] = Rand.Next();
             
             ZeroUnusedBits();
         }
@@ -822,21 +822,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public void ReduceN()
         {
             int i, j, h;
-            i = _blocks - 1;
-            while ((_value[i] == 0) && (i > 0))
+            i = m_blocks - 1;
+            while ((m_value[i] == 0) && (i > 0))
             {
                 i--;
             }
 
-            h = _value[i];
+            h = m_value[i];
             j = 0;
             while (h != 0)
             {
                 h = IntUtils.URShift(h, 1);
                 j++;
             }
-            _length = (i << 5) + j;
-            _blocks = i + 1;
+            m_length = (i << 5) + j;
+            m_blocks = i + 1;
         }
 
         /// <summary>
@@ -865,36 +865,36 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
 
             for (i = max; i > min; i--)
             {
-                t = _value[i] & 0x00000000ffffffffL;
-                _value[i - p0 - 1] ^= (int)(t << q0);
-                _value[i - p0] ^= IntUtils.URShift((int)t, (32 - q0));
-                _value[i - p1 - 1] ^= (int)(t << q1);
-                _value[i - p1] ^= IntUtils.URShift((int)t, (32 - q1));
-                _value[i - p2 - 1] ^= (int)(t << q2);
-                _value[i - p2] ^= IntUtils.URShift((int)t, (32 - q2));
-                _value[i - p3 - 1] ^= (int)(t << q3);
-                _value[i - p3] ^= IntUtils.URShift((int)t, (32 - q3));
-                _value[i] = 0;
+                t = m_value[i] & 0x00000000ffffffffL;
+                m_value[i - p0 - 1] ^= (int)(t << q0);
+                m_value[i - p0] ^= IntUtils.URShift((int)t, (32 - q0));
+                m_value[i - p1 - 1] ^= (int)(t << q1);
+                m_value[i - p1] ^= IntUtils.URShift((int)t, (32 - q1));
+                m_value[i - p2 - 1] ^= (int)(t << q2);
+                m_value[i - p2] ^= IntUtils.URShift((int)t, (32 - q2));
+                m_value[i - p3 - 1] ^= (int)(t << q3);
+                m_value[i - p3] ^= IntUtils.URShift((int)t, (32 - q3));
+                m_value[i] = 0;
             }
 
-            t = _value[min] & 0x00000000ffffffffL & (0xffffffffL << (M & 0x1f));
-            _value[0] ^= IntUtils.URShift((int)t, (32 - q0));
+            t = m_value[min] & 0x00000000ffffffffL & (0xffffffffL << (M & 0x1f));
+            m_value[0] ^= IntUtils.URShift((int)t, (32 - q0));
 
             if (min - p1 - 1 >= 0)
-                _value[min - p1 - 1] ^= (int)(t << q1);
+                m_value[min - p1 - 1] ^= (int)(t << q1);
 
-            _value[min - p1] ^= IntUtils.URShift((int)t, (32 - q1));
+            m_value[min - p1] ^= IntUtils.URShift((int)t, (32 - q1));
             if (min - p2 - 1 >= 0)
-                _value[min - p2 - 1] ^= (int)(t << q2);
+                m_value[min - p2 - 1] ^= (int)(t << q2);
             
-            _value[min - p2] ^= IntUtils.URShift((int)t, (32 - q2));
+            m_value[min - p2] ^= IntUtils.URShift((int)t, (32 - q2));
             if (min - p3 - 1 >= 0)
-                _value[min - p3 - 1] ^= (int)(t << q3);
+                m_value[min - p3 - 1] ^= (int)(t << q3);
             
-            _value[min - p3] ^= IntUtils.URShift((int)t, (32 - q3));
-            _value[min] &= _reverseRightMask[M & 0x1f];
-            _blocks = (IntUtils.URShift((int)(M - 1), 5)) + 1;
-            _length = M;
+            m_value[min - p3] ^= IntUtils.URShift((int)t, (32 - q3));
+            m_value[min] &= m_reverseRightMask[M & 0x1f];
+            m_blocks = (IntUtils.URShift((int)(M - 1), 5)) + 1;
+            m_length = M;
         }
 
         /// <summary>
@@ -920,29 +920,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             { // for i = maxBlock to minBlock
                 // reduce coefficients contained in t
                 // t = block[i]
-                t = _value[i] & 0x00000000ffffffffL;
+                t = m_value[i] & 0x00000000ffffffffL;
                 // block[i-p0-1] ^= t << q0
-                _value[i - p0 - 1] ^= (int)(t << q0);
+                m_value[i - p0 - 1] ^= (int)(t << q0);
                 // block[i-p0] ^= t >>> (32-q0)
-                _value[i - p0] ^= IntUtils.URShift((int)t, (32 - q0));
+                m_value[i - p0] ^= IntUtils.URShift((int)t, (32 - q0));
                 // block[i-p1-1] ^= << q1
-                _value[i - p1 - 1] ^= (int)(t << q1);
+                m_value[i - p1 - 1] ^= (int)(t << q1);
                 // block[i-p1] ^= t >>> (32-q1)
-                _value[i - p1] ^= IntUtils.URShift((int)t, (32 - q1));
-                _value[i] = 0x00;
+                m_value[i - p1] ^= IntUtils.URShift((int)t, (32 - q1));
+                m_value[i] = 0x00;
             }
 
             // reduce last coefficients in block containing 2^m
-            t = _value[min] & 0x00000000ffffffffL & (0xffffffffL << (M & 0x1f)); // t
+            t = m_value[min] & 0x00000000ffffffffL & (0xffffffffL << (M & 0x1f)); // t
             // contains the last coefficients > m
-            _value[0] ^= IntUtils.URShift((int)t, (32 - q0));
+            m_value[0] ^= IntUtils.URShift((int)t, (32 - q0));
             if (min - p1 - 1 >= 0)
-                _value[min - p1 - 1] ^= (int)(t << q1);
+                m_value[min - p1 - 1] ^= (int)(t << q1);
             
-            _value[min - p1] ^= IntUtils.URShift((int)t, (32 - q1));
-            _value[min] &= _reverseRightMask[M & 0x1f];
-            _blocks = (IntUtils.URShift((M - 1), 5)) + 1;
-            _length = M;
+            m_value[min - p1] ^= IntUtils.URShift((int)t, (32 - q1));
+            m_value[min] &= m_reverseRightMask[M & 0x1f];
+            m_blocks = (IntUtils.URShift((M - 1), 5)) + 1;
+            m_length = M;
         }
 
         /// <summary>
@@ -966,16 +966,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             a.ReduceN();
             b.ReduceN();
 
-            if (a._length < b._length)
+            if (a.m_length < b.m_length)
                 return a;
             
-            i = a._length - b._length;
+            i = a.m_length - b.m_length;
             while (i >= 0)
             {
                 j = b.ShiftLeft(i);
                 a.SubtractFromThis(j);
                 a.ReduceN();
-                i = a._length - b._length;
+                i = a.m_length - b.m_length;
             }
 
             return a;
@@ -988,12 +988,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Index">The index</param>
         public void ResetBit(int Index)
         {
-            if (Index < 0 || Index > (_length - 1))
+            if (Index < 0 || Index > (m_length - 1))
                 throw new Exception();
-            if (Index > (_length - 1))
+            if (Index > (m_length - 1))
                 return;
             
-            _value[IntUtils.URShift(Index, 5)] &= ~_bitMask[Index & 0x1f];
+            m_value[IntUtils.URShift(Index, 5)] &= ~m_bitMask[Index & 0x1f];
         }
 
         /// <summary>
@@ -1003,12 +1003,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Index">The index</param>
         public void SetBit(int Index)
         {
-            if (Index < 0 || Index > (_length - 1))
+            if (Index < 0 || Index > (m_length - 1))
                 throw new Exception();
-            if (Index > (_length - 1))
+            if (Index > (m_length - 1))
                 return;
 
-            _value[IntUtils.URShift(Index, 5)] |= _bitMask[Index & 0x1f];
+            m_value[IntUtils.URShift(Index, 5)] |= m_bitMask[Index & 0x1f];
 
             return;
         }
@@ -1020,14 +1020,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns a new GF2Polynomial (this &lt;&lt; 1)</returns>
         public GF2Polynomial ShiftLeft()
         {
-            GF2Polynomial result = new GF2Polynomial(_length + 1, _value);
+            GF2Polynomial result = new GF2Polynomial(m_length + 1, m_value);
 
-            for (int i = result._blocks - 1; i >= 1; i--)
+            for (int i = result.m_blocks - 1; i >= 1; i--)
             {
-                result._value[i] <<= 1;
-                result._value[i] |= IntUtils.URShift(result._value[i - 1], 31);
+                result.m_value[i] <<= 1;
+                result.m_value[i] |= IntUtils.URShift(result.m_value[i - 1], 31);
             }
-            result._value[0] <<= 1;
+            result.m_value[0] <<= 1;
 
             return result;
         }
@@ -1046,7 +1046,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             // with an explicit note that this method assumes that the polynomial
             // has already been resized. Or consider doing things inline.
             // Construct the resulting polynomial of appropriate length:
-            GF2Polynomial result = new GF2Polynomial(_length + K, _value);
+            GF2Polynomial result = new GF2Polynomial(m_length + K, m_value);
             // Shift left as many multiples of the block size as possible:
             if (K >= 32)
                 result.DoShiftBlocksLeft(IntUtils.URShift(K, 5));
@@ -1055,12 +1055,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             int remaining = K & 0x1f;
             if (remaining != 0)
             {
-                for (int i = result._blocks - 1; i >= 1; i--)
+                for (int i = result.m_blocks - 1; i >= 1; i--)
                 {
-                    result._value[i] <<= remaining;
-                    result._value[i] |= IntUtils.URShift(result._value[i - 1], (32 - remaining));
+                    result.m_value[i] <<= remaining;
+                    result.m_value[i] |= IntUtils.URShift(result.m_value[i - 1], (32 - remaining));
                 }
-                result._value[0] <<= remaining;
+                result.m_value[0] <<= remaining;
             }
 
             return result;
@@ -1081,15 +1081,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             }
 
             int i;
-            ExpandN(B._length + K);
+            ExpandN(B.m_length + K);
             int d = IntUtils.URShift(K, 5);
 
-            for (i = B._blocks - 1; i >= 0; i--)
+            for (i = B.m_blocks - 1; i >= 0; i--)
             {
-                if ((i + d + 1 < _blocks) && ((K & 0x1f) != 0))
-                    _value[i + d + 1] ^= IntUtils.URShift(B._value[i], (32 - (K & 0x1f)));
+                if ((i + d + 1 < m_blocks) && ((K & 0x1f) != 0))
+                    m_value[i + d + 1] ^= IntUtils.URShift(B.m_value[i], (32 - (K & 0x1f)));
                 
-                _value[i + d] ^= B._value[i] << (K & 0x1f);
+                m_value[i + d] ^= B.m_value[i] << (K & 0x1f);
             }
         }
 
@@ -1101,32 +1101,32 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             // This is untested
             int i;
             // check if blocks increases
-            if ((_length & 0x1f) == 0)
+            if ((m_length & 0x1f) == 0)
             {
-                _length += 1;
-                _blocks += 1;
-                if (_blocks > _value.Length)
+                m_length += 1;
+                m_blocks += 1;
+                if (m_blocks > m_value.Length)
                 { // enlarge value
-                    int[] bs = new int[_blocks];
-                    Array.Copy(_value, 0, bs, 0, _value.Length);
-                    _value = null;
-                    _value = bs;
+                    int[] bs = new int[m_blocks];
+                    Array.Copy(m_value, 0, bs, 0, m_value.Length);
+                    m_value = null;
+                    m_value = bs;
                 }
-                for (i = _blocks - 1; i >= 1; i--)
+                for (i = m_blocks - 1; i >= 1; i--)
                 {
-                    _value[i] |= IntUtils.URShift(_value[i - 1], 31);
-                    _value[i - 1] <<= 1;
+                    m_value[i] |= IntUtils.URShift(m_value[i - 1], 31);
+                    m_value[i - 1] <<= 1;
                 }
             }
             else
             {
-                _length += 1;
-                for (i = _blocks - 1; i >= 1; i--)
+                m_length += 1;
+                for (i = m_blocks - 1; i >= 1; i--)
                 {
-                    _value[i] <<= 1;
-                    _value[i] |= IntUtils.URShift(_value[i - 1], 31);
+                    m_value[i] <<= 1;
+                    m_value[i] |= IntUtils.URShift(m_value[i - 1], 31);
                 }
-                _value[0] <<= 1;
+                m_value[0] <<= 1;
             }
         }
 
@@ -1137,19 +1137,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns a new GF2Polynomial (this &lt;&lt; 1)</returns>
         public GF2Polynomial ShiftRight()
         {
-            GF2Polynomial result = new GF2Polynomial(_length - 1);
+            GF2Polynomial result = new GF2Polynomial(m_length - 1);
             int i;
-            Array.Copy(_value, 0, result._value, 0, result._blocks);
+            Array.Copy(m_value, 0, result.m_value, 0, result.m_blocks);
 
-            for (i = 0; i <= result._blocks - 2; i++)
+            for (i = 0; i <= result.m_blocks - 2; i++)
             {
-                result._value[i] = IntUtils.URShift(result._value[i], 1);
-                result._value[i] |= result._value[i + 1] << 31;
+                result.m_value[i] = IntUtils.URShift(result.m_value[i], 1);
+                result.m_value[i] |= result.m_value[i + 1] << 31;
             }
 
-            result._value[result._blocks - 1] = IntUtils.URShift(result._value[result._blocks - 1], 1);
-            if (result._blocks < _blocks)
-                result._value[result._blocks - 1] |= _value[result._blocks] << 31;
+            result.m_value[result.m_blocks - 1] = IntUtils.URShift(result.m_value[result.m_blocks - 1], 1);
+            if (result.m_blocks < m_blocks)
+                result.m_value[result.m_blocks - 1] |= m_value[result.m_blocks] << 31;
 
             return result;
         }
@@ -1160,18 +1160,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public void ShiftRightThis()
         {
             int i;
-            _length -= 1;
-            _blocks = (IntUtils.URShift((_length - 1), 5)) + 1;
+            m_length -= 1;
+            m_blocks = (IntUtils.URShift((m_length - 1), 5)) + 1;
 
-            for (i = 0; i <= _blocks - 2; i++)
+            for (i = 0; i <= m_blocks - 2; i++)
             {
-                _value[i] = IntUtils.URShift(_value[i], 1);
-                _value[i] |= _value[i + 1] << 31;
+                m_value[i] = IntUtils.URShift(m_value[i], 1);
+                m_value[i] |= m_value[i + 1] << 31;
             }
 
-            _value[_blocks - 1] = IntUtils.URShift(_value[_blocks - 1], 1);
-            if ((_length & 0x1f) == 0)
-                _value[_blocks - 1] |= _value[_blocks] << 31;
+            m_value[m_blocks - 1] = IntUtils.URShift(m_value[m_blocks - 1], 1);
+            if ((m_length & 0x1f) == 0)
+                m_value[m_blocks - 1] |= m_value[m_blocks] << 31;
         }
 
         /// <summary>
@@ -1185,10 +1185,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (IsZero())
                 return;
             
-            int[] result = new int[_blocks << 1];
-            for (i = _blocks - 1; i >= 0; i--)
+            int[] result = new int[m_blocks << 1];
+            for (i = m_blocks - 1; i >= 0; i--)
             {
-                h = _value[i];
+                h = m_value[i];
                 j = 0x00000001;
 
                 for (k = 0; k < 16; k++)
@@ -1202,10 +1202,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                     h = IntUtils.URShift(h, 1);
                 }
             }
-            _value = null;
-            _value = result;
-            _blocks = result.Length;
-            _length = (_length << 1) - 1;
+            m_value = null;
+            m_value = result;
+            m_blocks = result.Length;
+            m_length = (m_length << 1) - 1;
         }
 
         /// <summary>
@@ -1218,29 +1218,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (IsZero())
                 return;
             
-            if (_value.Length >= (_blocks << 1))
+            if (m_value.Length >= (m_blocks << 1))
             {
-                for (i = _blocks - 1; i >= 0; i--)
+                for (i = m_blocks - 1; i >= 0; i--)
                 {
 
-                    _value[(i << 1) + 1] = (int)GF2Polynomial._squaringTable[IntUtils.URShift((_value[i] & 0x00ff0000), 16)] | (GF2Polynomial._squaringTable[IntUtils.URShift((_value[i] & 0xff000000), 24)] << 16);
-                    _value[i << 1] = (int)GF2Polynomial._squaringTable[_value[i] & 0x000000ff] | (GF2Polynomial._squaringTable[IntUtils.URShift((_value[i] & 0x0000ff00), 8)] << 16);
+                    m_value[(i << 1) + 1] = (int)GF2Polynomial.m_squaringTable[IntUtils.URShift((m_value[i] & 0x00ff0000), 16)] | (GF2Polynomial.m_squaringTable[IntUtils.URShift((m_value[i] & 0xff000000), 24)] << 16);
+                    m_value[i << 1] = (int)GF2Polynomial.m_squaringTable[m_value[i] & 0x000000ff] | (GF2Polynomial.m_squaringTable[IntUtils.URShift((m_value[i] & 0x0000ff00), 8)] << 16);
                 }
-                _blocks <<= 1;
-                _length = (_length << 1) - 1;
+                m_blocks <<= 1;
+                m_length = (m_length << 1) - 1;
             }
             else
             {
-                int[] result = new int[_blocks << 1];
-                for (i = 0; i < _blocks; i++)
+                int[] result = new int[m_blocks << 1];
+                for (i = 0; i < m_blocks; i++)
                 {
-                    result[i << 1] = (int)GF2Polynomial._squaringTable[_value[i] & 0x000000ff] | (GF2Polynomial._squaringTable[IntUtils.URShift((_value[i] & 0x0000ff00), 8)] << 16);
-                    result[(i << 1) + 1] = (int)GF2Polynomial._squaringTable[IntUtils.URShift((_value[i] & 0x00ff0000), 16)] | (GF2Polynomial._squaringTable[IntUtils.URShift((_value[i] & 0xff000000), 24)] << 16);
+                    result[i << 1] = (int)GF2Polynomial.m_squaringTable[m_value[i] & 0x000000ff] | (GF2Polynomial.m_squaringTable[IntUtils.URShift((m_value[i] & 0x0000ff00), 8)] << 16);
+                    result[(i << 1) + 1] = (int)GF2Polynomial.m_squaringTable[IntUtils.URShift((m_value[i] & 0x00ff0000), 16)] | (GF2Polynomial.m_squaringTable[IntUtils.URShift((m_value[i] & 0xff000000), 24)] << 16);
                 }
-                _value = null;
-                _value = result;
-                _blocks <<= 1;
-                _length = (_length << 1) - 1;
+                m_value = null;
+                m_value = result;
+                m_blocks <<= 1;
+                m_length = (m_length << 1) - 1;
             }
         }
 
@@ -1265,7 +1265,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="B">A GF2Polynomial</param>
         public void SubtractFromThis(GF2Polynomial B)
         {
-            ExpandN(B._length);
+            ExpandN(B.m_length);
             XorThisBy(B);
         }
 
@@ -1278,10 +1278,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns true if the bit at position <c>i</c> is set (a(<c>Index</c>) == 1). False if (<c>Index</c> &lt; 0) || (<c>Index</c> &gt; (len - 1))</returns>
         public bool TestBit(int Index)
         {
-            if (Index < 0 || Index > (_length - 1))
+            if (Index < 0 || Index > (m_length - 1))
                 return false;
             
-            return (_value[IntUtils.URShift(Index, 5)] & _bitMask[Index & 0x1f]) != 0;
+            return (m_value[IntUtils.URShift(Index, 5)] & m_bitMask[Index & 0x1f]) != 0;
         }
 
         /// <summary>
@@ -1297,16 +1297,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             int h;
             bool result = false;
 
-            if (_length != B._length)
+            if (m_length != B.m_length)
                 throw new Exception("Length mismatch, invalid vector!");
             
-            for (i = 0; i < _blocks; i++)
+            for (i = 0; i < m_blocks; i++)
             {
-                h = _value[i] & B._value[i];
-                result ^= _parity[h & 0x000000ff];
-                result ^= _parity[(IntUtils.URShift(h, 8)) & 0x000000ff];
-                result ^= _parity[(IntUtils.URShift(h, 16)) & 0x000000ff];
-                result ^= _parity[(IntUtils.URShift(h, 24)) & 0x000000ff];
+                h = m_value[i] & B.m_value[i];
+                result ^= m_parity[h & 0x000000ff];
+                result ^= m_parity[(IntUtils.URShift(h, 8)) & 0x000000ff];
+                result ^= m_parity[(IntUtils.URShift(h, 16)) & 0x000000ff];
+                result ^= m_parity[(IntUtils.URShift(h, 24)) & 0x000000ff];
             }
 
             return result;
@@ -1324,19 +1324,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         {
             int i;
             GF2Polynomial result;
-            int k = Math.Min(_blocks, B._blocks);
+            int k = Math.Min(m_blocks, B.m_blocks);
 
-            if (_length >= B._length)
+            if (m_length >= B.m_length)
             {
                 result = new GF2Polynomial(this);
                 for (i = 0; i < k; i++)
-                    result._value[i] ^= B._value[i];
+                    result.m_value[i] ^= B.m_value[i];
             }
             else
             {
                 result = new GF2Polynomial(B);
                 for (i = 0; i < k; i++)
-                    result._value[i] ^= _value[i];
+                    result.m_value[i] ^= m_value[i];
             }
             // If we xor'ed some bits too many by proceeding blockwise, restore them to zero:
             result.ZeroUnusedBits();
@@ -1351,12 +1351,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Index">The index</param>
         public void XorBit(int Index)
         {
-            if (Index < 0 || Index > (_length - 1))
+            if (Index < 0 || Index > (m_length - 1))
                 throw new Exception();
-            if (Index > (_length - 1))
+            if (Index > (m_length - 1))
                 return;
             
-            _value[IntUtils.URShift(Index, 5)] ^= _bitMask[Index & 0x1f];
+            m_value[IntUtils.URShift(Index, 5)] ^= m_bitMask[Index & 0x1f];
         }
 
         /// <summary>
@@ -1367,8 +1367,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="B">The GF2Polynomial</param>
         public void XorThisBy(GF2Polynomial B)
         {
-            for (int i = 0; i < Math.Min(_blocks, B._blocks); i++)
-                _value[i] ^= B._value[i];
+            for (int i = 0; i < Math.Min(m_blocks, B.m_blocks); i++)
+                m_value[i] ^= B.m_value[i];
 
             // If we xor'ed some bits too many by proceeding blockwise, restore them to zero:
             ZeroUnusedBits();
@@ -1380,8 +1380,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         private void ZeroUnusedBits()
         {
-            if ((_length & 0x1f) != 0)
-                _value[_blocks - 1] &= _reverseRightMask[_length & 0x1f];
+            if ((m_length & 0x1f) != 0)
+                m_value[m_blocks - 1] &= m_reverseRightMask[m_length & 0x1f];
         }
         #endregion
 
@@ -1400,12 +1400,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
 
             GF2Polynomial otherPol = (GF2Polynomial)Obj;
 
-            if (_length != otherPol._length)
+            if (m_length != otherPol.m_length)
                 return false;
             
-            for (int i = 0; i < _blocks; i++)
+            for (int i = 0; i < m_blocks; i++)
             {
-                if (_value[i] != otherPol._value[i])
+                if (m_value[i] != otherPol.m_value[i])
                     return false;
             }
 
@@ -1419,7 +1419,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The hash code</returns>
         public override int GetHashCode()
         {
-            return _length * 31 + _value.GetHashCode();
+            return m_length * 31 + m_value.GetHashCode();
         }
         #endregion
 
@@ -1432,20 +1432,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="B">The shift amount (in blocks)</param>
         private void DoShiftBlocksLeft(int B)
         {
-            if (_blocks <= _value.Length)
+            if (m_blocks <= m_value.Length)
             {
                 int i;
-                for (i = _blocks - 1; i >= B; i--)
-                    _value[i] = _value[i - B];
+                for (i = m_blocks - 1; i >= B; i--)
+                    m_value[i] = m_value[i - B];
                 for (i = 0; i < B; i++)
-                    _value[i] = 0x00;
+                    m_value[i] = 0x00;
             }
             else
             {
-                int[] result = new int[_blocks];
-                Array.Copy(_value, 0, result, B, _blocks - B);
-                _value = null;
-                _value = result;
+                int[] result = new int[m_blocks];
+                Array.Copy(m_value, 0, result, B, m_blocks - B);
+                m_value = null;
+                m_value = result;
             }
         }
 
@@ -1458,35 +1458,35 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns><c>this * B</c></returns>
         private GF2Polynomial KaraMult(GF2Polynomial B)
         {
-            GF2Polynomial result = new GF2Polynomial(_length << 1);
-            if (_length <= 32)
+            GF2Polynomial result = new GF2Polynomial(m_length << 1);
+            if (m_length <= 32)
             {
-                result._value = Mult32(_value[0], B._value[0]);
+                result.m_value = Mult32(m_value[0], B.m_value[0]);
                 return result;
             }
-            if (_length <= 64)
+            if (m_length <= 64)
             {
-                result._value = Mult64(_value, B._value);
+                result.m_value = Mult64(m_value, B.m_value);
                 return result;
             }
-            if (_length <= 128)
+            if (m_length <= 128)
             {
-                result._value = Mult128(_value, B._value);
+                result.m_value = Mult128(m_value, B.m_value);
                 return result;
             }
-            if (_length <= 256)
+            if (m_length <= 256)
             {
-                result._value = Mult256(_value, B._value);
+                result.m_value = Mult256(m_value, B.m_value);
                 return result;
             }
-            if (_length <= 512)
+            if (m_length <= 512)
             {
-                result._value = Mult512(_value, B._value);
+                result.m_value = Mult512(m_value, B.m_value);
                 return result;
             }
 
-            int n = BigMath.FloorLog(_length - 1);
-            n = _bitMask[n];
+            int n = BigMath.FloorLog(m_length - 1);
+            n = m_bitMask[n];
 
             GF2Polynomial a0 = Lower(((n - 1) >> 5) + 1);
             GF2Polynomial a1 = Upper(((n - 1) >> 5) + 1);
@@ -1513,7 +1513,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         private GF2Polynomial Lower(int K)
         {
             GF2Polynomial result = new GF2Polynomial(K << 5);
-            Array.Copy(_value, 0, result._value, 0, Math.Min(K, _blocks));
+            Array.Copy(m_value, 0, result.m_value, 0, Math.Min(K, m_blocks));
 
             return result;
         }
@@ -1533,7 +1533,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             long h = 0;
             for (i = 1; i <= 32; i++)
             {
-                if ((a & _bitMask[i - 1]) != 0)
+                if ((a & m_bitMask[i - 1]) != 0)
                     h ^= b2;
                 
                 b2 <<= 1;
@@ -1861,23 +1861,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         private void ShiftBlocksLeft()
         {
-            _blocks += 1;
-            _length += 32;
+            m_blocks += 1;
+            m_length += 32;
 
-            if (_blocks <= _value.Length)
+            if (m_blocks <= m_value.Length)
             {
                 int i;
-                for (i = _blocks - 1; i >= 1; i--)
-                    _value[i] = _value[i - 1];
+                for (i = m_blocks - 1; i >= 1; i--)
+                    m_value[i] = m_value[i - 1];
 
-                _value[0] = 0x00;
+                m_value[0] = 0x00;
             }
             else
             {
-                int[] result = new int[_blocks];
-                Array.Copy(_value, 0, result, 1, _blocks - 1);
-                _value = null;
-                _value = result;
+                int[] result = new int[m_blocks];
+                Array.Copy(m_value, 0, result, 1, m_blocks - 1);
+                m_value = null;
+                m_value = result;
             }
         }
 
@@ -1886,11 +1886,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         private GF2Polynomial Upper(int K)
         {
-            int j = Math.Min(K, _blocks - K);
+            int j = Math.Min(K, m_blocks - K);
             GF2Polynomial result = new GF2Polynomial(j << 5);
 
-            if (_blocks >= K)
-                Array.Copy(_value, K, result._value, 0, j);
+            if (m_blocks >= K)
+                Array.Copy(m_value, K, result.m_value, 0, j);
             
             return result;
         }

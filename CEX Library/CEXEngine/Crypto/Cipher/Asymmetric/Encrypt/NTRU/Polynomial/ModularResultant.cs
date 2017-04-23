@@ -11,7 +11,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
     internal class ModularResultant : Resultant
     {
         #region Fields
-        private BigInteger _modulus;
+        private BigInteger m_modulus;
         #endregion
 
         #region Constructor
@@ -25,7 +25,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         public ModularResultant(BigIntPolynomial Rho, BigInteger Res, BigInteger Modulus) :
             base(Rho, Res)
         {
-            this._modulus = Modulus;
+            this.m_modulus = Modulus;
         }
         #endregion
 
@@ -42,8 +42,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns><c>Rho</c> modulo <c>modRes1.modulus * modRes2.modulus</c>, and <c>null</c> for <c>res</c></returns>
         public static ModularResultant CombineRho(ModularResultant ModRes1, ModularResultant ModRes2)
         {
-            BigInteger mod1 = ModRes1._modulus;
-            BigInteger mod2 = ModRes2._modulus;
+            BigInteger mod1 = ModRes1.m_modulus;
+            BigInteger mod2 = ModRes2.m_modulus;
             BigInteger prod = mod1.Multiply(mod2);
             BigIntEuclidean er = BigIntEuclidean.Calculate(mod2, mod1);
 

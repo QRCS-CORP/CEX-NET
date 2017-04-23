@@ -203,20 +203,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         #endregion
 
         #region Fields
-        private int _blockSize = 0;
-        private ICipherMode _cipherEngine;
-        private IPadding _cipherPadding;
-        private bool _destroyEngine = false;
-        private bool _isCounterMode = false;
-        private bool _isDisposed = false;
-        private bool _isEncryption = false;
-        private bool _isInitialized = false;
-        private bool _isParallel = false;
-        private bool _isStreamCipher = false;
-        private int _parallelBlockSize = PARALLEL_DEFBLOCK;
-        private int _processorCount = 0;
-        private BlockProfiles _parallelBlockProfile = BlockProfiles.UserDefined;
-        private IStreamCipher _streamCipher;
+        private int m_blockSize = 0;
+        private ICipherMode m_cipherEngine;
+        private IPadding m_cipherPadding;
+        private bool m_destroyEngine = false;
+        private bool m_isCounterMode = false;
+        private bool m_isDisposed = false;
+        private bool m_isEncryption = false;
+        private bool m_isInitialized = false;
+        private bool m_isParallel = false;
+        private bool m_isStreamCipher = false;
+        private int m_parallelBlockSize = PARALLEL_DEFBLOCK;
+        private int m_processorCount = 0;
+        private BlockProfiles m_parallelBlockProfile = BlockProfiles.UserDefined;
+        private IStreamCipher m_streamCipher;
         #endregion
 
         #region Properties
@@ -225,8 +225,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// </summary>
         public bool IsParallel
         {
-            get { return _isParallel; }
-            set { _isParallel = value; }
+            get { return m_isParallel; }
+            set { m_isParallel = value; }
         }
 
         /// <summary>
@@ -234,8 +234,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// </summary>
         public BlockProfiles ParallelBlockProfile
         {
-            get { return _parallelBlockProfile; }
-            set { _parallelBlockProfile = value; }
+            get { return m_parallelBlockProfile; }
+            set { m_parallelBlockProfile = value; }
         }
 
         /// <summary>
@@ -246,7 +246,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// or the size is less than ParallelMinimumSize or more than ParallelMaximumSize values</exception>
         public int ParallelBlockSize
         {
-            get { return _blockSize; }
+            get { return m_blockSize; }
             set
             {
                 if (value % ParallelMinimumSize != 0)
@@ -254,7 +254,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
                 if (value > ParallelMaximumSize || value < ParallelMinimumSize)
                     throw new CryptoProcessingException("CipherStream:ParallelBlockSize", String.Format("Parallel block must be Maximum of ParallelMaximumSize: {0} and evenly divisible by ParallelMinimumSize: {1}", ParallelMaximumSize, ParallelMinimumSize), new ArgumentOutOfRangeException());
 
-                _blockSize = value;
+                m_blockSize = value;
             }
         }
 
@@ -273,23 +273,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         {
             get 
             {
-                if (_isStreamCipher)
+                if (m_isStreamCipher)
                 {
-                    if (_streamCipher.GetType().Equals(typeof(ChaCha)))
-                        return ((ChaCha)_streamCipher).ParallelMinimumSize;
+                    if (m_streamCipher.GetType().Equals(typeof(ChaCha20)))
+                        return ((ChaCha20)m_streamCipher).ParallelMinimumSize;
                     else
-                        return ((Salsa20)_streamCipher).ParallelMinimumSize;
+                        return ((Salsa20)m_streamCipher).ParallelMinimumSize;
                 }
                 else
                 {
-                    if (_cipherEngine.GetType().Equals(typeof(CTR)))
-                        return ((CTR)_cipherEngine).ParallelMinimumSize;
-                    else if (_cipherEngine.GetType().Equals(typeof(CBC)) && !_isEncryption)
-                        return ((CBC)_cipherEngine).ParallelMinimumSize;
-                    else if (_cipherEngine.GetType().Equals(typeof(CFB)) && !_isEncryption)
-                        return ((CFB)_cipherEngine).ParallelMinimumSize;
+                    if (m_cipherEngine.GetType().Equals(typeof(CTR)))
+                        return ((CTR)m_cipherEngine).ParallelMinimumSize;
+                    else if (m_cipherEngine.GetType().Equals(typeof(CBC)) && !m_isEncryption)
+                        return ((CBC)m_cipherEngine).ParallelMinimumSize;
+                    else if (m_cipherEngine.GetType().Equals(typeof(CFB)) && !m_isEncryption)
+                        return ((CFB)m_cipherEngine).ParallelMinimumSize;
                     else
-                        return _blockSize * _processorCount;
+                        return m_blockSize * m_processorCount;
                 }
             }
         }
@@ -299,8 +299,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// </summary>
         public int ProcessorCount 
         { 
-            get { return _processorCount; }
-            private set { _processorCount = value; }
+            get { return m_processorCount; }
+            private set { m_processorCount = value; }
         }
         #endregion
 
@@ -321,39 +321,39 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 	    /// <exception cref="CryptoProcessingException">Thrown if an invalid configuration or is used</exception>
 	    public CipherStream(SymmetricEngines EngineType, int RoundCount = 22, CipherModes CipherType = CipherModes.CTR, PaddingModes PaddingType = PaddingModes.PKCS7, int BlockSize = 16, Digests KdfEngine = Digests.SHA512)
 	    {
-		    _destroyEngine = true;
+		    m_destroyEngine = true;
 		    SetScope();
 
 		    if (EngineType == SymmetricEngines.ChaCha || EngineType == SymmetricEngines.Salsa)
 		    {
 			    try
 			    {
-				    _streamCipher = GetStreamCipher((StreamCiphers)EngineType, RoundCount);
+				    m_streamCipher = GetStreamCipher((StreamCiphers)EngineType, RoundCount);
 			    }
 			    catch (Exception ex)
 			    {
 				    throw new CryptoProcessingException("CipherStream:CTor", "The cipher could not be initialize, check method parameters!", ex);
 			    }
 
-                _isStreamCipher = true;
+                m_isStreamCipher = true;
                 ParametersCheck();
 		    }
 		    else
 		    {
 			    try
 			    {
-				    _cipherEngine = GetCipherMode(CipherType, (BlockCiphers)EngineType, BlockSize, RoundCount, KdfEngine);
+				    m_cipherEngine = GetCipherMode(CipherType, (BlockCiphers)EngineType, BlockSize, RoundCount, KdfEngine);
 			    }
                 catch (Exception ex)
 			    {
 				    throw new CryptoProcessingException("CipherStream:CTor", "The cipher could not be initialize, check method parameters!", ex);
 			    }
 
-                _isStreamCipher = false;
+                m_isStreamCipher = false;
                 ParametersCheck();
 
-			    if (!_isCounterMode)
-				    _cipherPadding = GetPaddingMode(PaddingType);
+			    if (!m_isCounterMode)
+				    m_cipherPadding = GetPaddingMode(PaddingType);
 		    }
 	    }
 
@@ -368,7 +368,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 	    /// <exception cref="CryptoProcessingException">Thrown if an invalid CipherDescription is used</exception>
         public CipherStream(CipherDescription Header)
 	    {
-		    _destroyEngine = true;
+		    m_destroyEngine = true;
 
 		    if (Header == null)
 			    throw new CryptoProcessingException("CipherStream:CTor", "The key Header is invalid!");
@@ -379,32 +379,32 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 		    {
 			    try
 			    {
-				    _streamCipher = GetStreamCipher((StreamCiphers)Header.EngineType, (int)Header.RoundCount);
+				    m_streamCipher = GetStreamCipher((StreamCiphers)Header.EngineType, (int)Header.RoundCount);
 			    }
                 catch (Exception ex)
 			    {
 				    throw new CryptoProcessingException("CipherStream:CTor", "The cipher could not be initialize, check description parameters!", ex);
 			    }
 
-                _isStreamCipher = true;
+                m_isStreamCipher = true;
                 ParametersCheck();
 		    }
 		    else
 		    {
 			    try
 			    {
-                    _cipherEngine = GetCipherMode((CipherModes)Header.CipherType, (BlockCiphers)Header.EngineType, (int)Header.BlockSize, (int)Header.RoundCount, (Digests)Header.KdfEngine);
+                    m_cipherEngine = GetCipherMode((CipherModes)Header.CipherType, (BlockCiphers)Header.EngineType, (int)Header.BlockSize, (int)Header.RoundCount, (Digests)Header.KdfEngine);
 			    }
                 catch (Exception ex)
 			    {
                     throw new CryptoProcessingException("CipherStream:CTor", "The cipher could not be initialize, check description parameters!", ex);
 			    }
 
-                _isStreamCipher = false;
+                m_isStreamCipher = false;
                 ParametersCheck();
 
-			    if (!_isCounterMode)
-				    _cipherPadding = GetPaddingMode((PaddingModes)Header.PaddingType);
+			    if (!m_isCounterMode)
+				    m_cipherPadding = GetPaddingMode((PaddingModes)Header.PaddingType);
 		    }
 	    }
 
@@ -420,12 +420,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// <exception cref="CryptoProcessingException">Thrown if a null or initialized Cipher is used</exception>
         public CipherStream(ICipherMode Cipher, IPadding Padding = null)
 	    {
-		    _cipherEngine = Cipher;
-		    _destroyEngine = false;
-		    _isEncryption = Cipher.IsEncryption;
-		    _isStreamCipher = false;
+		    m_cipherEngine = Cipher;
+		    m_destroyEngine = false;
+		    m_isEncryption = Cipher.IsEncryption;
+		    m_isStreamCipher = false;
 
-		    if (_cipherEngine.IsInitialized)
+		    if (m_cipherEngine.IsInitialized)
 			    throw new CryptoProcessingException("CipherStream:CTor", "The cipher must be initialized through the local Initialize() method!");
 
 		    SetScope();
@@ -433,9 +433,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
 			// default padding
 			if (Padding != null)
-				_cipherPadding = Padding;
-            else if (_cipherEngine.Enumeral != CipherModes.CTR)
-				_cipherPadding = GetPaddingMode(PaddingModes.X923);
+				m_cipherPadding = Padding;
+            else if (m_cipherEngine.Enumeral != CipherModes.CTR)
+				m_cipherPadding = GetPaddingMode(PaddingModes.X923);
 	    }
 
 	    /// <summary>
@@ -448,9 +448,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 	    /// <exception cref="CryptoProcessingException">Thrown if a null or initialized Stream Cipher is used</exception>
         public CipherStream(IStreamCipher Cipher)
 	    {
-		    _destroyEngine = false;
-		    _isStreamCipher = true;
-            _streamCipher = Cipher;
+		    m_destroyEngine = false;
+		    m_isStreamCipher = true;
+            m_streamCipher = Cipher;
 
 		    if (Cipher == null)
 			    throw new CryptoProcessingException("CipherStream:CTor", "The Cipher can not be null!");
@@ -481,18 +481,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         {
 	        try
 	        {
-		        if (!_isStreamCipher)
-			        _cipherEngine.Initialize(Encryption, KeyParam);
+		        if (!m_isStreamCipher)
+			        m_cipherEngine.Initialize(Encryption, KeyParam);
 		        else
-			        _streamCipher.Initialize(KeyParam);
+			        m_streamCipher.Initialize(KeyParam);
 	        }
 	        catch
 	        {
 		        throw new CryptoProcessingException("CipherStream:Initialize", "The key could not be loaded, check the key and iv sizes!");
 	        }
 
-	        _isEncryption = Encryption;
-	        _isInitialized = true;
+	        m_isEncryption = Encryption;
+	        m_isInitialized = true;
         }
 
         /// <summary>
@@ -506,7 +506,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// <exception cref="CryptoProcessingException">Thrown if Write is called before Initialize(), or the Input stream is empty</exception>
         public void Write(Stream InStream, Stream OutStream)
         {
-	        if (!_isInitialized)
+	        if (!m_isInitialized)
 		        throw new CryptoProcessingException("CipherStream:Write", "The cipher has not been initialized; call the Initialize() function first!");
 	        if (InStream.Length - InStream.Position < 1)
 		        throw new CryptoProcessingException("CipherStream:Write", "The Input stream is too short!");
@@ -517,9 +517,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             // par blk user size?
 	        CalculateBlockSize(dlen);
 
-            if (_isEncryption && dlen % _blockSize != 0)
+            if (m_isEncryption && dlen % m_blockSize != 0)
             {
-                long alen = (dlen - (dlen % _blockSize)) + _blockSize;
+                long alen = (dlen - (dlen % m_blockSize)) + m_blockSize;
                 OutStream.SetLength(alen);
             }
             else
@@ -527,17 +527,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
                 OutStream.SetLength(dlen);
             }
 
-	        if (!_isStreamCipher)
+	        if (!m_isStreamCipher)
 	        {
-                if (_isParallel && IsParallelMin(dlen))
+                if (m_isParallel && IsParallelMin(dlen))
 		        {
-			        if (_isCounterMode)
+			        if (m_isCounterMode)
 			        {
 				        ParallelCTR(InStream, OutStream);
 			        }
 			        else
 			        {
-				        if (_isEncryption)
+				        if (m_isEncryption)
 					        BlockEncrypt(InStream, OutStream);
 				        else
 					        ParallelDecrypt(InStream, OutStream);
@@ -545,13 +545,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 		        }
 		        else
 		        {
-			        if (_isCounterMode)
+			        if (m_isCounterMode)
 			        {
 				        BlockCTR(InStream, OutStream);
 			        }
 			        else
 			        {
-				        if (_isEncryption)
+				        if (m_isEncryption)
 					        BlockEncrypt(InStream, OutStream);
 				        else
 					        BlockDecrypt(InStream, OutStream);
@@ -560,7 +560,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 	        }
 	        else
 	        {
-                if (_isParallel && IsParallelMin(dlen))
+                if (m_isParallel && IsParallelMin(dlen))
 			        ParallelStream(InStream, OutStream);
 		        else
 			        ProcessStream(InStream, OutStream);
@@ -583,7 +583,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// <exception cref="CryptoProcessingException">Thrown if Write is called before Initialize(), or if array sizes are misaligned</exception>
         public void Write(byte[] Input, int InOffset, ref byte[] Output, int OutOffset)
         {
-	        if (!_isInitialized)
+	        if (!m_isInitialized)
 		        throw new CryptoProcessingException("CipherStream:Write", "The cipher has not been initialized; call the Initialize() function first!");
 	        if (Input.Length - InOffset < 1)
 		        throw new CryptoProcessingException("CipherStream:Write", "The Input array is too short!");
@@ -594,17 +594,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             long dlen = Input.Length - InOffset;
 	        CalculateBlockSize(dlen);
 
-	        if (!_isStreamCipher)
+	        if (!m_isStreamCipher)
 	        {
-                if (_isParallel && IsParallelMin(dlen))
+                if (m_isParallel && IsParallelMin(dlen))
 		        {
-			        if (_isCounterMode)
+			        if (m_isCounterMode)
 			        {
 				        ParallelCTR(Input, InOffset, Output, OutOffset);
 			        }
 			        else
 			        {
-				        if (_isEncryption)
+				        if (m_isEncryption)
                             BlockEncrypt(Input, InOffset, ref Output, OutOffset);
 				        else
 					        ParallelDecrypt(Input, InOffset, ref Output, OutOffset);
@@ -612,13 +612,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 		        }
 		        else
 		        {
-			        if (_isCounterMode)
+			        if (m_isCounterMode)
 			        {
 				        BlockCTR(Input, InOffset, Output, OutOffset);
 			        }
 			        else
 			        {
-				        if (_isEncryption)
+				        if (m_isEncryption)
                             BlockEncrypt(Input, InOffset, ref Output, OutOffset);
 				        else
                             BlockDecrypt(Input, InOffset, ref Output, OutOffset);
@@ -627,7 +627,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 	        }
 	        else
 	        {
-                if (_isParallel && IsParallelMin(dlen))
+                if (m_isParallel && IsParallelMin(dlen))
 			        ParallelStream(Input, InOffset, Output, OutOffset);
 		        else
 			        ProcessStream(Input, InOffset, Output, OutOffset);
@@ -638,19 +638,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         #region Crypto
         private void BlockCTR(Stream InStream, Stream OutStream)
         {
-	        int blkSize = _cipherEngine.BlockSize;
+	        int blkSize = m_cipherEngine.BlockSize;
 	        long inpSize = (InStream.Length - InStream.Position);
 	        long alnSize = (inpSize / blkSize) * blkSize;
 	        long count = 0;
 	        byte[] inpBuffer = new byte[blkSize];
 	        byte[]  outBuffer = new byte[blkSize];
 
-	        _cipherEngine.IsParallel = false;
+	        m_cipherEngine.IsParallel = false;
 
 	        while (count != alnSize)
 	        {
 		        InStream.Read(inpBuffer, 0, blkSize);
-		        _cipherEngine.Transform(inpBuffer, outBuffer);
+		        m_cipherEngine.Transform(inpBuffer, outBuffer);
 		        OutStream.Write(outBuffer, 0, blkSize);
 		        count += blkSize;
                 CalculateProgress(inpSize, OutStream.Position);
@@ -660,7 +660,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 	        {
 		        int fnlSize = (int)(inpSize - alnSize);
 		        InStream.Read(inpBuffer, 0, fnlSize);
-		        _cipherEngine.Transform(inpBuffer, outBuffer);
+		        m_cipherEngine.Transform(inpBuffer, outBuffer);
 		        OutStream.Write(outBuffer, 0, fnlSize);
 		        count += fnlSize;
 	        }
@@ -670,16 +670,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void BlockCTR(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
-	        int blkSize = _cipherEngine.BlockSize;
+	        int blkSize = m_cipherEngine.BlockSize;
 	        long inpSize = (Input.Length - InOffset);
 	        long alnSize = (inpSize / blkSize) * blkSize;
 	        long count = 0;
 
-	        _cipherEngine.IsParallel = false;
+	        m_cipherEngine.IsParallel = false;
 
 	        while (count != alnSize)
 	        {
-		        _cipherEngine.Transform(Input, InOffset, Output, OutOffset);
+		        m_cipherEngine.Transform(Input, InOffset, Output, OutOffset);
 		        InOffset += blkSize;
 		        OutOffset += blkSize;
 		        count += blkSize;
@@ -693,7 +693,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 		        byte[] inpBuffer =  new byte[blkSize];
                 Buffer.BlockCopy(Input, InOffset, inpBuffer, 0, cnkSize);
 		        byte[] outBuffer = new byte[blkSize];
-		        _cipherEngine.Transform(inpBuffer, 0, outBuffer, 0);
+		        m_cipherEngine.Transform(inpBuffer, 0, outBuffer, 0);
                 Buffer.BlockCopy(outBuffer, 0, Output, OutOffset, cnkSize);
 		        count += cnkSize;
 	        }
@@ -703,19 +703,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void BlockDecrypt(Stream InStream, Stream OutStream)
         {
-	        int blkSize = _cipherEngine.BlockSize;
+	        int blkSize = m_cipherEngine.BlockSize;
 	        long inpSize = (InStream.Length - InStream.Position);
 	        long alnSize = (inpSize < blkSize) ? 0 : inpSize - blkSize;
 	        long count = 0;
 	        byte[] inpBuffer = new byte[blkSize];
 	        byte[] outBuffer = new byte[blkSize];
 
-	        _cipherEngine.IsParallel = false;
+	        m_cipherEngine.IsParallel = false;
 
 	        while (count != alnSize)
 	        {
 		        InStream.Read(inpBuffer, 0, blkSize);
-		        _cipherEngine.Transform(inpBuffer, outBuffer);
+		        m_cipherEngine.Transform(inpBuffer, outBuffer);
 		        OutStream.Write(outBuffer, 0, blkSize);
 		        count += blkSize;
                 CalculateProgress(inpSize, OutStream.Position);
@@ -725,8 +725,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 	        {
 		        int cnkSize = (int)(inpSize - alnSize);
 		        InStream.Read(inpBuffer, 0, cnkSize);
-		        _cipherEngine.Transform(inpBuffer, outBuffer);
-		        int fnlSize = blkSize - _cipherPadding.GetPaddingLength(outBuffer, 0);
+		        m_cipherEngine.Transform(inpBuffer, outBuffer);
+		        int fnlSize = blkSize - m_cipherPadding.GetPaddingLength(outBuffer, 0);
 		        OutStream.Write(outBuffer, 0, fnlSize);
 		        count += fnlSize;
 	        }
@@ -736,16 +736,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void BlockDecrypt(byte[] Input, int InOffset, ref byte[] Output, int OutOffset)
         {
-	        int blkSize = _cipherEngine.BlockSize;
+	        int blkSize = m_cipherEngine.BlockSize;
 	        long inpSize = (Input.Length - InOffset);
 	        long alnSize = (inpSize < blkSize) ? 0 : inpSize - blkSize;
 	        long count = 0;
 
-	        _cipherEngine.IsParallel = false;
+	        m_cipherEngine.IsParallel = false;
 
 	        while (count != alnSize)
 	        {
-		        _cipherEngine.Transform(Input, InOffset, Output, OutOffset);
+		        m_cipherEngine.Transform(Input, InOffset, Output, OutOffset);
 		        InOffset += blkSize;
 		        OutOffset += blkSize;
 		        count += blkSize;
@@ -756,8 +756,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 	        byte[] inpBuffer = new byte[blkSize];
             Buffer.BlockCopy(Input, InOffset, inpBuffer, 0, blkSize);
 	        byte[] outBuffer = new byte[blkSize];
-	        _cipherEngine.Transform(inpBuffer, 0, outBuffer, 0);
-	        int fnlSize = blkSize - _cipherPadding.GetPaddingLength(outBuffer, 0);
+	        m_cipherEngine.Transform(inpBuffer, 0, outBuffer, 0);
+	        int fnlSize = blkSize - m_cipherPadding.GetPaddingLength(outBuffer, 0);
             Buffer.BlockCopy(outBuffer, 0, Output, OutOffset, fnlSize);
 	        OutOffset += fnlSize;
 
@@ -769,19 +769,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void BlockEncrypt(Stream InStream, Stream OutStream)
         {
-	        int blkSize = _cipherEngine.BlockSize;
+	        int blkSize = m_cipherEngine.BlockSize;
 	        long inpSize = (InStream.Length - InStream.Position);
 	        long alnSize = (inpSize / blkSize) * blkSize;
 	        long count = 0;
 	        byte[] inpBuffer = new byte[blkSize];
 	        byte[] outBuffer = new byte[blkSize];
 
-	        _cipherEngine.IsParallel = false;
+	        m_cipherEngine.IsParallel = false;
 
 	        while (count != alnSize)
 	        {
 		        InStream.Read(inpBuffer, 0, blkSize);
-		        _cipherEngine.Transform(inpBuffer, outBuffer);
+		        m_cipherEngine.Transform(inpBuffer, outBuffer);
 		        OutStream.Write(outBuffer, 0, blkSize);
 		        count += blkSize;
                 CalculateProgress(inpSize, OutStream.Position);
@@ -791,8 +791,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 	        {
 		        int fnlSize = (int)(inpSize - alnSize);
 		        InStream.Read(inpBuffer, 0, fnlSize);
-		        _cipherPadding.AddPadding(inpBuffer, fnlSize);
-		        _cipherEngine.Transform(inpBuffer, outBuffer);
+		        m_cipherPadding.AddPadding(inpBuffer, fnlSize);
+		        m_cipherEngine.Transform(inpBuffer, outBuffer);
 		        OutStream.Write(outBuffer, 0, blkSize);
 		        count += blkSize;
 	        }
@@ -802,16 +802,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void BlockEncrypt(byte[] Input, int InOffset, ref byte[] Output, int OutOffset)
         {
-	        int blkSize = _cipherEngine.BlockSize;
+	        int blkSize = m_cipherEngine.BlockSize;
 	        long inpSize = (Input.Length - InOffset);
 	        long alnSize = (inpSize / blkSize) * blkSize;
 	        long count = 0;
 
-	        _cipherEngine.IsParallel = false;
+	        m_cipherEngine.IsParallel = false;
 
 	        while (count != alnSize)
 	        {
-		        _cipherEngine.Transform(Input, InOffset, Output, OutOffset);
+		        m_cipherEngine.Transform(Input, InOffset, Output, OutOffset);
 		        InOffset += blkSize;
 		        OutOffset += blkSize;
 		        count += blkSize;
@@ -823,9 +823,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 		        int fnlSize = (int)(inpSize - alnSize);
 		        byte[] inpBuffer = new byte[blkSize];
                 Buffer.BlockCopy(Input, InOffset, inpBuffer, 0, fnlSize);
-		        _cipherPadding.AddPadding(inpBuffer, fnlSize);
+		        m_cipherPadding.AddPadding(inpBuffer, fnlSize);
 		        byte[] outBuffer = new byte[blkSize];
-		        _cipherEngine.Transform(inpBuffer, 0, outBuffer, 0);
+		        m_cipherEngine.Transform(inpBuffer, 0, outBuffer, 0);
 		        if (Output.Length != OutOffset + blkSize)
                     Array.Resize(ref Output, OutOffset + blkSize);
                 Buffer.BlockCopy(outBuffer, 0, Output, OutOffset, blkSize);
@@ -837,20 +837,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void ParallelCTR(Stream InStream, Stream OutStream)
         {
-	        int blkSize = _parallelBlockSize;
+	        int blkSize = m_parallelBlockSize;
 	        long inpSize = (InStream.Length - InStream.Position);
 	        long alnSize = (inpSize / blkSize) * blkSize;
 	        long count = 0;
 	        byte[] inpBuffer = new byte[blkSize];
 	        byte[] outBuffer = new byte[blkSize];
 
-	        _cipherEngine.IsParallel = true;
-	        _cipherEngine.ParallelBlockSize = blkSize;
+	        m_cipherEngine.IsParallel = true;
+	        m_cipherEngine.ParallelBlockSize = blkSize;
 
 	        while (count != alnSize)
 	        {
 		        InStream.Read(inpBuffer, 0, blkSize);
-		        _cipherEngine.Transform(inpBuffer, outBuffer);
+		        m_cipherEngine.Transform(inpBuffer, outBuffer);
 		        OutStream.Write(outBuffer, 0, blkSize);
 		        count += blkSize;
                 CalculateProgress(inpSize, OutStream.Position);
@@ -862,7 +862,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 		        Array.Resize(ref inpBuffer, cnkSize);
 		        InStream.Read(inpBuffer, 0, cnkSize);
 		        Array.Resize(ref outBuffer, cnkSize);
-		        _cipherEngine.Transform(inpBuffer, outBuffer);
+		        m_cipherEngine.Transform(inpBuffer, outBuffer);
 		        OutStream.Write(outBuffer, 0, cnkSize);
 		        count += cnkSize;
 	        }
@@ -872,18 +872,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void ParallelCTR(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
-	        int blkSize = _parallelBlockSize;
+	        int blkSize = m_parallelBlockSize;
 	        long inpSize = (Input.Length - InOffset);
 	        long alnSize = (inpSize / blkSize) * blkSize;
 	        long count = 0;
 
-	        _cipherEngine.IsParallel = true;
-	        _cipherEngine.ParallelBlockSize = blkSize;
+	        m_cipherEngine.IsParallel = true;
+	        m_cipherEngine.ParallelBlockSize = blkSize;
 
 	        // parallel blocks
 	        while (count != alnSize)
 	        {
-		        _cipherEngine.Transform(Input, InOffset, Output, OutOffset);
+		        m_cipherEngine.Transform(Input, InOffset, Output, OutOffset);
 		        InOffset += blkSize;
 		        OutOffset += blkSize;
 		        count += blkSize;
@@ -896,7 +896,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 		        byte[] inpBuffer = new byte[cnkSize];
                 Buffer.BlockCopy(Input, InOffset, inpBuffer, 0, cnkSize);
 		        byte[] outBuffer = new byte[cnkSize];
-		        _cipherEngine.Transform(inpBuffer, outBuffer);
+		        m_cipherEngine.Transform(inpBuffer, outBuffer);
                 Buffer.BlockCopy(outBuffer, 0, Output, OutOffset, cnkSize);
 		        count += cnkSize;
 	        }
@@ -906,20 +906,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void ParallelDecrypt(Stream InStream, Stream OutStream)
         {
-	        int blkSize = _parallelBlockSize;
+	        int blkSize = m_parallelBlockSize;
 	        long inpSize = (InStream.Length - InStream.Position);
 	        long alnSize = (inpSize / blkSize) * blkSize;
 	        long count = 0;
 	        byte[] inpBuffer = new byte[blkSize];
 	        byte[] outBuffer = new byte[blkSize];
 
-	        _cipherEngine.IsParallel = true;
-	        _cipherEngine.ParallelBlockSize = blkSize;
+	        m_cipherEngine.IsParallel = true;
+	        m_cipherEngine.ParallelBlockSize = blkSize;
 
 	        while (count != alnSize)
 	        {
 		        InStream.Read(inpBuffer, 0, blkSize);
-		        _cipherEngine.Transform(inpBuffer, outBuffer);
+		        m_cipherEngine.Transform(inpBuffer, outBuffer);
 		        OutStream.Write(outBuffer, 0, blkSize);
 		        count += blkSize;
                 CalculateProgress(inpSize, OutStream.Position);
@@ -936,18 +936,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void ParallelDecrypt(byte[] Input, int InOffset, ref byte[] Output, int OutOffset)
         {
-	        int blkSize = _parallelBlockSize;
+	        int blkSize = m_parallelBlockSize;
 	        long inpSize = (Input.Length - InOffset);
 	        long alnSize = (inpSize / blkSize) * blkSize;
 	        long count = 0;
 
-	        _cipherEngine.IsParallel = true;
-	        _cipherEngine.ParallelBlockSize = blkSize;
+	        m_cipherEngine.IsParallel = true;
+	        m_cipherEngine.ParallelBlockSize = blkSize;
 
 	        // parallel
 	        while (count != alnSize)
 	        {
-		        _cipherEngine.Transform(Input, InOffset, Output, OutOffset);
+		        m_cipherEngine.Transform(Input, InOffset, Output, OutOffset);
 		        InOffset += blkSize;
 		        OutOffset += blkSize;
 		        count += blkSize;
@@ -965,20 +965,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void ParallelStream(Stream InStream, Stream OutStream)
         {
-	        int blkSize = _parallelBlockSize;
+	        int blkSize = m_parallelBlockSize;
 	        long inpSize = (InStream.Length - InStream.Position);
 	        long alnSize = (inpSize / blkSize) * blkSize;
 	        long count = 0;
 	        byte[] inpBuffer = new byte[blkSize];
 	        byte[] outBuffer = new byte[blkSize];
 
-	        _streamCipher.IsParallel = true;
-	        _streamCipher.ParallelBlockSize = blkSize;
+	        m_streamCipher.IsParallel = true;
+	        m_streamCipher.ParallelBlockSize = blkSize;
 
 	        while (count != alnSize)
 	        {
 		        InStream.Read(inpBuffer, 0, blkSize);
-		        _streamCipher.Transform(inpBuffer, outBuffer);
+		        m_streamCipher.Transform(inpBuffer, outBuffer);
 		        OutStream.Write(outBuffer, 0, blkSize);
 		        count += blkSize;
                 CalculateProgress(inpSize, OutStream.Position);
@@ -990,7 +990,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 		        Array.Resize(ref inpBuffer, cnkSize);
 		        InStream.Read(inpBuffer, 0, cnkSize);
 		        Array.Resize(ref outBuffer, cnkSize);
-		        _streamCipher.Transform(inpBuffer, outBuffer);
+		        m_streamCipher.Transform(inpBuffer, outBuffer);
 		        OutStream.Write(outBuffer, 0, cnkSize);
 		        count += cnkSize;
 	        }
@@ -1000,18 +1000,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void ParallelStream(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
-	        int blkSize = _parallelBlockSize;
+	        int blkSize = m_parallelBlockSize;
 	        long inpSize = (Input.Length - InOffset);
 	        long alnSize = (inpSize / blkSize) * blkSize;
 	        long count = 0;
 
-	        _streamCipher.IsParallel = true;
-	        _streamCipher.ParallelBlockSize = blkSize;
+	        m_streamCipher.IsParallel = true;
+	        m_streamCipher.ParallelBlockSize = blkSize;
 
 	        // parallel blocks
 	        while (count != alnSize)
 	        {
-		        _streamCipher.Transform(Input, InOffset, Output, OutOffset);
+		        m_streamCipher.Transform(Input, InOffset, Output, OutOffset);
 		        InOffset += blkSize;
 		        OutOffset += blkSize;
 		        count += blkSize;
@@ -1024,7 +1024,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 		        byte[] inpBuffer = new byte[cnkSize];
                 Buffer.BlockCopy(Input, InOffset, inpBuffer, 0, cnkSize);
 		        byte[] outBuffer = new byte[cnkSize];
-		        _streamCipher.Transform(inpBuffer, outBuffer);
+		        m_streamCipher.Transform(inpBuffer, outBuffer);
                 Buffer.BlockCopy(outBuffer, 0, Output, OutOffset, cnkSize);
 		        count += cnkSize;
 	        }
@@ -1034,19 +1034,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void ProcessStream(Stream InStream, Stream OutStream)
         {
-	        int blkSize = _streamCipher.BlockSize;
+	        int blkSize = m_streamCipher.BlockSize;
 	        long inpSize = (InStream.Length - InStream.Position);
 	        long alnSize = (inpSize / blkSize) * blkSize;
 	        long count = 0;
 	        byte[] inpBuffer = new byte[blkSize];
 	        byte[] outBuffer = new byte[blkSize];
 
-	        _streamCipher.IsParallel = false;
+	        m_streamCipher.IsParallel = false;
 
 	        while (count != alnSize)
 	        {
 		        InStream.Read(inpBuffer, 0, blkSize);
-		        _streamCipher.Transform(inpBuffer, outBuffer);
+		        m_streamCipher.Transform(inpBuffer, outBuffer);
 		        OutStream.Write(outBuffer, 0, blkSize);
 		        count += blkSize;
                 CalculateProgress(inpSize, OutStream.Position);
@@ -1058,7 +1058,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 		        Array.Resize(ref inpBuffer, cnkSize);
 		        InStream.Read(inpBuffer, 0, cnkSize);
 		        Array.Resize(ref outBuffer, cnkSize);
-		        _streamCipher.Transform(inpBuffer, outBuffer);
+		        m_streamCipher.Transform(inpBuffer, outBuffer);
 		        OutStream.Write(outBuffer, 0, cnkSize);
 		        count += cnkSize;
 	        }
@@ -1068,16 +1068,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void ProcessStream(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
-	        int blkSize = _streamCipher.BlockSize;
+	        int blkSize = m_streamCipher.BlockSize;
 	        long inpSize = (Input.Length - InOffset);
 	        long alnSize = (inpSize / blkSize) * blkSize;
 	        long count = 0;
 
-	        _streamCipher.IsParallel = false;
+	        m_streamCipher.IsParallel = false;
 
 	        while (count != alnSize)
 	        {
-		        _streamCipher.Transform(Input, InOffset, Output, OutOffset);
+		        m_streamCipher.Transform(Input, InOffset, Output, OutOffset);
 		        InOffset += blkSize;
 		        OutOffset += blkSize;
 		        count += blkSize;
@@ -1091,7 +1091,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 		        byte[] inpBuffer = new byte[cnkSize];
                 Buffer.BlockCopy(Input, InOffset, inpBuffer, 0, cnkSize);
 		        byte[] outBuffer = new byte[cnkSize];
-		        _streamCipher.Transform(inpBuffer, outBuffer);
+		        m_streamCipher.Transform(inpBuffer, outBuffer);
                 Buffer.BlockCopy(outBuffer, 0, Output, OutOffset, cnkSize);
 		        count += cnkSize;
 	        }
@@ -1105,32 +1105,32 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         {
 	        int cipherBlock = 0;
 
-	        if (_isStreamCipher)
-		        cipherBlock = _streamCipher.BlockSize;
+	        if (m_isStreamCipher)
+		        cipherBlock = m_streamCipher.BlockSize;
 	        else
-		        cipherBlock = _cipherEngine.BlockSize;
+		        cipherBlock = m_cipherEngine.BlockSize;
 
 	        // parallel min check
 	        if (Length < ParallelMinimumSize)
 	        {
-		        _parallelBlockSize = cipherBlock;
+		        m_parallelBlockSize = cipherBlock;
 	        }
 
-	        if (_parallelBlockProfile == BlockProfiles.ProgressProfile)
+	        if (m_parallelBlockProfile == BlockProfiles.ProgressProfile)
 	        {
 		        // get largest 10 base block 
 		        int dsr = 10;
 		        while (Length / dsr > ParallelMaximumSize)
 			        dsr *= 2;
 
-		        _parallelBlockSize = (int)(Length / dsr);
+		        m_parallelBlockSize = (int)(Length / dsr);
 	        }
-	        else if (_parallelBlockProfile == BlockProfiles.SpeedProfile)
+	        else if (m_parallelBlockProfile == BlockProfiles.SpeedProfile)
 	        {
 		        if (Length < PARALLEL_DEFBLOCK)
 		        {
 			        // small block
-			        _parallelBlockSize = (int)Length;
+			        m_parallelBlockSize = (int)Length;
 		        }
 		        else
 		        {
@@ -1142,35 +1142,35 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
                         while (dsr > ParallelMaximumSize)
                             dsr /= 2;
 
-                        _parallelBlockSize = (int)dsr;
+                        m_parallelBlockSize = (int)dsr;
                     }
                     else
                     {
-                        _parallelBlockSize = (int)dsr;
+                        m_parallelBlockSize = (int)dsr;
                     }
 		        }
 	        }
 
-	        if (_isParallel && !_isCounterMode && !_isEncryption && !_isStreamCipher)
+	        if (m_isParallel && !m_isCounterMode && !m_isEncryption && !m_isStreamCipher)
 	        {
-		        if (_parallelBlockSize % ParallelMinimumSize > 0)
-			        _parallelBlockSize -= (_parallelBlockSize % ParallelMinimumSize);
+		        if (m_parallelBlockSize % ParallelMinimumSize > 0)
+			        m_parallelBlockSize -= (m_parallelBlockSize % ParallelMinimumSize);
 		        else
-			        _parallelBlockSize -= ParallelMinimumSize;
+			        m_parallelBlockSize -= ParallelMinimumSize;
 	        }
 	        else
 	        {
-                if (_parallelBlockSize % ParallelMinimumSize != 0)
-		            _parallelBlockSize -= (_parallelBlockSize % ParallelMinimumSize);
+                if (m_parallelBlockSize % ParallelMinimumSize != 0)
+		            m_parallelBlockSize -= (m_parallelBlockSize % ParallelMinimumSize);
 	        }
 
             // set the ciphers block size
-            if (_parallelBlockSize >= ParallelMinimumSize)
+            if (m_parallelBlockSize >= ParallelMinimumSize)
             {
-                if (!_isStreamCipher)
-                    _cipherEngine.ParallelBlockSize = _parallelBlockSize;
+                if (!m_isStreamCipher)
+                    m_cipherEngine.ParallelBlockSize = m_parallelBlockSize;
                 else
-                    _streamCipher.ParallelBlockSize = _parallelBlockSize;
+                    m_streamCipher.ParallelBlockSize = m_parallelBlockSize;
             }
         }
 
@@ -1256,38 +1256,38 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void ParametersCheck()
         {
-            if (_isStreamCipher)
+            if (m_isStreamCipher)
             {
-                _blockSize = _streamCipher.BlockSize;
-                _isCounterMode = false;
-                _isParallel = _streamCipher.IsParallel;
-                _parallelBlockSize = _streamCipher.ParallelBlockSize;
+                m_blockSize = m_streamCipher.BlockSize;
+                m_isCounterMode = false;
+                m_isParallel = m_streamCipher.IsParallel;
+                m_parallelBlockSize = m_streamCipher.ParallelBlockSize;
             }
             else
             {
-                _blockSize = _cipherEngine.BlockSize;
-                _isCounterMode = _cipherEngine.Enumeral == CipherModes.CTR;
+                m_blockSize = m_cipherEngine.BlockSize;
+                m_isCounterMode = m_cipherEngine.Enumeral == CipherModes.CTR;
 
-                if (_cipherEngine.Enumeral == CipherModes.CBC || _cipherEngine.Enumeral == CipherModes.CFB || _isCounterMode)
+                if (m_cipherEngine.Enumeral == CipherModes.CBC || m_cipherEngine.Enumeral == CipherModes.CFB || m_isCounterMode)
                 {
-                    _isParallel = _cipherEngine.IsParallel && !(!_isCounterMode && _cipherEngine.IsEncryption);
-                    _parallelBlockSize = _cipherEngine.ParallelBlockSize;
+                    m_isParallel = m_cipherEngine.IsParallel && !(!m_isCounterMode && m_cipherEngine.IsEncryption);
+                    m_parallelBlockSize = m_cipherEngine.ParallelBlockSize;
                 }
                 else
                 {
-                    _isParallel = false;
-                    _parallelBlockSize = _blockSize;
+                    m_isParallel = false;
+                    m_parallelBlockSize = m_blockSize;
                 }
             }
         }
         
 	    private void SetScope()
 	    {
-            _processorCount = Environment.ProcessorCount;
-		    if (_processorCount % 2 != 0)
-			    _processorCount--;
-		    if (_processorCount > 1)
-			    _isParallel = true;
+            m_processorCount = Environment.ProcessorCount;
+		    if (m_processorCount % 2 != 0)
+			    m_processorCount--;
+		    if (m_processorCount > 1)
+			    m_isParallel = true;
 	    }
         #endregion
 
@@ -1303,31 +1303,31 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
   
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_destroyEngine)
+                    if (m_destroyEngine)
                     {
-                        if (_cipherEngine != null)
+                        if (m_cipherEngine != null)
                         {
-                            _cipherEngine.Dispose();
-                            _cipherEngine = null;
+                            m_cipherEngine.Dispose();
+                            m_cipherEngine = null;
                         }
-                        if (_cipherPadding != null)
+                        if (m_cipherPadding != null)
                         {
-                            _cipherPadding = null;
+                            m_cipherPadding = null;
                         }
-                        if (_streamCipher != null)
+                        if (m_streamCipher != null)
                         {
-                            _streamCipher.Dispose();
-                            _streamCipher = null;
+                            m_streamCipher.Dispose();
+                            m_streamCipher = null;
                         }
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

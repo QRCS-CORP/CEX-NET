@@ -95,28 +95,28 @@ namespace VTDev.Libraries.CEXEngine.Tools
         #endregion
 
         #region Fields
-        private long[] _binCount = new long[256];
-        private static double _currentProgress = 0;
-        private double[] _entProbability = new double[256];
-        private double _inCirc = 0;
-        private bool _isDisposed = false;
-        private double[] _meanSamples = new double[SUB_SAMPLES];
-        private long _monteAccum = 0;
-        private double _montePi = 0;
-        private uint[] _montePiComp = new uint[MONTE_COUNT];
-        private long _monteTries = 0;
-        private double _monteX = 0;
-        private double _monteY = 0;
-        private double[] _piSamples = new double[SUB_SAMPLES];
-        private long _totalBytes = 0;
-        private double _serialCC = 0;
-        private double _serialLast = 0;
-        private double _serialRun = 0;
-        private double _serialT1 = 0;
-        private double _serialT2 = 0;
-        private double _serialT3 = 0;
-        private double _serialU0 = 0;
-        private readonly double[,] _chiSqt = new double[2, 10] 
+        private long[] m_binCount = new long[256];
+        private static double m_currentProgress = 0;
+        private double[] m_entProbability = new double[256];
+        private double m_inCirc = 0;
+        private bool m_isDisposed = false;
+        private double[] m_meanSamples = new double[SUB_SAMPLES];
+        private long m_monteAccum = 0;
+        private double m_montePi = 0;
+        private uint[] m_montePiComp = new uint[MONTE_COUNT];
+        private long m_monteTries = 0;
+        private double m_monteX = 0;
+        private double m_monteY = 0;
+        private double[] m_piSamples = new double[SUB_SAMPLES];
+        private long m_totalBytes = 0;
+        private double m_serialCC = 0;
+        private double m_serialLast = 0;
+        private double m_serialRun = 0;
+        private double m_serialT1 = 0;
+        private double m_serialT2 = 0;
+        private double m_serialT3 = 0;
+        private double m_serialU0 = 0;
+        private readonly double[,] m_chiSqt = new double[2, 10] 
 			{
 				{0.5, 0.25, 0.1, 0.05, 0.025, 0.01, 0.005, 0.001, 0.0005, 0.0001}, 
 				{0.0, 0.6745, 1.2816, 1.6449, 1.9600, 2.3263, 2.5758, 3.0902, 3.2905, 3.7190}
@@ -160,7 +160,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
         public EntResult Calculate(string FileName)
         {
             byte[] fileBuffer;
-            _currentProgress = 0;
+            m_currentProgress = 0;
 
             using (FileStream fileStream = new FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.None))
             {
@@ -182,7 +182,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
         /// <returns>A populated <see cref="EntResult"/> class</returns>
         public EntResult Calculate(byte[] Buffer)
         {
-            _currentProgress = 0;
+            m_currentProgress = 0;
             AddSamples(Buffer);
 
             return EndCalculation();
@@ -193,26 +193,26 @@ namespace VTDev.Libraries.CEXEngine.Tools
         /// </summary>
         public void Reset()
         {
-            _binCount = new long[256];
-            _currentProgress = 0;
-            _entProbability = new double[256];
-            _inCirc = Math.Pow(Math.Pow(256.0, (double)(MONTE_COUNT / 2)) - 1, 2.0);
-            _meanSamples = new double[SUB_SAMPLES];
-            _monteAccum = 0;
-            _montePi = 0;
-            _montePiComp = new uint[MONTE_COUNT];
-            _monteTries = 0;
-            _monteX = 0;
-            _monteY = 0;
-            _piSamples = new double[SUB_SAMPLES];
-            _totalBytes = 0;
-            _serialCC = 0;
-            _serialLast = 0;
-            _serialRun = 0;
-            _serialT1 = 0;
-            _serialT2 = 0;
-            _serialT3 = 0;
-            _serialU0 = 0;
+            m_binCount = new long[256];
+            m_currentProgress = 0;
+            m_entProbability = new double[256];
+            m_inCirc = Math.Pow(Math.Pow(256.0, (double)(MONTE_COUNT / 2)) - 1, 2.0);
+            m_meanSamples = new double[SUB_SAMPLES];
+            m_monteAccum = 0;
+            m_montePi = 0;
+            m_montePiComp = new uint[MONTE_COUNT];
+            m_monteTries = 0;
+            m_monteX = 0;
+            m_monteY = 0;
+            m_piSamples = new double[SUB_SAMPLES];
+            m_totalBytes = 0;
+            m_serialCC = 0;
+            m_serialLast = 0;
+            m_serialRun = 0;
+            m_serialT1 = 0;
+            m_serialT2 = 0;
+            m_serialT3 = 0;
+            m_serialU0 = 0;
         }
         #endregion
 
@@ -229,10 +229,10 @@ namespace VTDev.Libraries.CEXEngine.Tools
             {
                 double pos = Position;
                 double percent = Math.Round((double)(pos / Maximum) * 100, 0);
-                if (percent > _currentProgress)
+                if (percent > m_currentProgress)
                 {
                     ProgressCounter((long)percent);
-                    _currentProgress = percent;
+                    m_currentProgress = percent;
                 }
             }
         }
@@ -243,20 +243,20 @@ namespace VTDev.Libraries.CEXEngine.Tools
         private void Init()
         {
             // Reset Monte Carlo accumulator pointer
-            _monteAccum = 0;
+            m_monteAccum = 0;
             // Clear Monte Carlo tries
-            _monteTries = 0;
+            m_monteTries = 0;
             // Clear Monte Carlo inside count
-            _inCirc = 65535.0 * 65535.0;
+            m_inCirc = 65535.0 * 65535.0;
             // Mark first time for serial correlation
-            _serialT1 = _serialT2 = _serialT3 = 0.0;
+            m_serialT1 = m_serialT2 = m_serialT3 = 0.0;
             // Clear serial correlation terms
-            _inCirc = Math.Pow(Math.Pow(256.0, (double)(MONTE_COUNT / 2)) - 1, 2.0);
+            m_inCirc = Math.Pow(Math.Pow(256.0, (double)(MONTE_COUNT / 2)) - 1, 2.0);
 
             for (int i = 0; i < 256; i++)
-                _binCount[i] = 0;
+                m_binCount[i] = 0;
 
-            _totalBytes = 0;
+            m_totalBytes = 0;
         }
 
         /// <summary>
@@ -273,17 +273,17 @@ namespace VTDev.Libraries.CEXEngine.Tools
 
             if (this.GraphCollection)
             {
-                _piSamples = new double[preProcessLength];
-                _meanSamples = new double[preProcessLength];
+                m_piSamples = new double[preProcessLength];
+                m_meanSamples = new double[preProcessLength];
             }
 
             for (int i = 0; i < Samples.Length; i++)
             {
                 // Update counter for this bin
-                _binCount[(int)Samples[i]]++;
-                _totalBytes++;
+                m_binCount[(int)Samples[i]]++;
+                m_totalBytes++;
                 // Update inside/outside circle counts for Monte Carlo computation of PI
-                _montePiComp[mp++] = Samples[i];
+                m_montePiComp[mp++] = Samples[i];
 
                 // Save character for Monte Carlo
                 if (mp >= MONTE_COUNT)
@@ -291,35 +291,35 @@ namespace VTDev.Libraries.CEXEngine.Tools
                     // Calculate every MONTEN character
                     int mj;
                     mp = 0;
-                    _monteAccum++;
-                    _monteX = _monteY = 0;
+                    m_monteAccum++;
+                    m_monteX = m_monteY = 0;
 
                     for (mj = 0; mj < MONTE_COUNT / 2; mj++)
                     {
-                        _monteX = (_monteX * 256.0) + _montePiComp[mj];
-                        _monteY = (_monteY * 256.0) + _montePiComp[(MONTE_COUNT / 2) + mj];
+                        m_monteX = (m_monteX * 256.0) + m_montePiComp[mj];
+                        m_monteY = (m_monteY * 256.0) + m_montePiComp[(MONTE_COUNT / 2) + mj];
                     }
 
-                    if ((_monteX * _monteX + _monteY * _monteY) <= _inCirc)
-                        _monteTries++;
+                    if ((m_monteX * m_monteX + m_monteY * m_monteY) <= m_inCirc)
+                        m_monteTries++;
                 }
 
                 // Update calculation of serial correlation coefficient
-                _serialRun = (int)Samples[i];
+                m_serialRun = (int)Samples[i];
                 if (sccFirst)
                 {
                     sccFirst = false;
-                    _serialLast = 0;
-                    _serialU0 = _serialRun;
+                    m_serialLast = 0;
+                    m_serialU0 = m_serialRun;
                 }
                 else
                 {
-                    _serialT1 = _serialT1 + _serialLast * _serialRun;
+                    m_serialT1 = m_serialT1 + m_serialLast * m_serialRun;
                 }
 
-                _serialT2 = _serialT2 + _serialRun;
-                _serialT3 = _serialT3 + (_serialRun * _serialRun);
-                _serialLast = _serialRun;
+                m_serialT2 = m_serialT2 + m_serialRun;
+                m_serialT3 = m_serialT3 + (m_serialRun * m_serialRun);
+                m_serialLast = m_serialRun;
 
                 // collect samples for graphs
                 if (this.GraphCollection)
@@ -329,10 +329,10 @@ namespace VTDev.Libraries.CEXEngine.Tools
                         double dataSum = 0.0;
 
                         for (int j = 0; j < 256; j++)
-                            dataSum += ((double)j) * _binCount[j];
+                            dataSum += ((double)j) * m_binCount[j];
 
-                        _meanSamples[counter] = dataSum / _totalBytes;
-                        _piSamples[counter] = 4.0 * (((double)_monteTries) / _monteAccum);
+                        m_meanSamples[counter] = dataSum / m_totalBytes;
+                        m_piSamples[counter] = 4.0 * (((double)m_monteTries) / m_monteAccum);
                         counter++;
                     }
                 }
@@ -342,7 +342,7 @@ namespace VTDev.Libraries.CEXEngine.Tools
                     byte[] b = new byte[16];
                     Buffer.BlockCopy(Samples, Samples.Length - 17, b, 0, 16);
                 }
-                CalculateProgress(_totalBytes, Samples.Length);
+                CalculateProgress(m_totalBytes, Samples.Length);
             }
         }
 
@@ -360,36 +360,36 @@ namespace VTDev.Libraries.CEXEngine.Tools
             int pos = 0;
 
             // Complete calculation of serial correlation coefficient
-            _serialT1 = _serialT1 + _serialLast * _serialU0;
-            _serialT2 = _serialT2 * _serialT2;
-            _serialCC = _totalBytes * _serialT3 - _serialT2;
+            m_serialT1 = m_serialT1 + m_serialLast * m_serialU0;
+            m_serialT2 = m_serialT2 * m_serialT2;
+            m_serialCC = m_totalBytes * m_serialT3 - m_serialT2;
 
-            if (_serialCC == 0.0)
-                _serialCC = -100000;
+            if (m_serialCC == 0.0)
+                m_serialCC = -100000;
             else
-                _serialCC = (_totalBytes * _serialT1 - _serialT2) / _serialCC;
+                m_serialCC = (m_totalBytes * m_serialT1 - m_serialT2) / m_serialCC;
 
             // Scan bins and calculate probability for each bin and Chi-Square distribution
-            double cExp = _totalBytes / 256.0;
+            double cExp = m_totalBytes / 256.0;
 
             // Expected count per bin
             for (int i = 0; i < 256; i++)
             {
-                _entProbability[i] = (double)_binCount[i] / _totalBytes;
-                binVal = _binCount[i] - cExp;
+                m_entProbability[i] = (double)m_binCount[i] / m_totalBytes;
+                binVal = m_binCount[i] - cExp;
                 chiSq = chiSq + (binVal * binVal) / cExp;
-                dataSum += ((double)i) * _binCount[i];
+                dataSum += ((double)i) * m_binCount[i];
             }
 
             // Calculate entropy
             for (int i = 0; i < 256; i++)
             {
-                if (_entProbability[i] > 0.0)
-                    entropy += _entProbability[i] * Log2(1 / _entProbability[i]);
+                if (m_entProbability[i] > 0.0)
+                    entropy += m_entProbability[i] * Log2(1 / m_entProbability[i]);
             }
 
             // Calculate Monte Carlo value for PI from percentage of hits within the circle
-            _montePi = 4.0 * (((double)_monteTries) / _monteAccum);
+            m_montePi = 4.0 * (((double)m_monteTries) / m_monteAccum);
 
             // Calculate probability of observed distribution occurring from the results of the Chi-Square test
             double chip = Math.Sqrt(2.0 * chiSq) - Math.Sqrt(2.0 * 255.0 - 1.0);
@@ -398,13 +398,13 @@ namespace VTDev.Libraries.CEXEngine.Tools
 
             for (pos = 9; pos >= 0; pos--)
             {
-                if (_chiSqt[1, pos] < binVal)
+                if (m_chiSqt[1, pos] < binVal)
                     break;
             }
 
             if (pos < 0) pos = 0;
 
-            chip = (chip >= 0.0) ? _chiSqt[0, pos] : 1.0 - _chiSqt[0, pos];
+            chip = (chip >= 0.0) ? m_chiSqt[0, pos] : 1.0 - m_chiSqt[0, pos];
             double compReductionPct = (8 - entropy) / 8.0;
 
             // Return results
@@ -413,16 +413,16 @@ namespace VTDev.Libraries.CEXEngine.Tools
                 Entropy = entropy,
                 ChiSquare = chiSq,
                 ChiProbability = chip,
-                Mean = dataSum / _totalBytes,
+                Mean = dataSum / m_totalBytes,
                 ExpectedMeanForRandom = 127.5,
-                MonteCarloPiCalc = _montePi,
-                MonteCarloErrorPct = (Math.Abs(Math.PI - _montePi) / Math.PI),
-                SerialCorrelation = _serialCC,
+                MonteCarloPiCalc = m_montePi,
+                MonteCarloErrorPct = (Math.Abs(Math.PI - m_montePi) / Math.PI),
+                SerialCorrelation = m_serialCC,
                 OptimumCompressionReductionPct = compReductionPct,
-                OccuranceCount = _binCount,
-                NumberOfSamples = _totalBytes,
-                MeanSamples = _meanSamples,
-                PiSamples = _piSamples
+                OccuranceCount = m_binCount,
+                NumberOfSamples = m_totalBytes,
+                MeanSamples = m_meanSamples,
+                PiSamples = m_piSamples
             };
 
             return result;
@@ -454,25 +454,25 @@ namespace VTDev.Libraries.CEXEngine.Tools
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed)
+            if (!m_isDisposed)
             {
                 if (Disposing)
                 {
                     // clear the arrays
-                    if (_binCount != null)
-                        Array.Clear(_binCount, 0, _binCount.Length);
-                    if (_entProbability != null)
-                        Array.Clear(_entProbability, 0, _entProbability.Length);
-                    if (_meanSamples != null)
-                        Array.Clear(_meanSamples, 0, _meanSamples.Length);
-                    if (_montePiComp != null)
-                        Array.Clear(_montePiComp, 0, _montePiComp.Length);
-                    if (_piSamples != null)
-                        Array.Clear(_piSamples, 0, _piSamples.Length);
-                    if (_chiSqt != null)
-                        Array.Clear(_chiSqt, 0, _chiSqt.Length);
+                    if (m_binCount != null)
+                        Array.Clear(m_binCount, 0, m_binCount.Length);
+                    if (m_entProbability != null)
+                        Array.Clear(m_entProbability, 0, m_entProbability.Length);
+                    if (m_meanSamples != null)
+                        Array.Clear(m_meanSamples, 0, m_meanSamples.Length);
+                    if (m_montePiComp != null)
+                        Array.Clear(m_montePiComp, 0, m_montePiComp.Length);
+                    if (m_piSamples != null)
+                        Array.Clear(m_piSamples, 0, m_piSamples.Length);
+                    if (m_chiSqt != null)
+                        Array.Clear(m_chiSqt, 0, m_chiSqt.Length);
                 }
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

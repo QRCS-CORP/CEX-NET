@@ -86,10 +86,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         #endregion
 
         #region Fields
-        private bool _isDisposed;
-        private RLWEParameters _rlweParams;
-        private IRandom _rndEngine;
-        private bool _frcLinear = false;
+        private bool m_isDisposed;
+        private RLWEParameters m_rlweParams;
+        private IRandom m_rndEngine;
+        private bool m_frcLinear = false;
         #endregion
 
         #region Properties
@@ -116,10 +116,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             if (CipherParams.RandomEngine == Prngs.PBPrng)
                 throw new CryptoAsymmetricException("RLWEKeyGenerator:Ctor", "Passphrase based digest and CTR generators must be pre-initialized, use the other constructor!", new ArgumentException());
 
-            _frcLinear = ParallelUtils.ForceLinear;
+            m_frcLinear = ParallelUtils.ForceLinear;
             ParallelUtils.ForceLinear = !Parallel;
-            _rlweParams = CipherParams;
-            _rndEngine = GetPrng(CipherParams.RandomEngine);
+            m_rlweParams = CipherParams;
+            m_rndEngine = GetPrng(CipherParams.RandomEngine);
         }
 
         /// <summary>
@@ -131,9 +131,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <param name="Parallel">Use parallel processing when generating a key; set to false if using a passphrase type generator (default is true)</param>
         public RLWEKeyGenerator(RLWEParameters CipherParams, IRandom RngEngine, bool Parallel = true)
         {
-            _rlweParams = CipherParams;
-            _rndEngine = RngEngine;
-            _frcLinear = ParallelUtils.ForceLinear;
+            m_rlweParams = CipherParams;
+            m_rndEngine = RngEngine;
+            m_frcLinear = ParallelUtils.ForceLinear;
 
             // passphrase gens must be linear processed
             if (RngEngine.GetType().Equals(typeof(PBPRng)))
@@ -163,10 +163,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <returns>A RLWEKeyPair containing public and private keys</returns>
         public IAsymmetricKeyPair GenerateKeyPair()
         {
-            if (_rlweParams.N == 512)
-                return new NTT512(_rndEngine).Generate();
+            if (m_rlweParams.N == 512)
+                return new NTT512(m_rndEngine).Generate();
             else
-                return new NTT256(_rndEngine).Generate();
+                return new NTT256(m_rndEngine).Generate();
         }
 
         /// <summary>
@@ -180,7 +180,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <returns>A populated IAsymmetricKeyPair</returns>
         public IAsymmetricKeyPair GenerateKeyPair(byte[] Passphrase, byte[] Salt)
         {
-            using (IDigest dgt = GetDigest(_rlweParams.Digest))
+            using (IDigest dgt = GetDigest(m_rlweParams.Digest))
             {
                 using (IRandom rnd = new PBPRng(dgt, Passphrase, Salt, 10000, false))
                     return GenerateKeyPair();
@@ -234,26 +234,26 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// </summary>
         public void Dispose()
         {
-            ParallelUtils.ForceLinear = _frcLinear;
+            ParallelUtils.ForceLinear = m_frcLinear;
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_rndEngine != null)
+                    if (m_rndEngine != null)
                     {
-                        _rndEngine.Dispose();
-                        _rndEngine = null;
+                        m_rndEngine.Dispose();
+                        m_rndEngine = null;
                     }
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

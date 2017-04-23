@@ -73,21 +73,17 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                     key = HexConverter.Decode(keyStr.Substring(i, 32));
                     pln = HexConverter.Decode(plnStr.Substring(i, 32));
 
-                    // reversed endian order in Nessie test vectors
+                    // *note* reversed endian ordered keys in Nessie test vectors
                     Array.Reverse(key);
-                    Array.Reverse(cip);
-                    Array.Reverse(pln);
 
                     if (doMonte)
                     {
                         mnt = HexConverter.Decode(mntStr.Substring(i, 32));
-                        Array.Reverse(mnt);
                         // monte carlo 100 rounds
                         MonteCarloTest(key, pln, mnt);
                         rcount += 100;
                         // 1000 rounds
                         mnt = HexConverter.Decode(mnt1kStr.Substring(i, 32));
-                        Array.Reverse(mnt);
                         MonteCarloTest(key, pln, mnt, 1000);
                         rcount += 1000;
                     }
@@ -114,19 +110,15 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                     pln = HexConverter.Decode(plnStr.Substring(i, 32));
 
                     Array.Reverse(key);
-                    Array.Reverse(cip);
-                    Array.Reverse(pln);
 
                     if (doMonte)
                     {
                         mnt = HexConverter.Decode(mntStr.Substring(i, 32));
-                        Array.Reverse(mnt);
                         // monte carlo 100 rounds
                         MonteCarloTest(key, pln, mnt);
                         rcount += 100;
                         // 1000 rounds
                         mnt = HexConverter.Decode(mnt1kStr.Substring(i, 32));
-                        Array.Reverse(mnt);
                         MonteCarloTest(key, pln, mnt, 1000);
                         rcount += 1000;
                     }
@@ -153,19 +145,15 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
                     pln = HexConverter.Decode(plnStr.Substring(i, 32));
 
                     Array.Reverse(key);
-                    Array.Reverse(cip);
-                    Array.Reverse(pln);
 
                     if (doMonte)
                     {
                         mnt = HexConverter.Decode(mntStr.Substring(i, 32));
-                        Array.Reverse(mnt);
                         // monte carlo 100 rounds
                         MonteCarloTest(key, pln, mnt);
                         rcount += 100;
                         // 1000 rounds
                         mnt = HexConverter.Decode(mnt1kStr.Substring(i, 32));
-                        Array.Reverse(mnt);
                         MonteCarloTest(key, pln, mnt, 1000);
                         rcount += 1000;
                     }

@@ -73,7 +73,7 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
         {
             byte[] outBytes = new byte[Size];
 
-            using (KDF2Drbg gen = new KDF2Drbg(new SHA256()))
+            using (KDF2 gen = new KDF2(new SHA256()))
             {
                 gen.Initialize(Salt);
                 gen.Generate(outBytes, 0, Size);

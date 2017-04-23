@@ -12,7 +12,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
     {
         #region Private Fields
         // Break point in digits (number of int elements) between Karatsuba and Pencil and Paper multiply
-        private static readonly int _whenUseKaratsuba = 63;
+        private static readonly int m_whenUseKaratsuba = 63;
 
         // An array with powers of ten that fit in the type int, (0^0,10^1,...,10^9)
         private static readonly int[] tenPows = 
@@ -21,7 +21,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         };
 
         // An array with powers of five that fit in the type int. (5^0,5^1,...,5^13)
-        static readonly int[] fivePows = 
+        static readonly int[] m_fivePows = 
         {
             1, 5, 25, 125, 625, 3125, 15625, 78125, 390625, 1953125, 9765625, 48828125, 244140625, 1220703125
         };
@@ -31,12 +31,12 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <summary>
         /// An array with the first powers of ten in BigInteger version: 10^0,10^1,...,10^31)
         /// </summary>
-        internal static readonly BigInteger[] bigTenPows = new BigInteger[32];
+        internal static readonly BigInteger[] m_bigTenPows = new BigInteger[32];
 
         /// <summary>
         /// An array with the first powers of five in BigInteger version: (5^0,5^1,...,5^31)
         /// </summary>
-        internal static readonly BigInteger[] bigFivePows = new BigInteger[32];
+        internal static readonly BigInteger[] m_bigFivePows = new BigInteger[32];
         #endregion
 
         #region Constructors
@@ -47,14 +47,14 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
             for (i = 0; i <= 18; i++)
             {
-                bigFivePows[i] = BigInteger.ValueOf(fivePow);
-                bigTenPows[i] = BigInteger.ValueOf(fivePow << i);
+                m_bigFivePows[i] = BigInteger.ValueOf(fivePow);
+                m_bigTenPows[i] = BigInteger.ValueOf(fivePow << i);
                 fivePow *= 5;
             }
-            for (; i < bigTenPows.Length; i++)
+            for (; i < m_bigTenPows.Length; i++)
             {
-                bigFivePows[i] = bigFivePows[i - 1].Multiply(bigFivePows[1]);
-                bigTenPows[i] = bigTenPows[i - 1].Multiply(BigInteger.Ten);
+                m_bigFivePows[i] = m_bigFivePows[i - 1].Multiply(m_bigFivePows[1]);
+                m_bigTenPows[i] = m_bigTenPows[i - 1].Multiply(BigInteger.Ten);
             }
         }
 
@@ -122,12 +122,12 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         internal static BigInteger MultiplyByFivePow(BigInteger X, int Exponent)
         {
             // PRE: exp >= 0
-            if (Exponent < fivePows.Length)
-                return MultiplyByPositiveInt(X, fivePows[Exponent]);
-            else if (Exponent < bigFivePows.Length)
-                return X.Multiply(bigFivePows[Exponent]);
+            if (Exponent < m_fivePows.Length)
+                return MultiplyByPositiveInt(X, m_fivePows[Exponent]);
+            else if (Exponent < m_bigFivePows.Length)
+                return X.Multiply(m_bigFivePows[Exponent]);
             else
-                return X.Multiply(bigFivePows[1].Pow(Exponent));// Large powers of five
+                return X.Multiply(m_bigFivePows[1].Pow(Exponent));// Large powers of five
         }
 
         /// <summary>
@@ -140,12 +140,12 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>X * Factor</returns>
         internal static BigInteger MultiplyByPositiveInt(BigInteger X, int Factor)
         {
-            int resSign = X._sign;
+            int resSign = X.m_sign;
             if (resSign == 0)
                 return BigInteger.Zero;
             
-            int aNumberLength = X._numberLength;
-            int[] aDigits = X._digits;
+            int aNumberLength = X.m_numberLength;
+            int[] aDigits = X.m_digits;
 
             if (aNumberLength == 1)
             {
@@ -206,10 +206,10 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                     res = res.Multiply(acc);
                 
                 // acc = base^(2^i), a limit where karatsuba performs a faster square than the square algorithm
-                if (acc._numberLength == 1)
+                if (acc.m_numberLength == 1)
                     acc = acc.Multiply(acc); 
                 else
-                    acc = new BigInteger(1, Square(acc._digits, acc._numberLength, new int[acc._numberLength << 1]));
+                    acc = new BigInteger(1, Square(acc.m_digits, acc.m_numberLength, new int[acc.m_numberLength << 1]));
             }
             // exponent == 1, multiply one more time
             res = res.Multiply(acc);
@@ -232,12 +232,12 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             int intExp = (int)Exponent;
 
             // The largest power that fit in 'long' type
-            if (Exponent < bigTenPows.Length)
-                return bigTenPows[intExp];
+            if (Exponent < m_bigTenPows.Length)
+                return m_bigTenPows[intExp];
             else if (Exponent <= 50) // To calculate: 10^exp
                 return BigInteger.Ten.Pow(intExp);
             else if (Exponent <= 1000)// To calculate: 5^exp * 2^exp
-                return bigFivePows[1].Pow(intExp).ShiftLeft(intExp);
+                return m_bigFivePows[1].Pow(intExp).ShiftLeft(intExp);
 
             // "LARGE POWERS"
             // To check if there is free memory to allocate a BigInteger of the
@@ -248,11 +248,11 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 throw new ArithmeticException("power of ten too big");
             if (Exponent <= int.MaxValue)
                 // To calculate:    5^exp * 2^exp
-                return bigFivePows[1].Pow(intExp).ShiftLeft(intExp);
+                return m_bigFivePows[1].Pow(intExp).ShiftLeft(intExp);
 
             // "HUGE POWERS"
             // This branch probably won't be executed since the power of ten is too big. To calculate: 5^exp
-            BigInteger powerOfFive = bigFivePows[1].Pow(int.MaxValue);
+            BigInteger powerOfFive = m_bigFivePows[1].Pow(int.MaxValue);
             BigInteger res = powerOfFive;
             long longExp = Exponent - int.MaxValue;
 
@@ -262,7 +262,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 res = res.Multiply(powerOfFive);
                 longExp -= int.MaxValue;
             }
-            res = res.Multiply(bigFivePows[1].Pow(intExp));
+            res = res.Multiply(m_bigFivePows[1].Pow(intExp));
 
             // To calculate: 5^exp << exp
             res = res.ShiftLeft(int.MaxValue);
@@ -298,18 +298,18 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             // Performs the multiplication with the Karatsuba's algorithm
             BigInteger temp;
-            if (Y._numberLength > X._numberLength)
+            if (Y.m_numberLength > X.m_numberLength)
             {
                 temp = X;
                 X = Y;
                 Y = temp;
             }
 
-            if (Y._numberLength < _whenUseKaratsuba)
+            if (Y.m_numberLength < m_whenUseKaratsuba)
                 return MultiplyPAP(X, Y);
             
             //  Karatsuba:  u = u1*B + u0, v = v1*B + v0, u*v = (u1*v1)*B^2 + ((u1-u0)*(v0-v1) + u1*v1 + u0*v0)*B + u0*v0
-            int ndiv2 = (int)(X._numberLength & 0xFFFFFFFE) << 4;
+            int ndiv2 = (int)(X.m_numberLength & 0xFFFFFFFE) << 4;
             BigInteger upperOp1 = X.ShiftRight(ndiv2);
             BigInteger upperOp2 = Y.ShiftRight(ndiv2);
             BigInteger lowerOp1 = X.Subtract(upperOp1.ShiftLeft(ndiv2));
@@ -343,14 +343,14 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             // Multiplies two BigIntegers. Implements traditional scholar algorithm described by Knuth.
             // PRE: a >= b
-            int aLen = X._numberLength;
-            int bLen = Y._numberLength;
+            int aLen = X.m_numberLength;
+            int bLen = Y.m_numberLength;
             int resLength = aLen + bLen;
-            int resSign = (X._sign != Y._sign) ? -1 : 1;
+            int resSign = (X.m_sign != Y.m_sign) ? -1 : 1;
             // A special case when both numbers don't exceed int
             if (resLength == 2)
             {
-                long val = UnsignedMultAddAdd(X._digits[0], Y._digits[0], 0, 0);
+                long val = UnsignedMultAddAdd(X.m_digits[0], Y.m_digits[0], 0, 0);
                 int valueLo = (int)val;
                 int valueHi = (int)IntUtils.URShift(val, 32);
 
@@ -358,8 +358,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                     new BigInteger(resSign, valueLo) : 
                     new BigInteger(resSign, 2, new int[] { valueLo, valueHi }));
             }
-            int[] aDigits = X._digits;
-            int[] bDigits = Y._digits;
+            int[] aDigits = X.m_digits;
+            int[] bDigits = Y.m_digits;
             int[] resDigits = new int[resLength];
             // Common case
             MultiplyArraysPAP(aDigits, aLen, bDigits, bLen, resDigits);

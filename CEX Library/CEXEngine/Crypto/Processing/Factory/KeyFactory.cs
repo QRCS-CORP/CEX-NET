@@ -49,8 +49,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
     public sealed class KeyFactory : IDisposable
     {
         #region Fields
-        private bool _isDisposed = false;
-        private Stream _keyStream;
+        private bool m_isDisposed = false;
+        private Stream m_keyStream;
         #endregion
 
         #region Constructor
@@ -66,7 +66,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             if (KeyStream == null)
                 throw new CryptoProcessingException("KeyFactory:Ctor", "The key stream can not be null!", new ArgumentException());
 
-            _keyStream = KeyStream;
+            m_keyStream = KeyStream;
         }
 
         private KeyFactory()
@@ -136,9 +136,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             }
 
             byte[] hdr = new CipherKey(Description).ToBytes();
-            _keyStream.Write(hdr, 0, hdr.Length);
+            m_keyStream.Write(hdr, 0, hdr.Length);
             byte[] key = ((MemoryStream)KeyParams.Serialize(KeyParam)).ToArray();
-            _keyStream.Write(key, 0, key.Length);
+            m_keyStream.Write(key, 0, key.Length);
         }
 
         /// <summary>
@@ -189,15 +189,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// <exception cref="CryptoProcessingException">Thrown if the key file could not be found or a Header parameter does not match the keystream length</exception>
         public void Extract(out CipherKey KeyHeader, out KeyParams KeyParam)
         {
-            _keyStream.Seek(0, SeekOrigin.Begin);
-            KeyHeader = new CipherKey(_keyStream);
+            m_keyStream.Seek(0, SeekOrigin.Begin);
+            KeyHeader = new CipherKey(m_keyStream);
             CipherDescription dsc = KeyHeader.Description;
 
-            if (_keyStream.Length < dsc.KeySize + dsc.IvSize + dsc.MacKeySize + CipherKey.GetHeaderSize())
+            if (m_keyStream.Length < dsc.KeySize + dsc.IvSize + dsc.MacKeySize + CipherKey.GetHeaderSize())
                 throw new CryptoProcessingException("KeyFactory:Extract", "The size of the key file does not align with the CipherKey sizes! Key is corrupt.", new ArgumentOutOfRangeException());
 
-            _keyStream.Seek(CipherKey.GetHeaderSize(), SeekOrigin.Begin);
-            KeyParam = KeyParams.DeSerialize(_keyStream);
+            m_keyStream.Seek(CipherKey.GetHeaderSize(), SeekOrigin.Begin);
+            KeyParam = KeyParams.DeSerialize(m_keyStream);
         }
         #endregion
 
@@ -213,9 +213,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

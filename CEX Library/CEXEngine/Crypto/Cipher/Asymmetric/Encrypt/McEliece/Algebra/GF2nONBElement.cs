@@ -9,18 +9,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
 {
     /// <summary>
     /// This class implements an element of the finite field <c>GF(2^n)</c>.
-    /// <para>It is represented in an optimal normal basis representation and holds the pointer <c>mField</c> to its corresponding field.</para>
+    /// <para>It is represented in an optimal normal basis representation and holds the pointer <c>m_Field</c> to its corresponding field.</para>
     /// </summary>
     internal sealed class GF2nONBElement : GF2nElement
     {
         #region Fields
         private static int MAXLONG = 64;
         // holds the lenght of the polynomial with 64 bit sized fields.
-        private int _mLength;
+        private int m_Length;
         // holds the value of mDeg % MAXLONG.
-        private int _mBit;
+        private int m_Bit;
         // holds this element in ONB representation.
-        private long[] _mPol;
+        private long[] m_Pol;
 
         private static readonly long[] _mBitmask = new long[]
         {
@@ -100,24 +100,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="SecRnd">The source of randomness</param>
         public GF2nONBElement(GF2nONBField Gf2n, IRandom SecRnd)
         {
-            mField = Gf2n;
-            mDegree = mField.Degree;
-            _mLength = Gf2n.GetONBLength();
-            _mBit = Gf2n.GetONBBit();
-            _mPol = new long[_mLength];
+            m_Field = Gf2n;
+            m_Degree = m_Field.Degree;
+            m_Length = Gf2n.GetONBLength();
+            m_Bit = Gf2n.GetONBBit();
+            m_Pol = new long[m_Length];
 
-            if (_mLength > 1)
+            if (m_Length > 1)
             {
-                for (int j = 0; j < _mLength - 1; j++)
-                    _mPol[j] = SecRnd.NextLong(); //ju next long?
+                for (int j = 0; j < m_Length - 1; j++)
+                    m_Pol[j] = SecRnd.NextLong(); //ju next long?
                 
                 long last = SecRnd.Next();
-                _mPol[_mLength - 1] = IntUtils.URShift(last, (MAXLONG - _mBit));
+                m_Pol[m_Length - 1] = IntUtils.URShift(last, (MAXLONG - m_Bit));
             }
             else
             {
-                _mPol[0] = SecRnd.NextLong();
-                _mPol[0] = IntUtils.URShift(_mPol[0], (MAXLONG - _mBit));
+                m_Pol[0] = SecRnd.NextLong();
+                m_Pol[0] = IntUtils.URShift(m_Pol[0], (MAXLONG - m_Bit));
             }
         }
 
@@ -129,11 +129,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Encoded">The encoded element</param>
         public GF2nONBElement(GF2nONBField Gf2n, byte[] Encoded)
         {
-            mField = Gf2n;
-            mDegree = mField.Degree;
-            _mLength = Gf2n.GetONBLength();
-            _mBit = Gf2n.GetONBBit();
-            _mPol = new long[_mLength];
+            m_Field = Gf2n;
+            m_Degree = m_Field.Degree;
+            m_Length = Gf2n.GetONBLength();
+            m_Bit = Gf2n.GetONBBit();
+            m_Pol = new long[m_Length];
             Assign(Encoded);
         }
 
@@ -145,11 +145,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Value">The value represented by a BigInteger</param>
         public GF2nONBElement(GF2nONBField Gf2n, BigInteger Value)
         {
-            mField = Gf2n;
-            mDegree = mField.Degree;
-            _mLength = Gf2n.GetONBLength();
-            _mBit = Gf2n.GetONBBit();
-            _mPol = new long[_mLength];
+            m_Field = Gf2n;
+            m_Degree = m_Field.Degree;
+            m_Length = Gf2n.GetONBLength();
+            m_Bit = Gf2n.GetONBBit();
+            m_Pol = new long[m_Length];
             Assign(Value);
         }
 
@@ -161,11 +161,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Value">The value in ONB representation</param>
         private GF2nONBElement(GF2nONBField Gf2n, long[] Value)
         {
-            mField = Gf2n;
-            mDegree = mField.Degree;
-            _mLength = Gf2n.GetONBLength();
-            _mBit = Gf2n.GetONBBit();
-            _mPol = Value;
+            m_Field = Gf2n;
+            m_Degree = m_Field.Degree;
+            m_Length = Gf2n.GetONBLength();
+            m_Bit = Gf2n.GetONBBit();
+            m_Pol = Value;
         }
 
         /// <summary>
@@ -176,11 +176,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public GF2nONBElement(GF2nONBElement Gf2n)
         {
 
-            mField = Gf2n.mField;
-            mDegree = mField.Degree;
-            _mLength = ((GF2nONBField)mField).GetONBLength();
-            _mBit = ((GF2nONBField)mField).GetONBBit();
-            _mPol = new long[_mLength];
+            m_Field = Gf2n.m_Field;
+            m_Degree = m_Field.Degree;
+            m_Length = ((GF2nONBField)m_Field).GetONBLength();
+            m_Bit = ((GF2nONBField)m_Field).GetONBBit();
+            m_Pol = new long[m_Length];
             Assign(Gf2n.GetElement());
         }
         #endregion
@@ -194,17 +194,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (IsZero())
                 throw new ArithmeticException();
 
-            int r = 31; // mDegree kann nur 31 Bits lang sein!!!
+            int r = 31; // m_Degree kann nur 31 Bits lang sein!!!
 
-            // Bitlaenge von mDegree:
+            // Bitlaenge von m_Degree:
             for (bool found = false; !found && r >= 0; r--)
             {
-                if (((mDegree - 1) & _mBitmask[r]) != 0)
+                if (((m_Degree - 1) & _mBitmask[r]) != 0)
                     found = true;
             }
             r++;
 
-            GF2nElement m = Zero((GF2nONBField)mField);
+            GF2nElement m = Zero((GF2nONBField)m_Field);
             GF2nElement n = new GF2nONBElement(this);
             int k = 1;
 
@@ -217,7 +217,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 n.MultiplyThisBy(m);
 
                 k <<= 1;
-                if (((mDegree - 1) & _mBitmask[i]) != 0)
+                if (((m_Degree - 1) & _mBitmask[i]) != 0)
                 {
                     n.SquareThis();
                     n.MultiplyThisBy(this);
@@ -239,7 +239,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             int mLength = Gf2n.GetONBLength();
             long[] polynomial = new long[mLength];
 
-            // fill mDegree coefficients with one's
+            // fill m_Degree coefficients with one's
             for (int i = 0; i < mLength - 1; i++)
                 polynomial[i] = unchecked((long)0xffffffffffffffffL);
             
@@ -253,7 +253,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public void ReverseOrder()
         {
-            _mPol = GetElementReverseOrder();
+            m_Pol = GetElementReverseOrder();
         }
 
         /// <summary>
@@ -289,10 +289,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         private void Assign(byte[] Value)
         {
             int j;
-            _mPol = new long[_mLength];
+            m_Pol = new long[m_Length];
 
             for (j = 0; j < Value.Length; j++)
-                _mPol[IntUtils.URShift(j, 3)] |= (Value[Value.Length - 1 - j] & 0x00000000000000ffL) << ((j & 0x07) << 3);
+                m_Pol[IntUtils.URShift(j, 3)] |= (Value[Value.Length - 1 - j] & 0x00000000000000ffL) << ((j & 0x07) << 3);
         }
 
         /// <summary>
@@ -302,7 +302,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Value">The value in ONB representation</param>
         private void Assign(long[] Value)
         {
-            Array.Copy(Value, 0, _mPol, 0, _mLength);
+            Array.Copy(Value, 0, m_Pol, 0, m_Length);
         }
 
         /// <summary>
@@ -313,8 +313,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         private long[] GetElement()
         {
 
-            long[] result = new long[_mPol.Length];
-            Array.Copy(_mPol, 0, result, 0, _mPol.Length);
+            long[] result = new long[m_Pol.Length];
+            Array.Copy(m_Pol, 0, result, 0, m_Pol.Length);
 
             return result;
         }
@@ -326,10 +326,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns this element in its representation and reverse bit-order</returns>
         private long[] GetElementReverseOrder()
         {
-            long[] result = new long[_mPol.Length];
-            for (int i = 0; i < mDegree; i++)
+            long[] result = new long[m_Pol.Length];
+            for (int i = 0; i < m_Degree; i++)
             {
-                if (TestBit(mDegree - i - 1))
+                if (TestBit(m_Degree - i - 1))
                     result[IntUtils.URShift(i, 6)] |= _mBitmask[i & 0x3f];
             }
             return result;
@@ -360,11 +360,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         {
             if (!(Addend is GF2nONBElement))
                 throw new Exception();
-            if (!mField.Equals(((GF2nONBElement)Addend).mField))
+            if (!m_Field.Equals(((GF2nONBElement)Addend).m_Field))
                 throw new Exception();
 
-            for (int i = 0; i < _mLength; i++)
-                _mPol[i] ^= ((GF2nONBElement)Addend)._mPol[i];
+            for (int i = 0; i < m_Length; i++)
+                m_Pol[i] ^= ((GF2nONBElement)Addend).m_Pol[i];
         }
 
         /// <summary>
@@ -372,11 +372,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public override void AssignOne()
         {
-            // fill mDegree coefficients with one's
-            for (int i = 0; i < _mLength - 1; i++)
-                _mPol[i] = unchecked((long)0xffffffffffffffffL);
+            // fill m_Degree coefficients with one's
+            for (int i = 0; i < m_Length - 1; i++)
+                m_Pol[i] = unchecked((long)0xffffffffffffffffL);
 
-            _mPol[_mLength - 1] = _mMaxmask[_mBit - 1];
+            m_Pol[m_Length - 1] = _mMaxmask[m_Bit - 1];
         }
 
         /// <summary>
@@ -384,7 +384,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public override void AssignZero()
         {
-            _mPol = new long[_mLength];
+            m_Pol = new long[m_Length];
         }
 
         /// <summary>
@@ -413,9 +413,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
 
             GF2nONBElement otherElem = (GF2nONBElement)Obj;
 
-            for (int i = 0; i < _mLength; i++)
+            for (int i = 0; i < m_Length; i++)
             {
-                if (_mPol[i] != otherElem._mPol[i])
+                if (m_Pol[i] != otherElem.m_Pol[i])
                 {
                     return false;
                 }
@@ -431,7 +431,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The hash code</returns>
         public override int GetHashCode()
         {
-            return _mPol.GetHashCode();
+            return m_Pol.GetHashCode();
         }
 
         /// <summary>
@@ -451,7 +451,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public override void IncreaseThis()
         {
-            AddToThis(One((GF2nONBField)mField));
+            AddToThis(One((GF2nONBField)m_Field));
         }
 
         /// <summary>
@@ -476,11 +476,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         {
             bool result = true;
 
-            for (int i = 0; i < _mLength - 1 && result; i++)
-                result = result && ((_mPol[i] & unchecked((long)0xFFFFFFFFFFFFFFFFL)) == unchecked((long)0xFFFFFFFFFFFFFFFFL));
+            for (int i = 0; i < m_Length - 1 && result; i++)
+                result = result && ((m_Pol[i] & unchecked((long)0xFFFFFFFFFFFFFFFFL)) == unchecked((long)0xFFFFFFFFFFFFFFFFL));
 
             if (result)
-                result = result && ((_mPol[_mLength - 1] & _mMaxmask[_mBit - 1]) == _mMaxmask[_mBit - 1]);
+                result = result && ((m_Pol[m_Length - 1] & _mMaxmask[m_Bit - 1]) == _mMaxmask[m_Bit - 1]);
 
             return result;
         }
@@ -494,8 +494,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         {
             bool result = true;
 
-            for (int i = 0; i < _mLength && result; i++)
-                result = result && ((_mPol[i] & unchecked((long)0xFFFFFFFFFFFFFFFFL)) == 0);
+            for (int i = 0; i < m_Length && result; i++)
+                result = result && ((m_Pol[i] & unchecked((long)0xFFFFFFFFFFFFFFFFL)) == 0);
 
             return result;
         }
@@ -524,7 +524,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
 
             if (!(Factor is GF2nONBElement))
                 throw new Exception("The elements have different" + " representation: not yet" + " implemented");
-            if (!mField.Equals(((GF2nONBElement)Factor).mField))
+            if (!m_Field.Equals(((GF2nONBElement)Factor).m_Field))
                 throw new Exception();
 
             if (Equals(Factor))
@@ -534,25 +534,25 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             else
             {
 
-                long[] a = _mPol;
-                long[] b = ((GF2nONBElement)Factor)._mPol;
-                long[] c = new long[_mLength];
-                int[][] m = ((GF2nONBField)mField).MultM;
+                long[] a = m_Pol;
+                long[] b = ((GF2nONBElement)Factor).m_Pol;
+                long[] c = new long[m_Length];
+                int[][] m = ((GF2nONBField)m_Field).m_MultM;
                 int degf, degb, s, fielda, fieldb, bita, bitb;
-                degf = _mLength - 1;
-                degb = _mBit - 1;
+                degf = m_Length - 1;
+                degb = m_Bit - 1;
                 s = 0;
 
                 long TWOTOMAXLONGM1 = _mBitmask[MAXLONG - 1];
                 long TWOTODEGB = _mBitmask[degb];
                 bool old, now;
 
-                // the product c of a and b (a*b = c) is calculated in mDegree cicles in every 
+                // the product c of a and b (a*b = c) is calculated in m_Degree cicles in every 
                 // cicle one coefficient of c is calculated and stored k indicates the coefficient
-                for (int k = 0; k < mDegree; k++)
+                for (int k = 0; k < m_Degree; k++)
                 {
                     s = 0;
-                    for (int i = 0; i < mDegree; i++)
+                    for (int i = 0; i < m_Degree; i++)
                     {
 
                         fielda = _mIBY64[i];
@@ -584,7 +584,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                         c[fielda] ^= _mBitmask[bita];
 
                     // Circular shift of x and y one bit to the right, respectively
-                    if (_mLength > 1)
+                    if (m_Length > 1)
                     {
                         old = (a[degf] & 1) == 1;
 
@@ -652,36 +652,36 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             long TWOTOMAXLONGM1 = _mBitmask[MAXLONG - 1];
             long ZERO = 0L;
             long ONE = 1L;
-            long[] p = new long[_mLength];
+            long[] p = new long[m_Length];
             long z = 0L;
             int j = 1;
 
-            for (int i = 0; i < _mLength - 1; i++)
+            for (int i = 0; i < m_Length - 1; i++)
             {
                 for (j = 1; j < MAXLONG; j++)
                 {
-                    if (!((((_mBitmask[j] & _mPol[i]) != ZERO) && ((z & _mBitmask[j - 1]) != ZERO)) || (((_mPol[i] & _mBitmask[j]) == ZERO) && ((z & _mBitmask[j - 1]) == ZERO))))
+                    if (!((((_mBitmask[j] & m_Pol[i]) != ZERO) && ((z & _mBitmask[j - 1]) != ZERO)) || (((m_Pol[i] & _mBitmask[j]) == ZERO) && ((z & _mBitmask[j - 1]) == ZERO))))
                         z ^= _mBitmask[j];
                 }
                 p[i] = z;
 
-                if (((TWOTOMAXLONGM1 & z) != ZERO && (ONE & _mPol[i + 1]) == ONE) || ((TWOTOMAXLONGM1 & z) == ZERO && (ONE & _mPol[i + 1]) == ZERO))
+                if (((TWOTOMAXLONGM1 & z) != ZERO && (ONE & m_Pol[i + 1]) == ONE) || ((TWOTOMAXLONGM1 & z) == ZERO && (ONE & m_Pol[i + 1]) == ZERO))
                     z = ZERO;
                 else
                     z = ONE;
             }
 
-            int b = mDegree & (MAXLONG - 1);
-            long LASTLONG = _mPol[_mLength - 1];
+            int b = m_Degree & (MAXLONG - 1);
+            long LASTLONG = m_Pol[m_Length - 1];
 
             for (j = 1; j < b; j++)
             {
                 if (!((((_mBitmask[j] & LASTLONG) != ZERO) && ((_mBitmask[j - 1] & z) != ZERO)) || (((_mBitmask[j] & LASTLONG) == ZERO) && ((_mBitmask[j - 1] & z) == ZERO))))
                     z ^= _mBitmask[j];
             }
-            p[_mLength - 1] = z;
+            p[m_Length - 1] = z;
 
-            return new GF2nONBElement((GF2nONBField)mField, p);
+            return new GF2nONBElement((GF2nONBField)m_Field, p);
         }
 
         /// <summary>
@@ -703,8 +703,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public override void SquareThis()
         {
             long[] pol = GetElement();
-            int f = _mLength - 1;
-            int b = _mBit - 1;
+            int f = m_Length - 1;
+            int b = m_Bit - 1;
             // Shift the coefficients one bit to the left.
             long TWOTOMAXLONGM1 = _mBitmask[MAXLONG - 1];
             bool old, now;
@@ -724,7 +724,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (old)
                 pol[f] ^= 1;
 
-            // Set the bit with index mDegree to zero.
+            // Set the bit with index m_Degree to zero.
             if (now)
                 pol[f] ^= _mBitmask[b + 1];
 
@@ -749,8 +749,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public override void SquareRootThis()
         {
             long[] pol = GetElement();
-            int f = _mLength - 1;
-            int b = _mBit - 1;
+            int f = m_Length - 1;
+            int b = m_Bit - 1;
             // Shift the coefficients one bit to the right.
             long TWOTOMAXLONGM1 = _mBitmask[MAXLONG - 1];
             bool old, now;
@@ -783,11 +783,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns <c>true</c> if the indexed bit is set</returns>
         public override bool TestBit(int Index)
         {
-            if (Index < 0 || Index > mDegree)
+            if (Index < 0 || Index > m_Degree)
             {
                 return false;
             }
-            long test = _mPol[IntUtils.URShift(Index, 6)] & _mBitmask[Index & 0x3f];
+            long test = m_Pol[IntUtils.URShift(Index, 6)] & _mBitmask[Index & 0x3f];
             return test != 0x0L;
         }
 
@@ -800,7 +800,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public override bool TestRightmostBit()
         {
             // due to the reverse bit order (compared to 1363) this method returns the value of the leftmost bit
-            return (_mPol[_mLength - 1] & _mBitmask[_mBit - 1]) != 0L;
+            return (m_Pol[m_Length - 1] & _mBitmask[m_Bit - 1]) != 0L;
         }
 
         /// <summary>
@@ -811,12 +811,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public override byte[] ToByteArray()
         {
             // ToDo this method does not reverse the bit-order as it should!
-            int k = ((mDegree - 1) >> 3) + 1;
+            int k = ((m_Degree - 1) >> 3) + 1;
             byte[] result = new byte[k];
             int i;
 
             for (i = 0; i < k; i++)
-                result[k - i - 1] = (byte)(IntUtils.URShift((_mPol[IntUtils.URShift(i, 3)] & (0x00000000000000ffL << ((i & 0x07) << 3))), ((i & 0x07) << 3)));
+                result[k - i - 1] = (byte)(IntUtils.URShift((m_Pol[IntUtils.URShift(i, 3)] & (0x00000000000000ffL << ((i & 0x07) << 3))), ((i & 0x07) << 3)));
             
             return result;
         }
@@ -853,7 +853,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         {
             String s = "";
             long[] a = GetElement();
-            int b = _mBit;
+            int b = m_Bit;
 
             if (Radix == 2)
             {
@@ -911,22 +911,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public override int Trace()
         {
             int result = 0;
-            int max = _mLength - 1;
+            int max = m_Length - 1;
 
             for (int i = 0; i < max; i++)
             {
                 for (int j = 0; j < MAXLONG; j++)
                 {
-                    if ((_mPol[i] & _mBitmask[j]) != 0)
+                    if ((m_Pol[i] & _mBitmask[j]) != 0)
                         result ^= 1;
                 }
             }
 
-            int b = _mBit;
+            int b = m_Bit;
 
             for (int j = 0; j < b; j++)
             {
-                if ((_mPol[max] & _mBitmask[j]) != 0)
+                if ((m_Pol[max] & _mBitmask[j]) != 0)
                     result ^= 1;
             }
 

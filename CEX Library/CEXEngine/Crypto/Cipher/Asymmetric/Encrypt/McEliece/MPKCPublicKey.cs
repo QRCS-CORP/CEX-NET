@@ -18,13 +18,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
+        private bool m_isDisposed = false;
         // the length of the code
-        private int _N;
+        private int m_N;
         // the error correction capability of the code
-        private int _T;
+        private int m_T;
         // the generator matrix
-        private GF2Matrix _G;
+        private GF2Matrix m_G;
         #endregion
 
         #region Properties
@@ -41,7 +41,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public int N
         {
-            get { return _N; }
+            get { return m_N; }
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public int T
         {
-            get { return _T; }
+            get { return m_T; }
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         internal GF2Matrix G
         {
-            get { return _G; }
+            get { return m_G; }
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public int K
         {
-            get { return _G.RowCount; }
+            get { return m_G.RowCount; }
         }
         #endregion
 
@@ -79,9 +79,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <param name="G">The generator matrix</param>
         internal MPKCPublicKey(int N, int T, GF2Matrix G)
         {
-            _N = N;
-            _T = T;
-            _G = new GF2Matrix(G);
+            m_N = N;
+            m_T = T;
+            m_G = new GF2Matrix(G);
         }
 
         /// <summary>
@@ -93,9 +93,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <param name="G">The encoded generator matrix</param>
         public MPKCPublicKey(int N, int T, byte[] G)
         {
-            _N = N;
-            _T = T;
-            _G = new GF2Matrix(G);
+            m_N = N;
+            m_T = T;
+            m_G = new GF2Matrix(G);
         }
 
         /// <summary>
@@ -110,10 +110,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             try
             {
                 BinaryReader reader = new BinaryReader(KeyStream);
-                _N = reader.ReadInt32();
-                _T = reader.ReadInt32();
+                m_N = reader.ReadInt32();
+                m_T = reader.ReadInt32();
                 int len = reader.ReadInt32();
-                _G = new GF2Matrix(reader.ReadBytes(len));
+                m_G = new GF2Matrix(reader.ReadBytes(len));
             }
             catch (Exception ex)
             {
@@ -298,7 +298,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <returns>The MPKCPublicKey copy</returns>
         public object Clone()
         {
-            return new MPKCPublicKey(_N, _T, _G);
+            return new MPKCPublicKey(m_N, m_T, m_G);
         }
 
         /// <summary>
@@ -324,22 +324,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_G != null)
+                    if (m_G != null)
                     {
-                        _G.Clear();
-                        _G = null;
+                        m_G.Clear();
+                        m_G = null;
                     }
-                    _N = 0;
-                    _T = 0;
+                    m_N = 0;
+                    m_T = 0;
                     
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

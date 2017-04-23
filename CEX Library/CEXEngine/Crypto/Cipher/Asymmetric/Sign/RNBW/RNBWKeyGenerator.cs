@@ -111,9 +111,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         private short[][] _pubSingular;
         // scalars
         private short[] _pubScalar;
-        private bool _isDisposed;
-        private RNBWParameters _rlweParams;
-        private IRandom _rngEngine;
+        private bool m_isDisposed;
+        private RNBWParameters m_rlweParams;
+        private IRandom m_rngEngine;
         #endregion
 
         #region Properties
@@ -139,8 +139,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
             if (CipherParams.RandomEngine == Prngs.PBPrng)
                 throw new CryptoAsymmetricSignException("RNBWKeyGenerator:Ctor", "Passphrase based digest and CTR generators must be pre-initialized, use the other constructor!", new ArgumentException());
 
-            _rlweParams = CipherParams;
-            _rngEngine = GetPrng(CipherParams.RandomEngine);
+            m_rlweParams = CipherParams;
+            m_rngEngine = GetPrng(CipherParams.RandomEngine);
         }
 
         /// <summary>
@@ -151,8 +151,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         /// <param name="RngEngine">An initialized Prng instance</param>
         public RNBWKeyGenerator(RNBWParameters CipherParams, IRandom RngEngine)
         {
-            _rlweParams = CipherParams;
-            _rngEngine = RngEngine;
+            m_rlweParams = CipherParams;
+            m_rngEngine = RngEngine;
         }
 
         private RNBWKeyGenerator()
@@ -179,8 +179,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
             RNBWPrivateKey privKey;
             RNBWPublicKey pubKey;
 
-            _VI = _rlweParams.Vi;
-            _numLayers = _rlweParams.NumLayers;
+            _VI = m_rlweParams.Vi;
+            _numLayers = m_rlweParams.NumLayers;
             // choose all coefficients at random
             Generate();
             // now marshall them to PrivateKey
@@ -238,7 +238,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
                     for (int i = 0; i < dim; i++)
                     {
                         for (int j = 0; j < dim; j++)
-                            _A1[i][j] = (short)(_rngEngine.Next() & GF2Field.MASK);
+                            _A1[i][j] = (short)(m_rngEngine.Next() & GF2Field.MASK);
                     }
                     _A1Inv = cif.Inverse(_A1);
                 }
@@ -246,7 +246,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
             // generation of the translation vector at random
             _B1 = new short[dim];
             for (int i = 0; i < dim; i++)
-                _B1[i] = (short)(_rngEngine.Next() & GF2Field.MASK);
+                _B1[i] = (short)(m_rngEngine.Next() & GF2Field.MASK);
 
         }
 
@@ -271,7 +271,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
                     for (int i = 0; i < dim; i++)
                     {
                         for (int j = 0; j < dim; j++)
-                            _A2[i][j] = (short)(_rngEngine.Next() & GF2Field.MASK);
+                            _A2[i][j] = (short)(m_rngEngine.Next() & GF2Field.MASK);
                     }
                     _A2Inv = cif.Inverse(_A2);
                 }
@@ -279,7 +279,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
             // generation of the translation vector at random
             _B2 = new short[dim];
             for (int i = 0; i < dim; i++)
-                _B2[i] = (short)(_rngEngine.Next() & GF2Field.MASK);
+                _B2[i] = (short)(m_rngEngine.Next() & GF2Field.MASK);
         }
 
         /// <summary>
@@ -292,7 +292,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
             _layers = new MapLayer[_numLayers];
 
             for (int i = 0; i < _numLayers; i++)
-                _layers[i] = new MapLayer(_VI[i], _VI[i + 1], _rngEngine);
+                _layers[i] = new MapLayer(_VI[i], _VI[i + 1], m_rngEngine);
         }
 
         /// <summary>
@@ -502,7 +502,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
@@ -516,15 +516,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
                         Array.Clear(_A2, 0, _A2.Length);
                         _A2 = null;
                     }
-                    if (_rngEngine != null)
+                    if (m_rngEngine != null)
                     {
-                        _rngEngine.Dispose();
-                        _rngEngine = null;
+                        m_rngEngine.Dispose();
+                        m_rngEngine = null;
                     }
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

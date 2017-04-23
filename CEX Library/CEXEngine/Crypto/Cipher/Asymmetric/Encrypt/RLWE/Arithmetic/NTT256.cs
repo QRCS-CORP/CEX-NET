@@ -32,19 +32,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.Arithm
         #endregion
 
         #region Fields
-        IRandom _secRand;
+        IRandom m_secRand;
 
-        private static readonly ushort[] _primeRtOmega = 
+        private static readonly ushort[] m_primeRtOmega = 
         { 
             7680, 4298, 6468, 849, 2138, 3654, 1714, 5118 
         };
 
-        private static ushort[] _invPrimeRt = 
+        private static ushort[] m_invPrimeRt = 
         {
             7680, 3383, 5756, 1728, 7584, 6569, 6601
         };
 
-        private static readonly byte[] _T1 =
+        private static readonly byte[] m_T1 =
         {
             3,4,1,2,2,8,6,1,3,0,1,9,2,5,5,4,3,4,1,1,2,7,6,11,3,0,1,4,2,4,5,2,3,4,1,2,2,8,6,0,3,0,1,7,2,5,
             5,12,3,4,1,1,2,7,6,9,3,0,1,3,2,4,5,19,3,4,1,2,2,8,6,1,3,0,1,9,2,5,5,0,3,4,1,1,2,7,6,10,3,0,1,
@@ -54,7 +54,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.Arithm
             1,2,2,8,6,0,3,0,1,7,2,5,5,7,3,4,1,1,2,7,6,6,3,0,1,3,2,4,5,22 
         };
 
-        private static readonly byte[] _T2 =
+        private static readonly byte[] m_T2 =
         {
             13,10,13,10,13,10,13,10,13,10,13,10,13,10,13,10,13,10,13,10,13,10,13,10,13,10,13,10,13,10,13,10,7,6,7,6,7,6,7,6,7,6,
             7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,0,14,0,12,
@@ -63,7 +63,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.Arithm
             7,35,11,0,0,39,12,7,6,37,9,33,17,41,13,8,7,36,11,32,0,40,12,4,6,38,9,34,15,42
         };
 
-        private static readonly int[][] _pMatrix = 
+        private static readonly int[][] m_pMatrix = 
         {
             new int[] {0,0,0,1,0,1,1,0,1,0,0,1,1,1,0,1,0,1,1,0,0,1,1,0,0,0,1,1,1,0,0,0,0,0,0,1,0,1,0,1,1,0,1,1,0,1,0,1,1,1,0,1,0,0,1,0,1,1,0,0,0,1,0,1,0,0,1,1,0,0,1,1,1,0,0,0,1,1,1,1,1,1,0,1,0,1,0,0,1,0,0,1,0,1,0,0,0,1,0,1,1,0,1,0,0,1,1,1,0},
             new int[] {0,0,1,0,1,1,0,0,0,0,1,0,0,0,1,0,0,1,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1,1,1,1,0,1,1,0,1,0,1,1,1,1,0,1,0,1,1,0,0,0,1,0,1,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,0,0,0,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,0,0,1,0,0,1,0,1,0,0,1,0,0},
@@ -131,7 +131,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.Arithm
         /// <param name="SecRand">The secure random number generator instance</param>
         public NTT256(IRandom SecRand)
         {
-            _secRand = SecRand;
+            m_secRand = SecRand;
         }
         #endregion
 
@@ -338,8 +338,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.Arithm
             i = 0;
             for (m = 2; m <= M / 2; m = 2 * m)
             {
-                primrt = _primeRtOmega[i];
-                omega = _primeRtOmega[i + 1];
+                primrt = m_primeRtOmega[i];
+                omega = m_primeRtOmega[i + 1];
                 i++;
 
                 for (j = 0; j < m; j += 2)
@@ -421,7 +421,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.Arithm
 
         private uint GetRand()
         {
-            uint rnd = (uint)_secRand.Next();
+            uint rnd = (uint)m_secRand.Next();
             // set the least significant bit
             rnd |= 0x80000000;
 
@@ -436,7 +436,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.Arithm
 
             for (m = 2, i = 0; m <= M / 2; m = 2 * m, i++)
             {
-                primrt = _invPrimeRt[i];
+                primrt = m_invPrimeRt[i];
                 omega = 1;
 
                 for (j = 0; j < m / 2; j++)
@@ -547,7 +547,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.Arithm
             int row, column;
             int index = (int)Rand & 0xFF;
             Rand >>= 8;
-            int sample = _T1[index];
+            int sample = m_T1[index];
             int sampleMsb = sample & 16;
 
             // lookup was successful
@@ -581,7 +581,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.Arithm
                 if (Rand == NEW_RND_BOTTOM)
                     Rand = GetRand();
 
-                sample = _T2[index];
+                sample = m_T2[index];
                 sampleMsb = sample & 32;
 
                 // lookup was successful
@@ -611,7 +611,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.Arithm
                         // Read probability-column 0 and count the number of non-zeros
                         for (row = 54; row >= 0; row--)
                         {
-                            distance = distance - _pMatrix[row][column];
+                            distance = distance - m_pMatrix[row][column];
                             if (distance < 0)
                             {
                                 if ((Rand & 1) != 0)

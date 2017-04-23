@@ -24,9 +24,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         #endregion
 
         #region Fields
-        private int _N;
-        private int[] _ones;
-        private int[] _negOnes;
+        private int m_N;
+        private int[] m_ones;
+        private int[] m_negOnes;
         #endregion
 
         #region Constructor
@@ -39,9 +39,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <param name="NegOnes">Indices of coefficients equal to -1 in ascending order</param>
         public SparseTernaryPolynomial(int N, int[] Ones, int[] NegOnes)
         {
-            _N = N;
-            _ones = Ones;
-            _negOnes = NegOnes;
+            m_N = N;
+            m_ones = Ones;
+            m_negOnes = NegOnes;
         }
 
         /// <summary>
@@ -64,21 +64,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <exception cref="CryptoAsymmetricException">Throws if the coefficients are not ternary</exception>
         public SparseTernaryPolynomial(int[] Coeffs)
         {
-            _N = Coeffs.Length;
-            _ones = new int[_N];
-            _negOnes = new int[_N];
+            m_N = Coeffs.Length;
+            m_ones = new int[m_N];
+            m_negOnes = new int[m_N];
             int onesIdx = 0;
             int negOnesIdx = 0;
 
-            for (int i = 0; i < _N; i++)
+            for (int i = 0; i < m_N; i++)
             {
                 int c = Coeffs[i];
                 switch (c)
                 {
                     case 1:
-                        _ones[onesIdx++] = i; break;
+                        m_ones[onesIdx++] = i; break;
                     case -1:
-                        _negOnes[negOnesIdx++] = i; break;
+                        m_negOnes[negOnesIdx++] = i; break;
                     case 0:
                         break;
                     default:
@@ -86,8 +86,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
                 }
             }
 
-            _ones = _ones.CopyOf(onesIdx);
-            _negOnes = _negOnes.CopyOf(negOnesIdx);
+            m_ones = m_ones.CopyOf(onesIdx);
+            m_negOnes = m_negOnes.CopyOf(negOnesIdx);
         }
         #endregion
 
@@ -97,10 +97,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// </summary>
         public void Clear()
         {
-            for (int i = 0; i < _ones.Length; i++)
-                _ones[i] = 0;
-            for (int i = 0; i < _negOnes.Length; i++)
-                _negOnes[i] = 0;
+            for (int i = 0; i < m_ones.Length; i++)
+                m_ones[i] = 0;
+            for (int i = 0; i < m_negOnes.Length; i++)
+                m_negOnes[i] = 0;
         }
 
         /// <summary>
@@ -232,7 +232,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>negative ones count</returns>
         public int[] GetNegOnes()
         {
-            return _negOnes;
+            return m_negOnes;
         }
 
         /// <summary>
@@ -242,7 +242,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>Ones count</returns>
         public int[] GetOnes()
         {
-            return _ones;
+            return m_ones;
         }
 
         /// <summary>
@@ -256,31 +256,31 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         public IntegerPolynomial Multiply(IntegerPolynomial Factor)
         {
             int[] b = Factor.Coeffs;
-            if (b.Length != _N)
+            if (b.Length != m_N)
                 throw new CryptoAsymmetricException("SparseTernaryPolynomial:Multiply", "Number of coefficients must be the same!", new FormatException());
 
-            int[] c = new int[_N];
-            for (int i = 0; i < _ones.Length; i++)
+            int[] c = new int[m_N];
+            for (int i = 0; i < m_ones.Length; i++)
             {
-                int j = _N - 1 - _ones[i];
-                for (int k = _N - 1; k >= 0; k--)
+                int j = m_N - 1 - m_ones[i];
+                for (int k = m_N - 1; k >= 0; k--)
                 {
                     c[k] += b[j];
                     j--;
                     if (j < 0)
-                        j = _N - 1;
+                        j = m_N - 1;
                 }
             }
 
-            for (int i = 0; i < _negOnes.Length; i++)
+            for (int i = 0; i < m_negOnes.Length; i++)
             {
-                int j = _N - 1 - _negOnes[i];
-                for (int k = _N - 1; k >= 0; k--)
+                int j = m_N - 1 - m_negOnes[i];
+                for (int k = m_N - 1; k >= 0; k--)
                 {
                     c[k] -= b[j];
                     j--;
                     if (j < 0)
-                        j = _N - 1;
+                        j = m_N - 1;
                 }
             }
 
@@ -317,36 +317,36 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         {
             BigInteger[] b = Factor.Coeffs;
 
-            if (b.Length != _N)
+            if (b.Length != m_N)
                 throw new CryptoAsymmetricException("SparseTernaryPolynomial:Multiply", "Number of coefficients must be the same!", new FormatException());
 
-            BigInteger[] c = new BigInteger[_N];
-            for (int i = 0; i < _N; i++)
+            BigInteger[] c = new BigInteger[m_N];
+            for (int i = 0; i < m_N; i++)
                 c[i] = BigInteger.Zero;
 
-            for (int i = 0; i < _ones.Length; i++)
+            for (int i = 0; i < m_ones.Length; i++)
             {
-                int j = _N - 1 - _ones[i];
-                for (int k = _N - 1; k >= 0; k--)
+                int j = m_N - 1 - m_ones[i];
+                for (int k = m_N - 1; k >= 0; k--)
                 {
                     c[k] = c[k].Add(b[j]);
                     j--;
 
                     if (j < 0)
-                        j = _N - 1;
+                        j = m_N - 1;
                 }
             }
 
-            for (int i = 0; i < _negOnes.Length; i++)
+            for (int i = 0; i < m_negOnes.Length; i++)
             {
-                int j = _N - 1 - _negOnes[i];
-                for (int k = _N - 1; k >= 0; k--)
+                int j = m_N - 1 - m_negOnes[i];
+                for (int k = m_N - 1; k >= 0; k--)
                 {
                     c[k] = c[k].Subtract(b[j]);
                     j--;
 
                     if (j < 0)
-                        j = _N - 1;
+                        j = m_N - 1;
                 }
             }
 
@@ -361,9 +361,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         public byte[] ToBinary()
         {
             int maxIndex = 1 << BITS_PER_INDEX;
-            byte[] bin1 = ArrayEncoder.EncodeModQ(_ones, maxIndex);//13l - (9,2048)
-            byte[] bin2 = ArrayEncoder.EncodeModQ(_negOnes, maxIndex);
-            byte[] bin = ArrayUtils.Concat(ArrayEncoder.ToByteArray(_ones.Length), ArrayEncoder.ToByteArray(_negOnes.Length), bin1, bin2);
+            byte[] bin1 = ArrayEncoder.EncodeModQ(m_ones, maxIndex);//13l - (9,2048)
+            byte[] bin2 = ArrayEncoder.EncodeModQ(m_negOnes, maxIndex);
+            byte[] bin = ArrayUtils.Concat(ArrayEncoder.ToByteArray(m_ones.Length), ArrayEncoder.ToByteArray(m_negOnes.Length), bin1, bin2);
 
             return bin;
         }
@@ -376,12 +376,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>The polynomial product</returns>
         public IntegerPolynomial ToIntegerPolynomial()
         {
-            int[] coeffs = new int[_N];
+            int[] coeffs = new int[m_N];
 
-            for (int i = 0; i < _ones.Length; i++)
-                coeffs[_ones[i]] = 1;
-            for (int i = 0; i < _negOnes.Length; i++)
-                coeffs[_negOnes[i]] = -1;
+            for (int i = 0; i < m_ones.Length; i++)
+                coeffs[m_ones[i]] = 1;
+            for (int i = 0; i < m_negOnes.Length; i++)
+                coeffs[m_negOnes[i]] = -1;
 
             return new IntegerPolynomial(coeffs);
         }
@@ -393,7 +393,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>Coefficients size</returns>
         public int Size()
         {
-            return _N;
+            return m_N;
         }
         #endregion
 
@@ -413,11 +413,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
                 return false;
 
             SparseTernaryPolynomial other = (SparseTernaryPolynomial)Obj;
-            if (_N != other._N)
+            if (m_N != other.m_N)
                 return false;
-            if (!Compare.IsEqual(_negOnes, other._negOnes))
+            if (!Compare.IsEqual(m_negOnes, other.m_negOnes))
                 return false;
-            if (!Compare.IsEqual(_ones, other._ones))
+            if (!Compare.IsEqual(m_ones, other.m_ones))
                 return false;
 
             return true;
@@ -429,9 +429,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int hash = 31 * _N;
-            hash += ArrayUtils.GetHashCode(_negOnes);
-            hash += ArrayUtils.GetHashCode(_ones);
+            int hash = 31 * m_N;
+            hash += ArrayUtils.GetHashCode(m_negOnes);
+            hash += ArrayUtils.GetHashCode(m_ones);
 
             return hash;
         }

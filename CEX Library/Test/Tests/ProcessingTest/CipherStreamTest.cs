@@ -104,15 +104,15 @@ namespace VTDev.Projects.CEX.Test.Tests.ProcessingTest
 				OnProgress(new TestEventArgs("***Testing Cipher Modes***.."));
 				StreamModesTest(new CTR(eng, false), new ISO7816());
 				OnProgress(new TestEventArgs("Passed CTR CipherStream test.."));
-				StreamModesTest(new CFB(eng, 128, false), new ISO7816());
+				StreamModesTest(new CFB(eng, 16, false), new ISO7816());
 				OnProgress(new TestEventArgs("Passed CFB CipherStream test.."));
-				StreamModesTest(new OFB(eng, false), new ISO7816());
+				StreamModesTest(new OFB(eng, 16, false), new ISO7816());
 				OnProgress(new TestEventArgs("Passed OFB CipherStream test.."));
 				OnProgress(new TestEventArgs(""));
 				eng.Dispose();
 
 				OnProgress(new TestEventArgs("***Testing Stream Ciphers***.."));
-				StreamingTest(new ChaCha());
+				StreamingTest(new ChaCha20());
 				OnProgress(new TestEventArgs("Passed ChaCha CipherStream test.."));
 				StreamingTest(new Salsa20());
 				OnProgress(new TestEventArgs("Passed Salsa20 CipherStream test.."));
@@ -524,8 +524,6 @@ namespace VTDev.Projects.CEX.Test.Tests.ProcessingTest
 				_decText = new byte[sze];
 				_encText = new byte[sze];
 
-				cipher.ParallelBlockSize = prlBlock;
-				cipher2.ParallelBlockSize = prlBlock;
 				MemoryStream mIn = new MemoryStream(_plnText);
 				MemoryStream mOut = new MemoryStream();
 				MemoryStream mRes = new MemoryStream();

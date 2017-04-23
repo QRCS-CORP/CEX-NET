@@ -64,15 +64,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         #endregion
 
         #region Fields
-        private int _M;
-        private int _T;
-        private int _N;
-        private byte[] _oId = new byte[OID_SIZE];
-        private int _fieldPoly;
-        private bool _isDisposed = false;
-        private Digests _dgtEngineType = Digests.SHA256;
-        private Prngs _rndEngineType = Prngs.CTRPrng;
-        private CCA2Ciphers _cca2Engine = CCA2Ciphers.Pointcheval;
+        private int m_M;
+        private int m_T;
+        private int m_N;
+        private byte[] m_oId = new byte[OID_SIZE];
+        private int m_fieldPoly;
+        private bool m_isDisposed = false;
+        private Digests m_dgtEngineType = Digests.SHA256;
+        private Prngs m_rndEngineType = Prngs.CTRPrng;
+        private CCA2Ciphers m_cca2Engine = CCA2Ciphers.Pointcheval;
         #endregion
 
         #region Properties
@@ -89,8 +89,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public CCA2Ciphers CCA2Engine
         {
-            get { return _cca2Engine; }
-            private set { _cca2Engine = value; }
+            get { return m_cca2Engine; }
+            private set { m_cca2Engine = value; }
         }
 
         /// <summary>
@@ -100,13 +100,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <exception cref="CryptoAsymmetricException">Thrown if an invalid digest is specified</exception>
         public Digests Digest
         {
-            get { return _dgtEngineType; }
+            get { return m_dgtEngineType; }
             private set
             {
                 if (value == Digests.Skein1024)
                     throw new CryptoAsymmetricException("MPKCParameters:Digest", "Only 512 and 256 bit Digests are supported!", new ArgumentException());
 
-                _dgtEngineType = value;
+                m_dgtEngineType = value;
             }
         }
 
@@ -115,7 +115,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public int FieldPolynomial
         {
-            get { return _fieldPoly; }
+            get { return m_fieldPoly; }
         }
 
         /// <summary>
@@ -123,15 +123,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public int M
         {
-            get { return _M; }
+            get { return m_M; }
         }
 
         /// <summary>
-        /// Returns the length of the code _maxPlainText = (((MPKCPublicKey)AsmKey).K >> 3);
+        /// Returns the length of the code m_maxPlainText = (((MPKCPublicKey)AsmKey).K >> 3);
         /// </summary>
         public int N
         {
-            get { return _N; }
+            get { return m_N; }
         }
 
         /// <summary>
@@ -139,8 +139,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public byte[] OId
         {
-            get { return _oId; }
-            private set { _oId = value; }
+            get { return m_oId; }
+            private set { m_oId = value; }
         }
 
         /// <summary>
@@ -148,8 +148,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public Prngs RandomEngine
         {
-            get { return _rndEngineType; }
-            private set { _rndEngineType = value; }
+            get { return m_rndEngineType; }
+            private set { m_rndEngineType = value; }
         }
 
         /// <summary>
@@ -157,7 +157,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public int T
         {
-            get { return _T; }
+            get { return m_T; }
         }
         #endregion
 
@@ -202,18 +202,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             this.CCA2Engine = CCA2Engine;
             this.RandomEngine = Prng;
             Array.Copy(OId, this.OId, Math.Min(OId.Length, OID_SIZE));
-            _M = 0;
-            _N = 1;
+            m_M = 0;
+            m_N = 1;
 
-            while (_N < Keysize)
+            while (m_N < Keysize)
             {
-                _N <<= 1;
-                _M++;
+                m_N <<= 1;
+                m_M++;
             }
-            _T = _N >> 1;
-            _T /= _M;
+            m_T = m_N >> 1;
+            m_T /= m_M;
 
-            _fieldPoly = PolynomialRingGF2.GetIrreduciblePolynomial(_M);
+            m_fieldPoly = PolynomialRingGF2.GetIrreduciblePolynomial(m_M);
         }
 
         /// <summary>
@@ -244,16 +244,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             this.RandomEngine = Prng;
 
             Array.Copy(OId, this.OId, Math.Min(OId.Length, OID_SIZE));
-            _M = M;
-            _N = 1 << M;
+            m_M = M;
+            m_N = 1 << M;
 
             if (T < 0)
                 throw new CryptoAsymmetricException("MPKCParameters:Ctor", "T must be positive!", new ArgumentException());
             if (T > N)
                 throw new CryptoAsymmetricException("MPKCParameters:Ctor", "T must be less than n = 2^m!", new ArgumentOutOfRangeException());
 
-            _T = T;
-            _fieldPoly = PolynomialRingGF2.GetIrreduciblePolynomial(M);
+            m_T = T;
+            m_fieldPoly = PolynomialRingGF2.GetIrreduciblePolynomial(M);
         }
 
         /// <summary>
@@ -280,14 +280,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             if (M > 32)
                 throw new CryptoAsymmetricException("MPKCParameters:Ctor", "M is too large!", new ArgumentOutOfRangeException());
 
-            _M = M;
+            m_M = M;
             this.Digest = Digest;
             this.CCA2Engine = CCA2Engine;
             this.RandomEngine = Prng;
 
             Array.Copy(OId, this.OId, Math.Min(OId.Length, OID_SIZE));
-            _N = 1 << M;
-            _T = T;
+            m_N = 1 << M;
+            m_T = T;
 
             if (T < 0)
                 throw new CryptoAsymmetricException("MPKCParameters:Ctor", "T must be positive!", new ArgumentException());
@@ -295,7 +295,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
                 throw new CryptoAsymmetricException("MPKCParameters:Ctor", "T must be less than n = 2^m!", new ArgumentOutOfRangeException());
 
             if ((PolynomialRingGF2.Degree(FieldPoly) == M) && (PolynomialRingGF2.IsIrreducible(FieldPoly)))
-                _fieldPoly = FieldPoly;
+                m_fieldPoly = FieldPoly;
             else
                 throw new CryptoAsymmetricException("MPKCParameters:Ctor", "Polynomial is not a field polynomial for GF(2^m)", new InvalidDataException());
         }
@@ -312,14 +312,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             try
             {
                 BinaryReader reader = new BinaryReader(ParamStream);
-                _oId = reader.ReadBytes(OID_SIZE);
-                _cca2Engine = (CCA2Ciphers)reader.ReadInt32();
-                _dgtEngineType = (Digests)reader.ReadInt32();
-                _rndEngineType = (Prngs)reader.ReadInt32();
-                _M = reader.ReadInt32();
-                _T = reader.ReadInt32();
-                _fieldPoly = reader.ReadInt32();
-                _N = 1 << M;
+                m_oId = reader.ReadBytes(OID_SIZE);
+                m_cca2Engine = (CCA2Ciphers)reader.ReadInt32();
+                m_dgtEngineType = (Digests)reader.ReadInt32();
+                m_rndEngineType = (Prngs)reader.ReadInt32();
+                m_M = reader.ReadInt32();
+                m_T = reader.ReadInt32();
+                m_fieldPoly = reader.ReadInt32();
+                m_N = 1 << M;
             }
             catch (Exception ex)
             {
@@ -514,7 +514,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <returns>The McElieceParameters copy</returns>
         public object Clone()
         {
-            return new MPKCParameters(_oId, M, T, FieldPolynomial, _cca2Engine, _dgtEngineType, _rndEngineType);
+            return new MPKCParameters(m_oId, M, T, FieldPolynomial, m_cca2Engine, m_dgtEngineType, m_rndEngineType);
         }
 
         /// <summary>
@@ -540,26 +540,26 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_oId != null)
+                    if (m_oId != null)
                     {
-                        Array.Clear(_oId, 0, _oId.Length);
-                        _oId = null;
+                        Array.Clear(m_oId, 0, m_oId.Length);
+                        m_oId = null;
                     }
-                    _N = 0;
-                    _M = 0;
-                    _T = 0;
-                    _fieldPoly = 0;
-                    _cca2Engine = CCA2Ciphers.Fujisaki;
-                    _dgtEngineType = Digests.SHA256;
-                    _rndEngineType = Prngs.CTRPrng;
+                    m_N = 0;
+                    m_M = 0;
+                    m_T = 0;
+                    m_fieldPoly = 0;
+                    m_cca2Engine = CCA2Ciphers.Fujisaki;
+                    m_dgtEngineType = Digests.SHA256;
+                    m_rndEngineType = Prngs.CTRPrng;
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

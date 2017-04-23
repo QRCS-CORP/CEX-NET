@@ -18,7 +18,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         /// </summary>
         public string GetSP20Vector(int KeySize)
         {
-            SP20Drbg spd = new SP20Drbg();
+            SBG spd = new SBG();
             byte[] key = new byte[KeySize];
             byte[] output = new byte[1024];
             for (int i = 0; i < KeySize; i++)
@@ -38,7 +38,7 @@ namespace VTDev.Projects.CEX.Test.Tests.CipherTest
         /// </summary>
         public string GetCTRVector()
         {
-            CTRDrbg ctd = new CTRDrbg(new RHX());
+            CMG ctd = new CMG(new RHX());
             int ksze = 48;
             byte[] key = new byte[ksze];
             byte[] output = new byte[1024];

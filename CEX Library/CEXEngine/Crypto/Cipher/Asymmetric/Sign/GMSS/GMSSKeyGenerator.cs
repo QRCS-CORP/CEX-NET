@@ -85,7 +85,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         #endregion
 
         #region Fields
-        private bool _isDisposed;
+        private bool m_isDisposed;
         private GMSSParameters _gmssParams;
         // The source of randomness for OTS private key generation
         private GMSSRandom _gmssRand;
@@ -106,10 +106,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         // An array of the Winternitz parameter 'w' of each layer
         private int[] _otsIndex;
         // The parameter K needed for the authentication path computation
-        private int[] _K;
+        private int[] m_K;
         private Digests _msgDigestType;
-        private Prngs _rndEngineType;
-        private IRandom _rndEngine;
+        private Prngs m_rndEngineType;
+        private IRandom m_rndEngine;
         #endregion
 
         #region Properties
@@ -138,14 +138,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
 
             _gmssParams = CiphersParams;
             _msgDigestType = CiphersParams.DigestEngine;
-            _rndEngineType = _gmssParams.RandomEngine;
+            m_rndEngineType = _gmssParams.RandomEngine;
             _msDigestTree = GetDigest(CiphersParams.DigestEngine);
             // construct randomizer
             _gmssRand = new GMSSRandom(_msDigestTree);
             // set mdLength
             _mdLength = _msDigestTree.DigestSize;
             // construct Random for initial seed generation
-            _rndEngine = GetPrng(_rndEngineType);
+            m_rndEngine = GetPrng(m_rndEngineType);
 
             Initialize();
         }
@@ -160,14 +160,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         {
             _gmssParams = CiphersParams;
             _msgDigestType = CiphersParams.DigestEngine;
-            _rndEngineType = _gmssParams.RandomEngine;
+            m_rndEngineType = _gmssParams.RandomEngine;
             _msDigestTree = GetDigest(CiphersParams.DigestEngine);
             // construct randomizer
             _gmssRand = new GMSSRandom(_msDigestTree);
             // set mdLength
             _mdLength = _msDigestTree.DigestSize;
             // construct Random for initial seed generation
-            _rndEngine = RngEngine;
+            m_rndEngine = RngEngine;
 
             Initialize();
         }
@@ -206,12 +206,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             for (int i = 0; i < _numLayer; i++)
             {
                 currentAuthPaths[i] = ArrayUtils.CreateJagged<byte[][]>(_heightOfTrees[i], _mdLength);//new byte[heightOfTrees[i]][mdLength];
-                currentTreehash[i] = new Treehash[_heightOfTrees[i] - _K[i]];
+                currentTreehash[i] = new Treehash[_heightOfTrees[i] - m_K[i]];
 
                 if (i > 0)
                 {
                     nextAuthPaths[i - 1] = ArrayUtils.CreateJagged<byte[][]>(_heightOfTrees[i], _mdLength);//new byte[heightOfTrees[i]][mdLength];
-                    nextTreehash[i - 1] = new Treehash[_heightOfTrees[i] - _K[i]];
+                    nextTreehash[i - 1] = new Treehash[_heightOfTrees[i] - m_K[i]];
                 }
 
                 currentStack[i] = new List<byte[]>();
@@ -235,7 +235,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             // calculation of current authpaths and current rootsigs (AUTHPATHS, SIG) from bottom up to the root
             for (int h = _numLayer - 1; h >= 0; h--)
             {
-                GMSSRootCalc tree = new GMSSRootCalc(_heightOfTrees[h], _K[h], GetDigest(_msgDigestType));
+                GMSSRootCalc tree = new GMSSRootCalc(_heightOfTrees[h], m_K[h], GetDigest(_msgDigestType));
                 try
                 {
                     // on lowest layer no lower root is available, so just call the method with null as first parameter
@@ -308,7 +308,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             OTSseed = _gmssRand.NextSeed(Seed);
             WinternitzOTSignature ots;
             // data structure that constructs the whole tree and stores the initial values for treehash, Auth and retain
-            GMSSRootCalc treeToConstruct = new GMSSRootCalc(_heightOfTrees[H], _K[H], GetDigest(_msgDigestType));
+            GMSSRootCalc treeToConstruct = new GMSSRootCalc(_heightOfTrees[H], m_K[H], GetDigest(_msgDigestType));
             treeToConstruct.Initialize(CurrentStack);
 
             // generate the first leaf
@@ -336,7 +336,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             for (int i = 1; i < (1 << _heightOfTrees[H]); i++)
             {
                 // initialize the seeds for the leaf generation with index 3 * 2^h
-                if (i == seedForTreehashIndex && count < _heightOfTrees[H] - _K[H])
+                if (i == seedForTreehashIndex && count < _heightOfTrees[H] - m_K[H])
                 {
                     treeToConstruct.InitializeTreehashSeed(Seed, count);
                     seedForTreehashIndex *= 2;
@@ -369,7 +369,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             WinternitzOTSignature ots;
 
             // data structure that constructs the whole tree and stores the initial values for treehash, Auth and retain
-            GMSSRootCalc treeToConstruct = new GMSSRootCalc(_heightOfTrees[H], _K[H], GetDigest(_msgDigestType));
+            GMSSRootCalc treeToConstruct = new GMSSRootCalc(_heightOfTrees[H], m_K[H], GetDigest(_msgDigestType));
             treeToConstruct.Initialize(NextStack);
             int seedForTreehashIndex = 3;
             int count = 0;
@@ -378,7 +378,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             for (int i = 0; i < (1 << _heightOfTrees[H]); i++)
             {
                 // initialize the seeds for the leaf generation with index 3 * 2^h
-                if (i == seedForTreehashIndex && count < _heightOfTrees[H] - _K[H])
+                if (i == seedForTreehashIndex && count < _heightOfTrees[H] - m_K[H])
                 {
                     treeToConstruct.InitializeTreehashSeed(Seed, count);
                     seedForTreehashIndex *= 2;
@@ -404,7 +404,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             _numLayer = _gmssParams.NumLayers;
             _heightOfTrees = _gmssParams.HeightOfTrees;
             _otsIndex = _gmssParams.WinternitzParameter;
-            _K = _gmssParams.K;
+            m_K = _gmssParams.K;
 
             // seeds
             _currentSeeds = ArrayUtils.CreateJagged<byte[][]>(_numLayer, _mdLength);
@@ -413,7 +413,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             // generation of initial seeds
             for (int i = 0; i < _numLayer; i++)
             {
-                _rndEngine.GetBytes(_currentSeeds[i]);
+                m_rndEngine.GetBytes(_currentSeeds[i]);
                 _gmssRand.NextSeed(_currentSeeds[i]);
             }
         }
@@ -469,7 +469,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
@@ -478,10 +478,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                         _gmssRand.Dispose();
                         _gmssRand = null;
                     }
-                    if (_rndEngine != null)
+                    if (m_rndEngine != null)
                     {
-                        _rndEngine.Dispose();
-                        _rndEngine = null;
+                        m_rndEngine.Dispose();
+                        m_rndEngine = null;
                     }
                     if (_msDigestTree != null)
                     {
@@ -512,7 +512,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

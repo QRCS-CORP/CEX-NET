@@ -14,10 +14,10 @@ namespace VTDev.Libraries.CEXEngine.Numeric
     public sealed class MathContext
     {
         #region Private Fields
-        private static readonly char[] _chPrecision = { 'p', 'r', 'e', 'c', 'i', 's', 'i', 'o', 'n', '=' };
-        private static readonly char[] _chRoundingMode = { 'r', 'o', 'u', 'n', 'd', 'i', 'n', 'g', 'M', 'o', 'd', 'e', '=' };
-        private readonly int _precision;
-        private readonly RoundingModes _roundingMode;
+        private static readonly char[] m_chPrecision = { 'p', 'r', 'e', 'c', 'i', 's', 'i', 'o', 'n', '=' };
+        private static readonly char[] m_chRoundingMode = { 'r', 'o', 'u', 'n', 'd', 'i', 'n', 'g', 'M', 'o', 'd', 'e', '=' };
+        private readonly int m_precision;
+        private readonly RoundingModes m_roundingMode;
         #endregion
 
         #region Public Fields
@@ -55,7 +55,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// results are not rounded in this case.</para></remarks>
         public int Precision
         {
-            get { return _precision; }
+            get { return m_precision; }
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </summary>
         public RoundingModes RoundingMode
         {
-            get { return _roundingMode; }
+            get { return m_roundingMode; }
         }
         #endregion
 
@@ -94,8 +94,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             if (Precision < 0)
                 throw new ArgumentException("Digits < 0!");
 
-            this._precision = Precision;
-            this._roundingMode = RoundingMode;
+            this.m_precision = Precision;
+            this.m_roundingMode = RoundingMode;
         }
 
         /// <summary>
@@ -119,12 +119,12 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 throw new ArgumentException("Bad string format!");
             
             // Parsing "precision=" String
-            for (i = 0; (i < _chPrecision.Length) && (charVal[i] == _chPrecision[i]); i++)
+            for (i = 0; (i < m_chPrecision.Length) && (charVal[i] == m_chPrecision[i]); i++)
             {
                 ;
             }
 
-            if (i < _chPrecision.Length)
+            if (i < m_chPrecision.Length)
                 throw new ArgumentException("bad string format!");
             
             // Parsing the value for "precision="...
@@ -133,7 +133,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             if (digit == -1)
                 throw new ArgumentException("bad string format!");
             
-            this._precision = this._precision * 10 + digit;
+            this.m_precision = this.m_precision * 10 + digit;
             i++;
 
             do
@@ -151,23 +151,23 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                     throw new ArgumentException("Bad string format!");
                 }
                 // Accumulating the value parsed
-                this._precision = this._precision * 10 + digit;
+                this.m_precision = this.m_precision * 10 + digit;
 
-                if (this._precision < 0)
+                if (this.m_precision < 0)
                     throw new ArgumentException("Bad string format!");
                 
                 i++;
             } while (true);
             // Parsing "roundingMode="
-            for (j = 0; (j < _chRoundingMode.Length) && (charVal[i] == _chRoundingMode[j]); i++, j++)
+            for (j = 0; (j < m_chRoundingMode.Length) && (charVal[i] == m_chRoundingMode[j]); i++, j++)
             {
                 ;
             }
 
-            if (j < _chRoundingMode.Length)
+            if (j < m_chRoundingMode.Length)
                 throw new ArgumentException("Bad string format!");
             // Parsing the value for "roundingMode"...
-            this._roundingMode = (RoundingModes)Enum.Parse(typeof(RoundingModes), new string(charVal, i, charVal.Length - i), true);
+            this.m_roundingMode = (RoundingModes)Enum.Parse(typeof(RoundingModes), new string(charVal, i, charVal.Length - i), true);
         }
         #endregion
 
@@ -182,8 +182,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         public override bool Equals(Object Obj)
         {
             return ((Obj is MathContext) &&
-                    (((MathContext)Obj).Precision == _precision) &&
-                    (((MathContext)Obj).RoundingMode == _roundingMode));
+                    (((MathContext)Obj).Precision == m_precision) &&
+                    (((MathContext)Obj).RoundingMode == m_roundingMode));
         }
 
         /// <summary>
@@ -194,7 +194,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         public override int GetHashCode()
         {
             // Make place for the necessary bits to represent 8 rounding modes
-            return ((_precision << 3) | (int)_roundingMode);
+            return ((m_precision << 3) | (int)m_roundingMode);
         }
 
         /// <summary>
@@ -209,11 +209,11 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             StringBuilder sb = new StringBuilder(45);
 
-            sb.Append(_chPrecision);
-            sb.Append(_precision);
+            sb.Append(m_chPrecision);
+            sb.Append(m_precision);
             sb.Append(' ');
-            sb.Append(_chRoundingMode);
-            sb.Append(_roundingMode);
+            sb.Append(m_chRoundingMode);
+            sb.Append(m_roundingMode);
 
             return sb.ToString();
         }

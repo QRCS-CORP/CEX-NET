@@ -13,7 +13,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
     {
         #region Private Fields
         //All prime numbers with bit length lesser than 10 bits
-        private static readonly int[] _primes = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
+        private static readonly int[] m_primes = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
             31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101,
             103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167,
             173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239,
@@ -29,7 +29,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             1013, 1019, 1021 };
 
         // All BigInteger prime numbers with bit length lesser than 8 bits
-        private static readonly BigInteger[] _biPrimes = new BigInteger[_primes.Length];
+        private static readonly BigInteger[] m_biPrimes = new BigInteger[m_primes.Length];
 
         // It encodes how many iterations of Miller-Rabin test are need to get an
         // error bound not greater than 2 pow (-100).
@@ -43,7 +43,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         // It encodes how many i-bit primes there are in the table for
         // i=2,...,10. For example offsetPrimes[6] says that from
         // index 11 exists 7 consecutive 6-bit prime numbers in the array.
-        private static readonly int[][] _offsetPrimes;
+        private static readonly int[][] m_offsetPrimes;
 
         #endregion
 
@@ -51,21 +51,21 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         static Primality()
         {
             // To initialize the dual table of BigInteger primes
-            for (int i = 0; i < _primes.Length; i++)
-                _biPrimes[i] = BigInteger.ValueOf(_primes[i]);
+            for (int i = 0; i < m_primes.Length; i++)
+                m_biPrimes[i] = BigInteger.ValueOf(m_primes[i]);
 
-            _offsetPrimes = new int[11][];
-            _offsetPrimes[0] = null;
-            _offsetPrimes[1] = null;
-            _offsetPrimes[2] = new int[] { 0, 2 };
-            _offsetPrimes[3] = new int[] { 2, 2 };
-            _offsetPrimes[4] = new int[] { 4, 2 };
-            _offsetPrimes[5] = new int[] { 6, 5 };
-            _offsetPrimes[6] = new int[] { 11, 7 };
-            _offsetPrimes[7] = new int[] { 18, 13 };
-            _offsetPrimes[8] = new int[] { 31, 23 };
-            _offsetPrimes[9] = new int[] { 54, 43 };
-            _offsetPrimes[10] = new int[] { 97, 75 };
+            m_offsetPrimes = new int[11][];
+            m_offsetPrimes[0] = null;
+            m_offsetPrimes[1] = null;
+            m_offsetPrimes[2] = new int[] { 0, 2 };
+            m_offsetPrimes[3] = new int[] { 2, 2 };
+            m_offsetPrimes[4] = new int[] { 4, 2 };
+            m_offsetPrimes[5] = new int[] { 6, 5 };
+            m_offsetPrimes[6] = new int[] { 11, 7 };
+            m_offsetPrimes[7] = new int[] { 18, 13 };
+            m_offsetPrimes[8] = new int[] { 31, 23 };
+            m_offsetPrimes[9] = new int[] { 54, 43 };
+            m_offsetPrimes[10] = new int[] { 97, 75 };
         }
 
         private Primality()
@@ -85,29 +85,29 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             int i, j;
             int certainty;
             int gapSize = 1024; // for searching of the next probable prime number
-            int[] modules = new int[_primes.Length];
+            int[] modules = new int[m_primes.Length];
             bool[] isDivisible = new bool[gapSize];
             BigInteger startPoint;
             BigInteger probPrime;
             // If n < "last prime of table" searches next prime in the table
-            if ((X._numberLength == 1) && (X._digits[0] >= 0) && (X._digits[0] < _primes[_primes.Length - 1]))
+            if ((X.m_numberLength == 1) && (X.m_digits[0] >= 0) && (X.m_digits[0] < m_primes[m_primes.Length - 1]))
             {
-                for (i = 0; X._digits[0] >= _primes[i]; i++)
+                for (i = 0; X.m_digits[0] >= m_primes[i]; i++)
                 {
                     ;
                 }
 
-                return _biPrimes[i];
+                return m_biPrimes[i];
             }
             // Creates a "N" enough big to hold the next probable prime Note that: N < "next prime" < 2*N
-            startPoint = new BigInteger(1, X._numberLength, new int[X._numberLength + 1]);
-            Array.Copy(X._digits, 0, startPoint._digits, 0, X._numberLength);
+            startPoint = new BigInteger(1, X.m_numberLength, new int[X.m_numberLength + 1]);
+            Array.Copy(X.m_digits, 0, startPoint.m_digits, 0, X.m_numberLength);
 
             // To fix N to the "next odd number"
             if (X.TestBit(0))
                 Elementary.InplaceAdd(startPoint, 2);
             else
-                startPoint._digits[0] |= 1;
+                startPoint.m_digits[0] |= 1;
 
             // To set the improved certainly of Miller-Rabin
             j = startPoint.BitLength;
@@ -116,8 +116,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 ;
             }
             // To calculate modules: N mod p1, N mod p2, ... for first primes.
-            for (i = 0; i < _primes.Length; i++)
-                modules[i] = Division.Remainder(startPoint, _primes[i]) - gapSize;
+            for (i = 0; i < m_primes.Length; i++)
+                modules[i] = Division.Remainder(startPoint, m_primes[i]) - gapSize;
 
             while (true)
             {
@@ -126,12 +126,12 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                     isDivisible[k] = false;
 
                 // To discard multiples of first primes
-                for (i = 0; i < _primes.Length; i++)
+                for (i = 0; i < m_primes.Length; i++)
                 {
-                    modules[i] = (modules[i] + gapSize) % _primes[i];
-                    j = (modules[i] == 0) ? 0 : (_primes[i] - modules[i]);
+                    modules[i] = (modules[i] + gapSize) % m_primes[i];
+                    j = (modules[i] == 0) ? 0 : (m_primes[i] - modules[i]);
 
-                    for (; j < gapSize; j += _primes[i])
+                    for (; j < gapSize; j += m_primes[i])
                         isDivisible[j] = true;
                 }
                 // To execute Miller-Rabin for non-divisible numbers by all first
@@ -160,8 +160,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             // For small numbers get a random prime from the prime table
             if (BitLength <= 10)
             {
-                int[] rp = _offsetPrimes[BitLength];
-                return _biPrimes[rp[0] + Rnd.Next(rp[1])];
+                int[] rp = m_offsetPrimes[BitLength];
+                return m_biPrimes[rp[0] + Rnd.Next(rp[1])];
             }
             int shiftCount = (-BitLength) & 31;
             int last = (BitLength + 31) >> 5;
@@ -170,15 +170,15 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             last--;
             do
             {// To fill the array with random integers
-                for (int i = 0; i < n._numberLength; i++)
-                    n._digits[i] = Rnd.Next();
+                for (int i = 0; i < n.m_numberLength; i++)
+                    n.m_digits[i] = Rnd.Next();
 
                 // To fix to the correct bitLength
                 // n.digits[last] |= 0x80000000;
-                n._digits[last] |= int.MinValue;
-                n._digits[last] = IntUtils.URShift(n._digits[last], shiftCount);
+                n.m_digits[last] |= int.MinValue;
+                n.m_digits[last] = IntUtils.URShift(n.m_digits[last], shiftCount);
                 // To create an odd number
-                n._digits[0] |= 1;
+                n.m_digits[0] |= 1;
             } while (!IsProbablePrime(n, Certainty));
 
             return n;
@@ -193,8 +193,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             // For small numbers get a random prime from the prime table
             if (BitLength <= 10)
             {
-                int[] rp = _offsetPrimes[BitLength];
-                return _biPrimes[rp[0] + Rnd.NextInt32(rp[1])];
+                int[] rp = m_offsetPrimes[BitLength];
+                return m_biPrimes[rp[0] + Rnd.NextInt32(rp[1])];
             }
             int shiftCount = (-BitLength) & 31;
             int last = (BitLength + 31) >> 5;
@@ -203,15 +203,15 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             last--;
             do
             {// To fill the array with random integers
-                for (int i = 0; i < n._numberLength; i++)
-                    n._digits[i] = Rnd.Next();
+                for (int i = 0; i < n.m_numberLength; i++)
+                    n.m_digits[i] = Rnd.Next();
                 
                 // To fix to the correct bitLength
                 // n.digits[last] |= 0x80000000;
-                n._digits[last] |= int.MinValue;
-                n._digits[last] = IntUtils.URShift(n._digits[last], shiftCount);
+                n.m_digits[last] |= int.MinValue;
+                n.m_digits[last] = IntUtils.URShift(n.m_digits[last], shiftCount);
                 // To create an odd number
-                n._digits[0] |= 1;
+                n.m_digits[0] |= 1;
             } while (!IsProbablePrime(n, Certainty));
 
             return n;
@@ -231,7 +231,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         internal static bool IsProbablePrime(BigInteger X, int Certainty)
         {
             // PRE: n >= 0;
-            if ((Certainty <= 0) || ((X._numberLength == 1) && (X._digits[0] == 2)))
+            if ((Certainty <= 0) || ((X.m_numberLength == 1) && (X.m_digits[0] == 2)))
                 return true;
             
             // To discard all even numbers
@@ -239,13 +239,13 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 return false;
             
             // To check if 'n' exists in the table (it fit in 10 bits)
-            if ((X._numberLength == 1) && ((X._digits[0] & 0XFFFFFC00) == 0))
-                return (Array.BinarySearch(_primes, X._digits[0]) >= 0);
+            if ((X.m_numberLength == 1) && ((X.m_digits[0] & 0XFFFFFC00) == 0))
+                return (Array.BinarySearch(m_primes, X.m_digits[0]) >= 0);
             
             // To check if 'n' is divisible by some prime of the table
-            for (int j = 1; j < _primes.Length; j++)
+            for (int j = 1; j < m_primes.Length; j++)
             {
-                if (Division.RemainderArrayByInt(X._digits, X._numberLength, _primes[j]) == 0)
+                if (Division.RemainderArrayByInt(X.m_digits, X.m_numberLength, m_primes[j]) == 0)
                     return false;
             }
             // To set the number of iterations necessary for Miller-Rabin test
@@ -279,9 +279,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             for (int i = 0; i < T; i++)
             {
                 // To generate a witness 'x', first it use the primes of table
-                if (i < _primes.Length)
+                if (i < m_primes.Length)
                 {
-                    x = _biPrimes[i];
+                    x = m_biPrimes[i];
                 }
                 else
                 {
@@ -290,7 +290,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                     do
                     {
                         x = new BigInteger(bitLength, rnd);
-                    } while ((x.CompareTo(X) >= BigInteger.EQUALS) || (x._sign == 0) || x.IsOne());
+                    } while ((x.CompareTo(X) >= BigInteger.EQUALS) || (x.m_sign == 0) || x.IsOne());
                 }
                 y = x.ModPow(q, X);
                 if (y.IsOne() || y.Equals(n_minus_1))

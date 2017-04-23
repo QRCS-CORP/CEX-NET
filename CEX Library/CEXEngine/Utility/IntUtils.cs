@@ -61,14 +61,13 @@ namespace VTDev.Libraries.CEXEngine.Utility
         #endregion
 
         #region public Methods
-        
-	    // Different computer architectures store data using different byte orders. "Big-endian"
-	    // means the most significant byte is on the left end of a word. "Little-endian" means the 
-	    // most significant byte is on the right end of a word. i.e.: 
-	    // BE: uint(block[3]) | (uint(block[2]) << 8) | (uint(block[1]) << 16) | (uint(block[0]) << 24)
-	    // LE: uint(block[0]) | (uint(block[1]) << 8) | (uint(block[2]) << 16) | (uint(block[3]) << 24)
+        // Different computer architectures store data using different byte orders. "Big-endian"
+        // means the most significant byte is on the left end of a word. "Little-endian" means the 
+        // most significant byte is on the right end of a word. i.e.: 
+        // BE: uint(block[3]) | (uint(block[2]) << 8) | (uint(block[1]) << 16) | (uint(block[0]) << 24)
+        // LE: uint(block[0]) | (uint(block[1]) << 8) | (uint(block[2]) << 16) | (uint(block[3]) << 24)
 
-	    // ** Big Endian word32 and dword ** //
+        // ** Big Endian word32 and dword ** //
 
         /// <summary>
         /// Convert a Big Endian 32 bit word to bytes
@@ -77,7 +76,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="Word">The 32 bit word</param>
         /// <param name="Block">The destination bytes</param>
         /// <param name="Offset">Offset within the destination array</param>
-	    public static void Be32ToBytes(uint Word, byte[] Block, int Offset)
+        public static void Be32ToBytes(uint Word, byte[] Block, int Offset)
 	    {
 		    Block[Offset + 3] = (byte)Word;
 		    Block[Offset + 2] = (byte)(Word >> 8);
@@ -143,7 +142,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
 	    // ** Little Endian ** //
 
         /// <summary>
-        /// Convert a Litthle Endian 32 bit word to bytes
+        /// Convert a Little Endian 32 bit word to bytes
         /// </summary>
         /// 
         /// <param name="Word">The 32 bit word</param>
@@ -464,6 +463,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="X">Integer to copy</param>
         /// 
         /// <returns>The integer bytes</returns>
+        /// 
         public static byte[] ULongToBytes(ulong X)
         {
             ulong[] num = new ulong[1] { X };
@@ -471,6 +471,18 @@ namespace VTDev.Libraries.CEXEngine.Utility
             Buffer.BlockCopy(num, 0, data, 0, 8);
 
             return data;
+        }
+        /// <summary>
+        /// Return the smaller of two values
+        /// </summary>
+        /// 
+        /// <param name="A">The first comparison value</param>
+        /// <param name="B">The second comparison value</param>
+        /// 
+        /// <returns>The smaller value</returns>
+        public static int Min(int A, int B)
+        {
+            return ((A) < (B) ? (A) : (B));
         }
 
         /// <summary>

@@ -345,7 +345,7 @@ namespace Speed.SpeedTest
         private IStreamCipher GetStreamEngine()
         {
             if (_engineType == SymmetricEngines.ChaCha)
-                return new ChaCha();
+                return new ChaCha20();
             else if (_engineType == SymmetricEngines.Salsa)
                 return new Salsa20();
             else

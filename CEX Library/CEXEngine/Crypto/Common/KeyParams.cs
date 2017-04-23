@@ -11,11 +11,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
     public class KeyParams : IDisposable, ICloneable
     {
         #region Fields
-        private bool _isDisposed = false;
-        private byte[] _Key = null;
-        private byte[] _Iv = null;
-        private byte[] _Ikm = null;
-        private byte[] _ExtKey = null;
+        private bool m_isDisposed = false;
+        private byte[] m_Key = null;
+        private byte[] m_Iv = null;
+        private byte[] m_Ikm = null;
+        private byte[] m_extKey = null;
         #endregion
 
         #region Properties
@@ -24,8 +24,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// </summary>
         public byte[] IKM
         {
-            get { return _Ikm == null ? null : (byte[])_Ikm.Clone(); }
-            set { _Ikm = value; }
+            get { return m_Ikm == null ? null : (byte[])m_Ikm.Clone(); }
+            set { m_Ikm = value; }
         }
 
         /// <summary>
@@ -33,8 +33,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// </summary>
         public byte[] Key 
         {
-            get { return _Key == null ? null : (byte[])_Key.Clone(); } 
-            set { _Key = value; } 
+            get { return m_Key == null ? null : (byte[])m_Key.Clone(); } 
+            set { m_Key = value; } 
         }
 
         /// <summary>
@@ -42,8 +42,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// </summary>
         public byte[] IV 
         {
-            get { return _Iv == null ? null : (byte[])_Iv.Clone(); }
-            set { _Iv = value; } 
+            get { return m_Iv == null ? null : (byte[])m_Iv.Clone(); }
+            set { m_Iv = value; } 
         }
 
         /// <summary>
@@ -51,8 +51,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// </summary>
         public byte[] ExtKey
         {
-            get { return _ExtKey == null ? null : (byte[])_ExtKey.Clone(); }
-            set { _ExtKey = value; }
+            get { return m_extKey == null ? null : (byte[])m_extKey.Clone(); }
+            set { m_extKey = value; }
         }
         #endregion
 
@@ -73,8 +73,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         {
             if (Key != null)
             {
-                _Key = new byte[Key.Length];
-                Buffer.BlockCopy(Key, 0, _Key, 0, _Key.Length);
+                m_Key = new byte[Key.Length];
+                Buffer.BlockCopy(Key, 0, m_Key, 0, m_Key.Length);
             }
         }
 
@@ -88,13 +88,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         {
             if (Key != null)
             {
-                _Key = new byte[Key.Length];
-                Buffer.BlockCopy(Key, 0, _Key, 0, _Key.Length);
+                m_Key = new byte[Key.Length];
+                Buffer.BlockCopy(Key, 0, m_Key, 0, m_Key.Length);
             }
             if (IV != null)
             {
-                _Iv = new byte[IV.Length];
-                Buffer.BlockCopy(IV, 0, _Iv, 0, _Iv.Length);
+                m_Iv = new byte[IV.Length];
+                Buffer.BlockCopy(IV, 0, m_Iv, 0, m_Iv.Length);
             }
         }
 
@@ -109,18 +109,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         {
             if (Key != null)
             {
-                _Key = new byte[Key.Length];
-                Buffer.BlockCopy(Key, 0, _Key, 0, _Key.Length);
+                m_Key = new byte[Key.Length];
+                Buffer.BlockCopy(Key, 0, m_Key, 0, m_Key.Length);
             }
             if (IV != null)
             {
-                _Iv = new byte[IV.Length];
-                Buffer.BlockCopy(IV, 0, _Iv, 0, _Iv.Length);
+                m_Iv = new byte[IV.Length];
+                Buffer.BlockCopy(IV, 0, m_Iv, 0, m_Iv.Length);
             }
             if (IKM != null)
             {
-                _Ikm = new byte[IKM.Length];
-                Buffer.BlockCopy(IKM, 0, _Ikm, 0, _Ikm.Length);
+                m_Ikm = new byte[IKM.Length];
+                Buffer.BlockCopy(IKM, 0, m_Ikm, 0, m_Ikm.Length);
             }
         }
 
@@ -136,23 +136,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         {
             if (Key != null)
             {
-                _Key = new byte[Key.Length];
-                Buffer.BlockCopy(Key, 0, _Key, 0, _Key.Length);
+                m_Key = new byte[Key.Length];
+                Buffer.BlockCopy(Key, 0, m_Key, 0, m_Key.Length);
             }
             if (IV != null)
             {
-                _Iv = new byte[IV.Length];
-                Buffer.BlockCopy(IV, 0, _Iv, 0, _Iv.Length);
+                m_Iv = new byte[IV.Length];
+                Buffer.BlockCopy(IV, 0, m_Iv, 0, m_Iv.Length);
             }
             if (IKM != null)
             {
-                _Ikm = new byte[IKM.Length];
-                Buffer.BlockCopy(IKM, 0, _Ikm, 0, _Ikm.Length);
+                m_Ikm = new byte[IKM.Length];
+                Buffer.BlockCopy(IKM, 0, m_Ikm, 0, m_Ikm.Length);
             }
             if (ExtKey != null)
             {
-                _ExtKey = new byte[ExtKey.Length];
-                Buffer.BlockCopy(ExtKey, 0, _ExtKey, 0, _ExtKey.Length);
+                m_extKey = new byte[ExtKey.Length];
+                Buffer.BlockCopy(ExtKey, 0, m_extKey, 0, m_extKey.Length);
             }
         }
 
@@ -239,19 +239,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
             MemoryStream stream = new MemoryStream();
             BinaryWriter writer = new BinaryWriter(stream);
 
-            writer.Write(_Key != null ? (short)_Key.Length : (short)0);
-            writer.Write(_Iv != null ? (short)_Iv.Length : (short)0);
-            writer.Write(_Ikm != null ? (short)_Ikm.Length : (short)0);
-            writer.Write(_ExtKey != null ? (short)_ExtKey.Length : (short)0);
+            writer.Write(m_Key != null ? (short)m_Key.Length : (short)0);
+            writer.Write(m_Iv != null ? (short)m_Iv.Length : (short)0);
+            writer.Write(m_Ikm != null ? (short)m_Ikm.Length : (short)0);
+            writer.Write(m_extKey != null ? (short)m_extKey.Length : (short)0);
 
-            if (_Key != null)
-                writer.Write(_Key);
-            if (_Iv != null)
-                writer.Write(_Iv);
-            if (_Ikm != null)
-                writer.Write(_Ikm);
-            if (_ExtKey != null)
-                writer.Write(_ExtKey);
+            if (m_Key != null)
+                writer.Write(m_Key);
+            if (m_Iv != null)
+                writer.Write(m_Iv);
+            if (m_Ikm != null)
+                writer.Write(m_Ikm);
+            if (m_extKey != null)
+                writer.Write(m_extKey);
 
             stream.Seek(0, SeekOrigin.Begin);
 
@@ -267,7 +267,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <returns>The KeyParams copy</returns>
         public object Clone()
         {
-            return new KeyParams(_Key, _Iv, _Ikm, _ExtKey);
+            return new KeyParams(m_Key, m_Iv, m_Ikm, m_extKey);
         }
 
         /// <summary>
@@ -291,13 +291,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <returns>Returns true if equal</returns>
         public bool Equals(KeyParams Obj)
         {
-            if (!Compare.IsEqual(Obj.Key, _Key))
+            if (!Compare.IsEqual(Obj.Key, m_Key))
                 return false;
-            if (!Compare.IsEqual(Obj.IV, _Iv))
+            if (!Compare.IsEqual(Obj.IV, m_Iv))
                 return false;
-            if (!Compare.IsEqual(Obj.IKM, _Ikm))
+            if (!Compare.IsEqual(Obj.IKM, m_Ikm))
                 return false;
-            if (!Compare.IsEqual(Obj.ExtKey, _ExtKey))
+            if (!Compare.IsEqual(Obj.ExtKey, m_extKey))
                 return false;
 
             return true;
@@ -310,10 +310,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int hash =  Utility.ArrayUtils.GetHashCode(_Key);
-            hash += Utility.ArrayUtils.GetHashCode(_Iv);
-            hash += Utility.ArrayUtils.GetHashCode(_Ikm);
-            hash += Utility.ArrayUtils.GetHashCode(_ExtKey);
+            int hash =  Utility.ArrayUtils.GetHashCode(m_Key);
+            hash += Utility.ArrayUtils.GetHashCode(m_Iv);
+            hash += Utility.ArrayUtils.GetHashCode(m_Ikm);
+            hash += Utility.ArrayUtils.GetHashCode(m_extKey);
 
             return hash;
         }
@@ -331,35 +331,35 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Common
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_Key != null)
+                    if (m_Key != null)
                     {
-                        Array.Clear(_Key, 0, _Key.Length);
-                        _Key = null;
+                        Array.Clear(m_Key, 0, m_Key.Length);
+                        m_Key = null;
                     }
 
-                    if (_Iv != null)
+                    if (m_Iv != null)
                     {
-                        Array.Clear(_Iv, 0, _Iv.Length);
-                        _Iv = null;
+                        Array.Clear(m_Iv, 0, m_Iv.Length);
+                        m_Iv = null;
                     }
-                    if (_Ikm != null)
+                    if (m_Ikm != null)
                     {
-                        Array.Clear(_Ikm, 0, _Ikm.Length);
-                        _Ikm = null;
+                        Array.Clear(m_Ikm, 0, m_Ikm.Length);
+                        m_Ikm = null;
                     }
-                    if (_ExtKey != null)
+                    if (m_extKey != null)
                     {
-                        Array.Clear(_ExtKey, 0, _ExtKey.Length);
-                        _ExtKey = null;
+                        Array.Clear(m_extKey, 0, m_extKey.Length);
+                        m_extKey = null;
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

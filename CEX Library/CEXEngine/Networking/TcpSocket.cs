@@ -103,11 +103,11 @@ namespace VTDev.Libraries.CEXEngine.Networking
 
         #region Fields
         private Socket _cltSocket =  null;
-        private ManualResetEvent _opDone = new ManualResetEvent(false);
-        private bool _isDisposed = false;
-        private bool _isListening = false;
+        private ManualResetEvent m_opDone = new ManualResetEvent(false);
+        private bool m_isDisposed = false;
+        private bool m_isListening = false;
         private bool _isServer = false;
-        private Socket _lsnSocket;
+        private Socket m_lsnSocket;
         private long _maxAllocation = MAXRCVBUFFER;
         private int _rcvBufferSize = RECEIVEBUFFER;
         private int _rcvTimeout = RECEIVETIMEOUT;
@@ -190,8 +190,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
         /// </summary>
         public bool IsListening
         {
-            get { return _isListening; }
-            private set { _isListening = value; }
+            get { return m_isListening; }
+            private set { m_isListening = value; }
         }
 
         /// <summary>
@@ -471,7 +471,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
                 if (_cltSocket.Connected)
                 {
                     _cltSocket.Close(1);
-                    _opDone.WaitOne(10);
+                    m_opDone.WaitOne(10);
                 }
             }
             catch (SocketException)
@@ -623,7 +623,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
                 // connect to the remote endpoint.
                 _cltSocket.BeginConnect(remEP, new AsyncCallback(ConnectCallback), _cltSocket);
                 // block and wait
-                _opDone.WaitOne(Timeout);
+                m_opDone.WaitOne(Timeout);
             }
             catch (SocketException se)
             {
@@ -657,8 +657,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
                     Connected(this, readEventArgs);
 
                 // signal that the connection has been made
-                if (_opDone != null)
-                    _opDone.Set();
+                if (m_opDone != null)
+                    m_opDone.Set();
             }
             catch (SocketException se)
             {
@@ -738,25 +738,25 @@ namespace VTDev.Libraries.CEXEngine.Networking
             {
                 _isServer = true;
                 IPEndPoint ipEP = new IPEndPoint(Address, Port);
-                _lsnSocket = new Socket(ipEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                m_lsnSocket = new Socket(ipEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
                 if (ipEP.AddressFamily == AddressFamily.InterNetworkV6)
                 {
-                    _lsnSocket.SetSocketOption(SocketOptionLevel.IPv6, (SocketOptionName)27, false);
-                    _lsnSocket.Bind(ipEP);
+                    m_lsnSocket.SetSocketOption(SocketOptionLevel.IPv6, (SocketOptionName)27, false);
+                    m_lsnSocket.Bind(ipEP);
                 }
                 else
                 {
                     // associate the socket with the local endpoint
-                    _lsnSocket.Bind(ipEP);
+                    m_lsnSocket.Bind(ipEP);
                 }
 
-                _isListening = true;
+                m_isListening = true;
                 // accept the incoming client
-                _lsnSocket.Listen(MaxConnections);
+                m_lsnSocket.Listen(MaxConnections);
                 // assign client and stream
-                _cltSocket = _lsnSocket.Accept();
-                _isListening = false;
+                _cltSocket = m_lsnSocket.Accept();
+                m_isListening = false;
 
                 // get the socket for the accepted client connection and put it into the ReadEventArg object user token
                 SocketAsyncEventArgs readEventArgs = new SocketAsyncEventArgs();
@@ -767,7 +767,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
                     Connected(this, readEventArgs);
 
                 // not sure why this is needed..
-                _opDone.WaitOne(100);
+                m_opDone.WaitOne(100);
             }
             catch (SocketException se)
             {
@@ -831,27 +831,27 @@ namespace VTDev.Libraries.CEXEngine.Networking
             {
                 _isServer = true;
                 IPEndPoint ipEP = new IPEndPoint(Address, Port);
-                _lsnSocket = new Socket(ipEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                m_lsnSocket = new Socket(ipEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
                 if (ipEP.AddressFamily == AddressFamily.InterNetworkV6)
                 {
-                    _lsnSocket.SetSocketOption(SocketOptionLevel.IPv6, (SocketOptionName)27, false);
-                    _lsnSocket.Bind(ipEP);
+                    m_lsnSocket.SetSocketOption(SocketOptionLevel.IPv6, (SocketOptionName)27, false);
+                    m_lsnSocket.Bind(ipEP);
                 }
                 else
                 {
                     // associate the socket with the local endpoint
-                    _lsnSocket.Bind(ipEP);
+                    m_lsnSocket.Bind(ipEP);
                 }
 
-                _isListening = true;
-                _lsnSocket.Listen(MaxConnections);
+                m_isListening = true;
+                m_lsnSocket.Listen(MaxConnections);
                 // create the state object
-                StateToken state = new StateToken(_lsnSocket);
+                StateToken state = new StateToken(m_lsnSocket);
                 // accept the incoming clients
-                _lsnSocket.BeginAccept(new AsyncCallback(ListenCallback), state);
+                m_lsnSocket.BeginAccept(new AsyncCallback(ListenCallback), state);
                 // blocks the current thread to receive incoming messages
-                _opDone.WaitOne(Timeout);
+                m_opDone.WaitOne(Timeout);
             }
             catch (SocketException se)
             {
@@ -889,9 +889,9 @@ namespace VTDev.Libraries.CEXEngine.Networking
                 if (Connected != null)
                     Connected(this, readEventArgs);
 
-                _isListening = false;
+                m_isListening = false;
                 // signal done
-                _opDone.Set();
+                m_opDone.Set();
                 // once the client connects then start receiving the commands
                 StateToken cstate = new StateToken(_cltSocket);
                 // start receiving
@@ -910,7 +910,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
             }
             catch (Exception)
             {
-                if (_isListening)
+                if (m_isListening)
                     throw;
             }
         }
@@ -923,9 +923,9 @@ namespace VTDev.Libraries.CEXEngine.Networking
             try
             {
                 _isServer = false;
-                _lsnSocket.Close(1);
-                _opDone.WaitOne(10);
-                _isListening = false;
+                m_lsnSocket.Close(1);
+                m_opDone.WaitOne(10);
+                m_isListening = false;
             }
             catch (SocketException se)
             {
@@ -1349,19 +1349,19 @@ namespace VTDev.Libraries.CEXEngine.Networking
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_lsnSocket != null)
+                    if (m_lsnSocket != null)
                     {
-                        if (_lsnSocket.Connected)
+                        if (m_lsnSocket.Connected)
                         {
-                            _lsnSocket.Shutdown(SocketShutdown.Both);
-                            _lsnSocket.Close();
+                            m_lsnSocket.Shutdown(SocketShutdown.Both);
+                            m_lsnSocket.Close();
                         }
-                        _lsnSocket.Dispose();
-                        _lsnSocket = null;
+                        m_lsnSocket.Dispose();
+                        m_lsnSocket = null;
                     }
                     if (_cltSocket != null)
                     {
@@ -1373,16 +1373,16 @@ namespace VTDev.Libraries.CEXEngine.Networking
                         _cltSocket.Dispose();
                         _cltSocket = null;
                     }
-                    if (_opDone != null)
+                    if (m_opDone != null)
                     {
-                        _opDone.Close();
-                        _opDone.Dispose();
-                        _opDone = null;
+                        m_opDone.Close();
+                        m_opDone.Dispose();
+                        m_opDone = null;
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

@@ -14,17 +14,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
     {
         #region Fields
         // the finite field this polynomial ring is defined over
-        private GF2mField _field;
+        private GF2mField m_field;
 
         // the reduction polynomial
-        private PolynomialGF2mSmallM _poly;
+        private PolynomialGF2mSmallM m_poly;
 
         // the squaring matrix for this polynomial ring (given as the array of its row vectors)
-        protected PolynomialGF2mSmallM[] _sqMatrix;
+        protected PolynomialGF2mSmallM[] m_sqMatrix;
 
         // the matrix for computing square roots in this polynomial ring (given as the array of its row vectors). 
         // This matrix is computed as the inverse of the squaring matrix.
-        protected PolynomialGF2mSmallM[] _sqRootMatrix;
+        protected PolynomialGF2mSmallM[] m_sqRootMatrix;
         #endregion
 
         #region Properties
@@ -34,7 +34,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns></returns>
         public PolynomialGF2mSmallM[] SquaringMatrix
         {
-            get { return _sqMatrix; }
+            get { return m_sqMatrix; }
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public PolynomialGF2mSmallM[] SquareRootMatrix
         {
-            get { return _sqRootMatrix; }
+            get { return m_sqRootMatrix; }
         }
         #endregion
 
@@ -55,8 +55,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Poly">The reduction polynomial</param>
         public PolynomialRingGF2m(GF2mField Field, PolynomialGF2mSmallM Poly)
         {
-            _field = Field;
-            _poly = Poly;
+            m_field = Field;
+            m_poly = Poly;
             ComputeSquaringMatrix();
             ComputeSquareRootMatrix();
         }
@@ -68,8 +68,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         private void ComputeSquaringMatrix()
         {
-            int numColumns = _poly.Degree;
-            _sqMatrix = new PolynomialGF2mSmallM[numColumns];
+            int numColumns = m_poly.Degree;
+            m_sqMatrix = new PolynomialGF2mSmallM[numColumns];
             PolynomialGF2mSmallM[] _sqMatrix2 = new PolynomialGF2mSmallM[numColumns];
 
             if (ParallelUtils.IsParallel)
@@ -79,15 +79,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 {
                     int[] monomCoeffs = new int[(i << 1) + 1];
                     monomCoeffs[i << 1] = 1;
-                    _sqMatrix[i] = new PolynomialGF2mSmallM(_field, monomCoeffs);
+                    m_sqMatrix[i] = new PolynomialGF2mSmallM(m_field, monomCoeffs);
                 });
 
                 Parallel.For(nct, numColumns, i =>
                 {
                     int[] monomCoeffs = new int[(i << 1) + 1];
                     monomCoeffs[i << 1] = 1;
-                    PolynomialGF2mSmallM monomial = new PolynomialGF2mSmallM(_field, monomCoeffs);
-                    _sqMatrix[i] = monomial.Mod(_poly);
+                    PolynomialGF2mSmallM monomial = new PolynomialGF2mSmallM(m_field, monomCoeffs);
+                    m_sqMatrix[i] = monomial.Mod(m_poly);
                 });
             }
             else
@@ -96,15 +96,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 {
                     int[] monomCoeffs = new int[(i << 1) + 1];
                     monomCoeffs[i << 1] = 1;
-                    _sqMatrix[i] = new PolynomialGF2mSmallM(_field, monomCoeffs);
+                    m_sqMatrix[i] = new PolynomialGF2mSmallM(m_field, monomCoeffs);
                 }
 
                 for (int i = numColumns >> 1; i < numColumns; i++)
                 {
                     int[] monomCoeffs = new int[(i << 1) + 1];
                     monomCoeffs[i << 1] = 1;
-                    PolynomialGF2mSmallM monomial = new PolynomialGF2mSmallM(_field, monomCoeffs);
-                    _sqMatrix[i] = monomial.Mod(_poly);
+                    PolynomialGF2mSmallM monomial = new PolynomialGF2mSmallM(m_field, monomCoeffs);
+                    m_sqMatrix[i] = monomial.Mod(m_poly);
                 }
             }
         }
@@ -114,17 +114,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         private void ComputeSquareRootMatrix()
         {
-            int numColumns = _poly.Degree;
+            int numColumns = m_poly.Degree;
 
             // clone squaring matrix
             PolynomialGF2mSmallM[] tmpMatrix = new PolynomialGF2mSmallM[numColumns];
             for (int i = numColumns - 1; i >= 0; i--)
-                tmpMatrix[i] = new PolynomialGF2mSmallM(_sqMatrix[i]);
+                tmpMatrix[i] = new PolynomialGF2mSmallM(m_sqMatrix[i]);
 
             // initialize square root matrix as unit matrix
-            _sqRootMatrix = new PolynomialGF2mSmallM[numColumns];
+            m_sqRootMatrix = new PolynomialGF2mSmallM[numColumns];
             for (int i = numColumns - 1; i >= 0; i--)
-                _sqRootMatrix[i] = new PolynomialGF2mSmallM(_field, i);
+                m_sqRootMatrix[i] = new PolynomialGF2mSmallM(m_field, i);
 
             // simultaneously compute Gaussian reduction of squaring matrix and unit matrix
             for (int i = 0; i < numColumns; i++)
@@ -141,7 +141,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                             // found it, swap columns ...
                             foundNonZero = true;
                             SwapColumns(tmpMatrix, i, j);
-                            SwapColumns(_sqRootMatrix, i, j);
+                            SwapColumns(m_sqRootMatrix, i, j);
                             // ... and quit searching
                             j = numColumns;
                             continue;
@@ -154,9 +154,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
 
                 // normalize i-th column
                 int coef = tmpMatrix[i].GetCoefficient(i);
-                int invCoef = _field.Inverse(coef);
+                int invCoef = m_field.Inverse(coef);
                 tmpMatrix[i].MultThisWithElement(invCoef);
-                _sqRootMatrix[i].MultThisWithElement(invCoef);
+                m_sqRootMatrix[i].MultThisWithElement(invCoef);
 
                 if (ParallelUtils.IsParallel)
                 {
@@ -169,10 +169,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                             if (coefp != 0)
                             {
                                 PolynomialGF2mSmallM tmpSqColumn = tmpMatrix[i].MultWithElement(coefp);
-                                PolynomialGF2mSmallM tmpInvColumn = _sqRootMatrix[i].MultWithElement(coefp);
+                                PolynomialGF2mSmallM tmpInvColumn = m_sqRootMatrix[i].MultWithElement(coefp);
                                 tmpMatrix[j].AddToThis(tmpSqColumn);
-                                lock (_sqRootMatrix)
-                                    _sqRootMatrix[j].AddToThis(tmpInvColumn);
+                                lock (m_sqRootMatrix)
+                                    m_sqRootMatrix[j].AddToThis(tmpInvColumn);
                             }
                         }
                     });
@@ -187,10 +187,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                             if (coef != 0)
                             {
                                 PolynomialGF2mSmallM tmpSqColumn = tmpMatrix[i].MultWithElement(coef);
-                                PolynomialGF2mSmallM tmpInvColumn = _sqRootMatrix[i].MultWithElement(coef);
+                                PolynomialGF2mSmallM tmpInvColumn = m_sqRootMatrix[i].MultWithElement(coef);
                                 tmpMatrix[j].AddToThis(tmpSqColumn);
-                                lock (_sqRootMatrix)
-                                    _sqRootMatrix[j].AddToThis(tmpInvColumn);
+                                lock (m_sqRootMatrix)
+                                    m_sqRootMatrix[j].AddToThis(tmpInvColumn);
                             }
                         }
                     }

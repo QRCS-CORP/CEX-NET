@@ -104,13 +104,13 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         #region Private Fields
         // The magnitude of this big integer. This array holds unsigned little endian digits.
         [NonSerialized]
-        internal int[] _digits;
+        internal int[] m_digits;
         // The length of this in measured in ints. Can be less than Digits.Length().
         [NonSerialized]
-        internal int _numberLength;
+        internal int m_numberLength;
         // The sign of this
         [NonSerialized]
-        internal int _sign;
+        internal int m_sign;
         // The BigInteger constant -1
         internal static readonly BigInteger MinusOne = new BigInteger(-1, 1);
         // The BigInteger constant 0 used for comparison
@@ -121,18 +121,18 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         internal static readonly int LESS = -1;
 
         // All the BigInteger numbers in the range [0,10] are cached.
-        private static readonly BigInteger[] _smallValues = 
+        private static readonly BigInteger[] m_smallValues = 
         {
             Zero, One, new BigInteger(1, 2), new BigInteger(1, 3), new BigInteger(1, 4), new BigInteger(1, 5),
             new BigInteger(1, 6), new BigInteger(1, 7), new BigInteger(1, 8), new BigInteger(1, 9), Ten 
         };
 
-        private static readonly BigInteger[] _twoPows;
+        private static readonly BigInteger[] m_twoPows;
         [NonSerialized]
-        private int _firstNonzeroDigit = -2;
+        private int m_firstNonzeroDigit = -2;
         // Cache for the hash code
         [NonSerialized]
-        private int _hashCode = 0;
+        private int m_hashCode = 0;
         #endregion
 
         #region Properties
@@ -166,12 +166,12 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             get
             {
-                if (_sign == 0)
+                if (m_sign == 0)
                     return -1;
 
                 // (sign != 0) implies that exists some non zero digit
                 int i = FirstNonzeroDigit;
-                return ((i << 5) + IntUtils.NumberOfTrailingZeros(_digits[i]));
+                return ((i << 5) + IntUtils.NumberOfTrailingZeros(m_digits[i]));
             }
         }
         #endregion
@@ -182,10 +182,10 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </summary>
         static BigInteger()
         {
-            _twoPows = new BigInteger[32];
+            m_twoPows = new BigInteger[32];
 
-            for (int i = 0; i < _twoPows.Length; i++)
-                _twoPows[i] = BigInteger.ValueOf(1L << i);
+            for (int i = 0; i < m_twoPows.Length; i++)
+                m_twoPows[i] = BigInteger.ValueOf(1L << i);
         }
 
         /// <summary>
@@ -203,12 +203,12 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
             if (Value[0] > sbyte.MaxValue)
             {
-                _sign = -1;
+                m_sign = -1;
                 PutBytesNegativeToIntegers(Value);
             }
             else
             {
-                _sign = 1;
+                m_sign = 1;
                 PutBytesPositiveToIntegers(Value);
             }
             CutOffLeadingZeroes();
@@ -241,13 +241,13 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
             if (Magnitude.Length == 0)
             {
-                _sign = 0;
-                _numberLength = 1;
-                _digits = new int[] { 0 };
+                m_sign = 0;
+                m_numberLength = 1;
+                m_digits = new int[] { 0 };
             }
             else
             {
-                _sign = Signum;
+                m_sign = Signum;
                 PutBytesPositiveToIntegers(Magnitude);
                 CutOffLeadingZeroes();
             }
@@ -268,21 +268,21 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
             if (NumBits == 0)
             {
-                _sign = 0;
-                _numberLength = 1;
-                _digits = new int[] { 0 };
+                m_sign = 0;
+                m_numberLength = 1;
+                m_digits = new int[] { 0 };
             }
             else
             {
-                _sign = 1;
-                _numberLength = (int)(uint)(NumBits + 31) >> 5;
-                _digits = new int[_numberLength];
+                m_sign = 1;
+                m_numberLength = (int)(uint)(NumBits + 31) >> 5;
+                m_digits = new int[m_numberLength];
 
-                for (int i = 0; i < _numberLength; i++)
-                    _digits[i] = Rand.Next();
+                for (int i = 0; i < m_numberLength; i++)
+                    m_digits[i] = Rand.Next();
 
                 // Using only the necessary bits
-                _digits[_numberLength - 1] = IntUtils.URShift(_digits[_numberLength - 1], (-NumBits) & 31);
+                m_digits[m_numberLength - 1] = IntUtils.URShift(m_digits[m_numberLength - 1], (-NumBits) & 31);
                 CutOffLeadingZeroes();
             }
         }
@@ -302,21 +302,21 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
             if (NumBits == 0)
             {
-                _sign = 0;
-                _numberLength = 1;
-                _digits = new int[] { 0 };
+                m_sign = 0;
+                m_numberLength = 1;
+                m_digits = new int[] { 0 };
             }
             else
             {
-                _sign = 1;
-                _numberLength = (int)(uint)(NumBits + 31) >> 5;
-                _digits = new int[_numberLength];
+                m_sign = 1;
+                m_numberLength = (int)(uint)(NumBits + 31) >> 5;
+                m_digits = new int[m_numberLength];
 
-                for (int i = 0; i < _numberLength; i++)
-                    _digits[i] = SecRand.Next();
+                for (int i = 0; i < m_numberLength; i++)
+                    m_digits[i] = SecRand.Next();
 
                 // Using only the necessary bits
-                _digits[_numberLength - 1] = IntUtils.URShift(_digits[_numberLength - 1], (-NumBits) & 31);
+                m_digits[m_numberLength - 1] = IntUtils.URShift(m_digits[m_numberLength - 1], (-NumBits) & 31);
                 CutOffLeadingZeroes();
             }
         }
@@ -335,9 +335,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 throw new ArithmeticException("bitLength < 2");
 
             BigInteger me = Primality.ConsBigInteger(BitLength, Certainty, Rnd);
-            _sign = me._sign;
-            _numberLength = me._numberLength;
-            _digits = me._digits;
+            m_sign = me.m_sign;
+            m_numberLength = me.m_numberLength;
+            m_digits = me.m_digits;
         }
 
         /// <summary>
@@ -354,9 +354,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 throw new ArithmeticException("bitLength < 2");
 
             BigInteger me = Primality.ConsBigInteger(BitLength, Certainty, Rnd);
-            _sign = me._sign;
-            _numberLength = me._numberLength;
-            _digits = me._digits;
+            m_sign = me.m_sign;
+            m_numberLength = me.m_numberLength;
+            m_digits = me.m_digits;
         }
 
         /// <summary>
@@ -403,15 +403,15 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             if (Digits.Length == 0)
             {
-                _sign = 0;
-                _numberLength = 1;
-                this._digits = new int[] { 0 };
+                m_sign = 0;
+                m_numberLength = 1;
+                this.m_digits = new int[] { 0 };
             }
             else
             {
-                _sign = Signum;
-                _numberLength = Digits.Length;
-                this._digits = Digits;
+                m_sign = Signum;
+                m_numberLength = Digits.Length;
+                this.m_digits = Digits;
                 CutOffLeadingZeroes();
             }
         }
@@ -424,9 +424,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <param name="Value">The only one digit of array</param>
         internal BigInteger(int Sign, int Value)
         {
-            this._sign = Sign;
-            _numberLength = 1;
-            _digits = new int[] { Value };
+            this.m_sign = Sign;
+            m_numberLength = 1;
+            m_digits = new int[] { Value };
         }
 
         /// <summary>
@@ -438,17 +438,17 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         internal BigInteger(int Sign, long Value)
         {
             // PRE: (val >= 0) && (sign >= -1) && (sign <= 1)
-            this._sign = Sign;
+            this.m_sign = Sign;
             if (((ulong)Value & 0xFFFFFFFF00000000L) == 0)
             {
                 // It fits in one 'int'
-                _numberLength = 1;
-                _digits = new int[] { (int)Value };
+                m_numberLength = 1;
+                m_digits = new int[] { (int)Value };
             }
             else
             {
-                _numberLength = 2;
-                _digits = new int[] { (int)Value, (int)(Value >> 32) };
+                m_numberLength = 2;
+                m_digits = new int[] { (int)Value, (int)(Value >> 32) };
             }
         }
 
@@ -462,9 +462,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <param name="Digits">A reference of some array created before</param>
         internal BigInteger(int Sign, int NumberLength, int[] Digits)
         {
-            this._sign = Sign;
-            this._numberLength = NumberLength;
-            this._digits = Digits;
+            this.m_sign = Sign;
+            this.m_numberLength = NumberLength;
+            this.m_digits = Digits;
         }
 
         private BigInteger()
@@ -480,7 +480,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns><c>Abs(this)</c></returns>
         public BigInteger Abs()
         {
-            return ((_sign < 0) ? new BigInteger(1, _numberLength, _digits) : this);
+            return ((m_sign < 0) ? new BigInteger(1, m_numberLength, m_digits) : this);
         }
 
         /// <summary>
@@ -549,17 +549,17 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>Returns 1 if this > Value, -1 if this &lt; Value, 0 if this == Value</returns>
         public int CompareTo(BigInteger Value)
         {
-            if (_sign > Value._sign)
+            if (m_sign > Value.m_sign)
                 return GREATER;
-            if (_sign < Value._sign)
+            if (m_sign < Value.m_sign)
                 return LESS;
-            if (_numberLength > Value._numberLength)
-                return _sign;
-            if (_numberLength < Value._numberLength)
-                return -Value._sign;
+            if (m_numberLength > Value.m_numberLength)
+                return m_sign;
+            if (m_numberLength < Value.m_numberLength)
+                return -Value.m_sign;
 
             // Equal sign and equal numberLength
-            return (_sign * Elementary.CompareArrays(_digits, Value._digits, _numberLength));
+            return (m_sign * Elementary.CompareArrays(m_digits, Value.m_digits, m_numberLength));
         }
 
         /// <summary>
@@ -571,27 +571,27 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns><c>this / Divisor</c></returns>
         public BigInteger Divide(BigInteger Divisor)
         {
-            if (Divisor._sign == 0)
+            if (Divisor.m_sign == 0)
                 throw new ArithmeticException("BigInteger divide by zero");
 
-            int divisorSign = Divisor._sign;
+            int divisorSign = Divisor.m_sign;
             if (Divisor.IsOne())
-                return ((Divisor._sign > 0) ? this : this.Negate());
+                return ((Divisor.m_sign > 0) ? this : this.Negate());
 
-            int thisSign = _sign;
-            int thisLen = _numberLength;
-            int divisorLen = Divisor._numberLength;
+            int thisSign = m_sign;
+            int thisLen = m_numberLength;
+            int divisorLen = Divisor.m_numberLength;
 
             if (thisLen + divisorLen == 2)
             {
-                long val = (_digits[0] & 0xFFFFFFFFL) / (Divisor._digits[0] & 0xFFFFFFFFL);
+                long val = (m_digits[0] & 0xFFFFFFFFL) / (Divisor.m_digits[0] & 0xFFFFFFFFL);
                 if (thisSign != divisorSign)
                     val = -val;
 
                 return ValueOf(val);
             }
 
-            int cmp = ((thisLen != divisorLen) ? ((thisLen > divisorLen) ? 1 : -1) : Elementary.CompareArrays(_digits, Divisor._digits, thisLen));
+            int cmp = ((thisLen != divisorLen) ? ((thisLen > divisorLen) ? 1 : -1) : Elementary.CompareArrays(m_digits, Divisor.m_digits, thisLen));
             if (cmp == EQUALS)
                 return ((thisSign == divisorSign) ? One : MinusOne);
 
@@ -603,9 +603,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             int resSign = ((thisSign == divisorSign) ? 1 : -1);
 
             if (divisorLen == 1)
-                Division.DivideArrayByInt(resDigits, _digits, thisLen, Divisor._digits[0]);
+                Division.DivideArrayByInt(resDigits, m_digits, thisLen, Divisor.m_digits[0]);
             else
-                Division.Divide(resDigits, resLength, _digits, thisLen, Divisor._digits, divisorLen);
+                Division.Divide(resDigits, resLength, m_digits, thisLen, Divisor.m_digits, divisorLen);
 
             BigInteger result = new BigInteger(resSign, resLength, resDigits);
             result.CutOffLeadingZeroes();
@@ -622,24 +622,24 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns><c>[this / Divisor, this % Divisor]</c></returns>
         public BigInteger[] DivideAndRemainder(BigInteger Divisor)
         {
-            int divisorSign = Divisor._sign;
+            int divisorSign = Divisor.m_sign;
             if (divisorSign == 0)
                 throw new ArithmeticException("BigInteger divide by zero");
 
-            int divisorLen = Divisor._numberLength;
-            int[] divisorDigits = Divisor._digits;
+            int divisorLen = Divisor.m_numberLength;
+            int[] divisorDigits = Divisor.m_digits;
 
             if (divisorLen == 1)
                 return Division.DivideAndRemainderByInteger(this, divisorDigits[0], divisorSign);
 
             // res[0] is a quotient and res[1] is a remainder:
-            int[] thisDigits = _digits;
-            int thisLen = _numberLength;
+            int[] thisDigits = m_digits;
+            int thisLen = m_numberLength;
             int cmp = (thisLen != divisorLen) ? ((thisLen > divisorLen) ? 1 : -1) : Elementary.CompareArrays(thisDigits, divisorDigits, thisLen);
             if (cmp < 0)
                 return new BigInteger[] { Zero, this };
 
-            int thisSign = _sign;
+            int thisSign = m_sign;
             int quotientLength = thisLen - divisorLen + 1;
             int remainderLength = divisorLen;
             int quotientSign = ((thisSign == divisorSign) ? 1 : -1);
@@ -692,7 +692,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
             // Optimization for small operands
             // (op2.bitLength() < 64) and (op1.bitLength() < 64)
-            if (((val1._numberLength == 1) || ((val1._numberLength == 2) && (val1._digits[1] > 0))) && (val2._numberLength == 1 || (val2._numberLength == 2 && val2._digits[1] > 0)))
+            if (((val1.m_numberLength == 1) || ((val1.m_numberLength == 2) && (val1.m_digits[1] > 0))) && (val2.m_numberLength == 1 || (val2.m_numberLength == 2 && val2.m_digits[1] > 0)))
                 return BigInteger.ValueOf(Division.GcdBinary(val1.ToInt64(), val2.ToInt64()));
 
             return Division.GcdBinary(val1.Copy(), val2.Copy());
@@ -751,12 +751,12 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <exception cref="ArithmeticException">Thrown if M == null or M &lt; 0</exception>
         public BigInteger Mod(BigInteger M)
         {
-            if (M._sign <= 0)
+            if (M.m_sign <= 0)
                 throw new ArithmeticException("BigInteger: modulus not positive!");
 
             BigInteger rem = Remainder(M);
 
-            return ((rem._sign < 0) ? rem.Add(M) : rem);
+            return ((rem.m_sign < 0) ? rem.Add(M) : rem);
         }
 
         /// <summary>
@@ -775,18 +775,18 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <exception cref="ArithmeticException">Thrown if M &lt; 0 or if Exponent&lt;0 and this is not relatively prime to M</exception>
         public BigInteger ModPow(BigInteger Exponent, BigInteger M)
         {
-            if (M._sign <= 0)
+            if (M.m_sign <= 0)
                 throw new ArithmeticException("BigInteger: modulus not positive");
 
             BigInteger b = this;
 
-            if (M.IsOne() | (Exponent._sign > 0 & b._sign == 0))
+            if (M.IsOne() | (Exponent.m_sign > 0 & b.m_sign == 0))
                 return BigInteger.Zero;
 
-            if (b._sign == 0 && Exponent._sign == 0)
+            if (b.m_sign == 0 && Exponent.m_sign == 0)
                 return BigInteger.One;
 
-            if (Exponent._sign < 0)
+            if (Exponent.m_sign < 0)
             {
                 b = ModInverse(M);
                 Exponent = Exponent.Negate();
@@ -795,7 +795,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             BigInteger res = (M.TestBit(0)) ? Division.OddModPow(b.Abs(), Exponent, M) : Division.EvenModPow(b.Abs(), Exponent, M);
 
             // -b^e mod m == ((-1 mod m) * (b^e mod m)) mod m
-            if ((b._sign < 0) && Exponent.TestBit(0))
+            if ((b.m_sign < 0) && Exponent.TestBit(0))
                 res = M.Subtract(BigInteger.One).Multiply(res).Mod(M);
 
             // else exponent is even, so base^exp is positive
@@ -816,7 +816,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <exception cref="ArithmeticException">Thrown if M &lt; 0 or, if this is not relatively prime to code M</exception>
         public BigInteger ModInverse(BigInteger M)
         {
-            if (M._sign <= 0)
+            if (M.m_sign <= 0)
                 throw new ArithmeticException("modulus not positive!");
 
             // If both are even, no inverse exists
@@ -829,10 +829,10 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
             // From now on: (m > 1)
             BigInteger res = Division.ModInverseMontgomery(Abs().Mod(M), M);
-            if (res._sign == 0)
+            if (res.m_sign == 0)
                 throw new ArithmeticException("BigInteger not invertible!");
 
-            res = ((_sign < 0) ? M.Subtract(res) : res);
+            res = ((m_sign < 0) ? M.Subtract(res) : res);
 
             return res;
         }
@@ -846,9 +846,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         public BigInteger Multiply(BigInteger Multiplicand)
         {
             // This let us to throw NullPointerException when val == null
-            if (Multiplicand._sign == 0)
+            if (Multiplicand.m_sign == 0)
                 return Zero;
-            if (_sign == 0)
+            if (m_sign == 0)
                 return Zero;
 
             return Multiplication.Multiply(this, Multiplicand);
@@ -861,7 +861,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns><c>-this</c></returns>
         public BigInteger Negate()
         {
-            return ((_sign == 0) ? this : new BigInteger(-_sign, _numberLength, _digits));
+            return ((m_sign == 0) ? this : new BigInteger(-m_sign, m_numberLength, m_digits));
         }
 
         /// <summary>
@@ -874,7 +874,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <exception cref="ArithmeticException">Thrown if this &lt; 0</exception>
         public BigInteger NextProbablePrime()
         {
-            if (_sign < 0)
+            if (m_sign < 0)
                 throw new ArithmeticException("start < 0");
 
             return Primality.NextProbablePrime(this);
@@ -958,27 +958,27 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>Returns <c>this % Divisor</c></returns>
         public BigInteger Remainder(BigInteger Divisor)
         {
-            if (Divisor._sign == 0)
+            if (Divisor.m_sign == 0)
                 throw new ArithmeticException("BigInteger divide by zero!");
 
-            int thisLen = _numberLength;
-            int divisorLen = Divisor._numberLength;
-            if (((thisLen != divisorLen) ? ((thisLen > divisorLen) ? 1 : -1) : Elementary.CompareArrays(_digits, Divisor._digits, thisLen)) == LESS)
+            int thisLen = m_numberLength;
+            int divisorLen = Divisor.m_numberLength;
+            if (((thisLen != divisorLen) ? ((thisLen > divisorLen) ? 1 : -1) : Elementary.CompareArrays(m_digits, Divisor.m_digits, thisLen)) == LESS)
                 return this;
 
             int resLength = divisorLen;
             int[] resDigits = new int[resLength];
             if (resLength == 1)
             {
-                resDigits[0] = Division.RemainderArrayByInt(_digits, thisLen, Divisor._digits[0]);
+                resDigits[0] = Division.RemainderArrayByInt(m_digits, thisLen, Divisor.m_digits[0]);
             }
             else
             {
                 int qLen = thisLen - divisorLen + 1;
-                resDigits = Division.Divide(null, qLen, _digits, thisLen, Divisor._digits, divisorLen);
+                resDigits = Division.Divide(null, qLen, m_digits, thisLen, Divisor.m_digits, divisorLen);
             }
 
-            BigInteger result = new BigInteger(_sign, resLength, resDigits);
+            BigInteger result = new BigInteger(m_sign, resLength, resDigits);
             result.CutOffLeadingZeroes();
 
             return result;
@@ -1012,7 +1012,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>Returns <c>this &lt;&lt; N</c> if n >= 0, <c>this >> (-N)</c> otherwise</returns>
         public BigInteger ShiftLeft(int N)
         {
-            if ((N == 0) || (_sign == 0))
+            if ((N == 0) || (m_sign == 0))
                 return this;
 
             return ((N > 0) ? BitLevel.ShiftLeft(this, N) : BitLevel.ShiftRight(this, -N));
@@ -1029,7 +1029,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>this >> N, if N >= 0; this &lt;&lt; (-n) otherwise</returns>
         public BigInteger ShiftRight(int N)
         {
-            if ((N == 0) || (_sign == 0))
+            if ((N == 0) || (m_sign == 0))
                 return this;
 
             return ((N > 0) ? BitLevel.ShiftRight(this, N) : BitLevel.ShiftLeft(this, -N));
@@ -1042,7 +1042,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>Returns -1 if this &lt; 0, 0 if this == 0, 1 if this > 0</returns>
         public int Signum()
         {
-            return _sign;
+            return m_sign;
         }
 
         /// <summary>
@@ -1075,18 +1075,18 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         public bool TestBit(int N)
         {
             if (N == 0)
-                return ((_digits[0] & 1) != 0);
+                return ((m_digits[0] & 1) != 0);
             if (N < 0)
                 throw new ArithmeticException("Negative bit address!");
 
             int intCount = (int)(uint)N >> 5;
-            if (intCount >= _numberLength)
-                return (_sign < 0);
+            if (intCount >= m_numberLength)
+                return (m_sign < 0);
 
-            int digit = _digits[intCount];
+            int digit = m_digits[intCount];
             N = (1 << (N & 31)); // int with 1 set to the needed position
 
-            if (_sign < 0)
+            if (m_sign < 0)
             {
                 int firstNonZeroDigit = FirstNonzeroDigit;
                 if (intCount < firstNonZeroDigit)
@@ -1107,7 +1107,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>Two's complement representation of this</returns>
         public byte[] ToByteArray()
         {
-            if (_sign == 0)
+            if (m_sign == 0)
                 return new byte[] { 0 };
 
             BigInteger temp = this;
@@ -1123,9 +1123,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             int digit;
             int hB;
 
-            if (bytesLen - (_numberLength << 2) == 1)
+            if (bytesLen - (m_numberLength << 2) == 1)
             {
-                bytes[0] = (byte)((_sign < 0) ? -1 : 0);
+                bytes[0] = (byte)((m_sign < 0) ? -1 : 0);
                 highBytes = 4;
                 firstByteNumber++;
             }
@@ -1138,11 +1138,11 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             digitIndex = iThis;
             bytesLen -= iThis << 2;
 
-            if (_sign < 0)
+            if (m_sign < 0)
             {
-                digit = -temp._digits[digitIndex];
+                digit = -temp.m_digits[digitIndex];
                 digitIndex++;
-                if (digitIndex == _numberLength)
+                if (digitIndex == m_numberLength)
                     bytesInInteger = highBytes;
 
                 for (int i = 0; i < bytesInInteger; i++, digit >>= 8)
@@ -1150,9 +1150,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
                 while (bytesLen > firstByteNumber)
                 {
-                    digit = ~temp._digits[digitIndex];
+                    digit = ~temp.m_digits[digitIndex];
                     digitIndex++;
-                    if (digitIndex == _numberLength)
+                    if (digitIndex == m_numberLength)
                         bytesInInteger = highBytes;
 
                     for (int i = 0; i < bytesInInteger; i++, digit >>= 8)
@@ -1163,9 +1163,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             {
                 while (bytesLen > firstByteNumber)
                 {
-                    digit = temp._digits[digitIndex];
+                    digit = temp.m_digits[digitIndex];
                     digitIndex++;
-                    if (digitIndex == _numberLength)
+                    if (digitIndex == m_numberLength)
                         bytesInInteger = highBytes;
 
                     for (int i = 0; i < bytesInInteger; i++, digit >>= 8)
@@ -1200,7 +1200,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>Returns this BigInteger as an int value</returns>
         public int ToInt32()
         {
-            return (_sign * _digits[0]);
+            return (m_sign * m_digits[0]);
         }
 
         /// <summary>
@@ -1211,11 +1211,11 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>Returns this BigInteger as a long value</returns>
         public long ToInt64()
         {
-            long value = (_numberLength > 1) ?
-                (((long)_digits[1]) << 32) | (_digits[0] & 0xFFFFFFFFL) :
-                (_digits[0] & 0xFFFFFFFFL);
+            long value = (m_numberLength > 1) ?
+                (((long)m_digits[1]) << 32) | (m_digits[0] & 0xFFFFFFFFL) :
+                (m_digits[0] & 0xFFFFFFFFL);
 
-            return (_sign * value);
+            return (m_sign * value);
         }
 
         /// <summary>
@@ -1268,7 +1268,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             }
             else if (Value <= 10)
             {
-                return _smallValues[(int)Value];
+                return m_smallValues[(int)Value];
             }
             else // (val > 10)
             {
@@ -1293,28 +1293,28 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         internal BigInteger Copy()
         {
             // Returns a copy of the current instance to achieve immutability
-            int[] copyDigits = new int[_numberLength];
-            Array.Copy(_digits, 0, copyDigits, 0, _numberLength);
+            int[] copyDigits = new int[m_numberLength];
+            Array.Copy(m_digits, 0, copyDigits, 0, m_numberLength);
 
-            return new BigInteger(_sign, _numberLength, copyDigits);
+            return new BigInteger(m_sign, m_numberLength, copyDigits);
         }
 
         internal void CutOffLeadingZeroes()
         {
             // Decreases NumberLength if there are zero high elements
-            while ((_numberLength > 0) && (_digits[--_numberLength] == 0))
+            while ((m_numberLength > 0) && (m_digits[--m_numberLength] == 0))
             {
                 // Empty
             }
 
-            if (_digits[_numberLength++] == 0)
-                _sign = 0;
+            if (m_digits[m_numberLength++] == 0)
+                m_sign = 0;
         }
 
         private bool EqualsArrays(int[] X)
         {
             int i;
-            for (i = _numberLength - 1; (i >= 0) && (_digits[i] == X[i]); i--)
+            for (i = m_numberLength - 1; (i >= 0) && (m_digits[i] == X[i]); i--)
             {
                 // Empty
             }
@@ -1326,30 +1326,30 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             // Get the first non-zero digit from this
             get
             {
-                if (_firstNonzeroDigit == -2)
+                if (m_firstNonzeroDigit == -2)
                 {
                     int i;
-                    if (this._sign == 0)
+                    if (this.m_sign == 0)
                     {
                         i = -1;
                     }
                     else
                     {
-                        for (i = 0; _digits[i] == 0; i++)
+                        for (i = 0; m_digits[i] == 0; i++)
                         {
                             // Empty
                         }
                     }
-                    _firstNonzeroDigit = i;
+                    m_firstNonzeroDigit = i;
                 }
-                return _firstNonzeroDigit;
+                return m_firstNonzeroDigit;
             }
         }
 
         internal static BigInteger GetPowerOfTwo(int Exponent)
         {
-            if (Exponent < _twoPows.Length)
-                return _twoPows[Exponent];
+            if (Exponent < m_twoPows.Length)
+                return m_twoPows[Exponent];
 
             int intCount = (int)(uint)Exponent >> 5;
             int bitN = Exponent & 31;
@@ -1362,7 +1362,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         internal bool IsOne()
         {
             // Tests if this.Abs() is equals to ONE
-            return ((_numberLength == 1) && (_digits[0] == 1));
+            return ((m_numberLength == 1) && (m_digits[0] == 1));
         }
 
         private void PutBytesNegativeToIntegers(byte[] ByteValues)
@@ -1370,34 +1370,34 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             // Puts a big-endian byte array into a little-endian applying two complement
             int bytesLen = ByteValues.Length;
             int highBytes = bytesLen & 3;
-            _numberLength = ((int)(uint)bytesLen >> 2) + ((highBytes == 0) ? 0 : 1);
-            _digits = new int[_numberLength];
+            m_numberLength = ((int)(uint)bytesLen >> 2) + ((highBytes == 0) ? 0 : 1);
+            m_digits = new int[m_numberLength];
             int i = 0;
             // Setting the sign
-            _digits[_numberLength - 1] = -1;
+            m_digits[m_numberLength - 1] = -1;
 
             // Put bytes to the int array starting from the end of the byte array
             while (bytesLen > highBytes)
             {
-                _digits[i] = (ByteValues[--bytesLen] & 0xFF) |
+                m_digits[i] = (ByteValues[--bytesLen] & 0xFF) |
                     (ByteValues[--bytesLen] & 0xFF) << 8 |
                     (ByteValues[--bytesLen] & 0xFF) << 16 |
                     (ByteValues[--bytesLen] & 0xFF) << 24;
 
-                if (_digits[i] != 0)
+                if (m_digits[i] != 0)
                 {
-                    _digits[i] = -_digits[i];
-                    _firstNonzeroDigit = i;
+                    m_digits[i] = -m_digits[i];
+                    m_firstNonzeroDigit = i;
                     i++;
 
                     while (bytesLen > highBytes)
                     {
-                        _digits[i] = (ByteValues[--bytesLen] & 0xFF) |
+                        m_digits[i] = (ByteValues[--bytesLen] & 0xFF) |
                             (ByteValues[--bytesLen] & 0xFF) << 8 |
                             (ByteValues[--bytesLen] & 0xFF) << 16 |
                             (ByteValues[--bytesLen] & 0xFF) << 24;
 
-                        _digits[i] = ~_digits[i];
+                        m_digits[i] = ~m_digits[i];
                         i++;
                     }
                     break;
@@ -1407,19 +1407,19 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             if (highBytes != 0)
             {
                 // Put the first bytes in the highest element of the int array
-                if (_firstNonzeroDigit != -2)
+                if (m_firstNonzeroDigit != -2)
                 {
                     for (int j = 0; j < bytesLen; j++)
-                        _digits[i] = (_digits[i] << 8) | (ByteValues[j] & 0xFF);
+                        m_digits[i] = (m_digits[i] << 8) | (ByteValues[j] & 0xFF);
 
-                    _digits[i] = ~_digits[i];
+                    m_digits[i] = ~m_digits[i];
                 }
                 else
                 {
                     for (int j = 0; j < bytesLen; j++)
-                        _digits[i] = (_digits[i] << 8) | (ByteValues[j] & 0xFF);
+                        m_digits[i] = (m_digits[i] << 8) | (ByteValues[j] & 0xFF);
 
-                    _digits[i] = -_digits[i];
+                    m_digits[i] = -m_digits[i];
                 }
             }
         }
@@ -1429,14 +1429,14 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             // Puts a big-endian byte array into a little-endian int array
             int bytesLen = ByteValues.Length;
             int highBytes = bytesLen & 3;
-            _numberLength = ((int)(uint)bytesLen >> 2) + ((highBytes == 0) ? 0 : 1);
-            _digits = new int[_numberLength];
+            m_numberLength = ((int)(uint)bytesLen >> 2) + ((highBytes == 0) ? 0 : 1);
+            m_digits = new int[m_numberLength];
             int i = 0;
 
             // Put bytes to the int array starting from the end of the byte array
             while (bytesLen > highBytes)
             {
-                _digits[i++] = (ByteValues[--bytesLen] & 0xFF) |
+                m_digits[i++] = (ByteValues[--bytesLen] & 0xFF) |
                     (ByteValues[--bytesLen] & 0xFF) << 8 |
                     (ByteValues[--bytesLen] & 0xFF) << 16 |
                     (ByteValues[--bytesLen] & 0xFF) << 24;
@@ -1444,7 +1444,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
             // Put the first bytes in the highest element of the int array
             for (int j = 0; j < bytesLen; j++)
-                _digits[i] = (_digits[i] << 8) | (ByteValues[j] & 0xFF);
+                m_digits[i] = (m_digits[i] << 8) | (ByteValues[j] & 0xFF);
         }
 
         private static void SetFromString(BigInteger X, String Value, int Radix)
@@ -1497,20 +1497,20 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             }
 
             numberLength = digitIndex;
-            X._sign = sign;
-            X._numberLength = numberLength;
-            X._digits = digits;
+            X.m_sign = sign;
+            X.m_numberLength = numberLength;
+            X.m_digits = digits;
             X.CutOffLeadingZeroes();
         }
 
         internal BigInteger ShiftLeftOneBit()
         {
-            return (_sign == 0) ? this : BitLevel.ShiftLeftOneBit(this);
+            return (m_sign == 0) ? this : BitLevel.ShiftLeftOneBit(this);
         }
 
         internal void UnCache()
         {
-            _firstNonzeroDigit = -2;
+            m_firstNonzeroDigit = -2;
         }
         #endregion
 
@@ -1594,9 +1594,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             }
 
             value = new BigInteger();
-            value._sign = sign;
-            value._numberLength = numberLength;
-            value._digits = digits;
+            value.m_sign = sign;
+            value.m_numberLength = numberLength;
+            value.m_digits = digits;
             value.CutOffLeadingZeroes();
             exception = null;
             return true;
@@ -1670,7 +1670,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <param name="Context">The streaming context</param>
         private BigInteger(SerializationInfo Info, StreamingContext Context)
         {
-            _sign = Info.GetInt32("sign");
+            m_sign = Info.GetInt32("sign");
             byte[] magn = (byte[])Info.GetValue("magnitude", typeof(byte[]));
             PutBytesPositiveToIntegers(magn);
             CutOffLeadingZeroes();
@@ -1684,7 +1684,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <param name="Context">The streaming context</param>
         void ISerializable.GetObjectData(SerializationInfo Info, StreamingContext Context)
         {
-            Info.AddValue("sign", _sign);
+            Info.AddValue("sign", m_sign);
             byte[] magn = Abs().ToByteArray();
             Info.AddValue("magnitude", magn, typeof(byte[]));
         }
@@ -1703,7 +1703,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             if (Obj is BigInteger)
             {
                 BigInteger x1 = (BigInteger)Obj;
-                return _sign == x1._sign && _numberLength == x1._numberLength && EqualsArrays(x1._digits);
+                return m_sign == x1.m_sign && m_numberLength == x1.m_numberLength && EqualsArrays(x1.m_digits);
             }
             return false;
         }
@@ -1715,15 +1715,15 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>Returns hash code for this</returns>
         public override int GetHashCode()
         {
-            if (_hashCode != 0)
-                return _hashCode;
+            if (m_hashCode != 0)
+                return m_hashCode;
 
-            for (int i = 0; i < _digits.Length; i++)
-                _hashCode = (int)(_hashCode * 33 + (_digits[i] & 0xffffffff));
+            for (int i = 0; i < m_digits.Length; i++)
+                m_hashCode = (int)(m_hashCode * 33 + (m_digits[i] & 0xffffffff));
 
-            _hashCode = _hashCode * _sign;
+            m_hashCode = m_hashCode * m_sign;
 
-            return _hashCode;
+            return m_hashCode;
         }
 
         /// <summary>

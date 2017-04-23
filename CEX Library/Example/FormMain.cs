@@ -597,7 +597,7 @@ namespace VTDev.Projects.CEX
                         cbKeySize.Items.Add(KeySizes.K256);
                         cbKeySize.Items.Add(KeySizes.K512);
                         break;
-                    case Digests.Blake256:
+                    case Digests.Blake2S256:
                     case Digests.Keccak256:
                     case Digests.Skein256:
                     case Digests.SHA256:
@@ -606,7 +606,7 @@ namespace VTDev.Projects.CEX
                         cbKeySize.Items.Add(KeySizes.K768);
                         cbKeySize.Items.Add(KeySizes.K1024);
                         break;
-                    case Digests.Blake512:
+                    case Digests.Blake2B512:
                     case Digests.Keccak512:
                     case Digests.SHA512:
                     case Digests.Skein512:
@@ -1212,12 +1212,12 @@ namespace VTDev.Projects.CEX
 
             switch (DigestType)
             {
-                case Digests.Blake256:
+                case Digests.Blake2S256:
                 case Digests.SHA256:
                 case Digests.Skein256:
                     macSize = 32;
                     break;
-                case Digests.Blake512:
+                case Digests.Blake2B512:
                 case Digests.SHA512:
                 case Digests.Skein512:
                 case Digests.Keccak512:

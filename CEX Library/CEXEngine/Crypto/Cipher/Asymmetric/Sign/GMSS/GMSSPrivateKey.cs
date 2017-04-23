@@ -91,7 +91,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         // An array of the Winternitz parameter 'w' of each layer
         private int[] _otsIndex;
         // The parameter K needed for the authentication path computation
-        private int[] _K;
+        private int[] m_K;
         // the number of Layers
         private int _numLayer;
         // The hash function used to construct the authentication trees
@@ -103,7 +103,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         // The number of leafs of one tree of each layer
         private int[] _numLeafs;
         private Digests _msgDigestType;
-        private bool _isDisposed = false;
+        private bool m_isDisposed = false;
         #endregion
 
         #region Properties
@@ -215,7 +215,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             // Parameter
             _gmssPS = ParameterSet;
             _otsIndex = ParameterSet.WinternitzParameter;
-            _K = ParameterSet.K;
+            m_K = ParameterSet.K;
             _heightOfTrees = ParameterSet.HeightOfTrees;
             // initialize numLayer
             _numLayer = _gmssPS.NumLayers;
@@ -284,7 +284,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             {
                 NextNextRoot = new GMSSRootCalc[_numLayer - 1];
                 for (int i = 0; i < _numLayer - 1; i++)
-                    NextNextRoot[i] = new GMSSRootCalc(_heightOfTrees[i + 1], _K[i + 1], GetDigest(Digest));
+                    NextNextRoot[i] = new GMSSRootCalc(_heightOfTrees[i + 1], m_K[i + 1], GetDigest(Digest));
             }
             else
             {
@@ -409,7 +409,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
             _msgDigestType = PrivateKey._msgDigestType;
             _heightOfTrees = PrivateKey._heightOfTrees;
             _otsIndex = PrivateKey._otsIndex;
-            _K = PrivateKey._K;
+            m_K = PrivateKey.m_K;
             _numLayer = PrivateKey._numLayer;
             _msgDigestTrees = PrivateKey._msgDigestTrees;
             _mdLength = PrivateKey._mdLength;
@@ -992,7 +992,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         {
             int Phi = _index[Layer];
             int H = _heightOfTrees[Layer];
-            int K = _K[Layer];
+            int K = m_K[Layer];
 
             // update all nextSeeds for seed scheduling
             for (int i = 0; i < H - K; i++)
@@ -1168,7 +1168,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
         {
             int minTreehash = -1;
 
-            for (int h = 0; h < _heightOfTrees[Layer] - _K[Layer]; h++)
+            for (int h = 0; h < _heightOfTrees[Layer] - m_K[Layer]; h++)
             {
                 if (_currentTreehash[Layer][h].IsInitialized() && !_currentTreehash[Layer][h].IsFinished())
                 {
@@ -1290,7 +1290,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                     // NOW: advance to next tree on layer 'layer' NextRootSig --> currentRootSigs
                     _currentRootSig[Layer - 1] = _nextRootSig[Layer - 1].GetSig();
 
-                    for (int i = 0; i < _heightOfTrees[Layer] - _K[Layer]; i++)
+                    for (int i = 0; i < _heightOfTrees[Layer] - m_K[Layer]; i++)
                     {
                         _currentTreehash[Layer][i] = _nextTreehash[Layer - 1][i];
                         _nextTreehash[Layer - 1][i] = _nextNextRoot[Layer - 1].GetTreehash()[i];
@@ -1302,7 +1302,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                         Array.Copy(_nextNextRoot[Layer - 1].GetAuthPath()[i], 0, _nextAuthPaths[Layer - 1][i], 0, _mdLength);
                     }
 
-                    for (int i = 0; i < _K[Layer] - 1; i++)
+                    for (int i = 0; i < m_K[Layer] - 1; i++)
                     {
                         _currentRetain[Layer][i] = _nextRetain[Layer - 1][i];
                         _nextRetain[Layer - 1][i] = _nextNextRoot[Layer - 1].GetRetain()[i];
@@ -1355,7 +1355,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                 // compute (partial) next leaf on tree above (not on layer 0)
                 _upperLeaf[Layer - 1] = _upperLeaf[Layer - 1].NextLeaf();
                 // compute (partial) next leaf for all treehashs on tree above (not on layer 0)
-                int t = (int)Math.Floor((double)(GetNumLeafs(Layer) * 2) / (double)(_heightOfTrees[Layer - 1] - _K[Layer - 1]));
+                int t = (int)Math.Floor((double)(GetNumLeafs(Layer) * 2) / (double)(_heightOfTrees[Layer - 1] - m_K[Layer - 1]));
 
                 if (_index[Layer] % t == 1)
                 {
@@ -1510,7 +1510,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
@@ -1642,10 +1642,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                         Array.Clear(_otsIndex, 0, _otsIndex.Length);
                         _otsIndex = null;
                     }
-                    if (_K != null)
+                    if (m_K != null)
                     {
-                        Array.Clear(_K, 0, _K.Length);
-                        _K = null;
+                        Array.Clear(m_K, 0, m_K.Length);
+                        m_K = null;
                     }
                     if (_numLeafs != null)
                     {
@@ -1667,7 +1667,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

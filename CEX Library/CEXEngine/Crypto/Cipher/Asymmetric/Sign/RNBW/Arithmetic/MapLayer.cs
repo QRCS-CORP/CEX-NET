@@ -31,7 +31,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
         private short[][][] _coeffBeta;
         private short[][] _coeffGamma;
         private short[] _coeffEta;
-        private bool _isDisposed = false;
+        private bool m_isDisposed = false;
         // number of oils in this layer
         private int _OI;
         // number of vinegars in this layer
@@ -451,7 +451,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
@@ -483,7 +483,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

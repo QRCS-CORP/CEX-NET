@@ -56,8 +56,6 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
                 OnProgress(new TestEventArgs("Passed MacStream CMAC test.."));
                 HmacDescriptionTest();
                 OnProgress(new TestEventArgs("Passed MacStream HMAC tests.."));
-                VmacDescriptionTest();
-                OnProgress(new TestEventArgs("Passed MacStream VMAC tests.."));
                 MacTests();
                 OnProgress(new TestEventArgs("Passed MacStream integrity tests.."));
 
@@ -94,7 +92,7 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
             mds3 = new MacDescription(mds2.ToStream());
             if (!mds.Equals(mds2) || !mds.Equals(mds3))
                 throw new Exception("MacStreamTest: Description serialization has failed!");
-            mds = new MacDescription(32, 96);
+            mds = new MacDescription(32, Digests.Blake2S256);
             mds2 = new MacDescription(mds.ToBytes());
             mds3 = new MacDescription(mds2.ToStream());
             if (!mds.Equals(mds2) || !mds.Equals(mds3))
@@ -134,24 +132,6 @@ namespace VTDev.Projects.CEX.Test.Tests.MacTest
 
             if (!Evaluate.AreEqual(c1, c2))
                 throw new Exception("MacStreamTest: HMAC code arrays are not equal!");
-        }
-
-        private void VmacDescriptionTest()
-        {
-            CSPPrng rng = new CSPPrng();
-            byte[] data = rng.GetBytes(rng.Next(100, 400));
-            byte[] key = rng.GetBytes(64);
-            byte[] iv = rng.GetBytes(16);
-            VMAC mac = new VMAC();
-            mac.Initialize(key, iv);
-            byte[] c1 = mac.ComputeMac(data);
-            MacDescription mds = new MacDescription(64, 16);
-            MacStream mst = new MacStream(mds, new KeyParams(key, iv));
-            mst.Initialize(new MemoryStream(data));
-            byte[] c2 = mst.ComputeMac();
-
-            if (!Evaluate.AreEqual(c1, c2))
-                throw new Exception("MacStreamTest: Mac code arrays are not equal!");
         }
 
         private void MacTests()

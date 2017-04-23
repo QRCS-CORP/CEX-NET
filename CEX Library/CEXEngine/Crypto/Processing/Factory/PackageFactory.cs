@@ -93,14 +93,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         #endregion
 
         #region Fields
-        private bool _isCreator = false;
-        private bool _isDisposed = false;
-        private KeyScope _accessScope;
-        private long _keyPolicy = 0;
-        private Stream _keyStream;
-        private PackageKey _keyPackage;
-        private KeyAuthority _keyOwner;
-        private string _lastError = "";
+        private bool m_isCreator = false;
+        private bool m_isDisposed = false;
+        private KeyScope m_accessScope;
+        private long m_keyPolicy = 0;
+        private Stream m_keyStream;
+        private PackageKey m_keyPackage;
+        private KeyAuthority m_keyOwner;
+        private string m_lastError = "";
         #endregion
 
         #region Properties
@@ -109,16 +109,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// </summary>
         public KeyScope AccessScope
         {
-            private set { _accessScope = value; }
-            get { return _accessScope; }
+            private set { m_accessScope = value; }
+            get { return m_accessScope; }
         }
 
         /// <summary>
         /// Are we the Creator of this PackageKey
         /// </summary>
         public bool IsCreator {
-            private set { _isCreator = value; }
-            get { return _isCreator; }
+            private set { m_isCreator = value; }
+            get { return m_isCreator; }
         }
 
         /// <summary>
@@ -126,8 +126,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// </summary>
         public long KeyPolicy
         {
-            private set { _keyPolicy = value; }
-            get { return _keyPolicy; }
+            private set { m_keyPolicy = value; }
+            get { return m_keyPolicy; }
         }
 
         /// <summary>
@@ -137,12 +137,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         {
             get
             {
-                if (_keyPackage == null)
+                if (m_keyPackage == null)
                     return 0;
                 int ctr = 0;
-                for (int i = 0; i < _keyPackage.SubKeyCount; i++)
+                for (int i = 0; i < m_keyPackage.SubKeyCount; i++)
                 {
-                    if (!PackageKey.KeyHasPolicy(_keyPackage.SubKeyPolicy[i], (long)PackageKeyStates.Expired))
+                    if (!PackageKey.KeyHasPolicy(m_keyPackage.SubKeyPolicy[i], (long)PackageKeyStates.Expired))
                         ++ctr;
                 }
                 return ctr;
@@ -154,8 +154,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// </summary>
         public string LastError
         {
-            private set { _lastError = value; }
-            get { return _lastError; }
+            private set { m_lastError = value; }
+            get { return m_lastError; }
         }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         /// </summary>
         public int SubKeyCount
         {
-            get { return (_keyPackage == null) ? 0 : _keyPackage.SubKeyCount; }
+            get { return (m_keyPackage == null) ? 0 : m_keyPackage.SubKeyCount; }
         }
         #endregion
 
@@ -178,11 +178,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
         public PackageFactory(Stream KeyStream, KeyAuthority Authority)
         {
             // store authority
-            _keyOwner = Authority;
+            m_keyOwner = Authority;
             // file or memory stream
-            _keyStream = KeyStream;
+            m_keyStream = KeyStream;
 
-            if (_keyStream.Length > 0)
+            if (m_keyStream.Length > 0)
                 AccessScope = Authenticate();
         }
 
@@ -211,26 +211,26 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             try
             {
                 // get the key headers
-                _keyPackage = GetPackage();
+                m_keyPackage = GetPackage();
                 // store the master policy flag
-                KeyPolicy = _keyPackage.KeyPolicy;
+                KeyPolicy = m_keyPackage.KeyPolicy;
                 // did we create this key
-                IsCreator = Compare.IsEqual(_keyOwner.OriginId, _keyPackage.Authority.OriginId);
+                IsCreator = Compare.IsEqual(m_keyOwner.OriginId, m_keyPackage.Authority.OriginId);
 
                 // key made by master auth, valid only if authenticated by PackageAuth, IdentityRestrict or DomainRestrict
                 if (PackageKey.KeyHasPolicy(KeyPolicy, (long)KeyPolicies.MasterAuth))
                 {
-                    if (Compare.IsEqual(_keyOwner.DomainId, _keyPackage.Authority.DomainId))
+                    if (Compare.IsEqual(m_keyOwner.DomainId, m_keyPackage.Authority.DomainId))
                     {
                         LastError = "";
                         return KeyScope.Creator;
                     }
-                    else if (Compare.IsEqual(_keyOwner.PackageId, _keyPackage.Authority.PackageId))
+                    else if (Compare.IsEqual(m_keyOwner.PackageId, m_keyPackage.Authority.PackageId))
                     {
                         LastError = "";
                         return KeyScope.Creator;
                     }
-                    else if (Compare.IsEqual(_keyOwner.TargetId, _keyPackage.Authority.TargetId))
+                    else if (Compare.IsEqual(m_keyOwner.TargetId, m_keyPackage.Authority.TargetId))
                     {
                         LastError = "";
                         return KeyScope.Creator;
@@ -241,10 +241,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 if (PackageKey.KeyHasPolicy(KeyPolicy, (long)KeyPolicies.IdentityRestrict))
                 {
                     // test only if not creator
-                    if (!Compare.IsEqual(_keyOwner.OriginId, _keyPackage.Authority.OriginId))
+                    if (!Compare.IsEqual(m_keyOwner.OriginId, m_keyPackage.Authority.OriginId))
                     {
                         // owner target field is set as a target OriginId hash
-                        if (!Compare.IsEqual(_keyOwner.TargetId, _keyPackage.Authority.TargetId))
+                        if (!Compare.IsEqual(m_keyOwner.TargetId, m_keyPackage.Authority.TargetId))
                         {
                             LastError = "You are not the intendant recipient of this key! Access is denied.";
                             return KeyScope.NoAccess;
@@ -255,7 +255,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 if (PackageKey.KeyHasPolicy(KeyPolicy, (long)KeyPolicies.DomainRestrict))
                 {
                     // the key is domain restricted
-                    if (!Compare.IsEqual(_keyOwner.DomainId, _keyPackage.Authority.DomainId))
+                    if (!Compare.IsEqual(m_keyOwner.DomainId, m_keyPackage.Authority.DomainId))
                     {
                         LastError = "Domain identification check has failed! You must be a member of the same Domain as the Creator of this key.";
                         return KeyScope.NoAccess;
@@ -265,7 +265,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 // the key package id is an authentication passphrase hash
                 if (PackageKey.KeyHasPolicy(KeyPolicy, (long)KeyPolicies.PackageAuth))
                 {
-                    if (!Compare.IsEqual(_keyOwner.PackageId, _keyPackage.Authority.PackageId))
+                    if (!Compare.IsEqual(m_keyOwner.PackageId, m_keyPackage.Authority.PackageId))
                     {
                         LastError = "Key Package authentication has failed! Access is denied.";
                         return KeyScope.NoAccess;
@@ -275,7 +275,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 // test for volatile flag
                 if (PackageKey.KeyHasPolicy(KeyPolicy, (long)KeyPolicies.Volatile))
                 {
-                    if (_keyPackage.Authority.OptionFlag != 0 && _keyPackage.Authority.OptionFlag < DateTime.Now.Ticks)
+                    if (m_keyPackage.Authority.OptionFlag != 0 && m_keyPackage.Authority.OptionFlag < DateTime.Now.Ticks)
                     {
                         LastError = "This key has expired and can no longer be used! Access is denied.";
                         return KeyScope.NoAccess;
@@ -285,7 +285,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 // only the key creator is allowed access 
                 if (PackageKey.KeyHasPolicy(KeyPolicy, (long)KeyPolicies.NoExport))
                 {
-                    if (!Compare.IsEqual(_keyOwner.OriginId, _keyPackage.Authority.OriginId))
+                    if (!Compare.IsEqual(m_keyOwner.OriginId, m_keyPackage.Authority.OriginId))
                     {
                         LastError = "Only the Creator of this key is authorized! Access is denied.";
                         return KeyScope.NoAccess;
@@ -316,9 +316,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             if (AccessScope.Equals(KeyScope.NoAccess))
                 throw new CryptoProcessingException("PackageFactory:ContainsSubKey", "You do not have permission to access this key!", new UnauthorizedAccessException());
 
-            for (int i = 0; i < _keyPackage.SubKeyID.Length; i++)
+            for (int i = 0; i < m_keyPackage.SubKeyID.Length; i++)
             {
-                if (Compare.IsEqual(KeyId, _keyPackage.SubKeyID[i]))
+                if (Compare.IsEqual(KeyId, m_keyPackage.SubKeyID[i]))
                     return i;
             }
             return -1;
@@ -361,7 +361,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             try
             {
                 // store the auth struct and policy
-                _keyOwner = Package.Authority;
+                m_keyOwner = Package.Authority;
                 KeyPolicy = Package.KeyPolicy;
                 // get the serialized header
                 byte[] header = Package.ToBytes();
@@ -372,7 +372,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 using (KeyGenerator keyGen = new KeyGenerator(SeedEngine, DigestEngine))
                     keyGen.GetBytes(buffer);
 
-                BinaryWriter keyWriter = new BinaryWriter(_keyStream);
+                BinaryWriter keyWriter = new BinaryWriter(m_keyStream);
                 // pre-set the size to avoid fragmentation
                 keyWriter.BaseStream.SetLength(PackageKey.GetHeaderSize(Package) + (subKeySize * Package.SubKeyCount));
 
@@ -405,7 +405,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 }
 
                 // cleanup
-                _keyStream.Seek(0, SeekOrigin.Begin);
+                m_keyStream.Seek(0, SeekOrigin.Begin);
                 Array.Clear(header, 0, header.Length);
                 Array.Clear(buffer, 0, buffer.Length);
             }
@@ -446,16 +446,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 // get the index
                 index = PackageKey.IndexFromId(keyStream, KeyId);
                 // key flagged SingleUse was used for decryption and is locked out
-                if (PackageKey.KeyHasPolicy(_keyPackage.SubKeyPolicy[index], (long)PackageKeyStates.Locked) && !PackageKey.KeyHasPolicy(KeyPolicy, (long)KeyPolicies.VolumeKey))
+                if (PackageKey.KeyHasPolicy(m_keyPackage.SubKeyPolicy[index], (long)PackageKeyStates.Locked) && !PackageKey.KeyHasPolicy(KeyPolicy, (long)KeyPolicies.VolumeKey))
                     throw new CryptoProcessingException("PackageFactory:Extract", "SubKey is locked. The subkey has a single use policy and was previously used to decrypt the file.", new Exception());
                 // key flagged PostOverwrite was used for decryption and was erased
-                if (PackageKey.KeyHasPolicy(_keyPackage.SubKeyPolicy[index], (long)PackageKeyStates.Erased))
+                if (PackageKey.KeyHasPolicy(m_keyPackage.SubKeyPolicy[index], (long)PackageKeyStates.Erased))
                     throw new CryptoProcessingException("PackageFactory:Extract", "SubKey is erased. The subkey has a post erase policy and was previously used to decrypt the file.", new Exception());
 
                 // get the cipher description
-                Description = _keyPackage.Description;
+                Description = m_keyPackage.Description;
                 // get the keying material
-                KeyParam = GetKeySet(keyStream, _keyPackage.Description, keyPos);
+                KeyParam = GetKeySet(keyStream, m_keyPackage.Description, keyPos);
 
                 // test flags for overwrite or single use policies
                 if (PackageKey.KeyHasPolicy(KeyPolicy, (long)KeyPolicies.PostOverwrite))
@@ -507,11 +507,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 // get the index
                 index = PackageKey.IndexFromId(keyStream, KeyId);
                 // key flagged PostOverwrite was used for decryption and was erased
-                if (PackageKey.KeyHasPolicy(_keyPackage.SubKeyPolicy[index], (long)PackageKeyStates.Erased))
+                if (PackageKey.KeyHasPolicy(m_keyPackage.SubKeyPolicy[index], (long)PackageKeyStates.Erased))
                     throw new CryptoProcessingException("PackageFactory:GetExtensionKey", "SubKey is erased. The subkey has a post erase policy and was previously used to decrypt the file.", new Exception());
 
                 // get the keying material
-                KeyParams keyParam = GetKeySet(keyStream, _keyPackage.Description, keyPos);
+                KeyParams keyParam = GetKeySet(keyStream, m_keyPackage.Description, keyPos);
 
                 return keyParam.ExtKey;
             }
@@ -545,9 +545,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             if (AccessScope.Equals(KeyScope.NoAccess))
                 throw new CryptoProcessingException("PackageFactory:HasExpired", "You do not have permission to access this key!", new UnauthorizedAccessException());
 
-            for (int i = 0; i < _keyPackage.SubKeyCount; i++)
+            for (int i = 0; i < m_keyPackage.SubKeyCount; i++)
             {
-                if (!PackageKey.KeyHasPolicy(_keyPackage.SubKeyPolicy[i], (long)PackageKeyStates.Expired))
+                if (!PackageKey.KeyHasPolicy(m_keyPackage.SubKeyPolicy[i], (long)PackageKeyStates.Expired))
                     return false;
             }
 
@@ -572,7 +572,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             if (index < 0)
                 return true;
 
-            return (PackageKey.KeyHasPolicy(_keyPackage.SubKeyPolicy[index], (int)PackageKeyStates.Expired));
+            return (PackageKey.KeyHasPolicy(m_keyPackage.SubKeyPolicy[index], (int)PackageKeyStates.Expired));
         }
 
         /// <summary>
@@ -587,7 +587,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             if (AccessScope.Equals(KeyScope.NoAccess))
                 throw new CryptoProcessingException("PackageFactory:KeyInfo", "You do not have permission to access this key!", new UnauthorizedAccessException());
 
-            PackageInfo info = new PackageInfo(_keyPackage);
+            PackageInfo info = new PackageInfo(m_keyPackage);
 
             // return limited data
             if (PackageKey.KeyHasPolicy(KeyPolicy, (long)KeyPolicies.NoNarrative))
@@ -626,9 +626,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                     throw new CryptoProcessingException("PackageFactory:NextKey", "The key file has expired! There are no keys left available for encryption.", new Exception());
 
                 // get the cipher description
-                Description = _keyPackage.Description;
+                Description = m_keyPackage.Description;
                 // store the subkey identity, this is written into the message header to identify the subkey
-                byte[] keyId = _keyPackage.SubKeyID[index];
+                byte[] keyId = m_keyPackage.SubKeyID[index];
                 // get the starting position of the keying material within the package
                 long keyPos = PackageKey.SubKeyOffset(keyStream, keyId);
 
@@ -637,7 +637,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                     throw new CryptoProcessingException("PackageFactory:NextKey", "The key file has expired! There are no keys left available for encryption.", new Exception());
 
                 // get the keying material
-                KeyParam = GetKeySet(keyStream, _keyPackage.Description, keyPos);
+                KeyParam = GetKeySet(keyStream, m_keyPackage.Description, keyPos);
                 // mark the subkey as expired
                 PackageKey.SubKeySetPolicy(keyStream, index, (long)PackageKeyStates.Expired);
                 // write to file
@@ -669,10 +669,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             if (index < 0)
                 return -1;
 
-            if (index > _keyPackage.SubKeyPolicy.Length)
+            if (index > m_keyPackage.SubKeyPolicy.Length)
                 return -1;
 
-            return _keyPackage.SubKeyPolicy[index];
+            return m_keyPackage.SubKeyPolicy[index];
         }
 
 
@@ -804,8 +804,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
 
             try
             {
-                _keyStream.Seek(0, SeekOrigin.Begin);
-                BinaryReader keyReader = new BinaryReader(_keyStream);
+                m_keyStream.Seek(0, SeekOrigin.Begin);
+                BinaryReader keyReader = new BinaryReader(m_keyStream);
                 // output stream and writer
                 keyMem = new MemoryStream((int)keyReader.BaseStream.Length);
                 BinaryWriter keyWriter = new BinaryWriter(keyMem);
@@ -833,7 +833,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
                 Array.Clear(data, 0, data.Length);
                 // reset position
                 keyMem.Seek(0, SeekOrigin.Begin);
-                _keyStream.Seek(0, SeekOrigin.Begin);
+                m_keyStream.Seek(0, SeekOrigin.Begin);
 
                 return keyMem;
             }
@@ -855,32 +855,32 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
             if (HasFlag(KeyPolicy, KeyPolicies.PackageAuth))
             {
                 // hash of user passphrase
-                salt = new byte[_keyOwner.PackageId.Length];
-                Buffer.BlockCopy(_keyOwner.PackageId, 0, salt, 0, salt.Length);
-                offset += _keyOwner.PackageId.Length;
+                salt = new byte[m_keyOwner.PackageId.Length];
+                Buffer.BlockCopy(m_keyOwner.PackageId, 0, salt, 0, salt.Length);
+                offset += m_keyOwner.PackageId.Length;
             }
 
             if (HasFlag(KeyPolicy, KeyPolicies.DomainRestrict))
             {
                 // hashed domain name or group secret
                 if (salt == null)
-                    salt = new byte[_keyOwner.DomainId.Length];
+                    salt = new byte[m_keyOwner.DomainId.Length];
                 else
-                    Array.Resize<byte>(ref salt, offset + _keyOwner.DomainId.Length);
+                    Array.Resize<byte>(ref salt, offset + m_keyOwner.DomainId.Length);
 
-                Buffer.BlockCopy(_keyOwner.DomainId, 0, salt, offset, _keyOwner.DomainId.Length);
-                offset += _keyOwner.DomainId.Length;
+                Buffer.BlockCopy(m_keyOwner.DomainId, 0, salt, offset, m_keyOwner.DomainId.Length);
+                offset += m_keyOwner.DomainId.Length;
             }
 
             if (HasFlag(KeyPolicy, KeyPolicies.IdentityRestrict))
             {
                 // add the target id
                 if (salt == null)
-                    salt = new byte[_keyOwner.TargetId.Length];
+                    salt = new byte[m_keyOwner.TargetId.Length];
                 else
-                    Array.Resize<byte>(ref salt, offset + _keyOwner.TargetId.Length);
+                    Array.Resize<byte>(ref salt, offset + m_keyOwner.TargetId.Length);
 
-                Buffer.BlockCopy(_keyOwner.DomainId, 0, salt, offset, _keyOwner.TargetId.Length);
+                Buffer.BlockCopy(m_keyOwner.DomainId, 0, salt, offset, m_keyOwner.TargetId.Length);
             }
 
             return salt;
@@ -948,7 +948,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
 
             try
             {
-                BinaryWriter keyWriter = new BinaryWriter(_keyStream);
+                BinaryWriter keyWriter = new BinaryWriter(m_keyStream);
                 BinaryReader keyReader = new BinaryReader(InputStream);
                 // policy flag is not encrypted
                 long policies = keyReader.ReadInt64();
@@ -968,7 +968,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
 
                 // copy to file
                 keyWriter.Write(data, 0, data.Length);
-                _keyStream.SetLength(_keyStream.Position);
+                m_keyStream.SetLength(m_keyStream.Position);
                 // clean up
                 Array.Clear(data, 0, data.Length);
                 InputStream.Dispose();
@@ -992,20 +992,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing.Factory
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_keyStream != null)
+                    if (m_keyStream != null)
                     {
-                        _keyStream.Close();
-                        _keyStream.Dispose();
-                        _keyStream = null;
+                        m_keyStream.Close();
+                        m_keyStream.Dispose();
+                        m_keyStream = null;
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

@@ -97,11 +97,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         #endregion
 
         #region Fields
-        private RLWEEncrypt _asyCipher;
-        private IAsymmetricKey _asmKey;
-        private IDigest _dgtEngine;
-        private bool _isDisposed = false;
-        private bool _isInitialized = false;
+        private RLWEEncrypt m_asyCipher;
+        private IAsymmetricKey m_asmKey;
+        private IDigest m_dgtEngine;
+        private bool m_isDisposed = false;
+        private bool m_isInitialized = false;
         #endregion
 
         #region Properties
@@ -110,7 +110,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// </summary>
         public bool IsInitialized
         {
-            get { return _isInitialized; }
+            get { return m_isInitialized; }
         }
 
         /// <summary>
@@ -122,10 +122,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         {
             get
             {
-                if (!_isInitialized)
+                if (!m_isInitialized)
                     throw new CryptoAsymmetricSignException("RLWESign:IsSigner", "The signer has not been initialized!", new InvalidOperationException());
 
-                return (_asmKey is RLWEPublicKey);
+                return (m_asmKey is RLWEPublicKey);
             }
         }
 
@@ -138,13 +138,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         {
             get 
             { 
-                if (!_isInitialized)
+                if (!m_isInitialized)
                     throw new CryptoAsymmetricException("RLWESign:MaxPlainText", "The signer has not been initialized!", new InvalidOperationException());
 
-                if (_asmKey is RLWEPublicKey)
-                    return ((RLWEPublicKey)_asmKey).N >> 3; 
+                if (m_asmKey is RLWEPublicKey)
+                    return ((RLWEPublicKey)m_asmKey).N >> 3; 
                 else
-                    return ((RLWEPrivateKey)_asmKey).N >> 3; 
+                    return ((RLWEPrivateKey)m_asmKey).N >> 3; 
             }
         }
 
@@ -166,8 +166,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <param name="Digest">The type of digest engine used</param>
         public RLWESign(RLWEParameters CipherParams, Digests Digest = Digests.SHA512)
         {
-            _asyCipher = new RLWEEncrypt(CipherParams);
-            _dgtEngine = GetDigest(Digest);
+            m_asyCipher = new RLWEEncrypt(CipherParams);
+            m_dgtEngine = GetDigest(Digest);
         }
 
         private RLWESign()
@@ -197,8 +197,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
                 throw new CryptoAsymmetricException("RLWESign:Initialize", "The key is not a valid Ring-LWE key!", new InvalidDataException());
 
             Reset();
-            _asmKey = AsmKey;
-            _isInitialized = true;
+            m_asmKey = AsmKey;
+            m_isInitialized = true;
         }
 
         /// <summary>
@@ -206,7 +206,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// </summary>
         public void Reset()
         {
-            _dgtEngine.Reset();
+            m_dgtEngine.Reset();
         }
 
         /// <summary>
@@ -220,21 +220,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <exception cref="CryptoAsymmetricException">Thrown if an invalid key pair is used, or signer has not been initialized</exception>
         public byte[] Sign(Stream InputStream)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoAsymmetricException("RLWESign:Sign", "The signer has not been initialized!", new InvalidOperationException());
-            if (_asmKey == null)
+            if (m_asmKey == null)
                 throw new CryptoAsymmetricException("RLWESign:Sign", "The public key is invalid!", new InvalidDataException());
-            if (!(_asmKey is RLWEPublicKey))
+            if (!(m_asmKey is RLWEPublicKey))
                 throw new CryptoAsymmetricException("RLWESign:Sign", "The public key is invalid!", new InvalidDataException());
 
-            _asyCipher.Initialize(_asmKey);
+            m_asyCipher.Initialize(m_asmKey);
 
-            if (_asyCipher.MaxPlainText < _dgtEngine.DigestSize)
-                throw new CryptoAsymmetricException("RLWESign:Sign", String.Format("The key size is too small; key supports encrypting up to {0} bytes!", _asyCipher.MaxPlainText), new ArgumentException());
+            if (m_asyCipher.MaxPlainText < m_dgtEngine.DigestSize)
+                throw new CryptoAsymmetricException("RLWESign:Sign", String.Format("The key size is too small; key supports encrypting up to {0} bytes!", m_asyCipher.MaxPlainText), new ArgumentException());
 
             byte[] hash = Compute(InputStream);
 
-            return _asyCipher.Encrypt(hash);
+            return m_asyCipher.Encrypt(hash);
         }
 
         /// <summary>
@@ -252,21 +252,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         {
             if (Input.Length - Offset < Length)
                 throw new CryptoAsymmetricException("RLWESign:Sign", "The input array is too short!", new ArgumentException());
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoAsymmetricException("RLWESign:Sign", "The signer has not been initialized!", new InvalidOperationException());
-            if (_asmKey == null)
+            if (m_asmKey == null)
                 throw new CryptoAsymmetricException("RLWESign:Sign", "The public key is invalid!", new InvalidDataException());
-            if (!(_asmKey is RLWEPublicKey))
+            if (!(m_asmKey is RLWEPublicKey))
                 throw new CryptoAsymmetricException("RLWESign:Sign", "The public key is invalid!", new InvalidDataException());
 
-            _asyCipher.Initialize(_asmKey);
+            m_asyCipher.Initialize(m_asmKey);
 
-            if (_asyCipher.MaxPlainText < _dgtEngine.DigestSize)
-                throw new CryptoAsymmetricException("RLWESign:Sign", String.Format("The key size is too small; key supports encrypting up to {0} bytes!", _asyCipher.MaxPlainText), new InvalidDataException());
+            if (m_asyCipher.MaxPlainText < m_dgtEngine.DigestSize)
+                throw new CryptoAsymmetricException("RLWESign:Sign", String.Format("The key size is too small; key supports encrypting up to {0} bytes!", m_asyCipher.MaxPlainText), new InvalidDataException());
 
             byte[] hash = Compute(Input, Offset, Length);
 
-            return _asyCipher.Encrypt(hash);
+            return m_asyCipher.Encrypt(hash);
         }
 
         /// <summary>
@@ -281,15 +281,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <exception cref="CryptoAsymmetricException">Thrown if signer is not initialized, or keys are invalid</exception>
         public bool Verify(Stream InputStream, byte[] Code)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoAsymmetricException("RLWESign:Verify", "The signer has not been initialized!", new InvalidOperationException());
-            if (_asmKey == null)
+            if (m_asmKey == null)
                 throw new CryptoAsymmetricException("RLWESign:Verify", "The private key is invalid!", new InvalidDataException());
-            if (!(_asmKey is RLWEPrivateKey))
+            if (!(m_asmKey is RLWEPrivateKey))
                 throw new CryptoAsymmetricException("RLWESign:Verify", "The private key is invalid!", new InvalidDataException());
 
-            _asyCipher.Initialize(_asmKey);
-            byte[] chksum = _asyCipher.Decrypt(Code);
+            m_asyCipher.Initialize(m_asmKey);
+            byte[] chksum = m_asyCipher.Decrypt(Code);
             byte[] hash = Compute(InputStream);
 
             return Compare.IsEqual(hash, chksum);
@@ -311,15 +311,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         {
             if (Input.Length - Offset < Length)
                 throw new CryptoAsymmetricException("RLWESign:Verify", "The input array is too short!", new ArgumentOutOfRangeException());
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoAsymmetricException("RLWESign:Verify", "The signer has not been initialized!", new InvalidOperationException());
-            if (_asmKey == null)
+            if (m_asmKey == null)
                 throw new CryptoAsymmetricException("RLWESign:Verify", "The private key is invalid!", new InvalidDataException());
-            if (!(_asmKey is RLWEPrivateKey))
+            if (!(m_asmKey is RLWEPrivateKey))
                 throw new CryptoAsymmetricException("RLWESign:Verify", "The private key is invalid!", new InvalidDataException());
 
-            _asyCipher.Initialize(_asmKey);
-            byte[] chksum = _asyCipher.Decrypt(Code);
+            m_asyCipher.Initialize(m_asmKey);
+            byte[] chksum = m_asyCipher.Decrypt(Code);
             byte[] hash = Compute(Input, Offset, Length);
 
             return Compare.IsEqual(hash, chksum);
@@ -337,7 +337,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         private byte[] Compute(Stream InputStream)
         {
             int length = (int)(InputStream.Length - InputStream.Position);
-            int blockSize = _dgtEngine.BlockSize < length ? length : _dgtEngine.BlockSize;
+            int blockSize = m_dgtEngine.BlockSize < length ? length : m_dgtEngine.BlockSize;
             int bytesRead = 0;
             byte[] buffer = new byte[blockSize];
             int maxBlocks = length / blockSize;
@@ -346,7 +346,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             for (int i = 0; i < maxBlocks; i++)
             {
                 bytesRead = InputStream.Read(buffer, 0, blockSize);
-                _dgtEngine.BlockUpdate(buffer, 0, bytesRead);
+                m_dgtEngine.BlockUpdate(buffer, 0, bytesRead);
                 bytesTotal += bytesRead;
             }
 
@@ -355,12 +355,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             {
                 buffer = new byte[length - bytesTotal];
                 bytesRead = InputStream.Read(buffer, 0, buffer.Length);
-                _dgtEngine.BlockUpdate(buffer, 0, buffer.Length);
+                m_dgtEngine.BlockUpdate(buffer, 0, buffer.Length);
                 bytesTotal += buffer.Length;
             }
 
-            byte[] hash = new byte[_dgtEngine.DigestSize];
-            _dgtEngine.DoFinal(hash, 0);
+            byte[] hash = new byte[m_dgtEngine.DigestSize];
+            m_dgtEngine.DoFinal(hash, 0);
 
             return hash;
         }
@@ -379,7 +379,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             if (Length < Input.Length - Offset)
                 throw new ArgumentOutOfRangeException();
 
-            int blockSize = _dgtEngine.BlockSize < Length ? Length : _dgtEngine.BlockSize;
+            int blockSize = m_dgtEngine.BlockSize < Length ? Length : m_dgtEngine.BlockSize;
             byte[] buffer = new byte[blockSize];
             int maxBlocks = Length / blockSize;
             int bytesTotal = 0;
@@ -387,7 +387,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             for (int i = 0; i < maxBlocks; i++)
             {
                 Array.Copy(Input, Offset + bytesTotal, buffer, 0, blockSize);
-                _dgtEngine.BlockUpdate(buffer, 0, blockSize);
+                m_dgtEngine.BlockUpdate(buffer, 0, blockSize);
                 bytesTotal += blockSize;
             }
 
@@ -396,11 +396,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             {
                 buffer = new byte[Length - bytesTotal];
                 Array.Copy(Input, Offset + bytesTotal, buffer, 0, Math.Min(buffer.Length, Input.Length - bytesTotal));
-                _dgtEngine.BlockUpdate(buffer, 0, buffer.Length);
+                m_dgtEngine.BlockUpdate(buffer, 0, buffer.Length);
             }
 
-            byte[] hash = new byte[_dgtEngine.DigestSize];
-            _dgtEngine.DoFinal(hash, 0);
+            byte[] hash = new byte[m_dgtEngine.DigestSize];
+            m_dgtEngine.DoFinal(hash, 0);
 
             return hash;
         }
@@ -437,24 +437,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_dgtEngine != null)
+                    if (m_dgtEngine != null)
                     {
-                        _dgtEngine.Dispose();
-                        _dgtEngine = null;
+                        m_dgtEngine.Dispose();
+                        m_dgtEngine = null;
                     }
-                    if (_asyCipher != null)
+                    if (m_asyCipher != null)
                     {
-                        _asyCipher.Dispose();
-                        _asyCipher = null;
+                        m_asyCipher.Dispose();
+                        m_asyCipher = null;
                     }
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

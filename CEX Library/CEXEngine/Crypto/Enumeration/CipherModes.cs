@@ -6,24 +6,28 @@
     public enum CipherModes : int
     {
         /// <summary>
+        /// No cipher mode was selected
+        /// </summary>
+        None = 0,
+        /// <summary>
         /// Electronic CodeBook Mode (not secure, testing only)
         /// </summary>
-        ECB = 0,
+        ECB = 1,
         /// <summary>
         /// Cipher Block Chaining Mode
         /// </summary>
-        CBC = 1,
+        CBC = 2,
         /// <summary>
         /// Cipher FeedBack Mode
         /// </summary>
-        CFB = 2,
+        CFB = 4,
         /// <summary>
         /// SIC Counter Mode
         /// </summary>
-        CTR = 4,
+        CTR = 8,
         /// <summary>
         /// Output FeedBack Mode
         /// </summary>
-        OFB = 8
+        OFB = 16
     }
 }

@@ -32,7 +32,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         // stores the authentication path y_1(i), i = 0..H-1
         private byte[][] _authPath;
         // the value K for the authentication path computation
-        private int _K;
+        private int m_K;
         // Vector element that stores the nodes on the stack
         private List<byte[]> _tailStack;
         // stores the height of all nodes laying on the tailStack
@@ -42,14 +42,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         // stores the index of the current node on each height of the tree
         private int[] _ndeIndex;
         // true if instance was already initialized, false otherwise
-        private bool _isInitialized;
+        private bool m_isInitialized;
         // true it instance was finished
         private bool _isFinished;
         // Integer that stores the index of the next seed that has to be omitted to the treehashs
         private int _indexForNextSeed;
         // temporary integer that stores the height of the next treehash instance that gets initialized with a seed
         private int _heightOfNextSeed;
-        private bool _isDisposed = false;
+        private bool m_isDisposed = false;
         #endregion
 
         #region Constructor
@@ -68,7 +68,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             // decode statInt
             _heightOfTree = StatInt[0];
             _mdLength = StatInt[1];
-            _K = StatInt[2];
+            m_K = StatInt[2];
             _indexForNextSeed = StatInt[3];
             _heightOfNextSeed = StatInt[4];
 
@@ -78,9 +78,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                 _isFinished = false;
             
             if (StatInt[6] == 1)
-                _isInitialized = true;
+                m_isInitialized = true;
             else
-                _isInitialized = false;
+                m_isInitialized = false;
 
             int tailLength = StatInt[7];
 
@@ -122,12 +122,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             _heightOfTree = HeightOfTree;
             _msgDigestTree = Digest;
             _mdLength = _msgDigestTree.DigestSize;
-            _K = K;
+            m_K = K;
             _ndeIndex = new int[HeightOfTree];
             _authPath = ArrayUtils.CreateJagged<byte[][]>(HeightOfTree, _mdLength);
             _treeRoot = new byte[_mdLength];
             // _treehash = new Treehash[HeightOfTree - K];
-            _ndeRetain = new List<byte[]>[_K - 1];
+            _ndeRetain = new List<byte[]>[m_K - 1];
 
             for (int i = 0; i < K - 1; i++)
                 _ndeRetain[i] = new List<byte[]>();
@@ -150,8 +150,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         /// <param name="SharedStack">The stack shared by all treehash instances of this tree</param>
         public void Initialize(List<byte[]> SharedStack)
         {
-            _treehash = new Treehash[_heightOfTree - _K];
-            for (int i = 0; i < _heightOfTree - _K; i++)
+            _treehash = new Treehash[_heightOfTree - m_K];
+            for (int i = 0; i < _heightOfTree - m_K; i++)
                 _treehash[i] = new Treehash(SharedStack, i, _msgDigestTree);
 
             _ndeIndex = new int[_heightOfTree];
@@ -159,14 +159,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             _treeRoot = new byte[_mdLength];
             _tailStack = new List<byte[]>();
             _heightOfNodes = new List<int>();
-            _isInitialized = true;
+            m_isInitialized = true;
             _isFinished = false;
 
             for (int i = 0; i < _heightOfTree; i++)
                 _ndeIndex[i] = -1;
 
-            _ndeRetain = new List<byte[]>[_K - 1];
-            for (int i = 0; i < _K - 1; i++)
+            _ndeRetain = new List<byte[]>[m_K - 1];
+            for (int i = 0; i < m_K - 1; i++)
                 _ndeRetain[i] = new List<byte[]>();
 
             _indexForNextSeed = 3;
@@ -183,7 +183,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         /// <param name="Leaf">The height of the treehash</param>
         public void Update(byte[] Seed, byte[] Leaf)
         {
-            if (_heightOfNextSeed < (_heightOfTree - _K) && _indexForNextSeed - 2 == _ndeIndex[0])
+            if (_heightOfNextSeed < (_heightOfTree - m_K) && _indexForNextSeed - 2 == _ndeIndex[0])
             {
                 InitializeTreehashSeed(Seed, _heightOfNextSeed);
                 _heightOfNextSeed++;
@@ -203,7 +203,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         {
             if (_isFinished)
                 return;
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 return;
 
             // a new leaf was omitted, so raise index on lowest layer
@@ -217,14 +217,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             else if (_ndeIndex[0] == 3)
             {
                 // store in treehash only if K < H
-                if (_heightOfTree > _K)
+                if (_heightOfTree > m_K)
                     _treehash[0].SetFirstNode(Leaf);
             }
 
             if ((_ndeIndex[0] - 3) % 2 == 0 && _ndeIndex[0] >= 3)
             {
                 // store in retain if K = H
-                if (_heightOfTree == _K)
+                if (_heightOfTree == m_K)
                     _ndeRetain[0].Insert(0, Leaf);
             }
 
@@ -264,11 +264,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                         if (_ndeIndex[helpHeight] == 1)
                             Array.Copy(help, 0, _authPath[helpHeight], 0, _mdLength);
 
-                        if (helpHeight >= _heightOfTree - _K)
+                        if (helpHeight >= _heightOfTree - m_K)
                         {
                             // add help element to retain stack if it is a right node and not stored in treehash
                             if ((_ndeIndex[helpHeight] - 3) % 2 == 0 && _ndeIndex[helpHeight] >= 3)
-                                _ndeRetain[helpHeight - (_heightOfTree - _K)].Insert(0, help);
+                                _ndeRetain[helpHeight - (_heightOfTree - m_K)].Insert(0, help);
                         }
                         else
                         {
@@ -287,7 +287,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                 if (helpHeight == _heightOfTree)
                 {
                     _isFinished = true;
-                    _isInitialized = false;
+                    m_isInitialized = false;
                     _treeRoot = (byte[])_tailStack[_tailStack.Count - 1];
                 }
             }
@@ -311,7 +311,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         /// <returns>Return true if treehash was already initialized</returns>
         public bool IsInitialized()
         {
-            return _isInitialized;
+            return m_isInitialized;
         }
 
         /// <summary>
@@ -417,7 +417,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             int[] statInt = new int[8 + _heightOfTree + tailLength];
             statInt[0] = _heightOfTree;
             statInt[1] = _mdLength;
-            statInt[2] = _K;
+            statInt[2] = m_K;
             statInt[3] = _indexForNextSeed;
             statInt[4] = _heightOfNextSeed;
 
@@ -426,7 +426,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             else
                 statInt[5] = 0;
             
-            if (_isInitialized)
+            if (m_isInitialized)
                 statInt[6] = 1;
             else
                 statInt[6] = 0;
@@ -455,7 +455,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
@@ -504,13 +504,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                     }
                     _heightOfTree = 0;
                     _mdLength = 0;
-                    _K = 0;
+                    m_K = 0;
                     _indexForNextSeed = 0;
                     _heightOfNextSeed = 0;
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

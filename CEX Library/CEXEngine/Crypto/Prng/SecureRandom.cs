@@ -58,12 +58,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
-        private RNGCryptoServiceProvider _rngEngine;
-        private byte[] _byteBuffer;
-        private int _bufferIndex = 0;
-        private int _bufferSize = 0;
-        private object _objLock = new object();
+        private bool m_isDisposed = false;
+        private RNGCryptoServiceProvider m_rngEngine;
+        private byte[] m_byteBuffer;
+        private int m_bufferIndex = 0;
+        private int m_bufferSize = 0;
+        private object m_objLock = new object();
         #endregion
 
         #region Constructor
@@ -79,8 +79,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
             if (BufferSize < 1)
                 throw new CryptoRandomException("SecureRandom:Ctor", "The buffer size must be more than zero!", new ArgumentException());
 
-            _byteBuffer = new byte[BufferSize];
-            _bufferSize = BufferSize;
+            m_byteBuffer = new byte[BufferSize];
+            m_bufferSize = BufferSize;
             Reset();
         }
 
@@ -101,26 +101,26 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <exception cref="CryptoRandomException">Thrown if RNGCryptoServiceProvider initialization failed</exception>
         public void Reset()
         {
-            lock (_objLock)
+            lock (m_objLock)
             {
-                if (_rngEngine != null)
+                if (m_rngEngine != null)
                 {
-                    _rngEngine.Dispose();
-                    _rngEngine = null;
+                    m_rngEngine.Dispose();
+                    m_rngEngine = null;
                 }
 
                 try
                 {
-                    _rngEngine = new RNGCryptoServiceProvider();
+                    m_rngEngine = new RNGCryptoServiceProvider();
                 }
                 catch (Exception ex)
                 {
-                    if (_rngEngine == null)
+                    if (m_rngEngine == null)
                         throw new CryptoRandomException("SecureRandom:Reset", "RNGCrypto could not be initialized!", ex);
                 }
 
-                _rngEngine.GetBytes(_byteBuffer);
-                _bufferIndex = 0;
+                m_rngEngine.GetBytes(m_byteBuffer);
+                m_bufferIndex = 0;
             }
         }
         #endregion
@@ -500,37 +500,37 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <returns>P-Rand bytes</returns>
         public byte[] GetBytes(int Size)
         {
-            lock (_objLock)
+            lock (m_objLock)
             {
                 byte[] data = new byte[Size];
-                if (_byteBuffer.Length - _bufferIndex < data.Length)
+                if (m_byteBuffer.Length - m_bufferIndex < data.Length)
                 {
-                    int bufSize = _byteBuffer.Length - _bufferIndex;
+                    int bufSize = m_byteBuffer.Length - m_bufferIndex;
                     // copy remaining bytes
-                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, data, 0, bufSize);
+                    Buffer.BlockCopy(m_byteBuffer, m_bufferIndex, data, 0, bufSize);
                     int rem = Size - bufSize;
 
                     while (rem > 0)
                     {
-                        _rngEngine.GetBytes(_byteBuffer);
-                        if (rem > _byteBuffer.Length)
+                        m_rngEngine.GetBytes(m_byteBuffer);
+                        if (rem > m_byteBuffer.Length)
                         {
-                            Buffer.BlockCopy(_byteBuffer, 0, data, bufSize, _byteBuffer.Length);
-                            bufSize += _byteBuffer.Length;
-                            rem -= _byteBuffer.Length;
+                            Buffer.BlockCopy(m_byteBuffer, 0, data, bufSize, m_byteBuffer.Length);
+                            bufSize += m_byteBuffer.Length;
+                            rem -= m_byteBuffer.Length;
                         }
                         else
                         {
-                            Buffer.BlockCopy(_byteBuffer, 0, data, bufSize, rem);
-                            _bufferIndex = rem;
+                            Buffer.BlockCopy(m_byteBuffer, 0, data, bufSize, rem);
+                            m_bufferIndex = rem;
                             rem = 0;
                         }
                     }
                 }
                 else
                 {
-                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, data, 0, data.Length);
-                    _bufferIndex += data.Length;
+                    Buffer.BlockCopy(m_byteBuffer, m_bufferIndex, data, 0, data.Length);
+                    m_bufferIndex += data.Length;
                 }
 
                 return data;
@@ -544,36 +544,36 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="Output">Array to fill with pseudo random</param>
         public void GetBytes(byte[] Output)
         {
-            lock (_objLock)
+            lock (m_objLock)
             {
-                if (_byteBuffer.Length - _bufferIndex < Output.Length)
+                if (m_byteBuffer.Length - m_bufferIndex < Output.Length)
                 {
-                    int bufSize = _byteBuffer.Length - _bufferIndex;
+                    int bufSize = m_byteBuffer.Length - m_bufferIndex;
                     // copy remaining bytes
-                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Output, 0, bufSize);
+                    Buffer.BlockCopy(m_byteBuffer, m_bufferIndex, Output, 0, bufSize);
                     int rem = Output.Length - bufSize;
 
                     while (rem > 0)
                     {
-                        _rngEngine.GetBytes(_byteBuffer);
-                        if (rem > _byteBuffer.Length)
+                        m_rngEngine.GetBytes(m_byteBuffer);
+                        if (rem > m_byteBuffer.Length)
                         {
-                            Buffer.BlockCopy(_byteBuffer, 0, Output, bufSize, _byteBuffer.Length);
-                            bufSize += _byteBuffer.Length;
-                            rem -= _byteBuffer.Length;
+                            Buffer.BlockCopy(m_byteBuffer, 0, Output, bufSize, m_byteBuffer.Length);
+                            bufSize += m_byteBuffer.Length;
+                            rem -= m_byteBuffer.Length;
                         }
                         else
                         {
-                            Buffer.BlockCopy(_byteBuffer, 0, Output, bufSize, rem);
-                            _bufferIndex = rem;
+                            Buffer.BlockCopy(m_byteBuffer, 0, Output, bufSize, rem);
+                            m_bufferIndex = rem;
                             rem = 0;
                         }
                     }
                 }
                 else
                 {
-                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Output, 0, Output.Length);
-                    _bufferIndex += Output.Length;
+                    Buffer.BlockCopy(m_byteBuffer, m_bufferIndex, Output, 0, Output.Length);
+                    m_bufferIndex += Output.Length;
                 }
             }
         }
@@ -656,19 +656,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_rngEngine != null)
+                    if (m_rngEngine != null)
                     {
-                        _rngEngine.Dispose();
-                        _rngEngine = null;
+                        m_rngEngine.Dispose();
+                        m_rngEngine = null;
                     }
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

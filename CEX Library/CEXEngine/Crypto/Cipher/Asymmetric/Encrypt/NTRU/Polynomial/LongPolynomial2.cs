@@ -19,7 +19,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// Each representing two coefficients in the original IntegerPolynomial
         /// </summary>
         public long[] Coeffs;
-        private int _numCoeffs;
+        private int m_numCoeffs;
         #endregion
 
         #region Constructor
@@ -29,17 +29,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <param name="P">The original polynomial. Coefficients must be between 0 and 2047.</param>
         public LongPolynomial2(IntegerPolynomial P)
         {
-            _numCoeffs = P.Coeffs.Length;
-            Coeffs = new long[(_numCoeffs + 1) / 2];
+            m_numCoeffs = P.Coeffs.Length;
+            Coeffs = new long[(m_numCoeffs + 1) / 2];
             int idx = 0;
 
-            for (int pIdx = 0; pIdx < _numCoeffs; )
+            for (int pIdx = 0; pIdx < m_numCoeffs; )
             {
                 int c0 = P.Coeffs[pIdx++];
                 while (c0 < 0)
                     c0 += 2048;
 
-                long c1 = pIdx < _numCoeffs ? P.Coeffs[pIdx++] : 0;
+                long c1 = pIdx < m_numCoeffs ? P.Coeffs[pIdx++] : 0;
                 while (c1 < 0)
                     c1 += 2048;
 
@@ -76,7 +76,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         public LongPolynomial2 Clone()
         {
             LongPolynomial2 p = new LongPolynomial2((long[])Coeffs.Clone());
-            p._numCoeffs = _numCoeffs;
+            p.m_numCoeffs = m_numCoeffs;
 
             return p;
         }
@@ -89,14 +89,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         public LongPolynomial2 Multiply(LongPolynomial2 Factor)
         {
             int N = Coeffs.Length;
-            if (Factor.Coeffs.Length != N || _numCoeffs != Factor._numCoeffs)
+            if (Factor.Coeffs.Length != N || m_numCoeffs != Factor.m_numCoeffs)
                 throw new CryptoAsymmetricException("LongPolynomial2:Multiply", "Number of coefficients must be the same!", new FormatException());
 
             LongPolynomial2 c = MultRecursive(Factor);
 
             if (c.Coeffs.Length > N)
             {
-                if (_numCoeffs % 2 == 0)
+                if (m_numCoeffs % 2 == 0)
                 {
                     for (int k = N; k < c.Coeffs.Length; k++)
                         c.Coeffs[k - N] = (c.Coeffs[k - N] + c.Coeffs[k]) & 0x7FF0007FFL;
@@ -118,7 +118,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
             }
 
             c = new LongPolynomial2(c.Coeffs);
-            c._numCoeffs = _numCoeffs;
+            c.m_numCoeffs = m_numCoeffs;
             return c;
         }
 
@@ -161,14 +161,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>The polynomial product</returns>
         public IntegerPolynomial ToIntegerPolynomial()
         {
-            int[] intCoeffs = new int[_numCoeffs];
+            int[] intCoeffs = new int[m_numCoeffs];
             int uIdx = 0;
 
             for (int i = 0; i < Coeffs.Length; i++)
             {
                 intCoeffs[uIdx++] = (int)(Coeffs[i] & 2047);
 
-                if (uIdx < _numCoeffs)
+                if (uIdx < m_numCoeffs)
                     intCoeffs[uIdx++] = (int)((Coeffs[i] >> 24) & 2047);
             }
 

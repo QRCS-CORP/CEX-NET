@@ -14,10 +14,10 @@ namespace VTDev.Libraries.CEXEngine.Networking
     public sealed class PacketBuffer : IDisposable
     {
         #region Fields
-        private bool _isDisposed = false;
-        private ConcurrentDictionary<long, MemoryStream> _pktBuffer;
-        private int _queueDepth;
-        private object _threadLock = new object();
+        private bool m_isDisposed = false;
+        private ConcurrentDictionary<long, MemoryStream> m_pktBuffer;
+        private int m_queueDepth;
+        private object m_threadLock = new object();
         #endregion
 
         #region Properties
@@ -28,8 +28,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
         {
             get 
             { 
-                if (_pktBuffer != null)
-                    return _pktBuffer.Count;
+                if (m_pktBuffer != null)
+                    return m_pktBuffer.Count;
                 else
                     return 0;
             }
@@ -42,13 +42,13 @@ namespace VTDev.Libraries.CEXEngine.Networking
         /// <exception cref="CryptoNetworkingException">Thrown if the queue depth is less than 1</exception>
         public int Depth
         {
-            get { return _queueDepth; }
+            get { return m_queueDepth; }
             set 
             {
                 if (value < 1)
                     throw new CryptoNetworkingException("PacketBuffer:Depth", "Depth can not be less than 1!", new ArgumentException());
 
-                _queueDepth = value; 
+                m_queueDepth = value; 
             }
         }
         #endregion
@@ -61,8 +61,8 @@ namespace VTDev.Libraries.CEXEngine.Networking
         /// <param name="QueueDepth">The maximum queue depth</param>
         public PacketBuffer(int QueueDepth)
         {
-            _queueDepth = QueueDepth;
-            _pktBuffer = new ConcurrentDictionary<long, MemoryStream>();
+            m_queueDepth = QueueDepth;
+            m_pktBuffer = new ConcurrentDictionary<long, MemoryStream>();
         }
 
         private PacketBuffer()
@@ -88,9 +88,9 @@ namespace VTDev.Libraries.CEXEngine.Networking
         {
             try
             {
-                if (_pktBuffer != null)
+                if (m_pktBuffer != null)
                 {
-                    List<MemoryStream> vals = new List<MemoryStream>(_pktBuffer.Values);
+                    List<MemoryStream> vals = new List<MemoryStream>(m_pktBuffer.Values);
 
                     foreach (MemoryStream pkt in vals)
                     {
@@ -98,7 +98,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
                             pkt.Dispose();
                     }
 
-                    _pktBuffer.Clear();
+                    m_pktBuffer.Clear();
                 }
             }
             catch
@@ -145,7 +145,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
         /// <returns>Returns <c>true</c> if the key exists, otherwise <c>false</c></returns>
         public bool Exists(long Sequence)
         {
-            return _pktBuffer == null ? false : _pktBuffer.ContainsKey(Sequence);
+            return m_pktBuffer == null ? false : m_pktBuffer.ContainsKey(Sequence);
         }
 
         /// <summary>
@@ -157,9 +157,9 @@ namespace VTDev.Libraries.CEXEngine.Networking
         {
             long lstSeq = -1;
 
-            lock (_threadLock)
+            lock (m_threadLock)
             {
-                List<long> keys = new List<long>(_pktBuffer.Keys);
+                List<long> keys = new List<long>(m_pktBuffer.Keys);
 
                 foreach (long key in keys)
                 {
@@ -180,9 +180,9 @@ namespace VTDev.Libraries.CEXEngine.Networking
         {
             long lstSeq = long.MaxValue;
 
-            lock (_threadLock)
+            lock (m_threadLock)
             {
-                List<long> keys = new List<long>(_pktBuffer.Keys);
+                List<long> keys = new List<long>(m_pktBuffer.Keys);
 
                 foreach (long key in keys)
                 {
@@ -210,7 +210,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
 
             if (Exists(Sequence))
             {
-                _pktBuffer.TryGetValue(Sequence, out pkt);
+                m_pktBuffer.TryGetValue(Sequence, out pkt);
 
                 if (pkt.Position != 0)
                     pkt.Seek(0, SeekOrigin.Begin);
@@ -232,7 +232,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
 
             if (Exists(Sequence))
             {
-                if (_pktBuffer.TryGetValue(Sequence, out pkt))
+                if (m_pktBuffer.TryGetValue(Sequence, out pkt))
                     Remove(Sequence);
 
                 if (pkt.Position != 0)
@@ -256,9 +256,9 @@ namespace VTDev.Libraries.CEXEngine.Networking
 
             int count = 0;
 
-            lock (_threadLock)
+            lock (m_threadLock)
             {
-                List<long> keys = new List<long>(_pktBuffer.Keys);
+                List<long> keys = new List<long>(m_pktBuffer.Keys);
                 foreach (var key in keys)
                 {
                     if (Sequence.Equals(key))
@@ -281,14 +281,14 @@ namespace VTDev.Libraries.CEXEngine.Networking
         /// <param name="Packet">The packet stream</param>
         public void Push(long Sequence, MemoryStream Packet)
         {
-            if (_pktBuffer == null)
+            if (m_pktBuffer == null)
                 return;
 
             if (Packet.Position != 0)
                 Packet.Seek(0, SeekOrigin.Begin);
 
             // remove first in queue
-            if (_pktBuffer.Count > _queueDepth)
+            if (m_pktBuffer.Count > m_queueDepth)
             {
                 long fstSeq = GetLowKey();
 
@@ -300,7 +300,7 @@ namespace VTDev.Libraries.CEXEngine.Networking
             if (Exists(Sequence))
                 Remove(Sequence);
 
-            _pktBuffer.TryAdd(Sequence, Packet);
+            m_pktBuffer.TryAdd(Sequence, Packet);
         }
 
         /// <summary>
@@ -312,13 +312,13 @@ namespace VTDev.Libraries.CEXEngine.Networking
         /// <returns>Returns true if the packet was removed, otherwise false</returns>
         public bool Remove(long Sequence)
         {
-            if (_pktBuffer == null)
+            if (m_pktBuffer == null)
                 return false;
-            else if (_pktBuffer.Count < 1)
+            else if (m_pktBuffer.Count < 1)
                 return false;
 
             MemoryStream pkt =  null;
-            _pktBuffer.TryRemove(Sequence, out pkt);
+            m_pktBuffer.TryRemove(Sequence, out pkt);
 
             if (pkt != null)
                 return true;
@@ -339,19 +339,19 @@ namespace VTDev.Libraries.CEXEngine.Networking
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_pktBuffer != null)
+                    if (m_pktBuffer != null)
                     {
                         Clear();
-                        _pktBuffer = null;
+                        m_pktBuffer = null;
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

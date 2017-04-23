@@ -45,14 +45,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Encode
     internal sealed class IndexGenerator
     {
         #region Private Fields
-        private BitString _bitBuffer;
-        private int _callCounter;
-        private IDigest _digestEngine;
-        private int _hashLen;
-        private int _remLen;
-        private int _C;
-        private int _N;
-        private byte[] _Z;
+        private BitString m_bitBuffer;
+        private int m_callCounter;
+        private IDigest m_digestEngine;
+        private int m_hashLen;
+        private int m_remLen;
+        private int m_C;
+        private int m_N;
+        private byte[] m_Z;
         #endregion
 
         #region Constructor
@@ -64,27 +64,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Encode
         /// <param name="EncParam">NtruEncrypt parameters</param>
         public IndexGenerator(byte[] Seed, NTRUParameters EncParam)
         {
-            _N = EncParam.N;
-            _C = EncParam.CBits;
+            m_N = EncParam.N;
+            m_C = EncParam.CBits;
             int minCallsR = EncParam.MinIGFHashCalls;
 
-            _digestEngine = GetDigest(EncParam.Digest);
-            _hashLen = _digestEngine.DigestSize;
-            _Z = Seed;
-            _callCounter = 0;
-            _bitBuffer = new BitString();
+            m_digestEngine = GetDigest(EncParam.Digest);
+            m_hashLen = m_digestEngine.DigestSize;
+            m_Z = Seed;
+            m_callCounter = 0;
+            m_bitBuffer = new BitString();
 
-            while (_callCounter < minCallsR)
+            while (m_callCounter < minCallsR)
             {
-                byte[] data = new byte[_Z.Length + 4];
-                Buffer.BlockCopy(_Z, 0, data, 0, _Z.Length);
-                Buffer.BlockCopy(IntUtils.IntToBytes(_callCounter), 0, data, _Z.Length, 4);
-                byte[] H = _digestEngine.ComputeHash(data);
-                _bitBuffer.AppendBits(H);
-                _callCounter++;
+                byte[] data = new byte[m_Z.Length + 4];
+                Buffer.BlockCopy(m_Z, 0, data, 0, m_Z.Length);
+                Buffer.BlockCopy(IntUtils.IntToBytes(m_callCounter), 0, data, m_Z.Length, 4);
+                byte[] H = m_digestEngine.ComputeHash(data);
+                m_bitBuffer.AppendBits(H);
+                m_callCounter++;
             }
 
-            _remLen = minCallsR * 8 * _hashLen;
+            m_remLen = minCallsR * 8 * m_hashLen;
         }
         #endregion
 
@@ -98,32 +98,32 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Encode
         {
             while (true)
             {
-                if (_remLen < _C)
+                if (m_remLen < m_C)
                 {
-                    BitString M = _bitBuffer.GetTrailing(_remLen);
-                    int tmpLen = _C - _remLen;
-                    int cThreshold = _callCounter + (tmpLen + _hashLen - 1) / _hashLen;
+                    BitString M = m_bitBuffer.GetTrailing(m_remLen);
+                    int tmpLen = m_C - m_remLen;
+                    int cThreshold = m_callCounter + (tmpLen + m_hashLen - 1) / m_hashLen;
 
-                    while (_callCounter < cThreshold)
+                    while (m_callCounter < cThreshold)
                     {
-                        byte[] data = new byte[_Z.Length + 4];
-                        Buffer.BlockCopy(_Z, 0, data, 0, _Z.Length);
-                        Buffer.BlockCopy(IntUtils.IntToBytes(_callCounter), 0, data, _Z.Length, 4);
-                        byte[] H = _digestEngine.ComputeHash(data);
+                        byte[] data = new byte[m_Z.Length + 4];
+                        Buffer.BlockCopy(m_Z, 0, data, 0, m_Z.Length);
+                        Buffer.BlockCopy(IntUtils.IntToBytes(m_callCounter), 0, data, m_Z.Length, 4);
+                        byte[] H = m_digestEngine.ComputeHash(data);
 
                         M.AppendBits(H);
-                        _callCounter++;
-                        _remLen += 8 * _hashLen;
+                        m_callCounter++;
+                        m_remLen += 8 * m_hashLen;
                     }
-                    _bitBuffer = M;
+                    m_bitBuffer = M;
                 }
 
                 // assume c less than 32
-                int i = _bitBuffer.Pop(_C);   
-                _remLen -= _C;
+                int i = m_bitBuffer.Pop(m_C);   
+                m_remLen -= m_C;
 
-                if (i < (1 << _C) - ((1 << _C) % _N))
-                    return i % _N;
+                if (i < (1 << m_C) - ((1 << m_C) % m_N))
+                    return i % m_N;
             }
         }
         #endregion

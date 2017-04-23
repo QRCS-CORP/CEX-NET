@@ -258,17 +258,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         #endregion
 
         #region Fields
-        private Threefish256 _blockCipher;
-        private int _bytesFilled; 
-        private ulong[] _cipherInput;
-        private ulong[] _configString;
-        private ulong[] _configValue;
-        private ulong[] _digestState;
-        private byte[] _inputBuffer;
-        private SkeinInitializationType _initializationType;
-        private bool _isDisposed = false;
-        private int _outputBytes;
-        private UbiTweak _ubiParameters;
+        private Threefish256 m_blockCipher;
+        private int m_bytesFilled; 
+        private ulong[] m_cipherInput;
+        private ulong[] m_configString;
+        private ulong[] m_configValue;
+        private ulong[] m_digestState;
+        private byte[] m_inputBuffer;
+        private SkeinInitializationType m_initializationType;
+        private bool m_isDisposed = false;
+        private int m_outputBytes;
+        private UbiTweak m_ubiParameters;
         #endregion
 
         #region Properties
@@ -286,8 +286,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         [CLSCompliant(false)]
         public ulong[] ConfigValue 
         {
-            get { return _configValue; }
-            private set { _configValue = value; }
+            get { return m_configValue; }
+            private set { m_configValue = value; }
         }
 
         /// <summary>
@@ -296,8 +296,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         [CLSCompliant(false)]
         public ulong[] ConfigString 
         {
-            get { return _configString; }
-            private set { _configString = value; }
+            get { return m_configString; }
+            private set { m_configString = value; }
         }
 
         /// <summary>
@@ -321,8 +321,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// </summary>
         public SkeinInitializationType InitializationType 
         {
-            get { return _initializationType; }
-            private set { _initializationType = value; }
+            get { return m_initializationType; }
+            private set { m_initializationType = value; }
         }
 
         /// <summary>
@@ -346,8 +346,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// </summary>
         public UbiTweak UbiParameters 
         {
-            get { return _ubiParameters; }
-            private set { _ubiParameters = value; }
+            get { return m_ubiParameters; }
+            private set { m_ubiParameters = value; }
         }
         #endregion
 
@@ -359,21 +359,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="InitializationType">Digest initialization type <see cref="SkeinInitializationType"/></param>
         public Skein256(SkeinInitializationType InitializationType = SkeinInitializationType.Normal)
         {
-            _initializationType = InitializationType;
-            _outputBytes = (STATE_SIZE + 7) / 8;
-            _blockCipher = new Threefish256();
+            m_initializationType = InitializationType;
+            m_outputBytes = (STATE_SIZE + 7) / 8;
+            m_blockCipher = new Threefish256();
             // allocate buffers
-            _inputBuffer = new byte[STATE_BYTES];
-            _cipherInput = new ulong[STATE_WORDS];
-            _digestState = new ulong[STATE_WORDS];
+            m_inputBuffer = new byte[STATE_BYTES];
+            m_cipherInput = new ulong[STATE_WORDS];
+            m_digestState = new ulong[STATE_WORDS];
             // allocate tweak
-            _ubiParameters = new UbiTweak();
+            m_ubiParameters = new UbiTweak();
             // generate the configuration string
             // allocate config value
-            _configValue = new ulong[STATE_BYTES];
+            m_configValue = new ulong[STATE_BYTES];
             // set the state size for the configuration
-            _configString = new ulong[STATE_BYTES];
-            _configString[1] = (ulong)DigestSize * 8;
+            m_configString = new ulong[STATE_BYTES];
+            m_configString[1] = (ulong)DigestSize * 8;
 
             SetSchema(83, 72, 65, 51); // "SHA3"
             SetVersion(1);
@@ -412,21 +412,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             while (bytesDone < Length && offset < Input.Length)
             {
                 // do a transform if the input buffer is filled
-                if (_bytesFilled == STATE_BYTES)
+                if (m_bytesFilled == STATE_BYTES)
                 {
                     // copy input buffer to cipher input buffer
                     for (int i = 0; i < STATE_WORDS; i++)
-                        _cipherInput[i] = BytesToUInt64(_inputBuffer, i * 8);
+                        m_cipherInput[i] = BytesToUInt64(m_inputBuffer, i * 8);
 
                     // process the block
                     ProcessBlock(STATE_BYTES);
                     // clear first flag, which will be set by Initialize() if this is the first transform
-                    _ubiParameters.IsFirstBlock = false;
+                    m_ubiParameters.IsFirstBlock = false;
                     // reset buffer fill count
-                    _bytesFilled = 0;
+                    m_bytesFilled = 0;
                 }
 
-                _inputBuffer[_bytesFilled++] = Input[offset++];
+                m_inputBuffer[m_bytesFilled++] = Input[offset++];
                 bytesDone++;
             }
         }
@@ -468,40 +468,40 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
                 throw new CryptoHashException("Skein256:DoFinal", "The Output buffer is too short!", new ArgumentOutOfRangeException());
 
             // pad left over space in input buffer with zeros
-            for (int i = _bytesFilled; i < _inputBuffer.Length; i++)
-                _inputBuffer[i] = 0;
+            for (int i = m_bytesFilled; i < m_inputBuffer.Length; i++)
+                m_inputBuffer[i] = 0;
             // copy to cipher input buffer
             for (int i = 0; i < STATE_WORDS; i++)
-                _cipherInput[i] = BytesToUInt64(_inputBuffer, i * 8);
+                m_cipherInput[i] = BytesToUInt64(m_inputBuffer, i * 8);
 
             // do final message block
-            _ubiParameters.IsFinalBlock = true;
-            ProcessBlock(_bytesFilled);
+            m_ubiParameters.IsFinalBlock = true;
+            ProcessBlock(m_bytesFilled);
 
             // clear cipher input
-            Array.Clear(_cipherInput, 0, _cipherInput.Length);
+            Array.Clear(m_cipherInput, 0, m_cipherInput.Length);
             // do output block counter mode output
-            byte[] hash = new byte[_outputBytes];
+            byte[] hash = new byte[m_outputBytes];
             ulong[] oldState = new ulong[STATE_WORDS];
             // save old state
-            Array.Copy(_digestState, oldState, _digestState.Length);
+            Array.Copy(m_digestState, oldState, m_digestState.Length);
 
-            for (int i = 0; i < _outputBytes; i += STATE_BYTES)
+            for (int i = 0; i < m_outputBytes; i += STATE_BYTES)
             {
-                _ubiParameters.StartNewBlockType(UbiType.Out);
-                _ubiParameters.IsFinalBlock = true;
+                m_ubiParameters.StartNewBlockType(UbiType.Out);
+                m_ubiParameters.IsFinalBlock = true;
                 ProcessBlock(8);
 
                 // output a chunk of the hash
-                int outputSize = _outputBytes - i;
+                int outputSize = m_outputBytes - i;
                 if (outputSize > STATE_BYTES)
                     outputSize = STATE_BYTES;
 
-                PutBytes(_digestState, hash, i, outputSize);
+                PutBytes(m_digestState, hash, i, outputSize);
                 // restore old state
-                Array.Copy(oldState, _digestState, oldState.Length);
+                Array.Copy(oldState, m_digestState, oldState.Length);
                 // increment counter
-                _cipherInput[0]++;
+                m_cipherInput[0]++;
             }
 
             Buffer.BlockCopy(hash, 0, Output, OutOffset, hash.Length);
@@ -531,14 +531,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
                 case SkeinInitializationType.ZeroedState:
                     {
                         // copy the configuration value to the state
-                        for (int i = 0; i < _digestState.Length; i++)
-                            _digestState[i] = 0;
+                        for (int i = 0; i < m_digestState.Length; i++)
+                            m_digestState[i] = 0;
                     }
                     break;
                 case SkeinInitializationType.ChainedConfig:
                     {
                         // generate a chained configuration
-                        GenerateConfiguration(_digestState);
+                        GenerateConfiguration(m_digestState);
                         // continue initialization
                         Initialize();
                     }
@@ -549,7 +549,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             }
 
             // reset bytes filled
-            _bytesFilled = 0;
+            m_bytesFilled = 0;
         }
 
 
@@ -587,11 +587,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             tweak.BitsProcessed = 32;
 
             cipher.SetTweak(tweak.Tweak);
-            cipher.Encrypt(_configString, _configValue);
+            cipher.Encrypt(m_configString, m_configValue);
 
-            _configValue[0] ^= _configString[0];
-            _configValue[1] ^= _configString[1];
-            _configValue[2] ^= _configString[2];
+            m_configValue[0] ^= m_configString[0];
+            m_configValue[1] ^= m_configString[1];
+            m_configValue[2] ^= m_configString[2];
         }
 
         /// <summary>
@@ -612,11 +612,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
             cipher.SetKey(InitialState);
             cipher.SetTweak(tweak.Tweak);
-            cipher.Encrypt(_configString, _configValue);
+            cipher.Encrypt(m_configString, m_configValue);
 
-            _configValue[0] ^= _configString[0];
-            _configValue[1] ^= _configString[1];
-            _configValue[2] ^= _configString[2];
+            m_configValue[0] ^= m_configString[0];
+            m_configValue[1] ^= m_configString[1];
+            m_configValue[2] ^= m_configString[2];
         }
 
         /// <summary>
@@ -631,7 +631,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             if (Schema.Length != 4)
                 throw new CryptoHashException("Skein256:SetSchema", "Schema must be 4 bytes.", new Exception());
 
-            ulong n = _configString[0];
+            ulong n = m_configString[0];
 
             // clear the schema bytes
             n &= ~(ulong)0xfffffffful;
@@ -641,7 +641,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             n |= (ulong)Schema[1] << 8;
             n |= (ulong)Schema[0];
 
-            _configString[0] = n;
+            m_configString[0] = n;
         }
 
         /// <summary>
@@ -656,8 +656,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             if (Version < 0 || Version > 3)
                 throw new CryptoHashException("Skein256:SetVersion", "Version must be between 0 and 3, inclusive.", new Exception());
 
-            _configString[0] &= ~((ulong)0x03 << 32);
-            _configString[0] |= (ulong)Version << 32;
+            m_configString[0] &= ~((ulong)0x03 << 32);
+            m_configString[0] |= (ulong)Version << 32;
         }
 
         /// <summary>
@@ -667,8 +667,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="Size">Leaf size</param>
         public void SetTreeLeafSize(byte Size)
         {
-            _configString[2] &= ~(ulong)0xff;
-            _configString[2] |= (ulong)Size;
+            m_configString[2] &= ~(ulong)0xff;
+            m_configString[2] |= (ulong)Size;
         }
 
         /// <summary>
@@ -678,8 +678,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         /// <param name="Size">Fan out size</param>
         public void SetTreeFanOutSize(byte Size)
         {
-            _configString[2] &= ~((ulong)0xff << 8);
-            _configString[2] |= (ulong)Size << 8;
+            m_configString[2] &= ~((ulong)0xff << 8);
+            m_configString[2] |= (ulong)Size << 8;
         }
 
         /// <summary>
@@ -694,8 +694,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
             if (Height == 1)
                 throw new CryptoHashException("Skein256:SetMaxTreeHeight", "Tree height must be zero or greater than 1.", new Exception());
 
-            _configString[2] &= ~((ulong)0xff << 16);
-            _configString[2] |= (ulong)Height << 16;
+            m_configString[2] &= ~((ulong)0xff << 16);
+            m_configString[2] |= (ulong)Height << 16;
         }
         #endregion
 
@@ -703,31 +703,31 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         private void Initialize()
         {
             // copy the configuration value to the state
-            for (int i = 0; i < _digestState.Length; i++)
-                _digestState[i] = _configValue[i];
+            for (int i = 0; i < m_digestState.Length; i++)
+                m_digestState[i] = m_configValue[i];
 
             // set up tweak for message block
-            _ubiParameters.StartNewBlockType(UbiType.Message);
+            m_ubiParameters.StartNewBlockType(UbiType.Message);
 
             // reset bytes filled
-            _bytesFilled = 0;
+            m_bytesFilled = 0;
         }
 
         private void ProcessBlock(int bytes)
         {
             // set the key to the current state
-            _blockCipher.SetKey(_digestState);
+            m_blockCipher.SetKey(m_digestState);
 
             // update tweak
-            _ubiParameters.BitsProcessed += (long)bytes;
-            _blockCipher.SetTweak(_ubiParameters.Tweak);
+            m_ubiParameters.BitsProcessed += (long)bytes;
+            m_blockCipher.SetTweak(m_ubiParameters.Tweak);
 
             // encrypt block
-            _blockCipher.Encrypt(_cipherInput, _digestState);
+            m_blockCipher.Encrypt(m_cipherInput, m_digestState);
 
             // feed-forward input with state
-            for (int i = 0; i < _cipherInput.Length; i++)
-                _digestState[i] ^= _cipherInput[i];
+            for (int i = 0; i < m_cipherInput.Length; i++)
+                m_digestState[i] ^= m_cipherInput[i];
         }
 
         private static ulong BytesToUInt64(byte[] Input, int InOffset)
@@ -1037,29 +1037,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_blockCipher != null)
+                    if (m_blockCipher != null)
                     {
-                        _blockCipher.Clear();
-                        _blockCipher = null;
+                        m_blockCipher.Clear();
+                        m_blockCipher = null;
                     }
-                    if (_cipherInput != null)
+                    if (m_cipherInput != null)
                     {
-                        Array.Clear(_cipherInput, 0, _cipherInput.Length);
-                        _cipherInput = null;
+                        Array.Clear(m_cipherInput, 0, m_cipherInput.Length);
+                        m_cipherInput = null;
                     }
-                    if (_digestState != null)
+                    if (m_digestState != null)
                     {
-                        Array.Clear(_digestState, 0, _digestState.Length);
-                        _digestState = null;
+                        Array.Clear(m_digestState, 0, m_digestState.Length);
+                        m_digestState = null;
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

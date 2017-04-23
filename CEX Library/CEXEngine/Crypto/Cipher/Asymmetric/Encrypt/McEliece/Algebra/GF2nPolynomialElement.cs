@@ -14,7 +14,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
     {
         #region Fields
         // pre-computed Bitmask for fast masking, bitMask[a]=0x1 << a
-        private static int[] _bitMask = {0x00000001, 0x00000002, 0x00000004,
+        private static int[] m_bitMask = {0x00000001, 0x00000002, 0x00000004,
         0x00000008, 0x00000010, 0x00000020, 0x00000040, 0x00000080,
         0x00000100, 0x00000200, 0x00000400, 0x00000800, 0x00001000,
         0x00002000, 0x00004000, 0x00008000, 0x00010000, 0x00020000,
@@ -23,7 +23,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         0x10000000, 0x20000000, 0x40000000, unchecked((int)0x80000000), 0x00000000};
 
         // the used GF2Polynomial which stores the coefficients
-        private GF2Polynomial polynomial;
+        private GF2Polynomial m_polynomial;
         #endregion
 
         #region Constructor
@@ -35,9 +35,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Rnd">The source of randomness</param>
         public GF2nPolynomialElement(GF2nPolynomialField Gf, Random Rnd)
         {
-            mField = Gf;
-            mDegree = mField.Degree;
-            polynomial = new GF2Polynomial(mDegree);
+            m_Field = Gf;
+            m_Degree = m_Field.Degree;
+            m_polynomial = new GF2Polynomial(m_Degree);
             Randomize(Rnd);
         }
 
@@ -49,10 +49,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Gp">The desired value as Bitstring</param>
         public GF2nPolynomialElement(GF2nPolynomialField Gf, GF2Polynomial Gp)
         {
-            mField = Gf;
-            mDegree = mField.Degree;
-            polynomial = new GF2Polynomial(Gp);
-            polynomial.ExpandN(mDegree);
+            m_Field = Gf;
+            m_Degree = m_Field.Degree;
+            m_polynomial = new GF2Polynomial(Gp);
+            m_polynomial.ExpandN(m_Degree);
         }
 
         /// <summary>
@@ -64,10 +64,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Os">The octet string to assign to this GF2nPolynomialElement</param>
         public GF2nPolynomialElement(GF2nPolynomialField Gf, byte[] Os)
         {
-            mField = Gf;
-            mDegree = mField.Degree;
-            polynomial = new GF2Polynomial(mDegree, Os);
-            polynomial.ExpandN(mDegree);
+            m_Field = Gf;
+            m_Degree = m_Field.Degree;
+            m_polynomial = new GF2Polynomial(m_Degree, Os);
+            m_polynomial.ExpandN(m_Degree);
         }
 
         /// <summary>
@@ -78,10 +78,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Is">The integer string to assign to this GF2nPolynomialElement</param>
         public GF2nPolynomialElement(GF2nPolynomialField Gf, int[] Is)
         {
-            mField = Gf;
-            mDegree = mField.Degree;
-            polynomial = new GF2Polynomial(mDegree, Is);
-            polynomial.ExpandN(Gf.Degree);
+            m_Field = Gf;
+            m_Degree = m_Field.Degree;
+            m_polynomial = new GF2Polynomial(m_Degree, Is);
+            m_polynomial.ExpandN(Gf.Degree);
         }
         /**
          * .
@@ -95,9 +95,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Ge">The GF2nPolynomialElement to clone</param>
         public GF2nPolynomialElement(GF2nPolynomialElement Ge)
         {
-            mField = Ge.mField;
-            mDegree = Ge.mDegree;
-            polynomial = new GF2Polynomial(Ge.polynomial);
+            m_Field = Ge.m_Field;
+            m_Degree = Ge.m_Degree;
+            m_polynomial = new GF2Polynomial(Ge.m_polynomial);
         }
         #endregion
 
@@ -109,7 +109,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The GF2nPolynomialElement as a Bitstring</returns>
         private GF2Polynomial GetGF2Polynomial()
         {
-            return new GF2Polynomial(polynomial);
+            return new GF2Polynomial(m_polynomial);
         }
 
         /// <summary>
@@ -122,12 +122,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (IsZero())
                 throw new ArithmeticException();
 
-            GF2Polynomial b = new GF2Polynomial(mDegree + 32, "ONE");
+            GF2Polynomial b = new GF2Polynomial(m_Degree + 32, "ONE");
             b.ReduceN();
-            GF2Polynomial c = new GF2Polynomial(mDegree + 32);
+            GF2Polynomial c = new GF2Polynomial(m_Degree + 32);
             c.ReduceN();
             GF2Polynomial u = GetGF2Polynomial();
-            GF2Polynomial v = mField.FieldPolynomial;
+            GF2Polynomial v = m_Field.FieldPolynomial;
             GF2Polynomial h;
             int j;
             u.ReduceN();
@@ -154,7 +154,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             }
             b.ReduceN();
 
-            return new GF2nPolynomialElement((GF2nPolynomialField)mField, b);
+            return new GF2nPolynomialElement((GF2nPolynomialField)m_Field, b);
         }
 
         /// <summary>
@@ -168,10 +168,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             {
                 throw new ArithmeticException();
             }
-            GF2Polynomial b = new GF2Polynomial(mDegree, "ONE");
-            GF2Polynomial c = new GF2Polynomial(mDegree);
+            GF2Polynomial b = new GF2Polynomial(m_Degree, "ONE");
+            GF2Polynomial c = new GF2Polynomial(m_Degree);
             GF2Polynomial u = GetGF2Polynomial();
-            GF2Polynomial v = mField.FieldPolynomial;
+            GF2Polynomial v = m_Field.FieldPolynomial;
             GF2Polynomial h;
             while (true)
             {
@@ -184,13 +184,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                     }
                     else
                     {
-                        b.AddToThis(mField.FieldPolynomial);
+                        b.AddToThis(m_Field.FieldPolynomial);
                         b.ShiftRightThis();
                     }
                 }
 
                 if (u.IsOne())
-                    return new GF2nPolynomialElement((GF2nPolynomialField)mField, b);
+                    return new GF2nPolynomialElement((GF2nPolynomialField)m_Field, b);
                 
                 u.ReduceN();
                 v.ReduceN();
@@ -225,11 +225,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 throw new ArithmeticException();
 
             // b = (n-1)
-            b = mField.Degree - 1;
+            b = m_Field.Degree - 1;
             // n = a
             n = new GF2nPolynomialElement(this);
-            n.polynomial.ExpandN((mDegree << 1) + 32); // increase performance
-            n.polynomial.ReduceN();
+            n.m_polynomial.ExpandN((m_Degree << 1) + 32); // increase performance
+            n.m_polynomial.ReduceN();
             // k = 1
             k = 1;
 
@@ -247,7 +247,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 // k = 2k
                 k <<= 1;
                 // if b(i)==1
-                if ((b & _bitMask[i]) != 0)
+                if ((b & m_bitMask[i]) != 0)
                 {
                     // n = n^2 * b
                     n.SquareThisPreCalc();
@@ -288,15 +288,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (K == 1)
                 return new GF2nPolynomialElement(this);
 
-            GF2nPolynomialElement result = GF2nPolynomialElement.One((GF2nPolynomialField)mField);
+            GF2nPolynomialElement result = GF2nPolynomialElement.One((GF2nPolynomialField)m_Field);
             if (K == 0)
                 return result;
 
             GF2nPolynomialElement x = new GF2nPolynomialElement(this);
-            x.polynomial.ExpandN((x.mDegree << 1) + 32); // increase performance
-            x.polynomial.ReduceN();
+            x.m_polynomial.ExpandN((x.m_Degree << 1) + 32); // increase performance
+            x.m_polynomial.ReduceN();
 
-            for (int i = 0; i < mDegree; i++)
+            for (int i = 0; i < m_Degree; i++)
             {
                 if ((K & (1 << i)) != 0)
                     result.MultiplyThisBy(x);
@@ -314,8 +314,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Rnd">The source of randomness</param>
         private void Randomize(Random Rnd)
         {
-            polynomial.ExpandN(mDegree);
-            polynomial.Randomize(Rnd);
+            m_polynomial.ExpandN(m_Degree);
+            m_polynomial.Randomize(Rnd);
         }
 
         /// <summary>
@@ -369,7 +369,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public void SquareThisBitwise()
         {
-            polynomial.SquareThisBitwise();
+            m_polynomial.SquareThisBitwise();
             ReduceThis();
         }
 
@@ -380,13 +380,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public void SquareThisMatrix()
         {
-            GF2Polynomial result = new GF2Polynomial(mDegree);
-            for (int i = 0; i < mDegree; i++)
+            GF2Polynomial result = new GF2Polynomial(m_Degree);
+            for (int i = 0; i < m_Degree; i++)
             {
-                if (polynomial.VectorMult(((GF2nPolynomialField)mField).SquaringMatrix[mDegree - i - 1]))
+                if (m_polynomial.VectorMult(((GF2nPolynomialField)m_Field).SquaringMatrix[m_Degree - i - 1]))
                     result.SetBit(i);
             }
-            polynomial = result;
+            m_polynomial = result;
         }
 
         /// <summary>
@@ -396,7 +396,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public void SquareThisPreCalc()
         {
-            polynomial.SquareThisPreCalc();
+            m_polynomial.SquareThisPreCalc();
             ReduceThis();
         }
 
@@ -439,10 +439,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         {
             if (!(Addend is GF2nPolynomialElement))
                 throw new Exception();
-            if (!mField.Equals(((GF2nPolynomialElement)Addend).mField))
+            if (!m_Field.Equals(((GF2nPolynomialElement)Addend).m_Field))
                 throw new Exception();
 
-            polynomial.AddToThis(((GF2nPolynomialElement)Addend).polynomial);
+            m_polynomial.AddToThis(((GF2nPolynomialElement)Addend).m_polynomial);
         }
 
         /// <summary>
@@ -450,7 +450,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public override void AssignOne()
         {
-            polynomial.AssignOne();
+            m_polynomial.AssignOne();
         }
 
         /// <summary>
@@ -458,7 +458,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public override void AssignZero()
         {
-            polynomial.AssignZero();
+            m_polynomial.AssignZero();
         }
 
         /// <summary>
@@ -485,13 +485,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             
             GF2nPolynomialElement otherElem = (GF2nPolynomialElement)Obj;
 
-            if (mField != otherElem.mField)
+            if (m_Field != otherElem.m_Field)
             {
-                if (!mField.FieldPolynomial.Equals(otherElem.mField.FieldPolynomial))
+                if (!m_Field.FieldPolynomial.Equals(otherElem.m_Field.FieldPolynomial))
                     return false;
             }
 
-            return polynomial.Equals(otherElem.polynomial);
+            return m_polynomial.Equals(otherElem.m_polynomial);
         }
 
         /// <summary>
@@ -501,7 +501,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The hash code</returns>
         public override int GetHashCode()
         {
-            return mField.GetHashCode() + polynomial.GetHashCode();
+            return m_Field.GetHashCode() + m_polynomial.GetHashCode();
         }
 
         /// <summary>
@@ -521,7 +521,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns true if <c>this</c> equals one (this == 1)</returns>
         public override bool IsOne()
         {
-            return polynomial.IsOne();
+            return m_polynomial.IsOne();
         }
 
         /// <summary>
@@ -531,7 +531,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns <c>true</c> if <c>this</c> is the zero element</returns>
         public override bool IsZero()
         {
-            return polynomial.IsZero();
+            return m_polynomial.IsZero();
         }
 
         /// <summary>
@@ -552,7 +552,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public override void IncreaseThis()
         {
-            polynomial.IncreaseThis();
+            m_polynomial.IncreaseThis();
         }
 
         /// <summary>
@@ -579,7 +579,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         {
             if (!(Factor is GF2nPolynomialElement))
                 throw new Exception();
-            if (!mField.Equals(((GF2nPolynomialElement)Factor).mField))
+            if (!m_Field.Equals(((GF2nPolynomialElement)Factor).m_Field))
                 throw new Exception();
             if (Equals(Factor))
             {
@@ -587,7 +587,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 return;
             }
 
-            polynomial = polynomial.Multiply(((GF2nPolynomialElement)Factor).polynomial);
+            m_polynomial = m_polynomial.Multiply(((GF2nPolynomialElement)Factor).m_polynomial);
             ReduceThis();
         }
 
@@ -601,9 +601,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public override GF2nElement SolveQuadraticEquation()
         {
             if (IsZero())
-                return Zero((GF2nPolynomialField)mField);
+                return Zero((GF2nPolynomialField)m_Field);
 
-            if ((mDegree & 1) == 1)
+            if ((m_Degree & 1) == 1)
                 return HalfTrace();
 
             // TODO this can be sped-up by precomputation of p and w's
@@ -612,12 +612,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             {
                 // step 1.
                 GF2nPolynomialElement p = new GF2nPolynomialElement(
-                    (GF2nPolynomialField)mField, new Random());
+                    (GF2nPolynomialField)m_Field, new Random());
                 // step 2.
-                z = Zero((GF2nPolynomialField)mField);
+                z = Zero((GF2nPolynomialField)m_Field);
                 w = (GF2nPolynomialElement)p.Clone();
                 // step 3.
-                for (int i = 1; i < mDegree; i++)
+                for (int i = 1; i < m_Degree; i++)
                 {
                     // compute z = z^2 + w^2 * this
                     // and w = w^2 + p
@@ -665,10 +665,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public override void SquareRootThis()
         {
             // increase performance
-            polynomial.ExpandN((mDegree << 1) + 32);
-            polynomial.ReduceN();
+            m_polynomial.ExpandN((m_Degree << 1) + 32);
+            m_polynomial.ReduceN();
 
-            for (int i = 0; i < mField.Degree - 1; i++)
+            for (int i = 0; i < m_Field.Degree - 1; i++)
                 SquareThis();
         }
 
@@ -690,7 +690,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns <c>true</c> if the indexed bit is set</returns>
         public override bool TestBit(int Index)
         {
-            return polynomial.TestBit(Index);
+            return m_polynomial.TestBit(Index);
         }
 
         /// <summary>
@@ -701,7 +701,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns <c>true</c> if the rightmost bit of this element is set</returns>
         public override bool TestRightmostBit()
         {
-            return polynomial.TestBit(0);
+            return m_polynomial.TestBit(0);
         }
 
         /// <summary>
@@ -711,7 +711,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns a byte[] representing the value of this GF2nPolynomialElement</returns>
         public override byte[] ToByteArray()
         {
-            return polynomial.ToByteArray();
+            return m_polynomial.ToByteArray();
         }
 
         /// <summary>
@@ -721,7 +721,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns a BigInteger representing the value of this GF2nPolynomialElement</returns>
         public override BigInteger ToFlexiBigInt()
         {
-            return polynomial.ToFlexiBigInt();
+            return m_polynomial.ToFlexiBigInt();
         }
 
         /// <summary>
@@ -731,7 +731,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns a String representing this Bitstrings value</returns>
         public override String ToString()
         {
-            return polynomial.ToString(16);
+            return m_polynomial.ToString(16);
         }
 
         /// <summary>
@@ -743,7 +743,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns a String representing this Bitstrings value.</returns>
         public override String ToString(int Radix)
         {
-            return polynomial.ToString(Radix);
+            return m_polynomial.ToString(Radix);
         }
 
         /// <summary>
@@ -756,7 +756,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             GF2nPolynomialElement t = new GF2nPolynomialElement(this);
             int i;
 
-            for (i = 1; i < mDegree; i++)
+            for (i = 1; i < m_Degree; i++)
             {
                 t.SquareThis();
                 t.AddToThis(this);
@@ -777,13 +777,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns a GF2nPolynomialElement representing the half-trace of this GF2nPolynomialElement</returns>
         private GF2nPolynomialElement HalfTrace()
         {
-            if ((mDegree & 0x01) == 0)
+            if ((m_Degree & 0x01) == 0)
                 throw new Exception();
             
             int i;
             GF2nPolynomialElement h = new GF2nPolynomialElement(this);
 
-            for (i = 1; i <= ((mDegree - 1) >> 1); i++)
+            for (i = 1; i <= ((m_Degree - 1) >> 1); i++)
             {
                 h.SquareThis();
                 h.SquareThis();
@@ -800,24 +800,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         private void ReducePentanomialBitwise(int[] Pc)
         {
             int i;
-            int k = mDegree - Pc[2];
-            int l = mDegree - Pc[1];
-            int m = mDegree - Pc[0];
+            int k = m_Degree - Pc[2];
+            int l = m_Degree - Pc[1];
+            int m = m_Degree - Pc[0];
 
-            for (i = polynomial.Length - 1; i >= mDegree; i--)
+            for (i = m_polynomial.Length - 1; i >= m_Degree; i--)
             {
-                if (polynomial.TestBit(i))
+                if (m_polynomial.TestBit(i))
                 {
-                    polynomial.XorBit(i);
-                    polynomial.XorBit(i - k);
-                    polynomial.XorBit(i - l);
-                    polynomial.XorBit(i - m);
-                    polynomial.XorBit(i - mDegree);
+                    m_polynomial.XorBit(i);
+                    m_polynomial.XorBit(i - k);
+                    m_polynomial.XorBit(i - l);
+                    m_polynomial.XorBit(i - m);
+                    m_polynomial.XorBit(i - m_Degree);
                 }
             }
 
-            polynomial.ReduceN();
-            polynomial.ExpandN(mDegree);
+            m_polynomial.ReduceN();
+            m_polynomial.ExpandN(m_Degree);
         }
 
         /// <summary>
@@ -825,62 +825,62 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         private void ReduceThis()
         {
-            if (polynomial.Length > mDegree)
+            if (m_polynomial.Length > m_Degree)
             { // really reduce ?
-                if (((GF2nPolynomialField)mField).IsTrinomial)
+                if (((GF2nPolynomialField)m_Field).IsTrinomial)
                 { // fieldpolonomial
                     // is trinomial
                     int tc;
                     try
                     {
-                        tc = ((GF2nPolynomialField)mField).Tc;
+                        tc = ((GF2nPolynomialField)m_Field).Tc;
                     }
                     catch (Exception NATExc)
                     {
                         throw new Exception("GF2nPolynomialElement.Reduce: the field polynomial is not a trinomial!", NATExc);
                     }
                     // do we have to use slow bitwise reduction ?
-                    if (((mDegree - tc) <= 32) || (polynomial.Length > (mDegree << 1)))
+                    if (((m_Degree - tc) <= 32) || (m_polynomial.Length > (m_Degree << 1)))
                     {
                         ReduceTrinomialBitwise(tc);
                         return;
                     }
-                    polynomial.ReduceTrinomial(mDegree, tc);
+                    m_polynomial.ReduceTrinomial(m_Degree, tc);
 
                     return;
                 }
-                else if (((GF2nPolynomialField)mField).IsPentanomial) // fieldpolynomial is pentanomial
+                else if (((GF2nPolynomialField)m_Field).IsPentanomial) // fieldpolynomial is pentanomial
                 {
                     int[] pc;
                     try
                     {
-                        pc = ((GF2nPolynomialField)mField).Pc;
+                        pc = ((GF2nPolynomialField)m_Field).Pc;
                     }
                     catch (Exception NATExc)
                     {
                         throw new Exception("GF2nPolynomialElement.Reduce: the field polynomial is not a pentanomial!", NATExc);
                     }
                     // do we have to use slow bitwise reduction ?
-                    if (((mDegree - pc[2]) <= 32) || (polynomial.Length > (mDegree << 1)))
+                    if (((m_Degree - pc[2]) <= 32) || (m_polynomial.Length > (m_Degree << 1)))
                     {
                         ReducePentanomialBitwise(pc);
                         return;
                     }
-                    polynomial.ReducePentanomial(mDegree, pc);
+                    m_polynomial.ReducePentanomial(m_Degree, pc);
 
                     return;
                 }
                 else
                 { // fieldpolynomial is something else
-                    polynomial = polynomial.Remainder(mField.FieldPolynomial);
-                    polynomial.ExpandN(mDegree);
+                    m_polynomial = m_polynomial.Remainder(m_Field.FieldPolynomial);
+                    m_polynomial.ExpandN(m_Degree);
 
                     return;
                 }
             }
 
-            if (polynomial.Length < mDegree)
-                polynomial.ExpandN(mDegree);
+            if (m_polynomial.Length < m_Degree)
+                m_polynomial.ExpandN(m_Degree);
         }
 
         /// <summary>
@@ -889,19 +889,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         private void ReduceTrinomialBitwise(int Tc)
         {
             int i;
-            int k = mDegree - Tc;
+            int k = m_Degree - Tc;
 
-            for (i = polynomial.Length - 1; i >= mDegree; i--)
+            for (i = m_polynomial.Length - 1; i >= m_Degree; i--)
             {
-                if (polynomial.TestBit(i))
+                if (m_polynomial.TestBit(i))
                 {
-                    polynomial.XorBit(i);
-                    polynomial.XorBit(i - k);
-                    polynomial.XorBit(i - mDegree);
+                    m_polynomial.XorBit(i);
+                    m_polynomial.XorBit(i - k);
+                    m_polynomial.XorBit(i - m_Degree);
                 }
             }
-            polynomial.ReduceN();
-            polynomial.ExpandN(mDegree);
+            m_polynomial.ReduceN();
+            m_polynomial.ExpandN(m_Degree);
         }
         #endregion
     }

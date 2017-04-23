@@ -72,12 +72,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
-        private SecureRandom _secRand;
-        private BigInteger _G;
-        private BigInteger _G0;
-        private BigInteger _P;
-        private BigInteger _Y;
+        private bool m_isDisposed = false;
+        private SecureRandom m_secRand;
+        private BigInteger m_G;
+        private BigInteger m_G0;
+        private BigInteger m_P;
+        private BigInteger m_Y;
         #endregion
 
         #region Properties
@@ -104,7 +104,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// </summary>
         public MODEXPG()
         {
-            _secRand = new SecureRandom();
+            m_secRand = new SecureRandom();
 
             Initialize(G_BITS);
         }
@@ -116,7 +116,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="BitLength">Length of integers used in equations, must be at least 512 bits</param>
         public MODEXPG(int BitLength)
         {
-            _secRand = new SecureRandom();
+            m_secRand = new SecureRandom();
 
             if (BitLength < G_BITS)
                 Initialize(G_BITS);
@@ -138,12 +138,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
             if (!P.IsProbablePrime(90))
                 throw new CryptoRandomException("MODEXPG:Ctor", "P is not a valid prime number!", new ArgumentOutOfRangeException());
 
-            _secRand = new SecureRandom();
+            m_secRand = new SecureRandom();
 
-            _P = P;
-            _G = G;
-            _Y = Y;
-            _G0 = G;
+            m_P = P;
+            m_G = G;
+            m_Y = Y;
+            m_G0 = G;
         }
 
         /// <summary>
@@ -212,13 +212,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         public int Next()
         {
             // Xi+1 = (G pow Y) mod P
-            _G = _G.ModPow(_Y, _P);
+            m_G = m_G.ModPow(m_Y, m_P);
 
             // set G to 2 if G <= 1.
-            if (_G.CompareTo(BigInteger.One) < 1)
-                _G = BigInteger.ValueOf(2);
+            if (m_G.CompareTo(BigInteger.One) < 1)
+                m_G = BigInteger.ValueOf(2);
 
-            return _G.ToInt32();
+            return m_G.ToInt32();
         }
 
         /// <summary>
@@ -265,13 +265,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         public long NextLong()
         {
             // Xi+1 = (G pow seed) mod P
-            _G = _G.ModPow(_Y, _P);
+            m_G = m_G.ModPow(m_Y, m_P);
 
             // set G to 2 if G < 1
-            if (_G.CompareTo(BigInteger.One) < 1)
-                _G = BigInteger.ValueOf(2);
+            if (m_G.CompareTo(BigInteger.One) < 1)
+                m_G = BigInteger.ValueOf(2);
 
-            return _G.ToInt64();
+            return m_G.ToInt64();
         }
 
         /// <summary>
@@ -315,7 +315,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// </summary>
         public void Reset()
         {
-            _G = _G0;
+            m_G = m_G0;
         }
         #endregion
 
@@ -364,19 +364,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
         private void Initialize(int BitLength)
         {
-            _P = BigInteger.ProbablePrime(BitLength, _secRand);
-            _G = BigInteger.ProbablePrime(BitLength, _secRand);
-            _Y = BigInteger.ProbablePrime(Y_BITS, _secRand);
+            m_P = BigInteger.ProbablePrime(BitLength, m_secRand);
+            m_G = BigInteger.ProbablePrime(BitLength, m_secRand);
+            m_Y = BigInteger.ProbablePrime(Y_BITS, m_secRand);
 
             // if g >= p swap(g, p).
-            if (_G.CompareTo(_P) > -1)
+            if (m_G.CompareTo(m_P) > -1)
             {
-                BigInteger temp = _G;
-                _G = _P;
-                _P = temp;
+                BigInteger temp = m_G;
+                m_G = m_P;
+                m_P = temp;
             }
 
-            _G0 = _G;
+            m_G0 = m_G;
         }
         #endregion
 
@@ -392,27 +392,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_secRand != null)
+                    if (m_secRand != null)
                     {
-                        _secRand.Dispose();
-                        _secRand = null;
+                        m_secRand.Dispose();
+                        m_secRand = null;
                     }
-                    if (_Y != null)
-                        _Y = null;
-                    if (_G != null)
-                        _G = null;
-                    if (_G0 != null)
-                        _G0 = null;
-                    if (_P != null)
-                        _P = null;
+                    if (m_Y != null)
+                        m_Y = null;
+                    if (m_G != null)
+                        m_G = null;
+                    if (m_G0 != null)
+                        m_G0 = null;
+                    if (m_P != null)
+                        m_P = null;
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

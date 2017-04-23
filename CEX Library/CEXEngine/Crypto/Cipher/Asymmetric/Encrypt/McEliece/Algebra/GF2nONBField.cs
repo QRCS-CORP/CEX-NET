@@ -22,14 +22,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
 
         #region Fields
         // holds the number of relevant bits in mONBPol[mLength-1].
-        private int _mBit;
-        // holds the length of the array-representation of degree mDegree.
-        private int _mLength;
+        private int m_Bit;
+        // holds the length of the array-representation of degree m_Degree.
+        private int m_Length;
         // holds the type of mONB
-        private int _mType;
+        private int m_Type;
         // holds the multiplication matrix
-        public int[][] MultM;
-        private IRandom _secRand;
+        public int[][] m_MultM;
+        private IRandom m_secRand;
         #endregion
 
         #region Constructor
@@ -44,31 +44,31 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (Degree < 3)
                 throw new ArgumentException("k must be at least 3");
 
-            _secRand = Rand;
+            m_secRand = Rand;
             DegreeN = Degree;
-            _mLength = DegreeN / MAXLONG;
-            _mBit = DegreeN & (MAXLONG - 1);
-            if (_mBit == 0)
-                _mBit = MAXLONG;
+            m_Length = DegreeN / MAXLONG;
+            m_Bit = DegreeN & (MAXLONG - 1);
+            if (m_Bit == 0)
+                m_Bit = MAXLONG;
             else
-                _mLength++;
+                m_Length++;
 
             ComputeType();
 
             // only ONB-implementations for type 1 and type 2
-            if (_mType < 3)
+            if (m_Type < 3)
             {
-                MultM = ArrayUtils.CreateJagged<int[][]>(DegreeN, 2);
+                m_MultM = ArrayUtils.CreateJagged<int[][]>(DegreeN, 2);
                 for (int i = 0; i < DegreeN; i++)
                 {
-                    MultM[i][0] = -1;
-                    MultM[i][1] = -1;
+                    m_MultM[i][0] = -1;
+                    m_MultM[i][1] = -1;
                 }
                 ComputeMultMatrix();
             }
             else
             {
-                throw new Exception("\nThe type of this field is " + _mType);
+                throw new Exception("\nThe type of this field is " + m_Type);
             }
             ComputeFieldPolynomial();
             Fields = new List<GF2nField>();
@@ -84,7 +84,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The relevant bits count</returns>
         public int GetONBBit()
         {
-            return _mBit;
+            return m_Bit;
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The length</returns>
         public int GetONBLength()
         {
-            return _mLength;
+            return m_Length;
         }
         #endregion
 
@@ -153,11 +153,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         protected override void ComputeFieldPolynomial()
         {
-            if (_mType == 1)
+            if (m_Type == 1)
             {
                 FieldPoly = new GF2Polynomial(DegreeN + 1, "ALL");
             }
-            else if (_mType == 2)
+            else if (m_Type == 2)
             {
                 // 1. q = 1
                 GF2Polynomial q = new GF2Polynomial(DegreeN + 1, "ONE");
@@ -207,7 +207,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 do
                 {
                     // 2.1 choose random u (element of) GF(2^m)
-                    u = new GF2nONBElement(this, _secRand);
+                    u = new GF2nONBElement(this, m_secRand);
                     ut = new GF2nPolynomial(2, GF2nONBElement.Zero(this));
                     // 2.2 Set c(t) <- ut
                     ut.Set(1, u);
@@ -251,20 +251,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             // checking for the type
             int s = 0;
             int k = 0;
-            _mType = 1;
+            m_Type = 1;
 
-            for (int d = 0; d != 1; _mType++)
+            for (int d = 0; d != 1; m_Type++)
             {
-                s = _mType * DegreeN + 1;
+                s = m_Type * DegreeN + 1;
                 if (BigMath.IsPrime(s))
                 {
                     k = BigMath.Order(2, s);
-                    d = BigMath.Gcd(_mType * DegreeN / k, DegreeN);
+                    d = BigMath.Gcd(m_Type * DegreeN / k, DegreeN);
                 }
             }
-            _mType--;
+            m_Type--;
 
-            if (_mType == 1)
+            if (m_Type == 1)
             {
                 s = (DegreeN << 1) + 1;
                 if (BigMath.IsPrime(s))
@@ -272,31 +272,31 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                     k = BigMath.Order(2, s);
                     int d = BigMath.Gcd((DegreeN << 1) / k, DegreeN);
                     if (d == 1)
-                        _mType++;
+                        m_Type++;
                 }
             }
         }
 
         private void ComputeMultMatrix()
         {
-            if ((_mType & 7) != 0)
+            if ((m_Type & 7) != 0)
             {
-                int p = _mType * DegreeN + 1;
+                int p = m_Type * DegreeN + 1;
                 // compute sequence F[1] ... F[p-1] via A.3.7. of 1363.
                 // F[0] will not be filled!
                 int[] F = new int[p];
                 int u;
 
-                if (_mType == 1)
+                if (m_Type == 1)
                     u = 1;
-                else if (_mType == 2)
+                else if (m_Type == 2)
                     u = p - 1;
                 else
-                    u = ElementOfOrder(_mType, p);
+                    u = ElementOfOrder(m_Type, p);
 
                 int w = 1;
                 int n;
-                for (int j = 0; j < _mType; j++)
+                for (int j = 0; j < m_Type; j++)
                 {
                     n = w;
 
@@ -313,40 +313,40 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                         w += p;
                 }
 
-                // building the matrix (mDegree * 2)
-                if (_mType == 1)
+                // building the matrix (m_Degree * 2)
+                if (m_Type == 1)
                 {
                     for (int k = 1; k < p - 1; k++)
                     {
-                        if (MultM[F[k + 1]][0] == -1)
-                            MultM[F[k + 1]][0] = F[p - k];
+                        if (m_MultM[F[k + 1]][0] == -1)
+                            m_MultM[F[k + 1]][0] = F[p - k];
                         else
-                            MultM[F[k + 1]][1] = F[p - k];
+                            m_MultM[F[k + 1]][1] = F[p - k];
                     }
 
                     int m_2 = DegreeN >> 1;
                     for (int k = 1; k <= m_2; k++)
                     {
 
-                        if (MultM[k - 1][0] == -1)
-                            MultM[k - 1][0] = m_2 + k - 1;
+                        if (m_MultM[k - 1][0] == -1)
+                            m_MultM[k - 1][0] = m_2 + k - 1;
                         else
-                            MultM[k - 1][1] = m_2 + k - 1;
+                            m_MultM[k - 1][1] = m_2 + k - 1;
 
-                        if (MultM[m_2 + k - 1][0] == -1)
-                            MultM[m_2 + k - 1][0] = k - 1;
+                        if (m_MultM[m_2 + k - 1][0] == -1)
+                            m_MultM[m_2 + k - 1][0] = k - 1;
                         else
-                            MultM[m_2 + k - 1][1] = k - 1;
+                            m_MultM[m_2 + k - 1][1] = k - 1;
                     }
                 }
-                else if (_mType == 2)
+                else if (m_Type == 2)
                 {
                     for (int k = 1; k < p - 1; k++)
                     {
-                        if (MultM[F[k + 1]][0] == -1)
-                            MultM[F[k + 1]][0] = F[p - k];
+                        if (m_MultM[F[k + 1]][0] == -1)
+                            m_MultM[F[k + 1]][0] = F[p - k];
                         else
-                            MultM[F[k + 1]][1] = F[p - k];
+                            m_MultM[F[k + 1]][1] = F[p - k];
                     }
                 }
                 else

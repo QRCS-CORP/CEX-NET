@@ -84,8 +84,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
-        private bool _isInitialized = false;
+        private bool m_isDisposed = false;
+        private bool m_isInitialized = false;
         private byte _G;
         private byte _N = 0;
         private byte[] _P = null;
@@ -119,8 +119,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// </summary>
         public bool IsInitialized
         {
-            get { return _isInitialized; }
-            private set { _isInitialized = value; }
+            get { return m_isInitialized; }
+            private set { m_isInitialized = value; }
         }
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <exception cref="CryptoMacException">Thrown if an invalid Input size is chosen</exception>
         public void BlockUpdate(byte[] Input, int InOffset, int Length)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoGeneratorException("VMAC:BlockUpdate", "The Mac is not initialized!", new InvalidOperationException());
             if ((InOffset + Length) > Input.Length)
                 throw new CryptoMacException("VMAC:Ctor", "The Input buffer is too short!", new ArgumentOutOfRangeException());
@@ -187,7 +187,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <returns>Mac Hash value</returns>
         public byte[] ComputeMac(byte[] Input)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoGeneratorException("VMAC:ComputeMac", "The Mac is not initialized!", new InvalidOperationException());
 
             byte[] hash = new byte[MacSize];
@@ -210,7 +210,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
         /// <exception cref="CryptoMacException">Thrown if Output array is too small</exception>
         public int DoFinal(byte[] Output, int OutOffset)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoGeneratorException("VMAC:DoFinal", "The Mac is not initialized!", new InvalidOperationException());
             if (Output.Length - OutOffset < DIGEST_SIZE)
                 throw new CryptoMacException("VMAC:DoFinal", "The Output buffer is too short!", new ArgumentOutOfRangeException());
@@ -294,7 +294,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
             _workingKey = (byte[])MacKey.Clone();
 			Reset();
 
-            _isInitialized = true;
+            m_isInitialized = true;
         }
 
         /// <summary>
@@ -392,7 +392,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
@@ -421,7 +421,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Mac
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

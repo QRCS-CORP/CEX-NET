@@ -52,13 +52,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
+        private bool m_isDisposed = false;
         // the length of the code
-        private byte[] _A;
+        private byte[] m_A;
         // the error correction capability of the code
-        private byte[] _P;
+        private byte[] m_P;
         // the number of coefficients
-        private int _N;
+        private int m_N;
         #endregion
 
         #region Properties
@@ -75,7 +75,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// </summary>
         internal byte[] A
         {
-            get { return _A; }
+            get { return m_A; }
         }
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// </summary>
         public int N
         {
-            get { return _N; }
+            get { return m_N; }
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// </summary>
         internal byte[] P
         {
-            get { return _P; }
+            get { return m_P; }
         }
         #endregion
 
@@ -105,9 +105,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <param name="P">The polynomial 'p'</param>
         public RLWEPublicKey(int N, byte[] A, byte[] P)
         {
-            _N = N;
-            _A = A;
-            _P = P;
+            m_N = N;
+            m_A = A;
+            m_P = P;
         }
         
         /// <summary>
@@ -124,13 +124,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
                 BinaryReader reader = new BinaryReader(KeyStream);
                 int len = 0;
                 // num coeffs
-                _N = reader.ReadInt32();
+                m_N = reader.ReadInt32();
                 // a poly
                 len = reader.ReadInt32();
-                _A = reader.ReadBytes(len);
+                m_A = reader.ReadBytes(len);
                 // p poly
                 len = reader.ReadInt32();
-                _P = reader.ReadBytes(len);
+                m_P = reader.ReadBytes(len);
             }
             catch (Exception ex)
             {
@@ -209,11 +209,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             // num coeff
             writer.Write(N);
             // write 'a' poly
-            writer.Write(_A.Length);
-            writer.Write(_A);
+            writer.Write(m_A.Length);
+            writer.Write(m_A);
             // write 'p' poly
-            writer.Write(_P.Length);
-            writer.Write(_P);
+            writer.Write(m_P.Length);
+            writer.Write(m_P);
             writer.BaseStream.Seek(0, SeekOrigin.Begin);
 
             return (MemoryStream)writer.BaseStream;
@@ -324,7 +324,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <returns>RLWEPublicKey copy</returns>
         public object Clone()
         {
-            return new RLWEPublicKey(_N, _A, _P);
+            return new RLWEPublicKey(m_N, m_A, m_P);
         }
 
         /// <summary>
@@ -350,26 +350,26 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_A != null)
+                    if (m_A != null)
                     {
-                        Array.Clear(_A, 0, _A.Length);
-                        _A = null;
+                        Array.Clear(m_A, 0, m_A.Length);
+                        m_A = null;
                     }
-                    if (_P != null)
+                    if (m_P != null)
                     {
-                        Array.Clear(_P, 0, _P.Length);
-                        _P = null;
+                        Array.Clear(m_P, 0, m_P.Length);
+                        m_P = null;
                     }
-                    _N = 0;
+                    m_N = 0;
                     
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

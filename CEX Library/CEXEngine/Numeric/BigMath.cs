@@ -18,9 +18,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         private static BigInteger FOUR = BigInteger.ValueOf(4);
         private static int[] SMALL_PRIMES = { 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41 };
         private static long SMALL_PRIME_PRODUCT = 3L * 5 * 7 * 11 * 13 * 17 * 19 * 23 * 29 * 31 * 37 * 41;
-        private static SecureRandom _secRnd = null;
+        private static SecureRandom m_secRnd = null;
         // the jacobi function uses this lookup table
-        private static readonly int[] _jacobiTable = { 0, 1, 0, -1, 0, -1, 0, 1 };
+        private static readonly int[] m_jacobiTable = { 0, 1, 0, -1, 0, -1, 0, 1 };
         #endregion
 
         #region Constructor
@@ -580,7 +580,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             }
 
             if (v.TestBit(0))
-                k = k * _jacobiTable[a.ToInt32() & 7];
+                k = k * m_jacobiTable[a.ToInt32() & 7];
 
             if (a.Signum() < 0)
             { 
@@ -599,7 +599,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                     a = a.Divide(TWO);
                 }
                 if (v.TestBit(0))
-                    k = k * _jacobiTable[b.ToInt32() & 7];
+                    k = k * m_jacobiTable[b.ToInt32() & 7];
 
                 if (a.CompareTo(b) < 0)
                 {
@@ -1045,10 +1045,10 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>A random BigInteger</returns>
         public static BigInteger Randomize(BigInteger UpperBound)
         {
-            if (_secRnd == null)
-                _secRnd = new SecureRandom();
+            if (m_secRnd == null)
+                m_secRnd = new SecureRandom();
             
-            return Randomize(UpperBound, _secRnd);
+            return Randomize(UpperBound, m_secRnd);
         }
 
         /// <summary>
@@ -1184,7 +1184,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             BigInteger randomNum = BigInteger.ValueOf(0);
 
             if (SecRnd == null)
-                SecRnd = _secRnd != null ? _secRnd : new SecureRandom();
+                SecRnd = m_secRnd != null ? m_secRnd : new SecureRandom();
 
             for (int i = 0; i < 20; i++)
             {

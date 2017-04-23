@@ -82,7 +82,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
     /// <item><description><c>N</c> - Degree Parameter. A positive integer. The associated NTRU lattice has dimension 2N.</description></item>
     /// <item><description><c>q</c> - Large Modulus. A positive integer. The associated NTRU lattice is a convolution modular lattice of modulus q.</description></item>
     /// <item><description><c>p</c> - Small Modulus. An integer or a polynomial.</description></item>
-    /// <item><description><c>Df, Dg</c> - Private Key Spaces. Sets of small polynomials from which the private keys are selected.</description></item>
+    /// <item><description><c>Df, m_Dg</c> - Private Key Spaces. Sets of small polynomials from which the private keys are selected.</description></item>
     /// <item><description><c>Dm</c> - Plaintext Space. Set of polynomials that represent encryptable messages.</description></item>
     /// <item><description><c>Dr</c> - Blinding Value Space. Set of polynomials from which the temporary blinding value used during encryption is selected.</description></item>
     /// <item><description><c>Center</c> - Centering Method. A means of performing mod q reduction on decryption.</description></item>
@@ -112,36 +112,36 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         #endregion
 
         #region Fields
-        private int _N;
-        private int _Q;
-        private int _cBits;
-        private int _Db;
-        private int _DF;
-        private int _DF1;
-        private int _DF2;
-        private int _DF3;
-        private int _Dm0;
-        private int _DR;
-        private int _DR1;
-        private int _DR2;
-        private int _DR3;
-        private bool _fastFp;
-        private bool _hashSeed;
-        private int _length;
-        private int _maxM1;
-        private int _msgMax;
-        private Digests _dgtEngineType;
-        private int _minIGFHashCalls;
-        private int _minMGFHashCalls;
-        private byte[] _oId = new byte[OID_SIZE];
-        private TernaryPolynomialType _polyType;
-        private Prngs _rndEngineType;
-        private bool _sparseMode;
-        private bool _isDisposed = false;
-        private int _bufferLenTrits;
-        internal int BufferLenBits;
+        private int m_N;
+        private int m_Q;
+        private int m_cBits;
+        private int m_Db;
+        private int m_DF;
+        private int m_DF1;
+        private int m_DF2;
+        private int m_DF3;
+        private int m_Dm0;
+        private int m_DR;
+        private int m_DR1;
+        private int m_DR2;
+        private int m_DR3;
+        private bool m_fastFp;
+        private bool m_hashSeed;
+        private int m_length;
+        private int m_maxM1;
+        private int m_msgMax;
+        private Digests m_dgtEngineType;
+        private int m_minIGFHashCalls;
+        private int m_minMGFHashCalls;
+        private byte[] m_oId = new byte[OID_SIZE];
+        private TernaryPolynomialType m_polyType;
+        private Prngs m_rndEngineType;
+        private bool m_sparseMode;
+        private bool m_isDisposed = false;
+        private int m_bufferLenTrits;
+        internal int m_bufferLenBits;
         internal int Dg;
-        internal int PkLen;
+        internal int m_PkLen;
         #endregion
 
         #region Properties
@@ -158,7 +158,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int N
         {
-            get { return _N; }
+            get { return m_N; }
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int Q
         {
-            get { return _Q; }
+            get { return m_Q; }
         }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int CBits
         {
-            get { return _cBits; }
+            get { return m_cBits; }
         }
 
         /// <summary>
@@ -182,8 +182,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int Db
         {
-            get { return _Db; }
-            set { _Db = value; }
+            get { return m_Db; }
+            set { m_Db = value; }
         }
 
         /// <summary>
@@ -191,7 +191,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int DF
         {
-            get { return _DF; }
+            get { return m_DF; }
         }
 
         /// <summary>
@@ -200,8 +200,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int DF1
         {
-            get { return _DF1; }
-            set { _DF1 = value; }
+            get { return m_DF1; }
+            set { m_DF1 = value; }
         }
 
         /// <summary>
@@ -210,8 +210,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int DF2
         {
-            get { return _DF2; }
-            set { _DF2 = value; }
+            get { return m_DF2; }
+            set { m_DF2 = value; }
         }
 
         /// <summary>
@@ -220,8 +220,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int DF3
         {
-            get { return _DF3; }
-            set { _DF3 = value; }
+            get { return m_DF3; }
+            set { m_DF3 = value; }
         }
 
         /// <summary>
@@ -229,7 +229,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int Dm0
         {
-            get { return _Dm0; }
+            get { return m_Dm0; }
         }
 
         /// <summary>
@@ -237,7 +237,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int DR
         {
-            get { return _DR; }
+            get { return m_DR; }
         }
 
         /// <summary>
@@ -246,8 +246,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int DR1
         {
-            get { return _DR1; }
-            set { _DR1 = value; }
+            get { return m_DR1; }
+            set { m_DR1 = value; }
         }
 
         /// <summary>
@@ -256,8 +256,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int DR2
         {
-            get { return _DR2; }
-            set { _DR2 = value; }
+            get { return m_DR2; }
+            set { m_DR2 = value; }
         }
 
         /// <summary>
@@ -266,8 +266,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int DR3
         {
-            get { return _DR3; }
-            set { _DR3 = value; }
+            get { return m_DR3; }
+            set { m_DR3 = value; }
         }
 
         /// <summary>
@@ -276,8 +276,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public bool FastFp
         {
-            get { return _fastFp; }
-            set { _fastFp = value; }
+            get { return m_fastFp; }
+            set { m_fastFp = value; }
         }
 
         /// <summary>
@@ -285,7 +285,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public bool HashSeed
         {
-            get { return _hashSeed; }
+            get { return m_hashSeed; }
         }
 
         /// <summary>
@@ -293,7 +293,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         internal int Length
         {
-            get { return _length; }
+            get { return m_length; }
         }
 
         /// <summary>
@@ -302,7 +302,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int MaxM1
         {
-            get { return _maxM1; }
+            get { return m_maxM1; }
         }
 
         /// <summary>
@@ -310,7 +310,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int MessageMax
         {
-            get { return _msgMax; }
+            get { return m_msgMax; }
         }
 
         /// <summary>
@@ -319,8 +319,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public Digests Digest
         {
-            get { return _dgtEngineType; }
-            set { _dgtEngineType = value; }
+            get { return m_dgtEngineType; }
+            set { m_dgtEngineType = value; }
         }
 
         /// <summary>
@@ -328,8 +328,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int MinIGFHashCalls
         {
-            get { return _minIGFHashCalls; }
-            set { _minIGFHashCalls = value; }
+            get { return m_minIGFHashCalls; }
+            set { m_minIGFHashCalls = value; }
         }
 
         /// <summary>
@@ -337,8 +337,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int MinMGFHashCalls
         {
-            get { return _minMGFHashCalls; }
-            set { _minMGFHashCalls = value; }
+            get { return m_minMGFHashCalls; }
+            set { m_minMGFHashCalls = value; }
         }
 
         /// <summary>
@@ -346,8 +346,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public byte[] OId
         {
-            get { return _oId; }
-            private set { _oId = value; }
+            get { return m_oId; }
+            private set { m_oId = value; }
         }
 
         /// <summary>
@@ -356,8 +356,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public TernaryPolynomialType PolyType
         {
-            get { return _polyType; }
-            set { _polyType = value; }
+            get { return m_polyType; }
+            set { m_polyType = value; }
         }
 
         /// <summary>
@@ -366,8 +366,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public Prngs RandomEngine
         {
-            get { return _rndEngineType; }
-            set { _rndEngineType = value; }
+            get { return m_rndEngineType; }
+            set { m_rndEngineType = value; }
         }
 
         /// <summary>
@@ -375,8 +375,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public bool Sparse
         {
-            get { return _sparseMode; }
-            set { _sparseMode = value; }
+            get { return m_sparseMode; }
+            set { m_sparseMode = value; }
         }
         #endregion
 
@@ -411,21 +411,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
                 throw new CryptoAsymmetricException("NTRUParameters:Ctor", string.Format("The OId is invalid, first byte must be family designator ({0})!", AsymmetricEngines.NTRU, new ArgumentException()));
 
             Array.Copy(OId, this.OId, Math.Min(OId.Length, OID_SIZE));
-            _N = N;
-            _Q = Q;
-            _DF = Df;
-            _Db = Db;
-            _Dm0 = Dm0;
-            _maxM1 = MaxM1;
-            _cBits = CBits;
-            _minIGFHashCalls = MinIGFHashCalls;
-            _minMGFHashCalls = MinMGFHashCalls;
-            _hashSeed = HashSeed;
-            _sparseMode = Sparse;
-            _fastFp = FastFp;
-            _polyType = TernaryPolynomialType.SIMPLE;
-            _dgtEngineType = Digest;
-            _rndEngineType = Random;
+            m_N = N;
+            m_Q = Q;
+            m_DF = Df;
+            m_Db = Db;
+            m_Dm0 = Dm0;
+            m_maxM1 = MaxM1;
+            m_cBits = CBits;
+            m_minIGFHashCalls = MinIGFHashCalls;
+            m_minMGFHashCalls = MinMGFHashCalls;
+            m_hashSeed = HashSeed;
+            m_sparseMode = Sparse;
+            m_fastFp = FastFp;
+            m_polyType = TernaryPolynomialType.SIMPLE;
+            m_dgtEngineType = Digest;
+            m_rndEngineType = Random;
 
             Initialize();
         }
@@ -462,23 +462,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
                 throw new CryptoAsymmetricException("NTRUParameters:Ctor", string.Format("The OId is invalid, first byte must be family designator ({0})!", AsymmetricEngines.NTRU, new ArgumentException()));
 
             Array.Copy(OId, this.OId, Math.Min(OId.Length, OID_SIZE));
-            _N = N;
-            _Q = Q;
-            _DF1 = Df1;
-            _DF2 = Df2;
-            _DF3 = Df3;
-            _Db = Db;
-            _Dm0 = Dm0;
-            _maxM1 = MaxM1;
-            _cBits = CBits;
-            _minIGFHashCalls = MinIGFHashCalls;
-            _minMGFHashCalls = MinMGFHashCalls;
-            _hashSeed = HashSeed;
-            _sparseMode = Sparse;
-            _fastFp = FastFp;
-            _polyType = TernaryPolynomialType.PRODUCT;
-            _dgtEngineType = Digest;
-            _rndEngineType = Random;
+            m_N = N;
+            m_Q = Q;
+            m_DF1 = Df1;
+            m_DF2 = Df2;
+            m_DF3 = Df3;
+            m_Db = Db;
+            m_Dm0 = Dm0;
+            m_maxM1 = MaxM1;
+            m_cBits = CBits;
+            m_minIGFHashCalls = MinIGFHashCalls;
+            m_minMGFHashCalls = MinMGFHashCalls;
+            m_hashSeed = HashSeed;
+            m_sparseMode = Sparse;
+            m_fastFp = FastFp;
+            m_polyType = TernaryPolynomialType.PRODUCT;
+            m_dgtEngineType = Digest;
+            m_rndEngineType = Random;
 
             Initialize();
         }
@@ -496,26 +496,26 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
             {
                 BinaryReader reader = new BinaryReader(ParamStream);
 
-                _oId = new byte[OID_SIZE];
-                reader.Read(_oId, 0, _oId.Length);
-                _N = reader.ReadInt32();
-                _Q = reader.ReadInt32();
-                _DF = reader.ReadInt32();
-                _DF1 = reader.ReadInt32();
-                _DF2 = reader.ReadInt32();
-                _DF3 = reader.ReadInt32();
-                _Db = reader.ReadInt32();
-                _Dm0 = reader.ReadInt32();
-                _maxM1 = reader.ReadInt32();
-                _cBits = reader.ReadInt32();
-                _minIGFHashCalls = reader.ReadInt32();
-                _minMGFHashCalls = reader.ReadInt32();
-                _hashSeed = reader.ReadBoolean();
-                _sparseMode = reader.ReadBoolean();
-                _fastFp = reader.ReadBoolean();
-                _polyType = (TernaryPolynomialType)reader.ReadInt32();
-                _dgtEngineType = (Digests)reader.ReadInt32();
-                _rndEngineType = (Prngs)reader.ReadInt32();
+                m_oId = new byte[OID_SIZE];
+                reader.Read(m_oId, 0, m_oId.Length);
+                m_N = reader.ReadInt32();
+                m_Q = reader.ReadInt32();
+                m_DF = reader.ReadInt32();
+                m_DF1 = reader.ReadInt32();
+                m_DF2 = reader.ReadInt32();
+                m_DF3 = reader.ReadInt32();
+                m_Db = reader.ReadInt32();
+                m_Dm0 = reader.ReadInt32();
+                m_maxM1 = reader.ReadInt32();
+                m_cBits = reader.ReadInt32();
+                m_minIGFHashCalls = reader.ReadInt32();
+                m_minMGFHashCalls = reader.ReadInt32();
+                m_hashSeed = reader.ReadBoolean();
+                m_sparseMode = reader.ReadBoolean();
+                m_fastFp = reader.ReadBoolean();
+                m_polyType = (TernaryPolynomialType)reader.ReadInt32();
+                m_dgtEngineType = (Digests)reader.ReadInt32();
+                m_rndEngineType = (Prngs)reader.ReadInt32();
 
                 Initialize();
             }
@@ -604,7 +604,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         public MemoryStream ToStream()
         {
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
-            writer.Write(_oId);
+            writer.Write(m_oId);
             writer.Write(N);
             writer.Write(Q);
             writer.Write(DF);
@@ -615,14 +615,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
             writer.Write(Dm0);
             writer.Write(MaxM1);
             writer.Write(CBits);
-            writer.Write(_minIGFHashCalls);
-            writer.Write(_minMGFHashCalls);
+            writer.Write(m_minIGFHashCalls);
+            writer.Write(m_minMGFHashCalls);
             writer.Write(HashSeed);
-            writer.Write(_sparseMode);
+            writer.Write(m_sparseMode);
             writer.Write(FastFp);
-            writer.Write((int)_polyType);
-            writer.Write((int)_dgtEngineType);
-            writer.Write((int)_rndEngineType);
+            writer.Write((int)m_polyType);
+            writer.Write((int)m_dgtEngineType);
+            writer.Write((int)m_rndEngineType);
             writer.Seek(0, SeekOrigin.Begin);
 
             return (MemoryStream)writer.BaseStream;
@@ -680,21 +680,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         #region Private Methods
         private void Initialize()
         {
-            _DR = DF;
-            _DR1 = DF1;
-            _DR2 = DF2;
-            _DR3 = DF3;
+            m_DR = DF;
+            m_DR1 = DF1;
+            m_DR2 = DF2;
+            m_DR3 = DF3;
             Dg = N / 3;
-            _length = 1;   // ceil(log2(maxMsgLenBytes))
+            m_length = 1;   // ceil(log2(maxMsgLenBytes))
 
             if (MaxM1 > 0)
-                _msgMax = (N - 1) * 3 / 2 / 8 - _length - Db / 8;   // only N-1 coeffs b/c the constant coeff is not used
+                m_msgMax = (N - 1) * 3 / 2 / 8 - m_length - Db / 8;   // only N-1 coeffs b/c the constant coeff is not used
             else
-                _msgMax = N * 3 / 2 / 8 - _length - Db / 8;
+                m_msgMax = N * 3 / 2 / 8 - m_length - Db / 8;
 
-            BufferLenBits = (N * 3 / 2 + 7) / 8 * 8 + 1;
-            _bufferLenTrits = N - 1;
-            PkLen = Db;
+            m_bufferLenBits = (N * 3 / 2 + 7) / 8 * 8 + 1;
+            m_bufferLenTrits = N - 1;
+            m_PkLen = Db;
         }
         #endregion
 
@@ -707,8 +707,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         public override int GetHashCode()
         {
             int hash = 31 * N;
-            hash += 31 * BufferLenBits;
-            hash += 31 * _bufferLenTrits;
+            hash += 31 * m_bufferLenBits;
+            hash += 31 * m_bufferLenTrits;
             hash += 31 * CBits;
             hash += 31 * Db;
             hash += 31 * DF;
@@ -731,7 +731,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
             hash += 31 * MinMGFHashCalls;
             hash += 31 * MinIGFHashCalls;
             hash += ArrayUtils.GetHashCode(OId);
-            hash += 31 * PkLen;
+            hash += 31 * m_PkLen;
             hash += 31 * (int)PolyType;
             hash += 31 * Q;
             hash += 31 * (Sparse ? 1231 : 1237);
@@ -756,9 +756,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
             NTRUParameters other = (NTRUParameters)Obj;
             if (N != other.N)
                 return false;
-            if (BufferLenBits != other.BufferLenBits)
+            if (m_bufferLenBits != other.m_bufferLenBits)
                 return false;
-            if (_bufferLenTrits != other._bufferLenTrits)
+            if (m_bufferLenTrits != other.m_bufferLenTrits)
                 return false;
             if (CBits != other.CBits)
                 return false;
@@ -804,7 +804,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
                 return false;
             if (!Compare.IsEqual(OId, other.OId))
                 return false;
-            if (PkLen != other.PkLen)
+            if (m_PkLen != other.m_PkLen)
                 return false;
             if (!PolyType.Equals(other.PolyType))
                 return false;
@@ -825,10 +825,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <returns>The NTRUParameters copy</returns>
         public object Clone()
         {
-            if (_polyType == TernaryPolynomialType.SIMPLE)
-                return new NTRUParameters(_oId, _N, _Q, _DF, _Dm0, _maxM1, _Db, _cBits, _minIGFHashCalls, _minMGFHashCalls, _hashSeed, _sparseMode, _fastFp, _dgtEngineType, _rndEngineType);
+            if (m_polyType == TernaryPolynomialType.SIMPLE)
+                return new NTRUParameters(m_oId, m_N, m_Q, m_DF, m_Dm0, m_maxM1, m_Db, m_cBits, m_minIGFHashCalls, m_minMGFHashCalls, m_hashSeed, m_sparseMode, m_fastFp, m_dgtEngineType, m_rndEngineType);
             else
-                return new NTRUParameters(_oId, _N, _Q, _DF1, _DF2, _DF3, _Dm0, _maxM1, _Db, _cBits, _minIGFHashCalls, _minMGFHashCalls, _hashSeed, _sparseMode, _fastFp, _dgtEngineType, _rndEngineType);
+                return new NTRUParameters(m_oId, m_N, m_Q, m_DF1, m_DF2, m_DF3, m_Dm0, m_maxM1, m_Db, m_cBits, m_minIGFHashCalls, m_minMGFHashCalls, m_hashSeed, m_sparseMode, m_fastFp, m_dgtEngineType, m_rndEngineType);
         }
 
         /// <summary>
@@ -854,37 +854,37 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    _N = 0;
-                    _Q = 0;
-                    _DF = 0;
-                    _DF1 = 0;
-                    _DF2 = 0;
-                    _DF3 = 0;
-                    _Db = 0;
-                    _Dm0 = 0;
-                    _maxM1 = 0;
-                    _cBits = 0;
-                    _minIGFHashCalls = 0;
-                    _minMGFHashCalls = 0;
-                    _hashSeed = false;
-                    _fastFp = false;
-                    _sparseMode = false;
-                    _dgtEngineType = Digests.SHA512;
-                    _rndEngineType = Prngs.CTRPrng;
+                    m_N = 0;
+                    m_Q = 0;
+                    m_DF = 0;
+                    m_DF1 = 0;
+                    m_DF2 = 0;
+                    m_DF3 = 0;
+                    m_Db = 0;
+                    m_Dm0 = 0;
+                    m_maxM1 = 0;
+                    m_cBits = 0;
+                    m_minIGFHashCalls = 0;
+                    m_minMGFHashCalls = 0;
+                    m_hashSeed = false;
+                    m_fastFp = false;
+                    m_sparseMode = false;
+                    m_dgtEngineType = Digests.SHA512;
+                    m_rndEngineType = Prngs.CTRPrng;
 
-                    if (_oId != null)
+                    if (m_oId != null)
                     {
-                        Array.Clear(_oId, 0, _oId.Length);
-                        _oId = null;
+                        Array.Clear(m_oId, 0, m_oId.Length);
+                        m_oId = null;
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

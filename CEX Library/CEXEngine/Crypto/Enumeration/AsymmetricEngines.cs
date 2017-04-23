@@ -6,6 +6,10 @@
     public enum AsymmetricEngines : int
     {
         /// <summary>
+        /// No cipher was selected
+        /// </summary>
+        None = 0,
+        /// <summary>
         /// An McEliece CCA2 cipher implementation
         /// </summary>
         McEliece = 1,

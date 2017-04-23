@@ -50,10 +50,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
-        private int _N;
-        private int _Q;
-        private IntegerPolynomial _H;
+        private bool m_isDisposed = false;
+        private int m_N;
+        private int m_Q;
+        private IntegerPolynomial m_H;
         #endregion
 
         #region Properties
@@ -70,7 +70,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int N
         {
-            get { return _N; }
+            get { return m_N; }
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public int Q
         {
-            get { return _Q; }
+            get { return m_Q; }
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         internal IntegerPolynomial H
         {
-            get { return _H; }
+            get { return m_H; }
         }
         #endregion
 
@@ -100,9 +100,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <param name="Q">The "big" NtruEncrypt modulus</param>
         internal NTRUPublicKey(IntegerPolynomial H, int N, int Q)
         {
-            _H = H;
-            _N = N;
-            _Q = Q;
+            m_H = H;
+            m_N = N;
+            m_Q = Q;
         }
 
         /// <summary>
@@ -116,9 +116,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         {
             try
             {
-                _N = IntUtils.ReadShort(KeyStream);
-                _Q = IntUtils.ReadShort(KeyStream);
-                _H = IntegerPolynomial.FromBinary(KeyStream, N, Q);
+                m_N = IntUtils.ReadShort(KeyStream);
+                m_Q = IntUtils.ReadShort(KeyStream);
+                m_H = IntegerPolynomial.FromBinary(KeyStream, N, Q);
             }
             catch (Exception ex)
             {
@@ -304,7 +304,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <returns>NTRUPublicKey copy</returns>
         public object Clone()
         {
-            return new NTRUPublicKey(_H, _N, _Q);
+            return new NTRUPublicKey(m_H, m_N, m_Q);
         }
 
         /// <summary>
@@ -330,19 +330,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    _N = 0;
-                    _Q = 0;
+                    m_N = 0;
+                    m_Q = 0;
 
-                    if (_H != null)
-                        _H.Clear();
+                    if (m_H != null)
+                        m_H.Clear();
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

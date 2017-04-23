@@ -23,8 +23,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
     internal sealed class GF2mField
     {
         #region Fields
-        private int _degree = 0;
-        private int _polynomial;
+        private int m_degree = 0;
+        private int m_polynomial;
         #endregion
 
         #region Properties
@@ -33,7 +33,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public int Degree
         {
-            get { return _degree; }
+            get { return m_degree; }
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public int Polynomial
         {
-            get { return _polynomial; }
+            get { return m_polynomial; }
         }
         #endregion
 
@@ -58,8 +58,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (Degree < 1)
                 throw new ArgumentException("Error: the degree of field is non-positive!");
             
-            this._degree = Degree;
-            _polynomial = PolynomialRingGF2.GetIrreduciblePolynomial(Degree);
+            this.m_degree = Degree;
+            m_polynomial = PolynomialRingGF2.GetIrreduciblePolynomial(Degree);
         }
 
         /// <summary>
@@ -75,8 +75,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (!PolynomialRingGF2.IsIrreducible(Polynomial))
                 throw new ArgumentException(" Error: given polynomial is reducible!");
             
-            _degree = Degree;
-            _polynomial = Polynomial;
+            m_degree = Degree;
+            m_polynomial = Polynomial;
         }
 
         /// <summary>
@@ -89,12 +89,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (Encoded.Length != 4)
                 throw new ArgumentException("byte array is not an encoded finite field");
 
-            _polynomial = LittleEndian.OctetsToInt(Encoded);
+            m_polynomial = LittleEndian.OctetsToInt(Encoded);
 
-            if (!PolynomialRingGF2.IsIrreducible(_polynomial))
+            if (!PolynomialRingGF2.IsIrreducible(m_polynomial))
                 throw new ArgumentException("byte array is not an encoded finite field");
 
-            _degree = PolynomialRingGF2.Degree(_polynomial);
+            m_degree = PolynomialRingGF2.Degree(m_polynomial);
         }
 
         /// <summary>
@@ -104,8 +104,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <param name="Field">The GF2mField class to copy</param>
         public GF2mField(GF2mField Field)
         {
-            _degree = Field._degree;
-            _polynomial = Field._polynomial;
+            m_degree = Field.m_degree;
+            m_polynomial = Field.m_polynomial;
         }
         #endregion
 
@@ -128,7 +128,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public void Clear()
         {
-            _degree = 0;
+            m_degree = 0;
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public String ElementToString(int A)
         {
             String s = "";
-            for (int i = 0; i < _degree; i++)
+            for (int i = 0; i < m_degree; i++)
             {
                 if (((byte)A & 0x01) == 0)
                     s = "0" + s;
@@ -192,7 +192,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The encoded field</returns>
         public byte[] GetEncoded()
         {
-            return LittleEndian.IntToOctets(_polynomial);
+            return LittleEndian.IntToOctets(m_polynomial);
         }
 
         /// <summary>
@@ -204,7 +204,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The inverse value A</returns>
         public int Inverse(int A)
         {
-            int d = (1 << _degree) - 2;
+            int d = (1 << m_degree) - 2;
 
             return Exp(A, d);
         }
@@ -218,7 +218,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>A random element</returns>
         public int GetRandomElement(IRandom SecRnd)
         {
-            return RandomDegree.NextInt(SecRnd, 1 << _degree);
+            return RandomDegree.NextInt(SecRnd, 1 << m_degree);
         }
 
         /// <summary>
@@ -232,11 +232,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         {
             int controltime = 1 << 20;
             int count = 0;
-            int result = RandomDegree.NextInt(SecRnd, 1 << _degree);
+            int result = RandomDegree.NextInt(SecRnd, 1 << m_degree);
 
             while ((result == 0) && (count < controltime))
             {
-                result = RandomDegree.NextInt(SecRnd, 1 << _degree);
+                result = RandomDegree.NextInt(SecRnd, 1 << m_degree);
                 count++;
             }
 
@@ -256,10 +256,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public bool IsElementOfThisField(int E)
         {
             // e is encoded element of this field iff 0<= e < |2^m|
-            if (_degree == 31)
+            if (m_degree == 31)
                 return E >= 0;
             
-            return E >= 0 && E < (1 << _degree);
+            return E >= 0 && E < (1 << m_degree);
         }
 
         /// <summary>
@@ -272,7 +272,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The sum: <c>a*b</c></returns>
         public int Multiply(int A, int B)
         {
-            return PolynomialRingGF2.ModMultiply(A, B, _polynomial);
+            return PolynomialRingGF2.ModMultiply(A, B, m_polynomial);
         }
 
         /// <summary>
@@ -284,7 +284,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The square root of A</returns>
         public int Sqrt(int A)
         {
-            for (int i = 1; i < _degree; i++)
+            for (int i = 1; i < m_degree; i++)
                 A = Multiply(A, A);
             
             return A;
@@ -338,7 +338,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 return false;
 
             GF2mField other = (GF2mField)Obj;
-            return ((_degree == other._degree) && (_polynomial == other._polynomial));
+            return ((m_degree == other.m_degree) && (m_polynomial == other.m_polynomial));
         }
 
         /// <summary>
@@ -348,7 +348,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The hash code</returns>
         public override int GetHashCode()
         {
-            return _polynomial * 31 + _degree * 31;
+            return m_polynomial * 31 + m_degree * 31;
         }
 
         /// <summary>
@@ -358,7 +358,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Degree and polynomial in readable form</returns>
         public override String ToString()
         {
-            return "Finite Field GF(2^" + _degree + ") = " + "GF(2)[X]/<" + PolyToString(_polynomial) + "> ";
+            return "Finite Field GF(2^" + m_degree + ") = " + "GF(2)[X]/<" + PolyToString(m_polynomial) + "> ";
         }
         #endregion
     }

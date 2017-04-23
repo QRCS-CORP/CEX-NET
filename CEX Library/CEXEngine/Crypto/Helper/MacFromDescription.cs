@@ -31,10 +31,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
                     {
                         return new HMAC((Digests)Description.HmacEngine);
                     }
-                case Macs.VMAC:
-                    {
-                        return new VMAC();
-                    }
                 default:
                     throw new CryptoProcessingException("MacFromDescription:GetInstance", "The Mac generator is not recognized!");
             }

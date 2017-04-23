@@ -75,12 +75,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         #endregion
 
         #region Fields
-        private IMPKCCiphers _encEngine;
-        private bool _isDisposed = false;
-        private bool _isEncryption = false;
-        private bool _isInitialized = false;
-        private int _maxPlainText;
-        private int _maxCipherText;
+        private IMPKCCiphers m_encEngine;
+        private bool m_isDisposed = false;
+        private bool m_isEncryption = false;
+        private bool m_isInitialized = false;
+        private int m_maxPlainText;
+        private int m_maxCipherText;
         #endregion
 
         #region Properties
@@ -91,10 +91,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         {
             get
             {
-                if (!_isInitialized)
+                if (!m_isInitialized)
                     throw new CryptoAsymmetricException("MPKCEncrypt:IsEncryption", "The cipher must be initialized before state can be determined!", new InvalidOperationException());
 
-                return _isEncryption;
+                return m_isEncryption;
             }
         }
 
@@ -103,7 +103,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public bool IsInitialized
         {
-            get { return _isInitialized; }
+            get { return m_isInitialized; }
         }
 
         /// <summary>
@@ -115,10 +115,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         {
             get
             {
-                if (_maxCipherText == 0 || !_isInitialized)
+                if (m_maxCipherText == 0 || !m_isInitialized)
                     throw new CryptoAsymmetricException("MPKCEncrypt:MaxCipherText", "The cipher must be initialized before size can be calculated!", new InvalidOperationException());
 
-                return _maxCipherText;
+                return m_maxCipherText;
             }
         }
 
@@ -131,10 +131,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         {
             get
             {
-                if (_maxPlainText == 0 || !_isInitialized)
+                if (m_maxPlainText == 0 || !m_isInitialized)
                     throw new CryptoAsymmetricException("MPKCEncrypt:MaxPlainText", "The cipher must be initialized before size can be calculated!", new InvalidOperationException());
 
-                return _maxPlainText;
+                return m_maxPlainText;
             }
         }
 
@@ -155,7 +155,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <param name="CipherParams">The cipher engine</param>
         public MPKCEncrypt(MPKCParameters CipherParams)
         {
-            _encEngine = GetEngine(CipherParams);
+            m_encEngine = GetEngine(CipherParams);
         }
 
         private MPKCEncrypt()
@@ -183,12 +183,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <exception cref="CryptoAsymmetricException">Thrown if the cipher is not initialized</exception>
         public byte[] Decrypt(byte[] Input)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoAsymmetricException("MPKCEncrypt:Decrypt", "The cipher has not been initialized!", new InvalidOperationException());
-            if (_isEncryption)
+            if (m_isEncryption)
                 throw new CryptoAsymmetricException("MPKCEncrypt:Decrypt", "The cipher is not initialized for decryption!", new ArgumentException());
 
-            return _encEngine.Decrypt(Input);
+            return m_encEngine.Decrypt(Input);
         }
 
         /// <summary>
@@ -202,14 +202,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <exception cref="CryptoAsymmetricException">Thrown if the cipher is not initialized, or the input text is invalid</exception>
         public byte[] Encrypt(byte[] Input)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoAsymmetricException("MPKCEncrypt:Encrypt", "The cipher has not been initialized!", new InvalidOperationException());
-            if (Input.Length > _maxPlainText)
+            if (Input.Length > m_maxPlainText)
                 throw new CryptoAsymmetricException("MPKCEncrypt:Encrypt", "The input text is too long!", new ArgumentException());
-            if (!_isEncryption)
+            if (!m_isEncryption)
                 throw new CryptoAsymmetricException("MPKCEncrypt:Encrypt", "The cipher is not initialized for encryption!", new ArgumentException());
 
-            return _encEngine.Encrypt(Input);
+            return m_encEngine.Encrypt(Input);
         }
 
         /// <summary>
@@ -223,7 +223,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <exception cref="CryptoAsymmetricException">Thrown if the cipher is not initialized</exception>
         public int GetKeySize(IAsymmetricKey Key)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoAsymmetricException("MPKCEncrypt:GetKeySize", "The cipher has not been initialized!", new InvalidOperationException());
 
             if (Key is MPKCPublicKey)
@@ -247,21 +247,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             if (!(AsmKey is MPKCPublicKey) && !(AsmKey is MPKCPrivateKey))
                 throw new CryptoAsymmetricException("MPKCEncrypt:Initialize", "The key is not a valid Ring-KWE key!", new InvalidDataException());
 
-            _isEncryption = (AsmKey is MPKCPublicKey);
+            m_isEncryption = (AsmKey is MPKCPublicKey);
 
             // init implementation engine
-            _encEngine.Initialize(AsmKey);
+            m_encEngine.Initialize(AsmKey);
 
             // get the sizes
-            if (_isEncryption)
+            if (m_isEncryption)
             {
                 if (AsmKey == null)
                     throw new CryptoAsymmetricException("MPKCEncrypt:Initialize", "Encryption requires a public key!", new InvalidOperationException());
                 if (!(AsmKey is MPKCPublicKey))
                     throw new CryptoAsymmetricException("MPKCEncrypt:Initialize", "The public key is invalid!", new ArgumentException());
 
-                _maxCipherText = ((MPKCPublicKey)AsmKey).N >> 3;
-                _maxPlainText = ((MPKCPublicKey)AsmKey).K >> 3;
+                m_maxCipherText = ((MPKCPublicKey)AsmKey).N >> 3;
+                m_maxPlainText = ((MPKCPublicKey)AsmKey).K >> 3;
             }
             else
             {
@@ -270,11 +270,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
                 if (!(AsmKey is MPKCPrivateKey))
                     throw new CryptoAsymmetricException("MPKCEncrypt:Initialize", "The private key is invalid!", new ArgumentException());
 
-                _maxPlainText = ((MPKCPrivateKey)AsmKey).K >> 3;
-                _maxCipherText = ((MPKCPrivateKey)AsmKey).N >> 3;
+                m_maxPlainText = ((MPKCPrivateKey)AsmKey).K >> 3;
+                m_maxCipherText = ((MPKCPrivateKey)AsmKey).N >> 3;
             }
 
-            _isInitialized = true;
+            m_isInitialized = true;
         }
         #endregion
 
@@ -312,21 +312,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_encEngine != null)
+                    if (m_encEngine != null)
                     {
-                        _encEngine.Dispose();
-                        _encEngine = null;
+                        m_encEngine.Dispose();
+                        m_encEngine = null;
                     }
-                    _maxPlainText = 0;
-                    _maxCipherText = 0;
+                    m_maxPlainText = 0;
+                    m_maxCipherText = 0;
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

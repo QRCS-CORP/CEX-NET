@@ -76,11 +76,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
+        private bool m_isDisposed = false;
         private bool _isShift1024 = false;
         private uint _stateOffset = 0;
-        private ulong[] _stateSeed;
-        private ulong[] _wrkBuffer;
+        private ulong[] m_stateSeed;
+        private ulong[] m_wrkBuffer;
         private static readonly ulong[] JMP128 = new ulong[] { 0x8a5cd789635d2dffUL, 0x121fd2155c472f96UL };
         private static readonly ulong[] JMP1024 = new ulong[] {
             0x84242f96eca9c41dUL, 0xa3c65b8776f96855UL, 0x5b34a39f070b5837UL, 0x4489affce4f31a1eUL,
@@ -116,10 +116,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         public XSPRsg()
         {
             byte[] rnd = new byte[SEED1024 * 8];
-            _stateSeed = new ulong[SEED1024];
-            _wrkBuffer = new ulong[SEED1024];
+            m_stateSeed = new ulong[SEED1024];
+            m_wrkBuffer = new ulong[SEED1024];
             new EntropyPool().GetBytes(rnd);
-            Buffer.BlockCopy(rnd, 0, _stateSeed, 0, rnd.Length);
+            Buffer.BlockCopy(rnd, 0, m_stateSeed, 0, rnd.Length);
             _isShift1024 = true;
             Reset();
         }
@@ -145,9 +145,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
                     throw new CryptoRandomException("XSPRsg:CTor", "Seed values can not be zero!");
             }
 
-            _stateSeed = new ulong[Seed.Length];
-            _wrkBuffer = new ulong[Seed.Length];
-            Array.Copy(Seed, _stateSeed, Seed.Length);
+            m_stateSeed = new ulong[Seed.Length];
+            m_wrkBuffer = new ulong[Seed.Length];
+            Array.Copy(Seed, m_stateSeed, Seed.Length);
             _isShift1024 = (Seed.Length == SEED1024);
             Reset();
         }
@@ -202,7 +202,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
         /// </summary>
         public void Reset()
         {
-            Array.Copy(_stateSeed, 0, _wrkBuffer, 0, _stateSeed.Length);
+            Array.Copy(m_stateSeed, 0, m_wrkBuffer, 0, m_stateSeed.Length);
         }
 
         /// <summary>
@@ -268,16 +268,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 		        {
 			        if ((JMP128[i] & 1UL) << b != 0)
 			        {
-				        s0 ^= _wrkBuffer[0];
-				        s1 ^= _wrkBuffer[1];
+				        s0 ^= m_wrkBuffer[0];
+				        s1 ^= m_wrkBuffer[1];
 			        }
 
 			        Shift128();
 		        }
 	        }
 
-	        _wrkBuffer[0] = s0;
-	        _wrkBuffer[1] = s1;
+	        m_wrkBuffer[0] = s0;
+	        m_wrkBuffer[1] = s1;
         }
 
         private void Jump1024()
@@ -291,38 +291,38 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 			        if ((JMP1024[i] & 1UL) << b != 0)
 			        {
 				        for (int j = 0; j < 16; j++)
-					        T[j] ^= _wrkBuffer[(j + _stateOffset) & 15];
+					        T[j] ^= m_wrkBuffer[(j + _stateOffset) & 15];
 			        }
 
 			        Shift1024();
 		        }
 	        }
 
-            Buffer.BlockCopy(T, 0, _wrkBuffer, 0, T.Length);
+            Buffer.BlockCopy(T, 0, m_wrkBuffer, 0, T.Length);
         }
 
         private ulong Shift128()
         {
-	        ulong X = _wrkBuffer[0];
-	        ulong Y = _wrkBuffer[1];
+	        ulong X = m_wrkBuffer[0];
+	        ulong Y = m_wrkBuffer[1];
 
-	        _wrkBuffer[0] = Y;
+	        m_wrkBuffer[0] = Y;
 	        X ^= X << 23; // a
-	        _wrkBuffer[1] = X ^ Y ^ (X >> 18) ^ (Y >> 5); // b, c
+	        m_wrkBuffer[1] = X ^ Y ^ (X >> 18) ^ (Y >> 5); // b, c
 
-	        return _wrkBuffer[1] + Y; // +
+	        return m_wrkBuffer[1] + Y; // +
         }
 
 
         private ulong Shift1024()
         {
-	        ulong X = _wrkBuffer[_stateOffset];
-	        ulong Y = _wrkBuffer[_stateOffset = (_stateOffset + 1) & 15];
+	        ulong X = m_wrkBuffer[_stateOffset];
+	        ulong Y = m_wrkBuffer[_stateOffset = (_stateOffset + 1) & 15];
 
 	        Y ^= Y << 31; // a
-	        _wrkBuffer[_stateOffset] = Y ^ X ^ (Y >> 11) ^ (X >> 30); // b,c
+	        m_wrkBuffer[_stateOffset] = Y ^ X ^ (Y >> 11) ^ (X >> 30); // b,c
 
-            return _wrkBuffer[_stateOffset] * Z4;
+            return m_wrkBuffer[_stateOffset] * Z4;
         }
         #endregion
 
@@ -338,26 +338,26 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Seed
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
                     _stateOffset = 0;
 
-                    if (_stateSeed != null)
+                    if (m_stateSeed != null)
                     {
-                        Array.Clear(_stateSeed, 0, _stateSeed.Length);
-                        _stateSeed = null;
+                        Array.Clear(m_stateSeed, 0, m_stateSeed.Length);
+                        m_stateSeed = null;
                     }
-                    if (_wrkBuffer != null)
+                    if (m_wrkBuffer != null)
                     {
-                        Array.Clear(_wrkBuffer, 0, _wrkBuffer.Length);
-                        _wrkBuffer = null;
+                        Array.Clear(m_wrkBuffer, 0, m_wrkBuffer.Length);
+                        m_wrkBuffer = null;
                     }
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

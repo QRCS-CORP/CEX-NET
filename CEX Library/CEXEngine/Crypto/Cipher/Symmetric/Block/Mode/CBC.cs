@@ -34,67 +34,93 @@ using VTDev.Libraries.CEXEngine.Utility;
 // Implementation Details:
 // An implementation of a Cipher Block Chaining mode (CBC).
 // Written by John Underhill, September 24, 2014
-// contact: develop@vtdev.com
+// Updated October 8, 2016
+// Contact: develop@vtdev.com
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 {
     /// <summary>
-    /// CBC: Implements a Cipher Block Chaining Mode: CBC
+    /// Implements the Cipher Block Chaining Mode (CBC)
     /// </summary> 
     /// 
     /// <example>
-    /// <description>Example using an <c>ICipherMode</c> interface:</description>
+    /// <description>Encrypting a single block of bytes:</description>
     /// <code>
-    /// using (ICipherMode cipher = new CBC(new RHX(), [DisposeEngine]))
+    /// using (ICipherMode cipher = new CBC(BlockCiphers.RHX))
     /// {
     ///     // initialize for encryption
     ///     cipher.Initialize(true, new KeyParams(Key, IV));
     ///     // encrypt a block
-    ///     cipher.Transform(Input, Output);
+    ///     cipher.Transform(Input, 0, Output, 0);
     /// }
     /// </code>
     /// </example>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block"/>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode.ICipherMode"/>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.SymmetricEngines"/>
-    /// 
+    ///
     /// <remarks>
-    /// <description>Implementation Notes:</description>
+    /// <description><B>Overview:</B></description>
+    /// <para>The Cipher Block Chaining cipher mode wraps a symmetric block cipher, enabling the processing of multiple contiguous input blocks to produce a unique cipher-text output.<BR></BR>
+    /// The mechanism used in CBC mode can be described as XOR chaining of message input blocks; the first block is XOR'd with the initialization vector, then encrypted with the underlying symmetric cipher.
+    /// The second block is XOR'd with the first encrypted block, then encrypted, and all subsequent blocks follow this pattern.<BR></BR>
+    /// The decryption function follows the reverse pattern; the block is decrypted with the symmetric cipher, and then XOR'd with the ciphertext from the previous block to produce the plain-text.</para>
+    /// 
+    /// <description><B>Description:</B></description>
+    /// <para><EM>Legend:</EM><BR></BR> 
+    /// <B>C</B>=ciphertext, <B>P</B>=plaintext, <B>K</B>=key, <B>E</B>=encrypt, <B>E<SUP>-1</SUP></B>=decrypt, <B>^</B>=XOR<BR></BR><BR></BR>
+    /// <EM>Encryption</EM><BR></BR>
+    /// C0 ← IV. For 1 ≤ j ≤ t, Cj ← EK(Cj−1 ^ Pj).<BR></BR>
+    /// <EM>Decryption</EM><BR></BR>
+    /// C0 ← IV. For 1 ≤ j ≤ t, Pj ← Cj−1 ^ E<SUP>−1</SUP>K(Cj).</para>
+    ///
+    /// <description><B>Multi-Threading:</B></description>
+    /// <para>The encryption function of the CBC mode is limited by its dependency chain; that is, each block relies on information from the previous block, and so can not be multi-threaded.
+    /// The decryption function however, is not limited by this dependency chain and can be parallelized via the use of simultaneous processing by multiple processor cores.<BR></BR>
+    /// This is acheived by storing the starting vector, (the encrypted bytes), from offsets within the ciphertext stream, and then processing multiple blocks of cipher-text independently across threads.</para>
+    ///
+    /// <description><B>Implementation Notes:</B></description>
     /// <list type="bullet">
-    /// <item><description>In CBC mode, only decryption can be processed in parallel.</description></item>
-    /// <item><description>Parallel processing is enabled on decryption by passing a block size of <see cref="ParallelBlockSize"/> to the transform.</description></item>
-    /// <item><description><see cref="ParallelBlockSize"/> must be divisible by <see cref="ParallelMinimumSize"/>.</description></item>
-    /// <item><description>Parallel block calculation ex. <c>int blocklen = (data.Length / cipher.ParallelMinimumSize) * 10</c></description></item>
-    /// <item><description>Cipher Engine is automatically disposed of unless DisposeEngine is set to <c>false</c> in the class constructor <see cref="CBC(IBlockCipher, bool)"/></description></item>
+    /// <item><description>A cipher mode constructor can either be initialized with a block cipher instance, or using the block ciphers enumeration name.</description></item>
+    /// <item><description>A block cipher instance created using the enumeration constructor, is automatically deleted when the class is destroyed.</description></item>
+    /// <item><description>The Transform functions are virtual, and can be accessed from an ICipherMode instance.</description></item>
+    /// <item><description>The DecryptBlock and EncryptBlock functions can be accessed through the class instance.</description></item>
+    /// <item><description>The transformation methods can not be called until the Initialize(bool, KeyParams) function has been called.</description></item>
+    /// <item><description>In CBC mode, only the decryption function can be processed in parallel.</description></item>
+    /// <item><description>The ParallelOptions.MaxDegreeOfParallelism property can be used to modify the thread count in the parallel loop; this must be an even number no greater than the number of processer cores on the system.</description></item>
+    /// <item><description>The IsParallel property is enabled automatically if the system has more than one processor core.</description></item>
+    /// <item><description>Parallel processing is enabled when the IsParallel property is set to true, and an input block of ParallelBlockSize is passed to the transform.</description></item>
+    /// <item><description>ParallelBlockSize is calculated automatically but can be user defined, but must be evenly divisible by ParallelMinimumSize.</description></item>
+    /// <item><description>Parallel block calculation ex. <c>ParallelBlockSize = (data.Length / cipher.ParallelMinimumSize) * 40</c></description></item>
     /// </list>
     /// 
     /// <description>Guiding Publications:</description>
     /// <list type="number">
     /// <item><description>NIST <a href="http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf">SP800-38A</a>.</description></item>
+    /// <item><description>Handbook of Applied Cryptography <a href="http://cacr.uwaterloo.ca/hac/about/chap7.pdf">Chapter 7: Block Ciphers</a>.</description></item>
     /// </list>
     /// </remarks>
     public sealed class CBC : ICipherMode
     {
         #region Constants
         private const string ALG_NAME = "CBC";
-        private const int PARALLEL_DEFBLOCK = 64000;
         private const int MAXALLOC_MB100 = 100000000;
+        private const int PRL_BLOCKCACHE = 32000;
         #endregion
 
         #region Fields
-        private IBlockCipher _blockCipher;
-        private int _blockSize = 16;
-        private byte[] _cbcIv;
-        private byte[] _cbcNextIv;
-        private bool _disposeEngine = true;
-        private bool _isDisposed = false;
-        private bool _isEncryption = false;
-        private bool _isInitialized = false;
-        private bool _isParallel = false;
-        private int _parallelBlockSize = PARALLEL_DEFBLOCK;
-        private ParallelOptions _parallelOption = null;
+        private IBlockCipher m_blockCipher;
+        private int m_blockSize = 0;
+        private byte[] m_cbcIv;
+        private byte[] m_cbcNextIv;
+        private bool m_disposeEngine = false;
+        private bool m_isDisposed = false;
+        private bool m_isEncryption = false;
+        private bool m_isInitialized = false;
+        private bool m_isLoaded = false;
+        private bool m_isParallel = false;
+        private int m_parallelBlockSize = 0;
+        private int m_parallelMinimumSize = 0;
+        private ParallelOptions m_parallelOption = null;
+        private int m_processorCount = 1;
         #endregion
 
         #region Properties
@@ -103,17 +129,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         /// </summary>
         public int BlockSize
         {
-            get { return _blockSize; }
-            private set { _blockSize = value; }
+            get { return m_blockSize; }
+            private set { m_blockSize = value; }
         }
 
         /// <summary>
-        /// Get: Underlying Cipher
+        /// Get: Underlying Cipher instance
         /// </summary>
         public IBlockCipher Engine
         {
-            get { return _blockCipher; }
-            private set { _blockCipher = value; }
+            get { return m_blockCipher; }
+            private set { m_blockCipher = value; }
         }
 
         /// <summary>
@@ -129,8 +155,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         /// </summary>
         public bool IsEncryption
         {
-            get { return _isEncryption; }
-            private set { _isEncryption = value; }
+            get { return m_isEncryption; }
+            private set { m_isEncryption = value; }
         }
 
         /// <summary>
@@ -138,8 +164,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         /// </summary>
         public bool IsInitialized
         {
-            get { return _isInitialized; }
-            private set { _isInitialized = value; }
+            get { return m_isInitialized; }
+            private set { m_isInitialized = value; }
         }
 
         /// <summary>
@@ -147,14 +173,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         /// </summary>
         public bool IsParallel
         {
-            get { return _isParallel; }
-            set
-            {
-                if (ProcessorCount < 2)
-                    _isParallel = false;
-                else
-                    _isParallel = value;
-            }
+            get { return m_isParallel; }
+            set { m_isParallel = value; }
         }
 
         /// <summary>
@@ -162,7 +182,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         /// </summary>
         public byte[] IV
         {
-            get { return (byte[])_cbcIv.Clone(); }
+            get { return (byte[])m_cbcIv.Clone(); }
         }
 
         /// <summary>
@@ -174,13 +194,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         }
 
         /// <summary>
-        /// Get/Set: Parallel block size. Must be a multiple of <see cref="ParallelMinimumSize"/>.
+        /// Get/Set: Parallel block size; must be a multiple of <see cref="ParallelMinimumSize"/>.
         /// </summary>
         /// 
         /// <exception cref="CryptoSymmetricException">Thrown if a parallel block size is not evenly divisible by ParallelMinimumSize, or  block size is less than ParallelMinimumSize or more than ParallelMaximumSize values</exception>
         public int ParallelBlockSize
         {
-            get { return _parallelBlockSize; }
+            get { return m_parallelBlockSize; }
             set
             {
                 if (value % ParallelMinimumSize != 0)
@@ -188,7 +208,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
                 if (value > ParallelMaximumSize || value < ParallelMinimumSize)
                     throw new CryptoSymmetricException("CBC:ParallelBlockSize", String.Format("Parallel block must be Maximum of ParallelMaximumSize: {0} and evenly divisible by ParallelMinimumSize: {1}", ParallelMaximumSize, ParallelMinimumSize), new ArgumentOutOfRangeException());
 
-                _parallelBlockSize = value;
+                m_parallelBlockSize = value;
             }
         }
 
@@ -205,7 +225,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         /// </summary>
         public int ParallelMinimumSize
         {
-            get { return ProcessorCount * BlockSize; }
+            get { return m_parallelMinimumSize; }
         }
 
         /// <summary>
@@ -216,10 +236,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         {
             get
             {
-                if (_parallelOption == null)
-                    _parallelOption = new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount };
+                if (m_parallelOption == null)
+                    m_parallelOption = new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount };
 
-                return _parallelOption;
+                return m_parallelOption;
             }
             set
             {
@@ -228,28 +248,50 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
                     if (value.MaxDegreeOfParallelism < 1)
                         throw new CryptoSymmetricException("CBC:ParallelOption", "MaxDegreeOfParallelism can not be less than 1!", new ArgumentException());
                     else if (value.MaxDegreeOfParallelism == 1)
-                        _isParallel = false;
+                        m_isParallel = false;
                     else if (value.MaxDegreeOfParallelism % 2 != 0)
                         throw new CryptoSymmetricException("CBC:ParallelOption", "MaxDegreeOfParallelism can not be an odd number; must be either 1, or a divisible of 2!", new ArgumentException());
                     
-                    _parallelOption = value;
+                    m_parallelOption = value;
                 }
             }
         }
 
         /// <remarks>
-        /// Processor count
+        /// Get: Processor count
         /// </remarks>
-        private int ProcessorCount { get; set; }
+        private int ProcessorCount
+        {
+            get { return m_processorCount; }
+            set { m_processorCount = value; }
+        }
         #endregion
 
         #region Constructor
         /// <summary>
-        /// Initialize the Cipher
+        /// Initialize the cipher mode using a block cipher type name
+        /// </summary>
+        /// 
+        /// <param name="CipherType">The formal enumeration name of a block cipher</param>
+        /// 
+        /// <exception cref="CryptoSymmetricException">Thrown if an invalid Cipher type is used</exception>
+        public CBC(BlockCiphers CipherType)
+        {
+            if (CipherType == BlockCiphers.None)
+                throw new CryptoSymmetricException("CBC:CTor", "The Cipher type can not be none!", new ArgumentNullException());
+
+            m_disposeEngine = true;
+            m_blockCipher = LoadCipher(CipherType);
+            m_blockSize = m_blockCipher.BlockSize;
+            Scope();
+        }
+
+        /// <summary>
+        /// Initialize the cipher mode with a block cipher instance
         /// </summary>
         /// 
         /// <param name="Cipher">Underlying encryption algorithm</param>
-        /// <param name="DisposeEngine">Dispose of cipher engine when <see cref="Dispose()"/> on this class is called</param>
+        /// <param name="DisposeEngine">Dispose of block cipher when <see cref="Dispose()"/> on this class is called</param>
         /// 
         /// <exception cref="CryptoSymmetricException">Thrown if a null Cipher is used</exception>
         public CBC(IBlockCipher Cipher, bool DisposeEngine = true)
@@ -257,19 +299,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
             if (Cipher == null)
                 throw new CryptoSymmetricException("CBC:CTor", "The Cipher can not be null!", new ArgumentNullException());
 
-            _disposeEngine = DisposeEngine;
-            _blockCipher = Cipher;
-            _blockSize = _blockCipher.BlockSize;
-
-            ProcessorCount = Environment.ProcessorCount;
-            if (ProcessorCount % 2 != 0)
-                ProcessorCount--;
-
-            if (ProcessorCount > 1)
-            {
-                _parallelOption = new ParallelOptions() { MaxDegreeOfParallelism = ProcessorCount };
-                _isParallel = true;
-            }
+            m_disposeEngine = DisposeEngine;
+            m_blockCipher = Cipher;
+            m_blockSize = m_blockCipher.BlockSize;
+            Scope();
         }
 
         private CBC()
@@ -287,6 +320,74 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 
         #region Public Methods
         /// <summary>
+        /// Decrypt a single block of bytes.
+        /// <para>Decrypts one block of bytes beginning at a zero index.
+        /// Initialize(bool, KeyParams) must be called before this method can be used.</para>
+        /// </summary>
+        /// 
+        /// <param name="Input">The input array of encrypted bytes</param>
+        /// <param name="Output">The output array of decrypted bytes</param>
+        public void DecryptBlock(byte[] Input, byte[] Output)
+        {
+            DecryptBlock(Input, 0, Output, 0);
+        }
+
+        /// <summary>
+        /// Decrypt a block of bytes with offset parameters.
+        /// <para>Decrypts one block of bytes at the designated offsets.
+        /// Initialize(bool, KeyParams) must be called before this method can be used.</para>
+        /// </summary>
+        /// 
+        /// <param name="Input">The input array of encrypted bytes</param>
+        /// <param name="InOffset">Starting offset within the Input array</param>
+        /// <param name="Output">The output array of decrypted bytes</param>
+        /// <param name="OutOffset">Starting offset within the Output array</param>
+        public void DecryptBlock(byte[] Input, int InOffset, byte[] Output, int OutOffset)
+        {
+            // copy input to temp iv
+            Buffer.BlockCopy(Input, InOffset, m_cbcNextIv, 0, m_blockSize);
+            // decrypt input
+            m_blockCipher.DecryptBlock(Input, InOffset, Output, OutOffset);
+            // xor output and iv
+            IntUtils.XORBLK(m_cbcIv, 0, Output, OutOffset, m_cbcIv.Length);
+            // copy forward iv
+            Buffer.BlockCopy(m_cbcNextIv, 0, m_cbcIv, 0, m_cbcIv.Length);
+        }
+
+        /// <summary>
+        /// Encrypt a single block of bytes. 
+        /// <para>Encrypts one block of bytes beginning at a zero index.
+        /// Initialize(bool, KeyParams) must be called before this method can be used.</para>
+        /// </summary>
+        /// 
+        /// <param name="Input">The input array of plain text bytes</param>
+        /// <param name="Output">The output array of encrypted bytes</param>
+        public void EncryptBlock(byte[] Input, byte[] Output)
+        {
+            EncryptBlock(Input, 0, Output, 0);
+        }
+
+        /// <summary>
+        /// Encrypt a block of bytes using offset parameters. 
+        /// <para>Encrypts one block of bytes at the designated offsets.
+        /// Initialize(bool, KeyParams) must be called before this method can be used.</para>
+        /// </summary>
+        /// 
+        /// <param name="Input">The input array of plain text bytes</param>
+        /// <param name="InOffset">Starting offset within the input array</param>
+        /// <param name="Output">The output array of encrypted bytes</param>
+        /// <param name="OutOffset">Starting offset within the output array</param>
+        public void EncryptBlock(byte[] Input, int InOffset, byte[] Output, int OutOffset)
+        {
+            // xor iv and input
+            IntUtils.XORBLK(Input, InOffset, m_cbcIv, 0, m_cbcIv.Length);
+            // encrypt iv
+            m_blockCipher.EncryptBlock(m_cbcIv, 0, Output, OutOffset);
+            // copy output to iv
+            Buffer.BlockCopy(Output, OutOffset, m_cbcIv, 0, m_blockSize);
+        }
+
+        /// <summary>
         /// Initialize the Cipher
         /// </summary>
         /// 
@@ -296,111 +397,44 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         /// <exception cref="CryptoSymmetricException">Thrown if a null Key or IV is used</exception>
         public void Initialize(bool Encryption, KeyParams KeyParam)
         {
+            // recheck params
+            Scope();
+
             if (KeyParam.Key == null)
                 throw new CryptoSymmetricException("CBC:Initialize", "Key can not be null!", new ArgumentNullException());
             if (KeyParam.IV == null)
                 throw new CryptoSymmetricException("CBC:Initialize", "IV can not be null!", new ArgumentNullException());
+            if (IsParallel && ParallelBlockSize < ParallelMinimumSize || ParallelBlockSize > ParallelMaximumSize)
+                throw new CryptoSymmetricException("CBC:Initialize", "The parallel block size is out of bounds!");
+            if (IsParallel && ParallelBlockSize % ParallelMinimumSize != 0)
+                throw new CryptoSymmetricException("CBC:Initialize", "The parallel block size must be evenly aligned to the ParallelMinimumSize!");
 
-            _blockCipher.Initialize(Encryption, KeyParam);
-            _cbcIv = KeyParam.IV;
-            _cbcNextIv = new byte[_cbcIv.Length];
-            _isEncryption = Encryption;
-            _isInitialized = true;
+            m_blockCipher.Initialize(Encryption, KeyParam);
+            m_cbcIv = KeyParam.IV;
+            m_cbcNextIv = new byte[m_cbcIv.Length];
+            m_isEncryption = Encryption;
+            m_isInitialized = true;
         }
 
         /// <summary>
-        /// Decrypt a single block of bytes. 
-        /// <para><see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
+        /// Transform a block of bytes.
+        /// <para>Transforms one block of bytes beginning at a zero index.
+        /// Encryption or Decryption is performed based on the Encryption flag set in the Initialize() function.
+        /// Multi-threading capable function in Decryption mode; set IsParallel() to true to enable, and process blocks of ParallelBlockSize().
+        /// Initialize(bool, KeyParams) must be called before this function can be used.</para>
         /// </summary>
-        /// 
-        /// <param name="Input">Encrypted bytes</param>
-        /// <param name="Output">Decrypted bytes</param>
-        public void DecryptBlock(byte[] Input, byte[] Output)
-        {
-            // copy input to temp iv
-            Buffer.BlockCopy(Input, 0, _cbcNextIv, 0, Input.Length);
-            // decrypt input
-            _blockCipher.DecryptBlock(Input, Output);
-            // xor output and iv
-            IntUtils.XORBLK(_cbcIv, 0, Output, 0, _cbcIv.Length);
-            // copy forward iv
-            Buffer.BlockCopy(_cbcNextIv, 0, _cbcIv, 0, _cbcIv.Length);
-        }
-
-        /// <summary>
-        /// Decrypt a block of bytes with offset parameters. 
-        /// <para><see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
-        /// </summary>
-        /// 
-        /// <param name="Input">Encrypted bytes</param>
-        /// <param name="InOffset">Offset in the Input array</param>
-        /// <param name="Output">Decrypted bytes</param>
-        /// <param name="OutOffset">Offset in the Output array</param>
-        public void DecryptBlock(byte[] Input, int InOffset, byte[] Output, int OutOffset)
-        {
-            // copy input to temp iv
-            Buffer.BlockCopy(Input, InOffset, _cbcNextIv, 0, _blockSize);
-            // decrypt input
-            _blockCipher.DecryptBlock(Input, InOffset, Output, OutOffset);
-            // xor output and iv
-            IntUtils.XORBLK(_cbcIv, 0, Output, OutOffset, _cbcIv.Length);
-            // copy forward iv
-            Buffer.BlockCopy(_cbcNextIv, 0, _cbcIv, 0, _cbcIv.Length);
-        }
-
-        /// <summary>
-        /// Encrypt a block of bytes. 
-        /// <para><see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
-        /// </summary>
-        /// 
-        /// <param name="Input">Bytes to Encrypt</param>
-        /// <param name="Output">Encrypted bytes</param>
-        public void EncryptBlock(byte[] Input, byte[] Output)
-        {
-            // xor iv and input
-            IntUtils.XORBLK(Input, 0, _cbcIv, 0, _cbcIv.Length);
-            // encrypt iv
-            _blockCipher.EncryptBlock(_cbcIv, Output);
-            // copy output to iv
-            Buffer.BlockCopy(Output, 0, _cbcIv, 0, _blockSize);
-        }
-
-        /// <summary>
-        /// Encrypt a block of bytes with offset parameters. 
-        /// <para><see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
-        /// </summary>
-        /// 
-        /// <param name="Input">Bytes to Encrypt</param>
-        /// <param name="InOffset">Offset in the Input array</param>
-        /// <param name="Output">Encrypted bytes</param>
-        /// <param name="OutOffset">Offset in the Output array</param>
-        public void EncryptBlock(byte[] Input, int InOffset, byte[] Output, int OutOffset)
-        {
-            // xor iv and input
-            IntUtils.XORBLK(Input, InOffset, _cbcIv, 0, _cbcIv.Length);
-            // encrypt iv
-            _blockCipher.EncryptBlock(_cbcIv, 0, Output, OutOffset);
-            // copy output to iv
-            Buffer.BlockCopy(Output, OutOffset, _cbcIv, 0, _blockSize);
-        }
-
-        /// <summary>
-        /// Transform a block of bytes. 
-        /// <para>Parallel capable in Decryption mode. 
-        /// <see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
-        /// </summary>
-        /// 
-        /// <param name="Input">Bytes to Transform</param>
-        /// <param name="Output">Transformed bytes</param>
+        ///
+        /// <param name="Input">The input array to transform</param>
+        /// <param name="Output">The output array of transformed bytes</param>
         public void Transform(byte[] Input, byte[] Output)
         {
-            if (_isEncryption)
+            if (m_isEncryption)
             {
                 EncryptBlock(Input, Output);
             }
             else
             {
-                if (_isParallel)
+                if (m_isParallel)
                     ParallelDecrypt(Input, Output);
                 else
                     DecryptBlock(Input, Output);
@@ -408,24 +442,25 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         }
 
         /// <summary>
-        /// Transform a block of bytes with offset parameters. 
-        /// <para>Parallel capable in Decryption mode. 
-        /// <see cref="Initialize(bool, KeyParams)"/> must be called before this method can be used.</para>
+        /// Transform a block of bytes using offset parameters.
+        /// <para>Transforms one block of bytes using the designated offsets.
+        /// Multi-threading capable function in Decryption mode; set IsParallel() to true to enable, and process blocks of ParallelBlockSize().
+        /// Initialize(bool, KeyParams) must be called before this method can be used.</para>
         /// </summary>
-        /// 
-        /// <param name="Input">Bytes to Transform</param>
-        /// <param name="InOffset">Offset in the Input array</param>
-        /// <param name="Output">Transformed bytes</param>
-        /// <param name="OutOffset">Offset in the Output array</param>
+        ///
+        /// <param name="Input">The input array to transform</param>
+        /// <param name="InOffset">Starting offset within the input array</param>
+        /// <param name="Output">The output array of transformed bytes</param>
+        /// <param name="OutOffset">Starting offset within the output array</param>
         public void Transform(byte[] Input, int InOffset, byte[] Output, int OutOffset)
         {
-            if (_isEncryption)
+            if (m_isEncryption)
             {
                 EncryptBlock(Input, InOffset, Output, OutOffset);
             }
             else
             {
-                if (_isParallel)
+                if (m_isParallel)
                     ParallelDecrypt(Input, InOffset, Output, OutOffset);
                 else
                     DecryptBlock(Input, InOffset, Output, OutOffset);
@@ -433,43 +468,55 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         }
         #endregion
 
-        #region Parallel Decrypt
+        #region Private Methods
+        IBlockCipher LoadCipher(BlockCiphers CipherType)
+        {
+            try
+            {
+                return Helper.BlockCipherFromName.GetInstance(CipherType);
+            }
+            catch (Exception ex)
+            {
+                throw new CryptoSymmetricException("CBC:LoadCipher", "The block cipher could not be instantiated!", ex);
+            }
+        }
+
         private void ParallelDecrypt(byte[] Input, byte[] Output)
         {
             if (Output.Length < ParallelBlockSize)
             {
-                int blocks = Output.Length / _blockSize;
+                int blocks = Output.Length / m_blockSize;
 
                 // output is input xor with random
                 for (int i = 0; i < blocks; i++)
-                    DecryptBlock(Input, i * _blockSize, Output, i * _blockSize);
+                    DecryptBlock(Input, i * m_blockSize, Output, i * m_blockSize);
             }
             else
             {
                 // parallel CBC decryption
                 int cnkSize = ParallelBlockSize / ProcessorCount;
-                int blkCount = (cnkSize / _blockSize);
+                int blkCount = (cnkSize / m_blockSize);
                 byte[][] vectors = new byte[ProcessorCount][];
 
                 for (int i = 0; i < ProcessorCount; i++)
                 {
-                    vectors[i] = new byte[_blockSize];
+                    vectors[i] = new byte[m_blockSize];
 
                     // get the first iv
                     if (i != 0)
-                        Buffer.BlockCopy(Input, (i * cnkSize) - _blockSize, vectors[i], 0, _blockSize);
+                        Buffer.BlockCopy(Input, (i * cnkSize) - m_blockSize, vectors[i], 0, m_blockSize);
                     else
-                        Buffer.BlockCopy(_cbcIv, 0, vectors[i], 0, _blockSize);
+                        Buffer.BlockCopy(m_cbcIv, 0, vectors[i], 0, m_blockSize);
                 }
 
                 System.Threading.Tasks.Parallel.For(0, ProcessorCount, ParallelOption, i =>
                 {
                     for (int j = 0; j < blkCount; j++)
-                        ProcessDecrypt(Input, (i * cnkSize) + (j * _blockSize), Output, (i * cnkSize) + (j * _blockSize), vectors[i]);
+                        ProcessDecrypt(Input, (i * cnkSize) + (j * m_blockSize), Output, (i * cnkSize) + (j * m_blockSize), vectors[i]);
                 });
 
                 // copy the last vector to class variable
-                Buffer.BlockCopy(vectors[ProcessorCount - 1], 0, _cbcIv, 0, _cbcIv.Length);
+                Buffer.BlockCopy(vectors[ProcessorCount - 1], 0, m_cbcIv, 0, m_cbcIv.Length);
             }
         }
 
@@ -477,37 +524,37 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
         {
             if ((Output.Length - OutOffset) < ParallelBlockSize)
             {
-                int blocks = (Output.Length - OutOffset) / _blockSize;
+                int blocks = (Output.Length - OutOffset) / m_blockSize;
 
                 // output is input xor with random
                 for (int i = 0; i < blocks; i++)
-                    DecryptBlock(Input, (i * _blockSize) + InOffset, Output, (i * _blockSize) + OutOffset);
+                    DecryptBlock(Input, (i * m_blockSize) + InOffset, Output, (i * m_blockSize) + OutOffset);
             }
             else
             {
                 // parallel CBC decryption //
                 int cnkSize = ParallelBlockSize / ProcessorCount;
-                int blkCount = (cnkSize / _blockSize);
+                int blkCount = (cnkSize / m_blockSize);
                 byte[][] vectors = new byte[ProcessorCount][];
 
                 for (int i = 0; i < ProcessorCount; i++)
                 {
-                    vectors[i] = new byte[_blockSize];
+                    vectors[i] = new byte[m_blockSize];
                     // get the first iv
                     if (i != 0)
-                        Buffer.BlockCopy(Input, (InOffset + (i * cnkSize)) - _blockSize, vectors[i], 0, _blockSize);
+                        Buffer.BlockCopy(Input, (InOffset + (i * cnkSize)) - m_blockSize, vectors[i], 0, m_blockSize);
                     else
-                        Buffer.BlockCopy(_cbcIv, 0, vectors[i], 0, _blockSize);
+                        Buffer.BlockCopy(m_cbcIv, 0, vectors[i], 0, m_blockSize);
                 }
 
                 System.Threading.Tasks.Parallel.For(0, ProcessorCount, ParallelOption, i =>
                 {
                     for (int j = 0; j < blkCount; j++)
-                        ProcessDecrypt(Input, InOffset + (i * cnkSize) + (j * _blockSize), Output, OutOffset + (i * cnkSize) + (j * _blockSize), vectors[i]);
+                        ProcessDecrypt(Input, InOffset + (i * cnkSize) + (j * m_blockSize), Output, OutOffset + (i * cnkSize) + (j * m_blockSize), vectors[i]);
                 });
 
                 // copy the last vector to class variable
-                Buffer.BlockCopy(vectors[ProcessorCount - 1], 0, _cbcIv, 0, _cbcIv.Length);
+                Buffer.BlockCopy(vectors[ProcessorCount - 1], 0, m_cbcIv, 0, m_cbcIv.Length);
             }
         }
 
@@ -516,13 +563,37 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
             byte[] nextIv = new byte[Vector.Length];
 
             // copy input to temp iv
-            Buffer.BlockCopy(Input, InOffset, nextIv, 0, _blockSize);
+            Buffer.BlockCopy(Input, InOffset, nextIv, 0, m_blockSize);
             // decrypt input
-            _blockCipher.DecryptBlock(Input, InOffset, Output, OutOffset);
+            m_blockCipher.DecryptBlock(Input, InOffset, Output, OutOffset);
             // xor output and iv
             IntUtils.XORBLK(Vector, 0, Output, OutOffset, Vector.Length);
             // copy forward iv
-            Buffer.BlockCopy(nextIv, 0, Vector, 0, _blockSize);
+            Buffer.BlockCopy(nextIv, 0, Vector, 0, m_blockSize);
+        }
+
+        void Scope()
+        {
+            m_processorCount = Environment.ProcessorCount;
+            if (ProcessorCount % 2 != 0)
+                ProcessorCount--;
+
+            if (m_processorCount > 1)
+            {
+                if (m_parallelOption != null && m_parallelOption.MaxDegreeOfParallelism > 0 && (m_parallelOption.MaxDegreeOfParallelism % 2 == 0))
+                    m_processorCount = m_parallelOption.MaxDegreeOfParallelism;
+                else
+                    m_parallelOption = new ParallelOptions() { MaxDegreeOfParallelism = m_processorCount };
+            }
+
+            m_parallelMinimumSize = m_processorCount * m_blockCipher.BlockSize;
+            m_parallelBlockSize = m_processorCount * PRL_BLOCKCACHE;
+
+            if (!m_isLoaded)
+            {
+                m_isParallel = (m_processorCount > 1);
+                m_isLoaded = true;
+            }
         }
         #endregion
 
@@ -538,27 +609,28 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block.Mode
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_blockCipher != null && _disposeEngine)
-                        _blockCipher.Dispose();
+                    if (m_blockCipher != null && m_disposeEngine)
+                        m_blockCipher.Dispose();
 
-                    if (_cbcIv != null)
+                    if (m_cbcIv != null)
                     {
-                        Array.Clear(_cbcIv, 0, _cbcIv.Length);
-                        _cbcIv = null;
+                        Array.Clear(m_cbcIv, 0, m_cbcIv.Length);
+                        m_cbcIv = null;
                     }
-                    if (_cbcNextIv != null)
+                    if (m_cbcNextIv != null)
                     {
-                        Array.Clear(_cbcNextIv, 0, _cbcNextIv.Length);
-                        _cbcNextIv = null;
+                        Array.Clear(m_cbcNextIv, 0, m_cbcNextIv.Length);
+                        m_cbcNextIv = null;
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isLoaded = false;
+                    m_isDisposed = true;
                 }
             }
         }

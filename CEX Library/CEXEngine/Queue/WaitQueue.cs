@@ -59,15 +59,15 @@ namespace VTDev.Libraries.CEXEngine.Queue
         #endregion
 
         #region Fields
-        private int _Count = 0;
-        private double _Delay = 0.0;
-        private double _Elapsed = 0;
-        private bool _isDisposed = false;
-        private byte[] _Queue;
-        private int _Size = 0;
-        private byte[] _Temp;
-        private Stopwatch _stpWatch;
-        private EventWaitHandle _evtWait;
+        private int m_Count = 0;
+        private double m_Delay = 0.0;
+        private double m_Elapsed = 0;
+        private bool m_isDisposed = false;
+        private byte[] m_Queue;
+        private int m_Size = 0;
+        private byte[] m_Temp;
+        private Stopwatch m_stpWatch;
+        private EventWaitHandle m_evtWait;
         #endregion
 
         #region Constructor
@@ -79,9 +79,9 @@ namespace VTDev.Libraries.CEXEngine.Queue
         /// <param name="CTime">Constant time value for each queue processed</param>
         public WaitQueue(int Size, double CTime)
         {
-            _Size = Size;
-            _Delay = CTime;
-            _Queue = new byte[Size];
+            m_Size = Size;
+            m_Delay = CTime;
+            m_Queue = new byte[Size];
         }
 
         /// <summary>
@@ -101,8 +101,8 @@ namespace VTDev.Libraries.CEXEngine.Queue
         /// <returns>Queued values</returns>
         public byte[] DeQueue()
         {
-            _Count = 0;
-            return _Queue;
+            m_Count = 0;
+            return m_Queue;
         }
 
         /// <summary>
@@ -112,14 +112,14 @@ namespace VTDev.Libraries.CEXEngine.Queue
         /// <param name="Data">Queue input</param>
         public void Final(byte[] Data)
         {
-            Array.Resize<byte>(ref _Queue, _Count + Data.Length);
-            Buffer.BlockCopy(Data, Data.Length, _Queue, _Count, Data.Length);
-            _Count = _Size;
+            Array.Resize<byte>(ref m_Queue, m_Count + Data.Length);
+            Buffer.BlockCopy(Data, Data.Length, m_Queue, m_Count, Data.Length);
+            m_Count = m_Size;
             Wait();
 
-            _stpWatch.Stop();
-            _stpWatch.Reset();
-            _Count = 0;
+            m_stpWatch.Stop();
+            m_stpWatch.Reset();
+            m_Count = 0;
         }
 
         /// <summary>
@@ -127,9 +127,9 @@ namespace VTDev.Libraries.CEXEngine.Queue
         /// </summary>
         public virtual void Initialize()
         {
-            _stpWatch = new Stopwatch();
-            _evtWait = new AutoResetEvent(true);
-            _stpWatch.Start();
+            m_stpWatch = new Stopwatch();
+            m_evtWait = new AutoResetEvent(true);
+            m_stpWatch.Start();
         }
 
         /// <summary>
@@ -143,24 +143,24 @@ namespace VTDev.Libraries.CEXEngine.Queue
         {
             int len = Data.Length;
 
-            if (_Temp != null)
+            if (m_Temp != null)
             {
-                Buffer.BlockCopy(_Temp, 0, _Queue, 0, _Temp.Length);
-                _Count += _Temp.Length;
-                _Temp = null;
+                Buffer.BlockCopy(m_Temp, 0, m_Queue, 0, m_Temp.Length);
+                m_Count += m_Temp.Length;
+                m_Temp = null;
                 Wait();
             }
 
-            if (len + _Count > _Size)
+            if (len + m_Count > m_Size)
             {
-                len = _Size - _Count;
+                len = m_Size - m_Count;
                 int tlen = Data.Length - len;
-                _Temp = new byte[tlen];
-                Buffer.BlockCopy(Data, len, _Temp, 0, tlen);
+                m_Temp = new byte[tlen];
+                Buffer.BlockCopy(Data, len, m_Temp, 0, tlen);
             }
 
-            Buffer.BlockCopy(Data, 0, _Queue, _Count, len);
-            _Count += len;
+            Buffer.BlockCopy(Data, 0, m_Queue, m_Count, len);
+            m_Count += len;
 
             return Wait();
         }
@@ -169,21 +169,21 @@ namespace VTDev.Libraries.CEXEngine.Queue
         #region Private Methods
         private double GetElapsed()
         {
-            double tms = _stpWatch.Elapsed.TotalMilliseconds;
-            double cms = tms - _Elapsed;
-            _Elapsed = tms;
+            double tms = m_stpWatch.Elapsed.TotalMilliseconds;
+            double cms = tms - m_Elapsed;
+            m_Elapsed = tms;
 
             return cms;
         }
 
         private bool Wait()
         {
-            if (_Count >= _Size)
+            if (m_Count >= m_Size)
             {
                 int cms = (int)GetElapsed();
                 if (cms > 0)
-                    _evtWait.WaitOne(cms);
-                _Count = 0;
+                    m_evtWait.WaitOne(cms);
+                m_Count = 0;
 
                 return true;
             }
@@ -204,35 +204,35 @@ namespace VTDev.Libraries.CEXEngine.Queue
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_Queue != null)
+                    if (m_Queue != null)
                     {
-                        Array.Clear(_Queue, 0, _Queue.Length);
-                        _Queue = null;
+                        Array.Clear(m_Queue, 0, m_Queue.Length);
+                        m_Queue = null;
                     }
-                    if (_Temp != null)
+                    if (m_Temp != null)
                     {
-                        Array.Clear(_Temp, 0, _Temp.Length);
-                        _Temp = null;
+                        Array.Clear(m_Temp, 0, m_Temp.Length);
+                        m_Temp = null;
                     }
-                    if (_stpWatch != null)
+                    if (m_stpWatch != null)
                     {
-                        if (_stpWatch.IsRunning)
-                            _stpWatch.Stop();
-                        _stpWatch = null;
+                        if (m_stpWatch.IsRunning)
+                            m_stpWatch.Stop();
+                        m_stpWatch = null;
                     }
-                    if (_evtWait != null)
+                    if (m_evtWait != null)
                     {
-                        _evtWait.Dispose();
-                        _evtWait = null;
+                        m_evtWait.Dispose();
+                        m_evtWait = null;
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }
@@ -260,9 +260,9 @@ namespace VTDev.Libraries.CEXEngine.Queue
             public SampleQueue(int Size, double CTime)
                 : base(Size, CTime)
             {
-                _Size = Size;
-                _Delay = CTime;
-                _Queue = new byte[Size];
+                m_Size = Size;
+                m_Delay = CTime;
+                m_Queue = new byte[Size];
             }
             #endregion
 
@@ -285,25 +285,25 @@ namespace VTDev.Libraries.CEXEngine.Queue
             {
                 int len = Data.Length;
 
-                if (_Temp != null)
+                if (m_Temp != null)
                 {
-                    Buffer.BlockCopy(_Temp, 0, _Queue, 0, _Temp.Length);
-                    _Count += _Temp.Length;
-                    _Temp = null;
-                    if (_Count >= _Size)
+                    Buffer.BlockCopy(m_Temp, 0, m_Queue, 0, m_Temp.Length);
+                    m_Count += m_Temp.Length;
+                    m_Temp = null;
+                    if (m_Count >= m_Size)
                         SampleTime();
                 }
 
-                if (len + _Count > _Size)
+                if (len + m_Count > m_Size)
                 {
-                    len = _Size - _Count;
+                    len = m_Size - m_Count;
                     int tlen = Data.Length - len;
-                    _Temp = new byte[tlen];
-                    Buffer.BlockCopy(Data, len, _Temp, 0, tlen);
+                    m_Temp = new byte[tlen];
+                    Buffer.BlockCopy(Data, len, m_Temp, 0, tlen);
                 }
 
-                Buffer.BlockCopy(Data, 0, _Queue, _Count, len);
-                _Count += len;
+                Buffer.BlockCopy(Data, 0, m_Queue, m_Count, len);
+                m_Count += len;
 
                 SampleTime();
             }
@@ -312,7 +312,7 @@ namespace VTDev.Libraries.CEXEngine.Queue
             #region Private Methods
             private void SampleTime()
             {
-                if (_Count >= _Size)
+                if (m_Count >= m_Size)
                 {
                     double ms = GetElapsed();
 
@@ -321,7 +321,7 @@ namespace VTDev.Libraries.CEXEngine.Queue
                     if (Samples.High == 0 || Samples.High < ms)
                         Samples.High = ms;
 
-                    _Count = 0;
+                    m_Count = 0;
                 }
             }
             #endregion

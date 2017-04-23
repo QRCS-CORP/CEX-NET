@@ -75,7 +75,7 @@ namespace VTDev.Projects.CEX.Test.Tests.GeneratorTest
         #region Private
         private void DGCDRBGTest(byte[] Seed, byte[] Expected)
         {
-            DGCDrbg rGen = new DGCDrbg(new SHA256());
+            DGC rGen = new DGC(new SHA256());
 
             byte[] output = new byte[32];
 

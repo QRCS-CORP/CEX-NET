@@ -35,14 +35,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         // the height in the tree of the first node stored in treehash
         private int _firstNodeHeight;
         // true if treehash instance was already initialized, false otherwise
-        private bool _isInitialized;
+        private bool m_isInitialized;
         // true if the first node's height equals the maxHeight of the treehash
         private bool _isFinished;
         // true if the nextSeed has been initialized with index 3*2^h needed for the seed scheduling
         private bool _seedInitialized;
         // denotes the Message Digest used by the tree to create nodes
         private IDigest _msgDigestTree;
-        private bool _isDisposed = false;
+        private bool m_isDisposed = false;
         #endregion
 
         #region Constructor
@@ -68,9 +68,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                 _isFinished = false;
 
             if (StatInt[4] == 1)
-                _isInitialized = true;
+                m_isInitialized = true;
             else
-                _isInitialized = false;
+                m_isInitialized = false;
 
             if (StatInt[5] == 1)
                 _seedInitialized = true;
@@ -122,9 +122,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                 _isFinished = false;
 
             if (statInt[4] == 1)
-                _isInitialized = true;
+                m_isInitialized = true;
             else
-                _isInitialized = false;
+                m_isInitialized = false;
 
             if (statInt[5] == 1)
                 _seedInitialized = true;
@@ -168,7 +168,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             _tailStack = TailStack;
             _maxHeight = MaxHeight;
             _firstNode = null;
-            _isInitialized = false;
+            m_isInitialized = false;
             _isFinished = false;
             _seedInitialized = false;
             _msgDigestTree = Digest;
@@ -191,7 +191,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         /// </summary>
         public void Destroy()
         {
-            _isInitialized = false;
+            m_isInitialized = false;
             _isFinished = false;
             _firstNode = null;
             _tailLength = 0;
@@ -222,7 +222,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             _tailLength = 0;
             _firstNode = null;
             _firstNodeHeight = -1;
-            _isInitialized = true;
+            m_isInitialized = true;
             Array.Copy(_seedNext, 0, _seedActive, 0, _msgDigestTree.DigestSize);
         }
 
@@ -312,7 +312,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             else
                 statInt[3] = 0;
 
-            if (_isInitialized)
+            if (m_isInitialized)
                 statInt[4] = 1;
             else
                 statInt[4] = 0;
@@ -355,7 +355,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         /// <returns>Return true if treehash was already initialized</returns>
         public bool IsInitialized()
         {
-            return _isInitialized;
+            return m_isInitialized;
         }
 
         /// <summary>
@@ -365,7 +365,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         /// <param name="Hash">The hash value</param>
         public void SetFirstNode(byte[] Hash)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 Initialize();
             
             _firstNode = Hash;
@@ -415,7 +415,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         {
             if (_isFinished)
                 return;
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 return;
 
             byte[] help = new byte[_msgDigestTree.DigestSize];
@@ -510,7 +510,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
@@ -550,7 +550,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

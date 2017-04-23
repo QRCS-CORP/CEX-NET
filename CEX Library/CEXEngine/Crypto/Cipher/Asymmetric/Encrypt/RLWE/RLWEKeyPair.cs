@@ -51,9 +51,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
-        private IAsymmetricKey _publicKey;
-        private IAsymmetricKey _privateKey;
+        private bool m_isDisposed = false;
+        private IAsymmetricKey m_publicKey;
+        private IAsymmetricKey m_privateKey;
         #endregion
 
         #region Properties
@@ -70,7 +70,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// </summary>
         public IAsymmetricKey PublicKey
         {
-            get { return _publicKey; }
+            get { return m_publicKey; }
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// </summary>
         public IAsymmetricKey PrivateKey
         {
-            get { return _privateKey; }
+            get { return m_privateKey; }
         }
         #endregion
 
@@ -98,10 +98,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             if (!(PrivateKey is RLWEPrivateKey))
                 throw new CryptoAsymmetricException("RLWEKeyPair:Ctor", "Not a valid RLWE Private key!", new InvalidDataException());
 
-            _publicKey = (RLWEPublicKey)PublicKey;
-            _privateKey = (RLWEPrivateKey)PrivateKey;
-            _publicKey = PublicKey;
-            _privateKey = PrivateKey;
+            m_publicKey = (RLWEPublicKey)PublicKey;
+            m_privateKey = (RLWEPrivateKey)PrivateKey;
+            m_publicKey = PublicKey;
+            m_privateKey = PrivateKey;
         }
 
         /// <summary>
@@ -114,9 +114,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         public RLWEKeyPair(IAsymmetricKey Key)
         {
             if (Key is RLWEPublicKey)
-                _publicKey = (RLWEPublicKey)Key;
+                m_publicKey = (RLWEPublicKey)Key;
             else if (Key is RLWEPrivateKey)
-                _privateKey = (RLWEPrivateKey)Key;
+                m_privateKey = (RLWEPrivateKey)Key;
             else
                 throw new CryptoAsymmetricException("RLWEKeyPair:Ctor", "Not a valid RLWE key!", new InvalidDataException());
         }
@@ -129,8 +129,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <param name="KeyStream">An input stream containing an encoded key pair</param>
         public RLWEKeyPair(MemoryStream KeyStream)
         {
-            _publicKey = new RLWEPublicKey(KeyStream);
-            _privateKey = new RLWEPrivateKey(KeyStream);
+            m_publicKey = new RLWEPublicKey(KeyStream);
+            m_privateKey = new RLWEPrivateKey(KeyStream);
         }
 
         /// <summary>
@@ -157,7 +157,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <returns>The IAsymmetricKeyPair copy</returns>
         public object Clone()
         {
-            return new RLWEKeyPair((IAsymmetricKey)_publicKey.Clone(), (IAsymmetricKey)_privateKey.Clone());
+            return new RLWEKeyPair((IAsymmetricKey)m_publicKey.Clone(), (IAsymmetricKey)m_privateKey.Clone());
         }
         #endregion
 
@@ -173,18 +173,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_privateKey != null)
-                        ((RLWEPrivateKey)_privateKey).Dispose();
-                    if (_publicKey != null)
-                        ((RLWEPublicKey)_publicKey).Dispose();
+                    if (m_privateKey != null)
+                        ((RLWEPrivateKey)m_privateKey).Dispose();
+                    if (m_publicKey != null)
+                        ((RLWEPublicKey)m_publicKey).Dispose();
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

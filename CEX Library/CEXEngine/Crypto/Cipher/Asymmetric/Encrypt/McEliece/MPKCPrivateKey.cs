@@ -20,14 +20,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         #endregion
 
         #region Fields
-        private GF2mField _gField;
-        private PolynomialGF2mSmallM _goppaPoly;
-        private bool _isDisposed = false;
-        private GF2Matrix _H;
-        private int _K;
-        private int _N;
-        private Permutation _P1;
-        private PolynomialGF2mSmallM[] _qInv;
+        private GF2mField m_gField;
+        private PolynomialGF2mSmallM m_goppaPoly;
+        private bool m_isDisposed = false;
+        private GF2Matrix m_H;
+        private int m_K;
+        private int m_N;
+        private Permutation m_P1;
+        private PolynomialGF2mSmallM[] m_qInv;
         #endregion
 
         #region Properties
@@ -44,7 +44,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         internal GF2mField GF
         {
-            get { return _gField; }
+            get { return m_gField; }
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         internal PolynomialGF2mSmallM GP
         {
-            get { return _goppaPoly; }
+            get { return m_goppaPoly; }
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         internal GF2Matrix H
         {
-            get { return _H; }
+            get { return m_H; }
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public int K
         {
-            get { return _K; }
+            get { return m_K; }
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public int N
         {
-            get { return _N; }
+            get { return m_N; }
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         internal Permutation P1
         {
-            get { return _P1; }
+            get { return m_P1; }
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         internal PolynomialGF2mSmallM[] QInv
         {
-            get { return _qInv; }
+            get { return m_qInv; }
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public int T
         {
-            get { return _goppaPoly.Degree; }
+            get { return m_goppaPoly.Degree; }
         }
         #endregion
 
@@ -118,13 +118,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <param name="QInv">The matrix used to compute square roots in <c>(GF(2^m))^t</c></param>
         internal MPKCPrivateKey(int N, int K, GF2mField Gf, PolynomialGF2mSmallM Gp, Permutation P, GF2Matrix H, PolynomialGF2mSmallM[] QInv)
         {
-            _N = N;
-            _K = K;
-            _gField = Gf;
-            _goppaPoly = Gp;
-            _P1 = P;
-            _H = H;
-            _qInv = QInv;
+            m_N = N;
+            m_K = K;
+            m_gField = Gf;
+            m_goppaPoly = Gp;
+            m_P1 = P;
+            m_H = H;
+            m_qInv = QInv;
         }
         
         /// <summary>
@@ -140,16 +140,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <param name="QInv">The encoded matrix used to compute square roots in <c>(GF(2^m))^t</c></param>
         public MPKCPrivateKey(int N, int K, byte[] Gf, byte[] Gp, byte[] P, byte[] H, byte[][] QInv)
         {
-            _N = N;
-            _K = K;
-            _gField = new GF2mField(Gf);
-            _goppaPoly = new PolynomialGF2mSmallM(_gField, Gp);
-            _P1 = new Permutation(P);
-            _H = new GF2Matrix(H);
-            _qInv = new PolynomialGF2mSmallM[QInv.Length];
+            m_N = N;
+            m_K = K;
+            m_gField = new GF2mField(Gf);
+            m_goppaPoly = new PolynomialGF2mSmallM(m_gField, Gp);
+            m_P1 = new Permutation(P);
+            m_H = new GF2Matrix(H);
+            m_qInv = new PolynomialGF2mSmallM[QInv.Length];
 
             for (int i = 0; i < QInv.Length; i++)
-                _qInv[i] = new PolynomialGF2mSmallM(_gField, QInv[i]);
+                m_qInv[i] = new PolynomialGF2mSmallM(m_gField, QInv[i]);
         }
 
         /// <summary>
@@ -167,28 +167,28 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
                 BinaryReader reader = new BinaryReader(KeyStream);
 
                 // length
-                _N = reader.ReadInt32();
+                m_N = reader.ReadInt32();
                 // dimension
-                _K = reader.ReadInt32();
+                m_K = reader.ReadInt32();
 
                 // gf
                 byte[] gf = reader.ReadBytes(GF_LENGTH);
-                _gField = new GF2mField(gf);
+                m_gField = new GF2mField(gf);
 
                 // gp
                 len = reader.ReadInt32();
                 byte[] gp = reader.ReadBytes(len);
-                _goppaPoly = new PolynomialGF2mSmallM(_gField, gp);
+                m_goppaPoly = new PolynomialGF2mSmallM(m_gField, gp);
 
                 // p1
                 len = reader.ReadInt32();
                 byte[] p1 = reader.ReadBytes(len);
-                _P1 = new Permutation(p1);
+                m_P1 = new Permutation(p1);
 
                 // check matrix
                 len = reader.ReadInt32();
                 byte[] h = reader.ReadBytes(len);
-                _H = new GF2Matrix(h);
+                m_H = new GF2Matrix(h);
 
                 // length of first dimension
                 len = reader.ReadInt32();
@@ -202,10 +202,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
                 }
 
                 // assign qinv
-                _qInv = new PolynomialGF2mSmallM[qi.Length];
+                m_qInv = new PolynomialGF2mSmallM[qi.Length];
 
                 for (int i = 0; i < QInv.Length; i++)
-                    _qInv[i] = new PolynomialGF2mSmallM(_gField, qi[i]);
+                    m_qInv[i] = new PolynomialGF2mSmallM(m_gField, qi[i]);
             }
             catch (Exception ex)
             {
@@ -282,31 +282,31 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         {
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
             // length
-            writer.Write(_N);
+            writer.Write(m_N);
             // dimension
-            writer.Write(_K);
+            writer.Write(m_K);
             // gf
-            writer.Write(_gField.GetEncoded());
+            writer.Write(m_gField.GetEncoded());
             // gp
-            byte[] gp = _goppaPoly.GetEncoded();
+            byte[] gp = m_goppaPoly.GetEncoded();
             writer.Write(gp.Length);
             writer.Write(gp);
             // p1
-            byte[] p = _P1.GetEncoded();
+            byte[] p = m_P1.GetEncoded();
             writer.Write(p.Length);
             writer.Write(p);
 
             // check matrix
-            byte[] h = _H.GetEncoded();
+            byte[] h = m_H.GetEncoded();
             writer.Write(h.Length);
             writer.Write(h);
 
             // length of first dimension
-            writer.Write(_qInv.Length);
-            for (int i = 0; i < _qInv.Length; i++)
+            writer.Write(m_qInv.Length);
+            for (int i = 0; i < m_qInv.Length; i++)
             {
                 // roots
-                byte[] qi = _qInv[i].GetEncoded();
+                byte[] qi = m_qInv[i].GetEncoded();
                 writer.Write(qi.Length);
                 writer.Write(qi);
             }
@@ -430,7 +430,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <returns>The MPKCPublicKey copy</returns>
         public object Clone()
         {
-            return new MPKCPrivateKey(_N, _K, _gField, _goppaPoly, _P1, _H, _qInv);
+            return new MPKCPrivateKey(m_N, m_K, m_gField, m_goppaPoly, m_P1, m_H, m_qInv);
         }
 
         /// <summary>
@@ -456,45 +456,45 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_gField != null)
+                    if (m_gField != null)
                     {
-                        _gField.Clear();
-                        _gField = null;
+                        m_gField.Clear();
+                        m_gField = null;
                     }
-                    if (_goppaPoly != null)
+                    if (m_goppaPoly != null)
                     {
-                        _goppaPoly.Clear();
-                        _goppaPoly = null;
+                        m_goppaPoly.Clear();
+                        m_goppaPoly = null;
                     }
-                    if (_H != null)
+                    if (m_H != null)
                     {
-                        _H.Clear();
-                        _H = null;
+                        m_H.Clear();
+                        m_H = null;
                     }
-                    if (_P1 != null)
+                    if (m_P1 != null)
                     {
-                        _P1.Clear();
-                        _P1 = null;
+                        m_P1.Clear();
+                        m_P1 = null;
                     }
-                    if (_qInv != null)
+                    if (m_qInv != null)
                     {
-                        for (int i = 0; i < _qInv.Length; i++)
+                        for (int i = 0; i < m_qInv.Length; i++)
                         {
-                            _qInv[i].Clear();
-                            _qInv[i] = null;
+                            m_qInv[i].Clear();
+                            m_qInv[i] = null;
                         }
-                        _qInv = null;
+                        m_qInv = null;
                     }
-                    _K = 0;
-                    _N = 0;
+                    m_K = 0;
+                    m_N = 0;
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

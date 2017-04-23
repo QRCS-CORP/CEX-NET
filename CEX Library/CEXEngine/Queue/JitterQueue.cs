@@ -43,14 +43,14 @@ namespace VTDev.Libraries.CEXEngine.Queue
     public sealed class JitterQueue : IDisposable
     {
         #region Fields
-        private int _Count = 0;
-        private bool _isDisposed = false;
-        private Int16 _MaxDelay = 0;
-        private byte[] _Queue;
-        private int _Size = 0;
-        private byte[] _Temp;
-        private EventWaitHandle _evtWait;
-        private RNGCryptoServiceProvider _rngCrypto;
+        private int m_Count = 0;
+        private bool m_isDisposed = false;
+        private Int16 m_MaxDelay = 0;
+        private byte[] m_Queue;
+        private int m_Size = 0;
+        private byte[] m_Temp;
+        private EventWaitHandle m_evtWait;
+        private RNGCryptoServiceProvider m_rngCrypto;
         #endregion
 
         #region Constructor
@@ -62,9 +62,9 @@ namespace VTDev.Libraries.CEXEngine.Queue
         /// <param name="MaxTime">Maximum delay time in milliseconds. Range is 1 to 65535</param>
         public JitterQueue(int Size, Int16 MaxTime)
         {
-            _Size = Size;
-            _MaxDelay = MaxTime;
-            _Queue = new byte[Size];
+            m_Size = Size;
+            m_MaxDelay = MaxTime;
+            m_Queue = new byte[Size];
         }
 
         /// <summary>
@@ -84,8 +84,8 @@ namespace VTDev.Libraries.CEXEngine.Queue
         /// <returns>Queued values</returns>
         public byte[] DeQueue()
         {
-            _Count = 0;
-            return _Queue;
+            m_Count = 0;
+            return m_Queue;
         }
 
         /// <summary>
@@ -95,12 +95,12 @@ namespace VTDev.Libraries.CEXEngine.Queue
         /// <param name="Data">Queue input</param>
         public void Final(byte[] Data)
         {
-            Array.Resize<byte>(ref _Queue, _Count + Data.Length);
-            Buffer.BlockCopy(Data, Data.Length, _Queue, _Count, Data.Length);
-            _Count = _Size;
+            Array.Resize<byte>(ref m_Queue, m_Count + Data.Length);
+            Buffer.BlockCopy(Data, Data.Length, m_Queue, m_Count, Data.Length);
+            m_Count = m_Size;
             Wait();
 
-            _Count = 0;
+            m_Count = 0;
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace VTDev.Libraries.CEXEngine.Queue
         /// </summary>
         public void Initialize()
         {
-            _evtWait = new AutoResetEvent(true);
+            m_evtWait = new AutoResetEvent(true);
         }
 
         /// <summary>
@@ -122,24 +122,24 @@ namespace VTDev.Libraries.CEXEngine.Queue
         {
             int len = Data.Length;
 
-            if (_Temp != null)
+            if (m_Temp != null)
             {
-                Buffer.BlockCopy(_Temp, 0, _Queue, 0, _Temp.Length);
-                _Count += _Temp.Length;
-                _Temp = null;
+                Buffer.BlockCopy(m_Temp, 0, m_Queue, 0, m_Temp.Length);
+                m_Count += m_Temp.Length;
+                m_Temp = null;
                 Wait();
             }
 
-            if (len + _Count > _Size)
+            if (len + m_Count > m_Size)
             {
-                len = _Size - _Count;
+                len = m_Size - m_Count;
                 int tlen = Data.Length - len;
-                _Temp = new byte[tlen];
-                Buffer.BlockCopy(Data, len, _Temp, 0, tlen);
+                m_Temp = new byte[tlen];
+                Buffer.BlockCopy(Data, len, m_Temp, 0, tlen);
             }
 
-            Buffer.BlockCopy(Data, 0, _Queue, _Count, len);
-            _Count += len;
+            Buffer.BlockCopy(Data, 0, m_Queue, m_Count, len);
+            m_Count += len;
 
             return Wait();
         }
@@ -148,7 +148,7 @@ namespace VTDev.Libraries.CEXEngine.Queue
         #region Private Methods
         private void GetBytes(byte[] Data)
         {
-            _rngCrypto.GetBytes(Data);
+            m_rngCrypto.GetBytes(Data);
         }
 
         private byte[] GetByteRange(Int16 Maximum)
@@ -202,10 +202,10 @@ namespace VTDev.Libraries.CEXEngine.Queue
 
         private bool Wait()
         {
-            if (_Count >= _Size)
+            if (m_Count >= m_Size)
             {
-                _evtWait.WaitOne(NextInt16(_MaxDelay));
-                _Count = 0;
+                m_evtWait.WaitOne(NextInt16(m_MaxDelay));
+                m_Count = 0;
 
                 return true;
             }
@@ -226,34 +226,34 @@ namespace VTDev.Libraries.CEXEngine.Queue
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_Queue != null)
+                    if (m_Queue != null)
                     {
-                        Array.Clear(_Queue, 0, _Queue.Length);
-                        _Queue = null;
+                        Array.Clear(m_Queue, 0, m_Queue.Length);
+                        m_Queue = null;
                     }
-                    if (_Temp != null)
+                    if (m_Temp != null)
                     {
-                        Array.Clear(_Temp, 0, _Temp.Length);
-                        _Temp = null;
+                        Array.Clear(m_Temp, 0, m_Temp.Length);
+                        m_Temp = null;
                     }
-                    if (_evtWait != null)
+                    if (m_evtWait != null)
                     {
-                        _evtWait.Dispose();
-                        _evtWait = null;
+                        m_evtWait.Dispose();
+                        m_evtWait = null;
                     }
-                    if (_rngCrypto != null)
+                    if (m_rngCrypto != null)
                     {
-                        _rngCrypto.Dispose();
-                        _rngCrypto = null;
+                        m_rngCrypto.Dispose();
+                        m_rngCrypto = null;
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

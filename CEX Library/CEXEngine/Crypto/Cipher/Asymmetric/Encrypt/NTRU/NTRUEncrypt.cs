@@ -129,13 +129,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         #endregion
 
         #region Fields
-        private IDigest _dgtEngine;
-        private readonly NTRUParameters _encParams;
-        private NTRUKeyPair _keyPair;
-        private bool _isDisposed = false;
-        private bool _isEncryption = false;
-        private bool _isInitialized = false;
-        private IRandom _rndEngine;
+        private IDigest m_dgtEngine;
+        private readonly NTRUParameters m_encParams;
+        private NTRUKeyPair m_keyPair;
+        private bool m_isDisposed = false;
+        private bool m_isEncryption = false;
+        private bool m_isInitialized = false;
+        private IRandom m_rndEngine;
         #endregion
 
         #region Properties
@@ -146,10 +146,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         {
             get
             {
-                if (!_isInitialized)
+                if (!m_isInitialized)
                     throw new CryptoAsymmetricException("NTRUEncrypt:IsEncryption", "The cipher must be initialized before state can be determined!", new InvalidOperationException());
 
-                return _isEncryption;
+                return m_isEncryption;
             }
         }
 
@@ -158,7 +158,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public bool IsInitialized
         {
-            get { return _isInitialized; }
+            get { return m_isInitialized; }
         }
 
         /// <summary>
@@ -170,10 +170,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         {
             get
             {
-                if (_encParams == null)
+                if (m_encParams == null)
                     throw new CryptoAsymmetricException("NTRUEncrypt:MaxCipherText", "The cipher must be initialized before size can be calculated!", new InvalidOperationException());
 
-                return _encParams.MessageMax;
+                return m_encParams.MessageMax;
             }
         }
 
@@ -194,9 +194,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <param name="NtruParams">Encryption parameters</param>
         public NTRUEncrypt(NTRUParameters NtruParams)
         {
-            _encParams = NtruParams;
-            _dgtEngine = GetDigest(_encParams.Digest);
-            _rndEngine = GetPrng(_encParams.RandomEngine);
+            m_encParams = NtruParams;
+            m_dgtEngine = GetDigest(m_encParams.Digest);
+            m_rndEngine = GetPrng(m_encParams.RandomEngine);
         }
 
         private NTRUEncrypt()
@@ -224,20 +224,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <exception cref="CryptoAsymmetricException">If not initialized, the specified hash algorithm is invalid, the encrypted data is invalid, or <c>MaxLenBytes</c> is greater than 255</exception>
         public byte[] Decrypt(byte[] Input)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoAsymmetricException("NTRUEncrypt:Decrypt", "The cipher has not been initialized!", new InvalidOperationException());
 
-            IPolynomial priv_t = ((NTRUPrivateKey)_keyPair.PrivateKey).T;
-            IntegerPolynomial priv_fp = ((NTRUPrivateKey)_keyPair.PrivateKey).FP;
-            IntegerPolynomial pub = ((NTRUPublicKey)_keyPair.PublicKey).H;
-            int N = _encParams.N;
-            int q = _encParams.Q;
-            int db = _encParams.Db;
-            int maxMsgLenBytes = _encParams.MessageMax;
-            int dm0 = _encParams.Dm0;
-            int maxM1 = _encParams.MaxM1;
-            int minCallsMask = _encParams.MinMGFHashCalls;
-            bool hashSeed = _encParams.HashSeed;
+            IPolynomial priv_t = ((NTRUPrivateKey)m_keyPair.PrivateKey).T;
+            IntegerPolynomial priv_fp = ((NTRUPrivateKey)m_keyPair.PrivateKey).FP;
+            IntegerPolynomial pub = ((NTRUPublicKey)m_keyPair.PublicKey).H;
+            int N = m_encParams.N;
+            int q = m_encParams.Q;
+            int db = m_encParams.Db;
+            int maxMsgLenBytes = m_encParams.MessageMax;
+            int dm0 = m_encParams.Dm0;
+            int maxM1 = m_encParams.MaxM1;
+            int minCallsMask = m_encParams.MinMGFHashCalls;
+            bool hashSeed = m_encParams.HashSeed;
             int bLen = db / 8;
             IntegerPolynomial e = IntegerPolynomial.FromBinary(Input, N, q);
             IntegerPolynomial ci = Decrypt(e, priv_t, priv_fp);
@@ -303,19 +303,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <exception cref="CryptoAsymmetricException">If not initialized, the specified hash algorithm is invalid, the encrypted data is invalid, or <c>maxLenBytes</c> is greater than 255</exception>
         public byte[] Encrypt(byte[] Input)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoAsymmetricException("NTRUEncrypt:Encrypt", "The cipher has not been initialized!", new InvalidOperationException());
 
-            IntegerPolynomial pub = ((NTRUPublicKey)_keyPair.PublicKey).H;
-            int N = _encParams.N;
-            int q = _encParams.Q;
-            int maxLenBytes = _encParams.MessageMax;
-            int db = _encParams.Db;
-            int bufferLenBits = _encParams.BufferLenBits;
-            int dm0 = _encParams.Dm0;
-            int maxM1 = _encParams.MaxM1;
-            int minCallsMask = _encParams.MinMGFHashCalls;
-            bool hashSeed = _encParams.HashSeed;
+            IntegerPolynomial pub = ((NTRUPublicKey)m_keyPair.PublicKey).H;
+            int N = m_encParams.N;
+            int q = m_encParams.Q;
+            int maxLenBytes = m_encParams.MessageMax;
+            int db = m_encParams.Db;
+            int m_bufferLenBits = m_encParams.m_bufferLenBits;
+            int dm0 = m_encParams.Dm0;
+            int maxM1 = m_encParams.MaxM1;
+            int minCallsMask = m_encParams.MinMGFHashCalls;
+            bool hashSeed = m_encParams.HashSeed;
             int msgLen = Input.Length;
 
             //if (maxLenBytes > 255)
@@ -328,11 +328,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
                 // M = b|octL|m|p0
                 byte[] b = new byte[db / 8];
                 // forward padding
-                _rndEngine.GetBytes(b);
+                m_rndEngine.GetBytes(b);
                 byte[] p0 = new byte[maxLenBytes + 1 - msgLen];
                 byte[] msgTmp;
 
-                using (BinaryWriter writer = new BinaryWriter(new MemoryStream((bufferLenBits + 7) / 8)))
+                using (BinaryWriter writer = new BinaryWriter(new MemoryStream((m_bufferLenBits + 7) / 8)))
                 {
                     writer.Write(b);
                     writer.Write((byte)msgLen);
@@ -407,9 +407,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
             if (!(AsmKey is NTRUPublicKey))
                 throw new CryptoAsymmetricException("NTRUEncrypt:Initialize", "Not a valid NTRU public key!", new InvalidDataException());
 
-            _keyPair = new NTRUKeyPair(AsmKey);
-            _isEncryption = true;
-            _isInitialized = true;
+            m_keyPair = new NTRUKeyPair(AsmKey);
+            m_isEncryption = true;
+            m_isInitialized = true;
         }
 
         /// <summary>
@@ -437,9 +437,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
             if (!(KeyPair.PrivateKey is NTRUPrivateKey))
                 throw new CryptoAsymmetricException("NTRUEncrypt:Initialize", "Not a valid NTRU key pair!", new InvalidDataException());
 
-            _keyPair = (NTRUKeyPair)KeyPair;
-            _isEncryption = false;
-            _isInitialized = true;
+            m_keyPair = (NTRUKeyPair)KeyPair;
+            m_isEncryption = false;
+            m_isInitialized = true;
         }
         #endregion
 
@@ -455,10 +455,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <returns>Derypted polynomial</returns>
         private IntegerPolynomial Decrypt(IntegerPolynomial E, IPolynomial PrivT, IntegerPolynomial PrivFp)
         {
-            int q = _encParams.Q;
+            int q = m_encParams.Q;
             IntegerPolynomial a;
 
-            if (_encParams.FastFp)
+            if (m_encParams.FastFp)
             {
                 a = PrivT.Multiply(E, q);
                 a.Multiply(3);
@@ -471,7 +471,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
 
             a.Center0(q);
             a.Mod3();
-            IntegerPolynomial c = _encParams.FastFp ? a : new DenseTernaryPolynomial(a).Multiply(PrivFp, 3);
+            IntegerPolynomial c = m_encParams.FastFp ? a : new DenseTernaryPolynomial(a).Multiply(PrivFp, 3);
             c.Center0(3);
 
             return c;
@@ -526,8 +526,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <returns>A byte array containing a seed value</returns>
         private byte[] GetSeed(byte[] Message, IntegerPolynomial PubKey, byte[] Bits)
         {
-            byte[] oid = _encParams.OId;
-            byte[] hTrunc = PubKey.ToBinaryTrunc(_encParams.Q, _encParams.PkLen / 8);
+            byte[] oid = m_encParams.OId;
+            byte[] hTrunc = PubKey.ToBinaryTrunc(m_encParams.Q, m_encParams.m_PkLen / 8);
             // sData = OID|m|b|hTrunc
             byte[] sData = new byte[oid.Length + Message.Length + Bits.Length + hTrunc.Length];
 
@@ -551,23 +551,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <returns>A blinding polynomial</returns>
         private IPolynomial GenerateBlindingPoly(byte[] Seed)
         {
-            int N = _encParams.N;
-            IndexGenerator ig = new IndexGenerator(Seed, _encParams);
+            int N = m_encParams.N;
+            IndexGenerator ig = new IndexGenerator(Seed, m_encParams);
 
-            if (_encParams.PolyType == TernaryPolynomialType.PRODUCT) //.8, .6
+            if (m_encParams.PolyType == TernaryPolynomialType.PRODUCT) //.8, .6
             {
-                SparseTernaryPolynomial r1 = SparseTernaryPolynomial.GenerateBlindingPoly(ig, N, _encParams.DR1);
-                SparseTernaryPolynomial r2 = SparseTernaryPolynomial.GenerateBlindingPoly(ig, N, _encParams.DR2);
-                SparseTernaryPolynomial r3 = SparseTernaryPolynomial.GenerateBlindingPoly(ig, N, _encParams.DR3);
+                SparseTernaryPolynomial r1 = SparseTernaryPolynomial.GenerateBlindingPoly(ig, N, m_encParams.DR1);
+                SparseTernaryPolynomial r2 = SparseTernaryPolynomial.GenerateBlindingPoly(ig, N, m_encParams.DR2);
+                SparseTernaryPolynomial r3 = SparseTernaryPolynomial.GenerateBlindingPoly(ig, N, m_encParams.DR3);
 
                 return new ProductFormPolynomial(r1, r2, r3);
             }
             else
             {
-                if (_encParams.Sparse)
-                    return SparseTernaryPolynomial.GenerateBlindingPoly(ig, N, _encParams.DR);
+                if (m_encParams.Sparse)
+                    return SparseTernaryPolynomial.GenerateBlindingPoly(ig, N, m_encParams.DR);
                 else
-                    return DenseTernaryPolynomial.GenerateBlindingPoly(ig, N, _encParams.DR);
+                    return DenseTernaryPolynomial.GenerateBlindingPoly(ig, N, m_encParams.DR);
             }
         }
 
@@ -583,11 +583,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <returns></returns>
         private IntegerPolynomial MGF(byte[] Seed, int N, int MinCallsMask, bool HashSeed)
         {
-            int hashLen = _dgtEngine.DigestSize;
+            int hashLen = m_dgtEngine.DigestSize;
 
             using (MemoryStream writer = new MemoryStream(MinCallsMask * hashLen))
             {
-                byte[] Z = HashSeed ? _dgtEngine.ComputeHash(Seed) : Seed;
+                byte[] Z = HashSeed ? m_dgtEngine.ComputeHash(Seed) : Seed;
                 int counter = 0;
 
                 while (counter < MinCallsMask)
@@ -595,7 +595,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
                     byte[] data = new byte[Z.Length + 4];
                     Buffer.BlockCopy(Z, 0, data, 0, Z.Length);
                     Buffer.BlockCopy(IntUtils.IntToBytes(counter), 0, data, Z.Length, 4);
-                    byte[] hash = _dgtEngine.ComputeHash(data);
+                    byte[] hash = m_dgtEngine.ComputeHash(data);
                     writer.Write(hash, 0, hash.Length);
                     counter++;
                 }
@@ -634,7 +634,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
                     writer.SetLength(0);
                     writer.SetLength(hashLen);
                     // get the hash
-                    byte[] hash = _dgtEngine.ComputeHash(ArrayUtils.Concat(Z, IntUtils.IntToBytes(counter)));
+                    byte[] hash = m_dgtEngine.ComputeHash(ArrayUtils.Concat(Z, IntUtils.IntToBytes(counter)));
                     writer.Write(hash, 0, hash.Length);
                     counter++;
                 }
@@ -654,24 +654,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_dgtEngine != null)
+                    if (m_dgtEngine != null)
                     {
-                        _dgtEngine.Dispose();
-                        _dgtEngine = null;
+                        m_dgtEngine.Dispose();
+                        m_dgtEngine = null;
                     }
-                    if (_rndEngine != null)
+                    if (m_rndEngine != null)
                     {
-                        _rndEngine.Dispose();
-                        _rndEngine = null;
+                        m_rndEngine.Dispose();
+                        m_rndEngine = null;
                     }
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

@@ -175,16 +175,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         #endregion
 
         #region Fields
-        private ICipherMode _cipherEngine;
-        private IStreamCipher _streamCipher;
-        private bool _isEncryption = true;
-        private int _blockSize = PARALLEL_DEFBLOCK;
-        private bool _disposeEngine = false;
-        private bool _isCounterMode = false;
-        private bool _isDisposed = false;
-        private bool _isParallel = false;
-        private bool _isStreamCipher = false;
-        private int _processorCount;
+        private ICipherMode m_cipherEngine;
+        private IStreamCipher m_streamCipher;
+        private bool m_isEncryption = true;
+        private int m_blockSize = PARALLEL_DEFBLOCK;
+        private bool m_disposeEngine = false;
+        private bool m_isCounterMode = false;
+        private bool m_isDisposed = false;
+        private bool m_isParallel = false;
+        private bool m_isStreamCipher = false;
+        private int m_processorCount;
         #endregion
 
         #region Properties
@@ -193,8 +193,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// </summary>
         public bool IsParallel
         {
-            get { return _isParallel; }
-            set { _isParallel = value; }
+            get { return m_isParallel; }
+            set { m_isParallel = value; }
         }
 
         /// <summary>
@@ -205,7 +205,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// or the size is less than ParallelMinimumSize or more than ParallelMaximumSize values</exception>
         public int ParallelBlockSize
         {
-            get { return _blockSize; }
+            get { return m_blockSize; }
             set
             {
                 if (value % ParallelMinimumSize != 0)
@@ -213,7 +213,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
                 if (value > ParallelMaximumSize || value < ParallelMinimumSize)
                     throw new CryptoProcessingException("PacketCipher:ParallelBlockSize", String.Format("Parallel block must be Maximum of ParallelMaximumSize: {0} and evenly divisible by ParallelMinimumSize: {1}", ParallelMaximumSize, ParallelMinimumSize), new ArgumentOutOfRangeException());
 
-                _blockSize = value;
+                m_blockSize = value;
             }
         }
 
@@ -232,21 +232,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         {
             get
             {
-                if (_isStreamCipher)
+                if (m_isStreamCipher)
                 {
-                    if (_streamCipher.GetType().Equals(typeof(ChaCha)))
-                        return ((ChaCha)_streamCipher).ParallelMinimumSize;
+                    if (m_streamCipher.GetType().Equals(typeof(ChaCha20)))
+                        return ((ChaCha20)m_streamCipher).ParallelMinimumSize;
                     else
-                        return ((Salsa20)_streamCipher).ParallelMinimumSize;
+                        return ((Salsa20)m_streamCipher).ParallelMinimumSize;
                 }
                 else
                 {
-                    if (_cipherEngine.GetType().Equals(typeof(CTR)))
-                        return ((CTR)_cipherEngine).ParallelMinimumSize;
-                    else if (_cipherEngine.GetType().Equals(typeof(CBC)) && !_isEncryption)
-                        return ((CBC)_cipherEngine).ParallelMinimumSize;
-                    else if (_cipherEngine.GetType().Equals(typeof(CFB)) && !_isEncryption)
-                        return ((CFB)_cipherEngine).ParallelMinimumSize;
+                    if (m_cipherEngine.GetType().Equals(typeof(CTR)))
+                        return ((CTR)m_cipherEngine).ParallelMinimumSize;
+                    else if (m_cipherEngine.GetType().Equals(typeof(CBC)) && !m_isEncryption)
+                        return ((CBC)m_cipherEngine).ParallelMinimumSize;
+                    else if (m_cipherEngine.GetType().Equals(typeof(CFB)) && !m_isEncryption)
+                        return ((CFB)m_cipherEngine).ParallelMinimumSize;
                     else
                         return 0;
                 }
@@ -258,8 +258,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// </summary>
         public int ProcessorCount
         {
-            get { return _processorCount; }
-            private set { _processorCount = value; }
+            get { return m_processorCount; }
+            private set { m_processorCount = value; }
         }
         #endregion
 
@@ -282,48 +282,48 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             if (KeyParam == null)
                 throw new CryptoProcessingException("PacketCipher:CTor", "KeyParam can not be null!", new ArgumentNullException());
 
-            _disposeEngine = true;
-            _isEncryption = Encryption;
-            _blockSize = Description.BlockSize;
-            _isParallel = false;
+            m_disposeEngine = true;
+            m_isEncryption = Encryption;
+            m_blockSize = Description.BlockSize;
+            m_isParallel = false;
 
-            if (_isStreamCipher = IsStreamCipher((SymmetricEngines)Description.EngineType))
+            if (m_isStreamCipher = IsStreamCipher((SymmetricEngines)Description.EngineType))
             {
-                _streamCipher = GetStreamCipher((StreamCiphers)Description.EngineType, Description.RoundCount);
-                _streamCipher.Initialize(KeyParam);
+                m_streamCipher = GetStreamCipher((StreamCiphers)Description.EngineType, Description.RoundCount);
+                m_streamCipher.Initialize(KeyParam);
 
-                if (_streamCipher.GetType().Equals(typeof(ChaCha)))
+                if (m_streamCipher.GetType().Equals(typeof(ChaCha20)))
                 {
-                    if (_isParallel = ((ChaCha)_streamCipher).IsParallel)
-                        _blockSize = ((ChaCha)_streamCipher).ParallelBlockSize;
+                    if (m_isParallel = ((ChaCha20)m_streamCipher).IsParallel)
+                        m_blockSize = ((ChaCha20)m_streamCipher).ParallelBlockSize;
                 }
                 else
                 {
-                    if (_isParallel = ((Salsa20)_streamCipher).IsParallel)
-                        _blockSize = ((Salsa20)_streamCipher).ParallelBlockSize;
+                    if (m_isParallel = ((Salsa20)m_streamCipher).IsParallel)
+                        m_blockSize = ((Salsa20)m_streamCipher).ParallelBlockSize;
                 }
             }
             else
             {
-                _cipherEngine = GetCipherMode((CipherModes)Description.CipherType, (BlockCiphers)Description.EngineType, Description.BlockSize, Description.RoundCount, (Digests)Description.KdfEngine);
-                _cipherEngine.Initialize(_isEncryption, KeyParam);
+                m_cipherEngine = GetCipherMode((CipherModes)Description.CipherType, (BlockCiphers)Description.EngineType, Description.BlockSize, Description.RoundCount, (Digests)Description.KdfEngine);
+                m_cipherEngine.Initialize(m_isEncryption, KeyParam);
 
-                if (_isCounterMode = _cipherEngine.GetType().Equals(typeof(CTR)))
+                if (m_isCounterMode = m_cipherEngine.GetType().Equals(typeof(CTR)))
                 {
-                    if (_isParallel = ((CTR)_cipherEngine).IsParallel)
-                        _blockSize = ((CTR)_cipherEngine).ParallelBlockSize;
+                    if (m_isParallel = ((CTR)m_cipherEngine).IsParallel)
+                        m_blockSize = ((CTR)m_cipherEngine).ParallelBlockSize;
                 }
                 else
                 {
-                    if (_cipherEngine.GetType().Equals(typeof(CBC)))
+                    if (m_cipherEngine.GetType().Equals(typeof(CBC)))
                     {
-                        if (_isParallel = ((CBC)_cipherEngine).IsParallel && !((CBC)_cipherEngine).IsEncryption)
-                            _blockSize = ((CBC)_cipherEngine).ParallelBlockSize;
+                        if (m_isParallel = ((CBC)m_cipherEngine).IsParallel && !((CBC)m_cipherEngine).IsEncryption)
+                            m_blockSize = ((CBC)m_cipherEngine).ParallelBlockSize;
                     }
-                    else if (_cipherEngine.GetType().Equals(typeof(CFB)))
+                    else if (m_cipherEngine.GetType().Equals(typeof(CFB)))
                     {
-                        if (_isParallel = ((CFB)_cipherEngine).IsParallel && !((CFB)_cipherEngine).IsEncryption)
-                            _blockSize = ((CFB)_cipherEngine).ParallelBlockSize;
+                        if (m_isParallel = ((CFB)m_cipherEngine).IsParallel && !((CFB)m_cipherEngine).IsEncryption)
+                            m_blockSize = ((CFB)m_cipherEngine).ParallelBlockSize;
                     }
                 }
             }
@@ -347,22 +347,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             if (!Cipher.IsInitialized)
                 throw new CryptoProcessingException("PacketCipher:CTor", "The Cipher has not been initialized!", new ArgumentException());
 
-            _disposeEngine = DisposeEngine;
-            _cipherEngine = Cipher;
-            _isStreamCipher = false;
-            _blockSize = _cipherEngine.BlockSize;
-            _isEncryption = _cipherEngine.IsEncryption;
-            _isParallel = false;
+            m_disposeEngine = DisposeEngine;
+            m_cipherEngine = Cipher;
+            m_isStreamCipher = false;
+            m_blockSize = m_cipherEngine.BlockSize;
+            m_isEncryption = m_cipherEngine.IsEncryption;
+            m_isParallel = false;
 
-            if (_isCounterMode = _cipherEngine.GetType().Equals(typeof(CTR)))
+            if (m_isCounterMode = m_cipherEngine.GetType().Equals(typeof(CTR)))
             {
-                if (_isParallel = ((CTR)_cipherEngine).IsParallel)
-                    _blockSize = ((CTR)_cipherEngine).ParallelBlockSize;
+                if (m_isParallel = ((CTR)m_cipherEngine).IsParallel)
+                    m_blockSize = ((CTR)m_cipherEngine).ParallelBlockSize;
             }
             else
             {
-                if (_cipherEngine.GetType().Equals(typeof(CBC)))
-                    _isParallel = ((CBC)_cipherEngine).IsParallel && !((CBC)_cipherEngine).IsEncryption;
+                if (m_cipherEngine.GetType().Equals(typeof(CBC)))
+                    m_isParallel = ((CBC)m_cipherEngine).IsParallel && !((CBC)m_cipherEngine).IsEncryption;
             }
         }
 
@@ -382,22 +382,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             if (!Cipher.IsInitialized)
                 throw new CryptoProcessingException("PacketCipher:CTor", "The Cipher has not been initialized!", new ArgumentException());
 
-            _disposeEngine = DisposeEngine;
-            _streamCipher = Cipher;
-            _isStreamCipher = true;
-            _blockSize = 1024;
-            _isCounterMode = false;
+            m_disposeEngine = DisposeEngine;
+            m_streamCipher = Cipher;
+            m_isStreamCipher = true;
+            m_blockSize = 1024;
+            m_isCounterMode = false;
 
             // set defaults
-            if (_streamCipher.GetType().Equals(typeof(ChaCha)))
+            if (m_streamCipher.GetType().Equals(typeof(ChaCha20)))
             {
-                if (_isParallel = ((ChaCha)_streamCipher).IsParallel)
-                    _blockSize = ((ChaCha)_streamCipher).ParallelBlockSize;
+                if (m_isParallel = ((ChaCha20)m_streamCipher).IsParallel)
+                    m_blockSize = ((ChaCha20)m_streamCipher).ParallelBlockSize;
             }
             else
             {
-                if (_isParallel = ((Salsa20)_streamCipher).IsParallel)
-                    _blockSize = ((Salsa20)_streamCipher).ParallelBlockSize;
+                if (m_isParallel = ((Salsa20)m_streamCipher).IsParallel)
+                    m_blockSize = ((Salsa20)m_streamCipher).ParallelBlockSize;
             }
         }
 
@@ -426,9 +426,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// <param name="Length">The number of bytes to process</param>
         public void Write(byte[] Input, int InOffset, byte[] Output, int OutOffset, int Length)
         {
-            if (!_isStreamCipher)
+            if (!m_isStreamCipher)
             {
-                if (_isEncryption)
+                if (m_isEncryption)
                     Encrypt(Input, InOffset, Output, OutOffset, Length);
                 else
                     Decrypt(Input, InOffset, Output, OutOffset, Length);
@@ -448,9 +448,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
             while (InOffset < Length)
             {
-                _cipherEngine.Transform(Input, InOffset, Output, OutOffset);
-                InOffset += _blockSize;
-                OutOffset += _blockSize;
+                m_cipherEngine.Transform(Input, InOffset, Output, OutOffset);
+                InOffset += m_blockSize;
+                OutOffset += m_blockSize;
             }
         }
 
@@ -461,9 +461,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
             while (InOffset < Length)
             {
-                _cipherEngine.Transform(Input, InOffset, Output, OutOffset);
-                InOffset += _blockSize;
-                OutOffset += _blockSize;
+                m_cipherEngine.Transform(Input, InOffset, Output, OutOffset);
+                InOffset += m_blockSize;
+                OutOffset += m_blockSize;
             }
         }
 
@@ -529,9 +529,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
             while (InOffset < Length)
             {
-                _streamCipher.Transform(Input, InOffset, Output, OutOffset);
-                InOffset += _blockSize;
-                OutOffset += _blockSize;
+                m_streamCipher.Transform(Input, InOffset, Output, OutOffset);
+                InOffset += m_blockSize;
+                OutOffset += m_blockSize;
             }
         }
         #endregion
@@ -548,27 +548,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_disposeEngine)
+                    if (m_disposeEngine)
                     {
-                        if (_cipherEngine != null)
+                        if (m_cipherEngine != null)
                         {
-                            _cipherEngine.Dispose();
-                            _cipherEngine = null;
+                            m_cipherEngine.Dispose();
+                            m_cipherEngine = null;
                         }
-                        if (_streamCipher != null)
+                        if (m_streamCipher != null)
                         {
-                            _streamCipher.Dispose();
-                            _streamCipher = null;
+                            m_streamCipher.Dispose();
+                            m_streamCipher = null;
                         }
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

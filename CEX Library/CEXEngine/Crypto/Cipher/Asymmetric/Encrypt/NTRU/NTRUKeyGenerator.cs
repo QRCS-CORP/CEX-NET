@@ -101,10 +101,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         #endregion
 
         #region Fields
-        private readonly NTRUParameters _ntruParams;
-        private bool _isDisposed;
-        private IRandom _rndEngine;
-        private bool _frcLinear = false;
+        private readonly NTRUParameters m_ntruParams;
+        private bool m_isDisposed;
+        private IRandom m_rndEngine;
+        private bool m_frcLinear = false;
         #endregion
 
         #region Properties
@@ -131,10 +131,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
             if (CipherParams.RandomEngine == Prngs.PBPrng)
                 throw new CryptoAsymmetricException("MPKCKeyGenerator:Ctor", "Passphrase based digest and CTR generators must be pre-initialized, use the other constructor!", new ArgumentException());
 
-            _frcLinear = ParallelUtils.ForceLinear;
+            m_frcLinear = ParallelUtils.ForceLinear;
             ParallelUtils.ForceLinear = !Parallel;
-            _ntruParams = CipherParams;
-            _rndEngine = GetPrng(_ntruParams.RandomEngine);
+            m_ntruParams = CipherParams;
+            m_rndEngine = GetPrng(m_ntruParams.RandomEngine);
         }
 
         /// <summary>
@@ -146,16 +146,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <param name="Parallel">Use parallel processing when generating a key; set to false if using a passphrase type generator (default is true)</param>
         public NTRUKeyGenerator(NTRUParameters CipherParams, IRandom RngEngine, bool Parallel = true)
         {
-            _frcLinear = ParallelUtils.ForceLinear;
+            m_frcLinear = ParallelUtils.ForceLinear;
             // passphrase gens must be linear processed
             if (RngEngine.GetType().Equals(typeof(PBPRng)))
                 ParallelUtils.ForceLinear = true;
             else
                 ParallelUtils.ForceLinear = !Parallel;
 
-            _ntruParams = CipherParams;
+            m_ntruParams = CipherParams;
             // set source of randomness
-            _rndEngine = RngEngine;
+            m_rndEngine = RngEngine;
         }
 
         private NTRUKeyGenerator()
@@ -179,7 +179,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <returns>A key pair</returns>
         public IAsymmetricKeyPair GenerateKeyPair()
         {
-            return GenerateKeyPair(_rndEngine);
+            return GenerateKeyPair(m_rndEngine);
         }
 
         /// <summary>
@@ -193,7 +193,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <returns>A populated IAsymmetricKeyPair</returns>
         public IAsymmetricKeyPair GenerateKeyPair(byte[] Passphrase, byte[] Salt)
         {
-            using (IDigest dgt = GetDigest(_ntruParams.Digest))
+            using (IDigest dgt = GetDigest(m_ntruParams.Digest))
             {
                 using (IRandom rnd = new PBPRng(dgt, Passphrase, Salt, 10000, false))
                 {
@@ -240,11 +240,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <returns>A key pair</returns>
         private IAsymmetricKeyPair GenerateKeyPair(IRandom RngF, IRandom RngG)
         {
-            int N = _ntruParams.N;
-            int q = _ntruParams.Q;
-            bool fastFp = _ntruParams.FastFp;
-            bool sparse = _ntruParams.Sparse;
-            TernaryPolynomialType polyType = _ntruParams.PolyType;
+            int N = m_ntruParams.N;
+            int q = m_ntruParams.Q;
+            bool fastFp = m_ntruParams.FastFp;
+            bool sparse = m_ntruParams.Sparse;
+            TernaryPolynomialType polyType = m_ntruParams.PolyType;
             IPolynomial t = null;
             IntegerPolynomial fq = null;
             IntegerPolynomial fp = null;
@@ -285,15 +285,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
 
         private void GenerateFQ(IRandom Rng, out IPolynomial T, out IntegerPolynomial Fq, out IntegerPolynomial Fp)
         {
-            int N = _ntruParams.N;
-            int q = _ntruParams.Q;
-            int df = _ntruParams.DF;
-            int df1 = _ntruParams.DF1;
-            int df2 = _ntruParams.DF2;
-            int df3 = _ntruParams.DF3;
-            bool fastFp = _ntruParams.FastFp;
-            bool sparse = _ntruParams.Sparse;
-            TernaryPolynomialType polyType = _ntruParams.PolyType;
+            int N = m_ntruParams.N;
+            int q = m_ntruParams.Q;
+            int df = m_ntruParams.DF;
+            int df1 = m_ntruParams.DF1;
+            int df2 = m_ntruParams.DF2;
+            int df3 = m_ntruParams.DF3;
+            bool fastFp = m_ntruParams.FastFp;
+            bool sparse = m_ntruParams.Sparse;
+            TernaryPolynomialType polyType = m_ntruParams.PolyType;
             Fp = null;
 
             // choose a random f that is invertible mod 3 and q
@@ -340,8 +340,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </remarks>
         private IntegerPolynomial GenerateG(IRandom RngEngine)
         {
-            int N = _ntruParams.N;
-            int dg = _ntruParams.Dg;
+            int N = m_ntruParams.N;
+            int dg = m_ntruParams.Dg;
 
             while (true)
             {
@@ -397,26 +397,26 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public void Dispose()
         {
-            ParallelUtils.ForceLinear = _frcLinear;
+            ParallelUtils.ForceLinear = m_frcLinear;
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_rndEngine != null)
+                    if (m_rndEngine != null)
                     {
-                        _rndEngine.Dispose();
-                        _rndEngine = null;
+                        m_rndEngine.Dispose();
+                        m_rndEngine = null;
                     }
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

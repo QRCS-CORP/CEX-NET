@@ -96,7 +96,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
         private int _dataLen = 0;
         private byte[] _msgState = new byte[128];
         private ulong[] _hashVal = new ulong[8];
-        private bool _isDisposed = false;
+        private bool m_isDisposed = false;
         private bool _isNullT;
         private ulong[] _salt64 = new ulong[4];
         private ulong[] _M = new ulong[16];
@@ -498,7 +498,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
@@ -530,7 +530,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Digest
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

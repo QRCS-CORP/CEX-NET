@@ -15,9 +15,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
     internal sealed class ComputeInField : IDisposable
     {
         #region Fields
-        private short[][] _A;
-        private short[] _X;
-        private bool _isDisposed = false;
+        private short[][] m_A;
+        private short[] m_X;
+        private bool m_isDisposed = false;
         #endregion
 
         #region Constructor
@@ -102,7 +102,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
                 short factor;
                 short[][] inverse;
 
-                _A = ArrayUtils.CreateJagged<short[][]>(Coef.Length, 2 * Coef.Length);
+                m_A = ArrayUtils.CreateJagged<short[][]>(Coef.Length, 2 * Coef.Length);
 
                 if (Coef.Length != Coef[0].Length)
                     throw new CryptoAsymmetricSignException("ComputeInField:Inverse", "The matrix is not invertible!", new ArgumentException());
@@ -112,36 +112,36 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
                 {
                     // copy the input matrix coef into A
                     for (int j = 0; j < Coef.Length; j++)
-                        _A[i][j] = Coef[i][j];
+                        m_A[i][j] = Coef[i][j];
 
                     // copy the identity matrix into A.
                     for (int j = Coef.Length; j < 2 * Coef.Length; j++)
-                        _A[i][j] = 0;
+                        m_A[i][j] = 0;
                     
-                    _A[i][i + _A.Length] = 1;
+                    m_A[i][i + m_A.Length] = 1;
                 }
 
                 // Elimination operations to get the identity matrix from the left side of A, modify A to get 0s under the diagonal
                 ComputeZerosUnder(true);
 
                 // modify A to get only 1s on the diagonal: A[i][j] =A[i][j]/A[i][i]
-                for (int i = 0; i < _A.Length; i++)
+                for (int i = 0; i < m_A.Length; i++)
                 {
-                    factor = GF2Field.InvElem(_A[i][i]);
-                    for (int j = i; j < 2 * _A.Length; j++)
-                        _A[i][j] = GF2Field.MultElem(_A[i][j], factor);
+                    factor = GF2Field.InvElem(m_A[i][i]);
+                    for (int j = i; j < 2 * m_A.Length; j++)
+                        m_A[i][j] = GF2Field.MultElem(m_A[i][j], factor);
                 }
 
                 //modify A to get only 0s above the diagonal.
                 ComputeZerosAbove();
 
                 // copy the result (the second half of A) in the matrix inverse
-                inverse = ArrayUtils.CreateJagged<short[][]>(_A.Length, _A.Length);
+                inverse = ArrayUtils.CreateJagged<short[][]>(m_A.Length, m_A.Length);
 
-                for (int i = 0; i < _A.Length; i++)
+                for (int i = 0; i < m_A.Length; i++)
                 {
-                    for (int j = _A.Length; j < 2 * _A.Length; j++)
-                        inverse[i][j - _A.Length] = _A[i][j];
+                    for (int j = m_A.Length; j < 2 * m_A.Length; j++)
+                        inverse[i][j - m_A.Length] = m_A[i][j];
                 }
 
                 return inverse;
@@ -172,7 +172,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
                 throw new CryptoAsymmetricSignException("ComputeInField:MultiplyMatrix", "Multiplication is not possible!", new ArgumentException());
             
             short tmp = 0;
-            _A = ArrayUtils.CreateJagged<short[][]>(M1.Length, M2[0].Length);
+            m_A = ArrayUtils.CreateJagged<short[][]>(M1.Length, M2[0].Length);
 
             for (int i = 0; i < M1.Length; i++)
             {
@@ -181,11 +181,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
                     for (int k = 0; k < M2[0].Length; k++)
                     {
                         tmp = GF2Field.MultElem(M1[i][j], M2[j][k]);
-                        _A[i][k] = GF2Field.AddElem(_A[i][k], tmp);
+                        m_A[i][k] = GF2Field.AddElem(m_A[i][k], tmp);
                     }
                 }
             }
-            return _A;
+            return m_A;
         }
 
         /// <summary>
@@ -303,27 +303,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
 
                 // initialize this matrix stores B and b from the equation B*x = b, b is stored as the last column.
                 // B contains one column more than rows, In this column we store a free coefficient that should be later subtracted from b
-                _A = ArrayUtils.CreateJagged<short[][]>(B.Length, B.Length + 1);
+                m_A = ArrayUtils.CreateJagged<short[][]>(B.Length, B.Length + 1);
                 // stores the solution of the LES
-                _X = new short[B.Length];
+                m_X = new short[B.Length];
 
                 // copy B into the global matrix A
                 for (int i = 0; i < B.Length; i++)
                 {
                     for (int j = 0; j < B[0].Length; j++)
-                        _A[i][j] = B[i][j];
+                        m_A[i][j] = B[i][j];
                 }
 
                 // copy the vector b into the global A
                 // the free coefficient, stored in the last column of A( A[i][b.Length] is to be subtracted from b
                 for (int i = 0; i < Br.Length; i++)
-                    _A[i][Br.Length] = GF2Field.AddElem(Br[i], _A[i][Br.Length]);
+                    m_A[i][Br.Length] = GF2Field.AddElem(Br[i], m_A[i][Br.Length]);
 
                 // call the methods for gauss elimination and backward substitution
                 ComputeZerosUnder(false);     // obtain zeros under the diagonal
                 Substitute();
 
-                return _X;
+                return m_X;
 
             }
             catch
@@ -355,18 +355,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
 
             // the function is used in inverse() - A should have 2 times more columns than rows
             if (ForInverse)
-                length = 2 * _A.Length;
+                length = 2 * m_A.Length;
             // the function is used in solveEquation - A has 1 column more than rows
             else
-                length = _A.Length + 1;
+                length = m_A.Length + 1;
 
             // elimination operations to modify A so that that it contains only 0s under the diagonal
-            for (int k = 0; k < _A.Length - 1; k++) // the fixed row
+            for (int k = 0; k < m_A.Length - 1; k++) // the fixed row
             {
-                for (int i = k + 1; i < _A.Length; i++)
+                for (int i = k + 1; i < m_A.Length; i++)
                 {
-                    short factor1 = _A[i][k];
-                    short factor2 = GF2Field.InvElem(_A[k][k]);
+                    short factor1 = m_A[i][k];
+                    short factor2 = GF2Field.InvElem(m_A[k][k]);
 
                     // The element which multiplicative inverse is needed, is 0 in this case is the input matrix not invertible
                     if (factor2 == 0)
@@ -375,11 +375,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
                     for (int j = k; j < length; j++)
                     {// columns
                         // tmp=A[k,j] / A[k,k]
-                        tmp = GF2Field.MultElem(_A[k][j], factor2);
+                        tmp = GF2Field.MultElem(m_A[k][j], factor2);
                         // tmp = A[i,k] * A[k,j] / A[k,k]
                         tmp = GF2Field.MultElem(factor1, tmp);
                         // A[i,j]=A[i,j]-A[i,k]/A[k,k]*A[k,j];
-                        _A[i][j] = GF2Field.AddElem(_A[i][j], tmp);
+                        m_A[i][j] = GF2Field.AddElem(m_A[i][j], tmp);
                     }
                 }
             }
@@ -396,21 +396,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
         private void ComputeZerosAbove()
         {
             short tmp = 0;
-            for (int k = _A.Length - 1; k > 0; k--) // the fixed row
+            for (int k = m_A.Length - 1; k > 0; k--) // the fixed row
             {
                 for (int i = k - 1; i >= 0; i--) // rows
                 {
-                    short factor1 = _A[i][k];
-                    short factor2 = GF2Field.InvElem(_A[k][k]);
+                    short factor1 = m_A[i][k];
+                    short factor2 = GF2Field.InvElem(m_A[k][k]);
 
                     if (factor2 == 0)
                         throw new CryptoAsymmetricSignException("ComputeInField:ComputeZerosAbove", "Matrix not invertible!", new ArgumentException());
                     
-                    for (int j = k; j < 2 * _A.Length; j++) // columns
+                    for (int j = k; j < 2 * m_A.Length; j++) // columns
                     {
-                        tmp = GF2Field.MultElem(_A[k][j], factor2);
+                        tmp = GF2Field.MultElem(m_A[k][j], factor2);
                         tmp = GF2Field.MultElem(factor1, tmp);
-                        _A[i][j] = GF2Field.AddElem(_A[i][j], tmp);
+                        m_A[i][j] = GF2Field.AddElem(m_A[i][j], tmp);
                     }
                 }
             }
@@ -430,28 +430,28 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
             // for the temporary results of the operations in field
             short tmp, temp;
 
-            temp = GF2Field.InvElem(_A[_A.Length - 1][_A.Length - 1]);
+            temp = GF2Field.InvElem(m_A[m_A.Length - 1][m_A.Length - 1]);
 
             if (temp == 0)
                 throw new CryptoAsymmetricSignException("ComputeInField:Substitute", "The equation system is not solvable!", new ArgumentException());
 
             // backward substitution
-            _X[_A.Length - 1] = GF2Field.MultElem(_A[_A.Length - 1][_A.Length], temp);
-            for (int i = _A.Length - 2; i >= 0; i--)
+            m_X[m_A.Length - 1] = GF2Field.MultElem(m_A[m_A.Length - 1][m_A.Length], temp);
+            for (int i = m_A.Length - 2; i >= 0; i--)
             {
-                tmp = _A[i][_A.Length];
-                for (int j = _A.Length - 1; j > i; j--)
+                tmp = m_A[i][m_A.Length];
+                for (int j = m_A.Length - 1; j > i; j--)
                 {
-                    temp = GF2Field.MultElem(_A[i][j], _X[j]);
+                    temp = GF2Field.MultElem(m_A[i][j], m_X[j]);
                     tmp = GF2Field.AddElem(tmp, temp);
                 }
 
-                temp = GF2Field.InvElem(_A[i][i]);
+                temp = GF2Field.InvElem(m_A[i][i]);
 
                 if (temp == 0)
                     throw new CryptoAsymmetricSignException("ComputeInField:Substitute", "Not a solvable equation system!", new ArgumentException());
                 
-                _X[i] = GF2Field.MultElem(tmp, temp);
+                m_X[i] = GF2Field.MultElem(tmp, temp);
             }
         }
         #endregion
@@ -468,24 +468,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW.Arithmeti
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_A != null)
+                    if (m_A != null)
                     {
-                        Array.Clear(_A, 0, _A.Length);
-                        _A = null;
+                        Array.Clear(m_A, 0, m_A.Length);
+                        m_A = null;
                     }
-                    if (_X != null)
+                    if (m_X != null)
                     {
-                        Array.Clear(_X, 0, _X.Length);
-                        _X = null;
+                        Array.Clear(m_X, 0, m_X.Length);
+                        m_X = null;
                     }
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

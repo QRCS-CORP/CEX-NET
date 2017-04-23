@@ -51,9 +51,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
-        private byte[] _R2;
-        private int _N;
+        private bool m_isDisposed = false;
+        private byte[] m_R2;
+        private int m_N;
         #endregion
 
         #region Properties
@@ -70,7 +70,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// </summary>
         internal byte[] R2
         {
-            get { return _R2; }
+            get { return m_R2; }
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// </summary>
         public int N
         {
-            get { return _N; }
+            get { return m_N; }
         }
         #endregion
 
@@ -91,8 +91,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <param name="R2">The private key as a byte array</param>
         public RLWEPrivateKey(int N, byte[] R2)
         {
-            _N = N;
-            _R2 = R2;
+            m_N = N;
+            m_R2 = R2;
         }
 
         /// <summary>
@@ -108,10 +108,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             {
                 BinaryReader reader = new BinaryReader(KeyStream);
                 // num coef
-                _N = reader.ReadInt32();
+                m_N = reader.ReadInt32();
                 // key len
                 int klen = reader.ReadInt32();
-                _R2 = reader.ReadBytes(klen);
+                m_R2 = reader.ReadBytes(klen);
             }
             catch (Exception ex)
             {
@@ -191,9 +191,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             // num coeff
             writer.Write(N);
             // length
-            writer.Write(_R2.Length);
+            writer.Write(m_R2.Length);
             // write key
-            writer.Write(_R2);
+            writer.Write(m_R2);
             writer.BaseStream.Seek(0, SeekOrigin.Begin);
 
             return (MemoryStream)writer.BaseStream;
@@ -298,7 +298,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <returns>MPKCPublicKey copy</returns>
         public object Clone()
         {
-            return new RLWEPrivateKey(_N, _R2);
+            return new RLWEPrivateKey(m_N, m_R2);
         }
 
         /// <summary>
@@ -324,20 +324,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_R2 != null)
+                    if (m_R2 != null)
                     {
-                        Array.Clear(_R2, 0, _R2.Length);
-                        _R2 = null;
+                        Array.Clear(m_R2, 0, m_R2.Length);
+                        m_R2 = null;
                     }
-                    _N = 0;
+                    m_N = 0;
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

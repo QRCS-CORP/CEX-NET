@@ -24,7 +24,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Helper
             switch (StreamCipherType)
             {
                 case StreamCiphers.ChaCha:
-                    return new ChaCha(RoundCount);
+                    return new ChaCha20(RoundCount);
                 case StreamCiphers.Salsa:
                     return new Salsa20(RoundCount);
                 default:

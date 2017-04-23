@@ -78,7 +78,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
             for (int i = 0; i < 3; i++)
             {
                 if (i == 0)
-                    param.Digest = Digests.Blake512;//blake512
+                    param.Digest = Digests.Blake2B512;//blake512
                 else if (i == 1)
                     param.Digest = Digests.Keccak512;//keccak512
                 else
@@ -137,16 +137,6 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
 
             // test the digests //
             NTRUParameters param = (NTRUParameters)NTRUParamSets.APR2011439.DeepCopy();
-            // blake 256
-            param.Digest = Digests.Blake256;
-            EncryptDecrypt(param);
-            OnProgress(new TestEventArgs("Passed the APR2011439/Blake256 encryption test"));
-
-            // blake 512
-            param = (NTRUParameters)NTRUParamSets.EES1087EP2.DeepCopy();
-            param.Digest = Digests.Blake512;
-            EncryptDecrypt(param);
-            OnProgress(new TestEventArgs("Passed the EES1087EP2/Blake512 encryption test"));
 
             // keccak 256
             param.Digest = Digests.Keccak256;

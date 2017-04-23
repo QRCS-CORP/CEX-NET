@@ -19,7 +19,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         private IDigest _msgDigestOTS;
         // The length of the message digest and private key
         private int _mdsize;
-        private int _keysize;
+        private int m_keySize;
         // The source of randomness for OTS private key generation
         private GMSSRandom _gmssRandom;
         // Byte array for distributed computation of the upcoming leaf
@@ -39,7 +39,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         private byte[] _seed;
         // the OTS privateKey parts
         private byte[] _privateKeyOTS;
-        private bool _isDisposed = false;
+        private bool m_isDisposed = false;
         #endregion
 
         #region Constructor
@@ -63,7 +63,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             int mdsizeBit = _mdsize << 3;
             int messagesize = (int)Math.Ceiling((double)(mdsizeBit) / (double)_W);
             int checksumsize = GetLog((messagesize << _W) + 1);
-            _keysize = messagesize + (int)Math.Ceiling((double)checksumsize / (double)_W);
+            m_keySize = messagesize + (int)Math.Ceiling((double)checksumsize / (double)_W);
             _twoPowerW = 1 << _W;
             // initialize arrays
             _privateKeyOTS = OtsIndex[0];
@@ -89,15 +89,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             int mdsizeBit = _mdsize << 3;
             int messagesize = (int)Math.Ceiling((double)(mdsizeBit) / (double)W);
             int checksumsize = GetLog((messagesize << W) + 1);
-            _keysize = messagesize + (int)Math.Ceiling((double)checksumsize / (double)W);
+            m_keySize = messagesize + (int)Math.Ceiling((double)checksumsize / (double)W);
             _twoPowerW = 1 << W;
             // calculate steps ((2^w)-1)*keysize + keysize + 1 / (2^h -1)
-            _steps = (int)Math.Ceiling((double)(((1 << W) - 1) * _keysize + 1 + _keysize) / (double)(NumLeafs));
+            _steps = (int)Math.Ceiling((double)(((1 << W) - 1) * m_keySize + 1 + m_keySize) / (double)(NumLeafs));
             // initialize arrays
             _seed = new byte[_mdsize];
             _leaf = new byte[_mdsize];
             _privateKeyOTS = new byte[_mdsize];
-            _concHashs = new byte[_mdsize * _keysize];
+            _concHashs = new byte[_mdsize * m_keySize];
         }
         
         /// <summary>
@@ -118,15 +118,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             int mdsizeBit = _mdsize << 3;
             int messagesize = (int)Math.Ceiling((double)(mdsizeBit) / (double)W);
             int checksumsize = GetLog((messagesize << W) + 1);
-            _keysize = messagesize + (int)Math.Ceiling((double)checksumsize / (double)W);
+            m_keySize = messagesize + (int)Math.Ceiling((double)checksumsize / (double)W);
             _twoPowerW = 1 << W;
             // calculate steps ((2^w)-1)*keysize + keysize + 1 / (2^h -1)
-            _steps = (int)Math.Ceiling((double)(((1 << W) - 1) * _keysize + 1 + _keysize) / (double)(NumLeafs));
+            _steps = (int)Math.Ceiling((double)(((1 << W) - 1) * m_keySize + 1 + m_keySize) / (double)(NumLeafs));
             // initialize arrays
             _seed = new byte[_mdsize];
             _leaf = new byte[_mdsize];
             _privateKeyOTS = new byte[_mdsize];
-            _concHashs = new byte[_mdsize * _keysize];
+            _concHashs = new byte[_mdsize * m_keySize];
 
             InitLeafCalc(Seed);
         }
@@ -135,7 +135,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
         {
             _msgDigestOTS = original._msgDigestOTS;
             _mdsize = original._mdsize;
-            _keysize = original._keysize;
+            m_keySize = original.m_keySize;
             _gmssRandom = original._gmssRandom;
             _leaf = ArrayUtils.Clone(original._leaf);
             _concHashs = ArrayUtils.Clone(original._concHashs);
@@ -179,7 +179,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             byte[][] statByte = new byte[4][];
             statByte[0] = new byte[_mdsize];
             statByte[1] = new byte[_mdsize];
-            statByte[2] = new byte[_mdsize * _keysize];
+            statByte[2] = new byte[_mdsize * m_keySize];
             statByte[3] = new byte[_mdsize];
             statByte[0] = _privateKeyOTS;
             statByte[1] = _seed;
@@ -240,7 +240,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
             // prior to this the leaf value always ended up as zeros.
             for (int s = 0; s < _steps + 10000; s++)
             {
-                if (_ctr1 == _keysize && _ctr2 == _twoPowerW - 1)
+                if (_ctr1 == m_keySize && _ctr2 == _twoPowerW - 1)
                 { 
                     // [3] at last hash the concatenation
                     _msgDigestOTS.BlockUpdate(_concHashs, 0, _concHashs.Length);
@@ -307,7 +307,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
@@ -342,7 +342,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                         _privateKeyOTS = null;
                     }
                     _mdsize = 0;
-                    _keysize = 0;
+                    m_keySize = 0;
                     _ctr1 = 0;
                     _ctr2 = 0;
                     _twoPowerW = 0;
@@ -351,7 +351,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Arithmeti
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

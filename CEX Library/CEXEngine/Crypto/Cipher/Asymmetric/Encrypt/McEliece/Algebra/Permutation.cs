@@ -15,7 +15,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
     internal sealed class Permutation
     {
         #region Fields
-        private int[] _perm;
+        private int[] m_perm;
         #endregion
 
         #region Constructor
@@ -29,9 +29,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (N <= 0)
                 throw new ArgumentException("N is an invalid length!");
 
-            _perm = new int[N];
+            m_perm = new int[N];
             for (int i = N - 1; i >= 0; i--)
-                _perm[i] = i;
+                m_perm[i] = i;
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (!IsPermutation(Perm))
                 throw new ArgumentException("Permutation: Array is not a permutation vector!");
 
-            this._perm = IntUtils.DeepCopy(Perm);
+            this.m_perm = IntUtils.DeepCopy(Perm);
         }
         
         /// <summary>
@@ -63,11 +63,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (Encoded.Length != 4 + n * size)
                 throw new ArgumentException("Permutation: Invalid encoding!");
 
-            _perm = new int[n];
+            m_perm = new int[n];
             for (int i = 0; i < n; i++)
-                _perm[i] = LittleEndian.OctetsToInt(Encoded, 4 + i * size, size);
+                m_perm[i] = LittleEndian.OctetsToInt(Encoded, 4 + i * size, size);
 
-            if (!IsPermutation(_perm))
+            if (!IsPermutation(m_perm))
                 throw new ArgumentException("Permutation: Invalid encoding!");
         }
 
@@ -82,7 +82,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             if (N <= 0)
                 throw new ArgumentException("Permutation: Invalid length!");
 
-            _perm = new int[N];
+            m_perm = new int[N];
             int[] help = new int[N];
 
             for (int i = 0; i < N; i++)
@@ -93,7 +93,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             {
                 int i = RandomDegree.NextInt(SecRnd, k);
                 k--;
-                _perm[j] = help[i];
+                m_perm[j] = help[i];
                 help[i] = help[k];
             }
         }
@@ -105,8 +105,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public void Clear()
         {
-            if (_perm != null)
-                Array.Clear(_perm, 0, _perm.Length);
+            if (m_perm != null)
+                Array.Clear(m_perm, 0, m_perm.Length);
         }
 
         /// <summary>
@@ -116,9 +116,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns <c>this pow -1</c></returns>
         public Permutation ComputeInverse()
         {
-            Permutation result = new Permutation(_perm.Length);
-            for (int i = _perm.Length - 1; i >= 0; i--)
-                result._perm[_perm[i]] = i;
+            Permutation result = new Permutation(m_perm.Length);
+            for (int i = m_perm.Length - 1; i >= 0; i--)
+                result.m_perm[m_perm[i]] = i;
 
             return result;
         }
@@ -130,13 +130,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The encoded permutation</returns>
         public byte[] GetEncoded()
         {
-            int n = _perm.Length;
+            int n = m_perm.Length;
             int size = BigMath.CeilLog256(n - 1);
             byte[] result = new byte[4 + n * size];
             LittleEndian.IntToOctets(n, result, 0);
 
             for (int i = 0; i < n; i++)
-                LittleEndian.IntToOctets(_perm[i], result, 4 + i * size, size);
+                LittleEndian.IntToOctets(m_perm[i], result, 4 + i * size, size);
             
             return result;
         }
@@ -148,7 +148,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The permutation vector</returns>
         public int[] GetVector()
         {
-            return IntUtils.DeepCopy(_perm);
+            return IntUtils.DeepCopy(m_perm);
         }
 
         /// <summary>
@@ -160,12 +160,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns <c>this * P</c></returns>
         public Permutation RightMultiply(Permutation p)
         {
-            if (p._perm.Length != _perm.Length)
+            if (p.m_perm.Length != m_perm.Length)
                 throw new ArgumentException("length mismatch");
             
-            Permutation result = new Permutation(_perm.Length);
-            for (int i = _perm.Length - 1; i >= 0; i--)
-                result._perm[i] = _perm[p._perm[i]];
+            Permutation result = new Permutation(m_perm.Length);
+            for (int i = m_perm.Length - 1; i >= 0; i--)
+                result.m_perm[i] = m_perm[p.m_perm[i]];
             
             return result;
         }
@@ -188,7 +188,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
 
             Permutation otherPerm = (Permutation)Obj;
 
-            return Compare.IsEqual(_perm, otherPerm._perm);
+            return Compare.IsEqual(m_perm, otherPerm.m_perm);
         }
 
         /// <summary>
@@ -197,7 +197,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns></returns>
         public override int GetHashCode()
         {
-            return ArrayUtils.GetHashCode(_perm);
+            return ArrayUtils.GetHashCode(m_perm);
         }
 
         /// <summary>
@@ -207,9 +207,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns the permutation in readable form</returns>
         public override String ToString()
         {
-            String result = "[" + _perm[0];
-            for (int i = 1; i < _perm.Length; i++)
-                result += ", " + _perm[i];
+            String result = "[" + m_perm[0];
+            for (int i = 1; i < m_perm.Length; i++)
+                result += ", " + m_perm[i];
 
             result += "]";
 

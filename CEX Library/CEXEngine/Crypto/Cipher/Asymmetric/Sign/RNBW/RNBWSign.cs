@@ -100,14 +100,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         #endregion
 
         #region Fields
-        private IAsymmetricKey _asmKey;
+        private IAsymmetricKey m_asmKey;
         private ComputeInField _cptIf = new ComputeInField();
-        private IDigest _dgtEngine;
-        private bool _isDisposed = false;
-        private bool _isInitialized = false;
-        private IRandom _rndEngine;
+        private IDigest m_dgtEngine;
+        private bool m_isDisposed = false;
+        private bool m_isInitialized = false;
+        private IRandom m_rndEngine;
         int _signableLength;
-        private short[] _X;
+        private short[] m_X;
         #endregion
 
         #region Properties
@@ -116,7 +116,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         /// </summary>
         public bool IsInitialized
         {
-            get { return _isInitialized; }
+            get { return m_isInitialized; }
         }
 
         /// <summary>
@@ -128,10 +128,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         {
             get 
             { 
-                if (!_isInitialized)
+                if (!m_isInitialized)
                     throw new CryptoAsymmetricSignException("RNBWSign:IsSigner", "The signer has not been initialized!", new InvalidOperationException());
 
-                return (_asmKey is RNBWPrivateKey);
+                return (m_asmKey is RNBWPrivateKey);
             }
         }
 
@@ -152,7 +152,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         /// <param name="CipherParams">The RNBW cipher used to encrypt the hash</param>
         public RNBWSign(RNBWParameters CipherParams)
         {
-            _rndEngine = GetPrng(CipherParams.RandomEngine);
+            m_rndEngine = GetPrng(CipherParams.RandomEngine);
             _signableLength = CipherParams.DocLength;
         }
 
@@ -183,8 +183,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
                 throw new CryptoAsymmetricSignException("RNBWSign:Initialize", "The key pair is not a valid RNBW key pair!", new InvalidDataException());
 
             Reset();
-            _asmKey = AsmKey;
-            _isInitialized = true;
+            m_asmKey = AsmKey;
+            m_isInitialized = true;
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         /// </summary>
         public void Reset()
         {
-            _rndEngine.Reset();
+            m_rndEngine.Reset();
         }
 
         /// <summary>
@@ -206,11 +206,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         /// <exception cref="CryptoAsymmetricSignException">Thrown if an invalid key is used, or signer has not been initialized</exception>
         public byte[] Sign(Stream InputStream)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoAsymmetricSignException("RNBWSign:Sign", "The signer has not been initialized!", new InvalidOperationException());
-            if (_asmKey == null)
+            if (m_asmKey == null)
                 throw new CryptoAsymmetricSignException("RNBWSign:Sign", "The private key is invalid!", new InvalidDataException());
-            if (!(_asmKey is RNBWPrivateKey))
+            if (!(m_asmKey is RNBWPrivateKey))
                 throw new CryptoAsymmetricSignException("RNBWSign:Sign", "The private key is invalid!", new InvalidDataException());
 
             byte[] data = ((MemoryStream)InputStream).ToArray();
@@ -233,11 +233,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         {
             if (Input.Length - Offset < Length)
                 throw new CryptoAsymmetricSignException("RNBWSign:Sign", "The input array is too short!", new ArgumentException());
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoAsymmetricSignException("RNBWSign:Sign", "The signer has not been initialized!", new InvalidOperationException());
-            if (_asmKey == null)
+            if (m_asmKey == null)
                 throw new CryptoAsymmetricSignException("RNBWSign:Sign", "The private key is invalid!", new InvalidDataException());
-            if (!(_asmKey is RNBWPrivateKey))
+            if (!(m_asmKey is RNBWPrivateKey))
                 throw new CryptoAsymmetricSignException("RNBWSign:Sign", "The private key is invalid!", new InvalidDataException());
 
             byte[] data = new byte[Length];
@@ -258,11 +258,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         /// <exception cref="CryptoAsymmetricSignException">Thrown if signer is not initialized, or the key is invalid</exception>
         public bool Verify(Stream InputStream, byte[] Code)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoAsymmetricSignException("RNBWSign:Verify", "The signer has not been initialized!", new InvalidOperationException());
-            if (_asmKey == null)
+            if (m_asmKey == null)
                 throw new CryptoAsymmetricSignException("RNBWSign:Verify", "The public key is invalid!", new InvalidDataException());
-            if (!(_asmKey is RNBWPublicKey))
+            if (!(m_asmKey is RNBWPublicKey))
                 throw new CryptoAsymmetricSignException("RNBWSign:Verify", "The public key is invalid!", new InvalidDataException());
 
             byte[] data = ((MemoryStream)InputStream).ToArray();
@@ -286,11 +286,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         {
             if (Input.Length - Offset < Length)
                 throw new CryptoAsymmetricSignException("RNBWSign:Verify", "The input array is too short!", new ArgumentOutOfRangeException());
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoAsymmetricSignException("RNBWSign:Verify", "The signer has not been initialized!", new InvalidOperationException());
-            if (_asmKey == null)
+            if (m_asmKey == null)
                 throw new CryptoAsymmetricSignException("RNBWSign:Verify", "The public key is invalid!", new InvalidDataException());
-            if (!(_asmKey is RNBWPublicKey))
+            if (!(m_asmKey is RNBWPublicKey))
                 throw new CryptoAsymmetricSignException("RNBWSign:Verify", "The public key is invalid!", new InvalidDataException());
 
             byte[] data = new byte[Length];
@@ -314,15 +314,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
             // preparation: Modifies the document with the inverse of L1, tmp = Y - b1:
             short[] tmpVec = new short[Message.Length];
-            tmpVec = _cptIf.AddVect(((RNBWPrivateKey)this._asmKey).B1, Message);
+            tmpVec = _cptIf.AddVect(((RNBWPrivateKey)this.m_asmKey).B1, Message);
             // Y_ = A1^{-1} * (Y - b1) :
-            short[] y = _cptIf.MultiplyMatrix(((RNBWPrivateKey)this._asmKey).InvA1, tmpVec);
+            short[] y = _cptIf.MultiplyMatrix(((RNBWPrivateKey)this.m_asmKey).InvA1, tmpVec);
 
             // generates the vinegar vars of the first layer at random
             for (int i = 0; i < Layer[0].VI; i++)
             {
-                _X[i] = (short)_rndEngine.Next();
-                _X[i] = (short)(_X[i] & GF2Field.MASK);
+                m_X[i] = (short)m_rndEngine.Next();
+                m_X[i] = (short)(m_X[i] & GF2Field.MASK);
             }
 
             return y;
@@ -340,9 +340,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         /// <returns>The signature of the message</returns>
         private byte[] GenerateSignature(byte[] Message)
         {
-            MapLayer[] layer = ((RNBWPrivateKey)this._asmKey).Layers;
+            MapLayer[] layer = ((RNBWPrivateKey)this.m_asmKey).Layers;
             int numberOfLayers = layer.Length;
-            _X = new short[((RNBWPrivateKey)this._asmKey).InvA2.Length]; // all variables
+            m_X = new short[((RNBWPrivateKey)this.m_asmKey).InvA2.Length]; // all variables
             short[] y;          // modified document
             short[] yi;         // part of Y_ each polynomial
             int counter;        // index of the current part of the doc
@@ -376,7 +376,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
                         }
 
                         // plug in the vars of the previous layer in order to get the vars of the current layer
-                        solVec = _cptIf.SolveEquation(layer[i].PlugInVinegars(_X), yi);
+                        solVec = _cptIf.SolveEquation(layer[i].PlugInVinegars(m_X), yi);
 
                         // LES is not solveable
                         if (solVec == null)
@@ -384,12 +384,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
                         // copy the new vars into the x-array
                         for (int j = 0; j < solVec.Length; j++)
-                            _X[layer[i].VI + j] = solVec[j];
+                            m_X[layer[i].VI + j] = solVec[j];
                     }
 
                     // apply the inverse of L2: (signature = A2^{-1}*(b2+x)) 
-                    tmpVec = _cptIf.AddVect(((RNBWPrivateKey)this._asmKey).B2, _X);
-                    signature = _cptIf.MultiplyMatrix(((RNBWPrivateKey)this._asmKey).InvA2, tmpVec);
+                    tmpVec = _cptIf.AddVect(((RNBWPrivateKey)this.m_asmKey).B2, m_X);
+                    signature = _cptIf.MultiplyMatrix(((RNBWPrivateKey)this.m_asmKey).InvA2, tmpVec);
 
                     // cast signature from short[] to byte[]
                     for (int i = 0; i < S.Length; i++)
@@ -451,9 +451,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         private short[] VerifySignatureIntern(short[] Signature)
         {
 
-            short[][] coeffQuadratic = ((RNBWPublicKey)this._asmKey).CoeffQuadratic;
-            short[][] coeffSingular = ((RNBWPublicKey)this._asmKey).CoeffSingular;
-            short[] coeffScalar = ((RNBWPublicKey)this._asmKey).CoeffScalar;
+            short[][] coeffQuadratic = ((RNBWPublicKey)this.m_asmKey).CoeffQuadratic;
+            short[][] coeffSingular = ((RNBWPublicKey)this.m_asmKey).CoeffSingular;
+            short[] coeffScalar = ((RNBWPublicKey)this.m_asmKey).CoeffScalar;
 
             short[] rslt = new short[coeffQuadratic.Length];// n - v1
             int n = coeffSingular[0].Length;
@@ -559,34 +559,34 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_dgtEngine != null)
+                    if (m_dgtEngine != null)
                     {
-                        _dgtEngine.Dispose();
-                        _dgtEngine = null;
+                        m_dgtEngine.Dispose();
+                        m_dgtEngine = null;
                     }
-                    if (_rndEngine != null)
+                    if (m_rndEngine != null)
                     {
-                        _rndEngine.Dispose();
-                        _rndEngine = null;
+                        m_rndEngine.Dispose();
+                        m_rndEngine = null;
                     }
                     if (_cptIf != null)
                     {
                         _cptIf.Dispose();
                         _cptIf = null;
                     }
-                    if (_X != null)
+                    if (m_X != null)
                     {
-                        Array.Clear(_X, 0, _X.Length);
-                        _X = null;
+                        Array.Clear(m_X, 0, m_X.Length);
+                        m_X = null;
                     }
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

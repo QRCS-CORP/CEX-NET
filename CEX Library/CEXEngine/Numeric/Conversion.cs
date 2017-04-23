@@ -53,12 +53,12 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         internal static double BigInteger2Double(BigInteger Value)
         {
             // val.bitLength() < 64
-            if ((Value._numberLength < 2) || ((Value._numberLength == 2) && (Value._digits[1] > 0)))
+            if ((Value.m_numberLength < 2) || ((Value.m_numberLength == 2) && (Value.m_digits[1] > 0)))
                 return Value.ToInt64();
             
             // val.bitLength() >= 33 * 32 > 1024
-            if (Value._numberLength > 32)
-                return ((Value._sign > 0) ? Double.PositiveInfinity : Double.NegativeInfinity);
+            if (Value.m_numberLength > 32)
+                return ((Value.m_sign > 0) ? Double.PositiveInfinity : Double.NegativeInfinity);
             
             int bitLen = Value.Abs().BitLength;
             long exponent = bitLen - 1;
@@ -71,19 +71,19 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             if (exponent == 1023)
             {
                 if (mantissa == 0X1FFFFFFFFFFFFFL)
-                    return ((Value._sign > 0) ? Double.PositiveInfinity : Double.NegativeInfinity);
+                    return ((Value.m_sign > 0) ? Double.PositiveInfinity : Double.NegativeInfinity);
                 
                 if (mantissa == 0x1FFFFFFFFFFFFEL)
-                    return ((Value._sign > 0) ? Double.MaxValue : -Double.MaxValue);
+                    return ((Value.m_sign > 0) ? Double.MaxValue : -Double.MaxValue);
                 
             }
             // Round the mantissa
-            if (((mantissa & 1) == 1)  && (((mantissa & 2) == 2) || BitLevel.NonZeroDroppedBits(delta, Value._digits)))
+            if (((mantissa & 1) == 1)  && (((mantissa & 2) == 2) || BitLevel.NonZeroDroppedBits(delta, Value.m_digits)))
                 mantissa += 2;
             
             mantissa >>= 1; // drop the rounding bit
             // long resSign = (val.sign < 0) ? 0x8000000000000000L : 0;
-            long resSign = (Value._sign < 0) ? long.MinValue : 0;
+            long resSign = (Value.m_sign < 0) ? long.MinValue : 0;
             exponent = ((1023 + exponent) << 52) & 0x7FF0000000000000L;
             long result = resSign | exponent | mantissa;
 
@@ -102,9 +102,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <returns>Returns a string representation of this with radix 10</returns>
         internal static string BigInteger2String(BigInteger Value, int Radix)
         {
-            int sign = Value._sign;
-            int numberLength = Value._numberLength;
-            int[] digits = Value._digits;
+            int sign = Value.m_sign;
+            int numberLength = Value.m_numberLength;
+            int[] digits = Value.m_digits;
 
             if (sign == 0)
                 return "0"; //$NON-NLS-1$
@@ -196,9 +196,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         internal static String ToDecimalScaledString(BigInteger Value, int Scale)
         {   
             //ToDo: too proceedural, break this up.. j.u.
-            int sign = Value._sign;
-            int numberLength = Value._numberLength;
-            int[] digits = Value._digits;
+            int sign = Value.m_sign;
+            int numberLength = Value.m_numberLength;
+            int[] digits = Value.m_digits;
             int resLengthInChars;
             int currentChar;
             char[] result;

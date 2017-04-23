@@ -6,6 +6,10 @@
     public enum EncodingSchemes : int
     {
         /// <summary>
+        /// No encoding scheme was selected
+        /// </summary>
+        None = 0,
+        /// <summary>
         /// CER
         /// </summary>
         CER = 1,

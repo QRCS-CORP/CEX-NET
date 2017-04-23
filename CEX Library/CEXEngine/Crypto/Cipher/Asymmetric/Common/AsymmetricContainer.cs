@@ -28,12 +28,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Common
     public sealed class AsymmetricContainer : IDisposable
     {
         #region Fields
-        private AsymmetricEngines _asmEngine;
-        private IAsymmetricParameters _asmParameters;
-        private byte[] _idTag;
-        private bool _isDisposed = false;
-        private IAsymmetricKey _privateKey;
-        private IAsymmetricKey _publicKey;
+        private AsymmetricEngines m_asmEngine;
+        private IAsymmetricParameters m_asmParameters;
+        private byte[] m_idTag;
+        private bool m_isDisposed = false;
+        private IAsymmetricKey m_privateKey;
+        private IAsymmetricKey m_publicKey;
         #endregion
 
         #region Properties
@@ -42,7 +42,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Common
         /// </summary>
         public AsymmetricEngines EngineType
         {
-            get { return _asmEngine; }
+            get { return m_asmEngine; }
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Common
         /// </summary>
         public IAsymmetricParameters Parameters
         {
-            get { return _asmParameters; }
+            get { return m_asmParameters; }
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Common
         /// </summary>
         public IAsymmetricKey PublicKey
         {
-            get { return _publicKey; }
+            get { return m_publicKey; }
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Common
         /// </summary>
         public IAsymmetricKey PrivateKey
         {
-            get { return _privateKey; }
+            get { return m_privateKey; }
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Common
         /// </summary>
         public byte[] Tag
         {
-            get { return _idTag; }
+            get { return m_idTag; }
         }
         #endregion
 
@@ -90,13 +90,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Common
         /// <exception cref="CryptoAsymmetricException">Thrown if an invalid key is used</exception>
         public AsymmetricContainer(IAsymmetricParameters Parameters, IAsymmetricKey AsmKey, byte[] Tag = null)
         {
-            _asmParameters = Parameters;
-            _idTag = Tag;
+            m_asmParameters = Parameters;
+            m_idTag = Tag;
 
             if (AsymmetricUtils.IsPublicKey(AsmKey))
-                _publicKey = AsmKey;
+                m_publicKey = AsmKey;
             else
-                _privateKey = AsmKey;
+                m_privateKey = AsmKey;
         }
 
         /// <summary>
@@ -113,10 +113,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Common
             if (!(KeyPair is IAsymmetricKeyPair))
                 throw new CryptoAsymmetricException("KeyContainer:Ctor", "Not a valid key-pair!", new InvalidDataException());
 
-            _publicKey = KeyPair.PublicKey;
-            _privateKey = KeyPair.PrivateKey;
-            _asmParameters = Parameters;
-            _idTag = Tag;
+            m_publicKey = KeyPair.PublicKey;
+            m_privateKey = KeyPair.PrivateKey;
+            m_asmParameters = Parameters;
+            m_idTag = Tag;
         }
         
         /// <summary>
@@ -130,29 +130,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Common
             byte[] data;
             int len;
 
-            _idTag = null;
-            _publicKey = null;
-            _publicKey = null;
+            m_idTag = null;
+            m_publicKey = null;
+            m_publicKey = null;
 
             // tag
             len = reader.ReadInt32();
             if (len > 0)
-                _idTag = reader.ReadBytes(len);
+                m_idTag = reader.ReadBytes(len);
 
             // family
-            _asmEngine = (AsymmetricEngines)reader.ReadByte();
+            m_asmEngine = (AsymmetricEngines)reader.ReadByte();
 
             // parameters
             len = reader.ReadInt32();
             data = reader.ReadBytes(len);
-            _asmParameters = ParamsFromBytes(data);
+            m_asmParameters = ParamsFromBytes(data);
 
             // public key
             len = reader.ReadInt32();
             if (len > 0)
             {
                 data = reader.ReadBytes(len);
-                _publicKey = PublicKeyFromBytes(data);
+                m_publicKey = PublicKeyFromBytes(data);
             }
 
             // private key
@@ -160,7 +160,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Common
             if (len > 0)
             {
                 data = reader.ReadBytes(len);
-                _privateKey = PrivateKeyFromBytes(data);
+                m_privateKey = PrivateKeyFromBytes(data);
             }
         }
 
@@ -210,44 +210,44 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Common
             byte[] data;
 
             // tag
-            if (_idTag == null)
+            if (m_idTag == null)
             {
                 writer.Write((int)0);
             }
             else
             {
-                writer.Write(_idTag.Length);
-                writer.Write(_idTag);
+                writer.Write(m_idTag.Length);
+                writer.Write(m_idTag);
             }
 
             // family
-            writer.Write((byte)_asmEngine);
+            writer.Write((byte)m_asmEngine);
 
             // parameters
-            data = _asmParameters.ToBytes();
+            data = m_asmParameters.ToBytes();
             writer.Write(data.Length);
             writer.Write(data);
 
             // public key
-            if (_publicKey == null)
+            if (m_publicKey == null)
             {
                 writer.Write((int)0);
             }
             else
             {
-                data = _publicKey.ToBytes();
+                data = m_publicKey.ToBytes();
                 writer.Write(data.Length);
                 writer.Write(data);
             }
 
             // private key
-            if (_privateKey == null)
+            if (m_privateKey == null)
             {
                 writer.Write((int)0);
             }
             else
             {
-                data = _privateKey.ToBytes();
+                data = m_privateKey.ToBytes();
                 writer.Write(data.Length);
                 writer.Write(data);
             }
@@ -260,13 +260,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Common
         #region Private Methods
         private IAsymmetricParameters ParamsFromBytes(byte[] ParameterArray)
         {
-            if (_asmEngine == AsymmetricEngines.GMSS)
+            if (m_asmEngine == AsymmetricEngines.GMSS)
                 return new GMSSParameters(ParameterArray);
-            else if (_asmEngine == AsymmetricEngines.McEliece)
+            else if (m_asmEngine == AsymmetricEngines.McEliece)
                 return new MPKCParameters(ParameterArray);
-            else if (_asmEngine == AsymmetricEngines.NTRU)
+            else if (m_asmEngine == AsymmetricEngines.NTRU)
                 return new NTRUParameters(ParameterArray);
-            else if (_asmEngine == AsymmetricEngines.Rainbow)
+            else if (m_asmEngine == AsymmetricEngines.Rainbow)
                 return new RNBWParameters(ParameterArray);
             else
                 return new RLWEParameters(ParameterArray);
@@ -274,13 +274,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Common
 
         private IAsymmetricKey PublicKeyFromBytes(byte[] KeyArray)
         {
-            if (_asmEngine == AsymmetricEngines.GMSS)
+            if (m_asmEngine == AsymmetricEngines.GMSS)
                 return new GMSSPublicKey(KeyArray);
-            else if (_asmEngine == AsymmetricEngines.McEliece)
+            else if (m_asmEngine == AsymmetricEngines.McEliece)
                 return new MPKCPublicKey(KeyArray);
-            else if (_asmEngine == AsymmetricEngines.NTRU)
+            else if (m_asmEngine == AsymmetricEngines.NTRU)
                 return new NTRUPublicKey(KeyArray);
-            else if (_asmEngine == AsymmetricEngines.Rainbow)
+            else if (m_asmEngine == AsymmetricEngines.Rainbow)
                 return new RNBWPublicKey(KeyArray);
             else
                 return new RLWEPublicKey(KeyArray);
@@ -288,13 +288,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Common
 
         private IAsymmetricKey PrivateKeyFromBytes(byte[] KeyArray)
         {
-            if (_asmEngine == AsymmetricEngines.GMSS)
+            if (m_asmEngine == AsymmetricEngines.GMSS)
                 return new GMSSPrivateKey(KeyArray);
-            else if (_asmEngine == AsymmetricEngines.McEliece)
+            else if (m_asmEngine == AsymmetricEngines.McEliece)
                 return new MPKCPrivateKey(KeyArray);
-            else if (_asmEngine == AsymmetricEngines.NTRU)
+            else if (m_asmEngine == AsymmetricEngines.NTRU)
                 return new NTRUPrivateKey(KeyArray);
-            else if (_asmEngine == AsymmetricEngines.Rainbow)
+            else if (m_asmEngine == AsymmetricEngines.Rainbow)
                 return new RNBWPrivateKey(KeyArray);
             else
                 return new RLWEPrivateKey(KeyArray);
@@ -313,34 +313,34 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Common
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_asmParameters != null)
+                    if (m_asmParameters != null)
                     {
-                        _asmParameters.Dispose();
-                        _asmParameters = null;
+                        m_asmParameters.Dispose();
+                        m_asmParameters = null;
                     }
-                    if (_publicKey != null)
+                    if (m_publicKey != null)
                     {
-                        _publicKey.Dispose();
-                        _publicKey = null;
+                        m_publicKey.Dispose();
+                        m_publicKey = null;
                     }
-                    if (_privateKey != null)
+                    if (m_privateKey != null)
                     {
-                        _privateKey.Dispose();
-                        _privateKey = null;
+                        m_privateKey.Dispose();
+                        m_privateKey = null;
                     }
-                    if (_idTag != null)
+                    if (m_idTag != null)
                     {
-                        Array.Clear(_idTag, 0, _idTag.Length);
-                        _idTag = null;
+                        Array.Clear(m_idTag, 0, m_idTag.Length);
+                        m_idTag = null;
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

@@ -60,14 +60,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         #endregion
 
         #region Fields
-        private bool _isDisposed;
-        private MPKCParameters _mpkcParams;
-        private int _M;
-        private int _N;
-        private int _T;
-        private int _fieldPoly;
-        private IRandom _rndEngine;
-        private bool _frcLinear = false;
+        private bool m_isDisposed;
+        private MPKCParameters m_mpkcParams;
+        private int m_M;
+        private int m_N;
+        private int m_T;
+        private int m_fieldPoly;
+        private IRandom m_rndEngine;
+        private bool m_frcLinear = false;
         #endregion
 
         #region Properties
@@ -94,15 +94,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             if (CipherParams.RandomEngine == Prngs.PBPrng)
                 throw new CryptoAsymmetricException("MPKCKeyGenerator:Ctor", "Passphrase based digest and CTR generators must be pre-initialized, use the other constructor!", new ArgumentException());
 
-            _frcLinear = ParallelUtils.ForceLinear;
+            m_frcLinear = ParallelUtils.ForceLinear;
             ParallelUtils.ForceLinear = !Parallel;
-            _mpkcParams = (MPKCParameters)CipherParams;
+            m_mpkcParams = (MPKCParameters)CipherParams;
             // set source of randomness
-            _rndEngine = GetPrng(_mpkcParams.RandomEngine);
-            _M = _mpkcParams.M;
-            _N = _mpkcParams.N;
-            _T = _mpkcParams.T;
-            _fieldPoly = _mpkcParams.FieldPolynomial;
+            m_rndEngine = GetPrng(m_mpkcParams.RandomEngine);
+            m_M = m_mpkcParams.M;
+            m_N = m_mpkcParams.N;
+            m_T = m_mpkcParams.T;
+            m_fieldPoly = m_mpkcParams.FieldPolynomial;
         }
 
         /// <summary>
@@ -114,15 +114,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <param name="Parallel">Use parallel processing when generating a key; set to false if using a passphrase type generator (default is true)</param>
         public MPKCKeyGenerator(MPKCParameters CipherParams, IRandom RngEngine, bool Parallel = true)
         {
-            _mpkcParams = (MPKCParameters)CipherParams;
+            m_mpkcParams = (MPKCParameters)CipherParams;
             // set source of randomness
-            _rndEngine = RngEngine;
-            _M = _mpkcParams.M;
-            _N = _mpkcParams.N;
-            _T = _mpkcParams.T;
-            _fieldPoly = _mpkcParams.FieldPolynomial;
+            m_rndEngine = RngEngine;
+            m_M = m_mpkcParams.M;
+            m_N = m_mpkcParams.N;
+            m_T = m_mpkcParams.T;
+            m_fieldPoly = m_mpkcParams.FieldPolynomial;
 
-            _frcLinear = ParallelUtils.ForceLinear;
+            m_frcLinear = ParallelUtils.ForceLinear;
             // passphrase gens must be linear processed
             if (RngEngine.GetType().Equals(typeof(PBPRng)))
                 ParallelUtils.ForceLinear = true;
@@ -152,16 +152,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         public IAsymmetricKeyPair GenerateKeyPair()
         {
             // finite field GF(2^m)
-            GF2mField field = new GF2mField(_M, _fieldPoly); 
+            GF2mField field = new GF2mField(m_M, m_fieldPoly); 
             // irreducible Goppa polynomial
-            PolynomialGF2mSmallM gp = new PolynomialGF2mSmallM(field, _T, PolynomialGF2mSmallM.RANDOM_IRREDUCIBLE_POLYNOMIAL, _rndEngine);
+            PolynomialGF2mSmallM gp = new PolynomialGF2mSmallM(field, m_T, PolynomialGF2mSmallM.RANDOM_IRREDUCIBLE_POLYNOMIAL, m_rndEngine);
             PolynomialRingGF2m ring = new PolynomialRingGF2m(field, gp);
             // matrix for computing square roots in (GF(2^m))^t
             PolynomialGF2mSmallM[] qInv = ring.SquareRootMatrix;
             // generate canonical check matrix
             GF2Matrix h = GoppaCode.CreateCanonicalCheckMatrix(field, gp);
             // compute short systematic form of check matrix
-            GoppaCode.MaMaPe mmp = GoppaCode.ComputeSystematicForm(h, _rndEngine);
+            GoppaCode.MaMaPe mmp = GoppaCode.ComputeSystematicForm(h, m_rndEngine);
             GF2Matrix shortH = mmp.SecondMatrix;
             Permutation p = mmp.Permutation;
             // compute short systematic form of generator matrix
@@ -169,8 +169,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             // obtain number of rows of G (= dimension of the code)
             int k = shortG.RowCount;
             // generate keys
-            IAsymmetricKey pubKey = new MPKCPublicKey(_N, _T, shortG);
-            IAsymmetricKey privKey = new MPKCPrivateKey(_N, k, field, gp, p, h, qInv);
+            IAsymmetricKey pubKey = new MPKCPublicKey(m_N, m_T, shortG);
+            IAsymmetricKey privKey = new MPKCPrivateKey(m_N, k, field, gp, p, h, qInv);
 
             // return key pair
             return new MPKCKeyPair(pubKey, privKey);            
@@ -187,7 +187,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <returns>A populated IAsymmetricKeyPair</returns>
         public IAsymmetricKeyPair GenerateKeyPair(byte[] Passphrase, byte[] Salt)
         {
-            using (IDigest dgt = GetDigest(_mpkcParams.Digest))
+            using (IDigest dgt = GetDigest(m_mpkcParams.Digest))
             {
                 using (IRandom rnd = new PBPRng(dgt, Passphrase, Salt, 10000, false))
                     return GenerateKeyPair();
@@ -243,30 +243,30 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public void Dispose()
         {
-            ParallelUtils.ForceLinear = _frcLinear;
+            ParallelUtils.ForceLinear = m_frcLinear;
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_rndEngine != null)
+                    if (m_rndEngine != null)
                     {
-                        _rndEngine.Dispose();
-                        _rndEngine = null;
+                        m_rndEngine.Dispose();
+                        m_rndEngine = null;
                     }
-                    _M = 0;
-                    _N = 0;
-                    _T = 0;
-                    _fieldPoly = 0;
+                    m_M = 0;
+                    m_N = 0;
+                    m_T = 0;
+                    m_fieldPoly = 0;
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

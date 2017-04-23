@@ -14,8 +14,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
     {
         #region Fields
         // groups of 5 coefficients
-        private long[] _coeffs;
-        private int _numCoeffs;
+        private long[] m_coeffs;
+        private int m_numCoeffs;
         #endregion
 
         #region Constructor
@@ -26,15 +26,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <param name="P">The original polynomial. Coefficients must be between 0 and 2047.</param>
         public LongPolynomial5(IntegerPolynomial P)
         {
-            _numCoeffs = P.Coeffs.Length;
+            m_numCoeffs = P.Coeffs.Length;
 
-            _coeffs = new long[(_numCoeffs + 4) / 5];
+            m_coeffs = new long[(m_numCoeffs + 4) / 5];
             int cIdx = 0;
             int shift = 0;
 
-            for (int i = 0; i < _numCoeffs; i++)
+            for (int i = 0; i < m_numCoeffs; i++)
             {
-                _coeffs[cIdx] |= ((long)P.Coeffs[i]) << shift;
+                m_coeffs[cIdx] |= ((long)P.Coeffs[i]) << shift;
                 shift += 12;
 
                 if (shift >= 60)
@@ -47,8 +47,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
 
         private LongPolynomial5(long[] coeffs, int numCoeffs)
         {
-            this._coeffs = coeffs;
-            this._numCoeffs = numCoeffs;
+            this.m_coeffs = coeffs;
+            this.m_numCoeffs = numCoeffs;
         }
         #endregion
 
@@ -62,7 +62,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>The multiplication product</returns>
         public LongPolynomial5 Multiply(ITernaryPolynomial Factor)
         {
-            long[][] prod = ArrayUtils.CreateJagged<long[][]>(5, _coeffs.Length + (Factor.Size() + 4) / 5 - 1);
+            long[][] prod = ArrayUtils.CreateJagged<long[][]>(5, m_coeffs.Length + (Factor.Size() + 4) / 5 - 1);
             int[] pIdx = Factor.GetOnes();
 
             // multiply ones
@@ -71,9 +71,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
                 int cIdx = pIdx[i] / 5;
                 int m = pIdx[i] - cIdx * 5;   // m = pIdx % 5
 
-                for (int j = 0; j < _coeffs.Length; j++)
+                for (int j = 0; j < m_coeffs.Length; j++)
                 {
-                    prod[m][cIdx] = (prod[m][cIdx] + _coeffs[j]) & 0x7FF7FF7FF7FF7FFL;
+                    prod[m][cIdx] = (prod[m][cIdx] + m_coeffs[j]) & 0x7FF7FF7FF7FF7FFL;
                     cIdx++;
                 }
             }
@@ -85,9 +85,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
                 int cIdx = pIdx[i] / 5;
                 int m = pIdx[i] - cIdx * 5;   // m = pIdx % 5
 
-                for (int j = 0; j < _coeffs.Length; j++)
+                for (int j = 0; j < m_coeffs.Length; j++)
                 {
-                    prod[m][cIdx] = (0x800800800800800L + prod[m][cIdx] - _coeffs[j]) & 0x7FF7FF7FF7FF7FFL;
+                    prod[m][cIdx] = (0x800800800800800L + prod[m][cIdx] - m_coeffs[j]) & 0x7FF7FF7FF7FF7FFL;
                     cIdx++;
                 }
             }
@@ -115,21 +115,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
             }
 
             // reduce indices of cCoeffs modulo numCoeffs
-            int shift2 = 12 * (_numCoeffs % 5);
-            for (int cIdx = _coeffs.Length - 1; cIdx < cCoeffs.Length; cIdx++)
+            int shift2 = 12 * (m_numCoeffs % 5);
+            for (int cIdx = m_coeffs.Length - 1; cIdx < cCoeffs.Length; cIdx++)
             {
                 long iCoeff;   // coefficient to shift into the [0..numCoeffs-1] range
                 int newIdx;
 
-                if (cIdx == _coeffs.Length - 1)
+                if (cIdx == m_coeffs.Length - 1)
                 {
-                    iCoeff = _numCoeffs == 5 ? 0 : cCoeffs[cIdx] >> shift2;
+                    iCoeff = m_numCoeffs == 5 ? 0 : cCoeffs[cIdx] >> shift2;
                     newIdx = 0;
                 }
                 else
                 {
                     iCoeff = cCoeffs[cIdx];
-                    newIdx = cIdx * 5 - _numCoeffs;
+                    newIdx = cIdx * 5 - m_numCoeffs;
                 }
 
                 int base1 = newIdx / 5;
@@ -139,11 +139,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
                 cCoeffs[base1] = (cCoeffs[base1] + lower) & 0x7FF7FF7FF7FF7FFL;
 
                 int base2 = base1 + 1;
-                if (base2 < _coeffs.Length)
+                if (base2 < m_coeffs.Length)
                     cCoeffs[base2] = (cCoeffs[base2] + upper) & 0x7FF7FF7FF7FF7FFL;
             }
 
-            return new LongPolynomial5(cCoeffs, _numCoeffs);
+            return new LongPolynomial5(cCoeffs, m_numCoeffs);
         }
 
         /// <summary>
@@ -154,13 +154,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>The polynomial product</returns>
         public IntegerPolynomial ToIntegerPolynomial()
         {
-            int[] intCoeffs = new int[_numCoeffs];
+            int[] intCoeffs = new int[m_numCoeffs];
             int cIdx = 0;
             int shift = 0;
 
-            for (int i = 0; i < _numCoeffs; i++)
+            for (int i = 0; i < m_numCoeffs; i++)
             {
-                intCoeffs[i] = (int)((_coeffs[cIdx] >> shift) & 2047);
+                intCoeffs[i] = (int)((m_coeffs[cIdx] >> shift) & 2047);
                 shift += 12;
                 if (shift >= 60)
                 {

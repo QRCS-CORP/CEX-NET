@@ -54,18 +54,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
-        private IBlockCipher _rngEngine;
-        private CTRDrbg _rngGenerator;
-        private ISeed _seedGenerator;
-        private BlockCiphers _engineType;
-        private SeedGenerators _seedType;
-        private byte[] _stateSeed;
-        private byte[] _byteBuffer;
-        private int _bufferIndex = 0;
-        private int _bufferSize = 0;
-        private int _keySize = 0;
-        private object _objLock = new object();
+        private bool m_isDisposed = false;
+        private IBlockCipher m_rngEngine;
+        private CMG m_rngGenerator;
+        private ISeed m_seedGenerator;
+        private BlockCiphers m_engineType;
+        private SeedGenerators m_seedType;
+        private byte[] m_stateSeed;
+        private byte[] m_byteBuffer;
+        private int m_bufferIndex = 0;
+        private int m_bufferSize = 0;
+        private int m_keySize = 0;
+        private object m_objLock = new object();
         #endregion
 
         #region Properties
@@ -100,15 +100,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
             if (BufferSize < 64)
                 throw new CryptoRandomException("CTRPrng:Ctor", "Buffer size must be at least 64 bytes!", new ArgumentNullException());
 
-            _engineType = BlockEngine;
-            _seedType = SeedEngine;
-            _byteBuffer = new byte[BufferSize];
-            _bufferSize = BufferSize;
+            m_engineType = BlockEngine;
+            m_seedType = SeedEngine;
+            m_byteBuffer = new byte[BufferSize];
+            m_bufferSize = BufferSize;
 
             if (KeySize > 0)
-                _keySize = KeySize;
+                m_keySize = KeySize;
             else
-                _keySize = GetKeySize(BlockEngine);
+                m_keySize = GetKeySize(BlockEngine);
 
             Reset();
         }
@@ -131,10 +131,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
             if (GetKeySize(BlockEngine) < Seed.Length)
                 throw new CryptoRandomException("CTRPrng:Ctor", String.Format("The state seed is too small! must be at least {0} bytes", GetKeySize(BlockEngine)), new ArgumentException());
 
-            _engineType = BlockEngine;
-            _stateSeed = Seed;
-            _byteBuffer = new byte[BufferSize];
-            _bufferSize = BufferSize;
+            m_engineType = BlockEngine;
+            m_stateSeed = Seed;
+            m_byteBuffer = new byte[BufferSize];
+            m_bufferSize = BufferSize;
             Reset();
         }
 
@@ -171,38 +171,38 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="Output">Array to fill with random bytes</param>
         public void GetBytes(byte[] Output)
         {
-            lock (_objLock)
+            lock (m_objLock)
             {
-                if (_byteBuffer.Length - _bufferIndex < Output.Length)
+                if (m_byteBuffer.Length - m_bufferIndex < Output.Length)
                 {
-                    int bufSize = _byteBuffer.Length - _bufferIndex;
+                    int bufSize = m_byteBuffer.Length - m_bufferIndex;
                     // copy remaining bytes
-                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Output, 0, bufSize);
+                    Buffer.BlockCopy(m_byteBuffer, m_bufferIndex, Output, 0, bufSize);
                     int rem = Output.Length - bufSize;
 
                     while (rem > 0)
                     {
                         // fill buffer
-                        _rngGenerator.Generate(_byteBuffer);
+                        m_rngGenerator.Generate(m_byteBuffer);
 
-                        if (rem > _byteBuffer.Length)
+                        if (rem > m_byteBuffer.Length)
                         {
-                            Buffer.BlockCopy(_byteBuffer, 0, Output, bufSize, _byteBuffer.Length);
-                            bufSize += _byteBuffer.Length;
-                            rem -= _byteBuffer.Length;
+                            Buffer.BlockCopy(m_byteBuffer, 0, Output, bufSize, m_byteBuffer.Length);
+                            bufSize += m_byteBuffer.Length;
+                            rem -= m_byteBuffer.Length;
                         }
                         else
                         {
-                            Buffer.BlockCopy(_byteBuffer, 0, Output, bufSize, rem);
-                            _bufferIndex = rem;
+                            Buffer.BlockCopy(m_byteBuffer, 0, Output, bufSize, rem);
+                            m_bufferIndex = rem;
                             rem = 0;
                         }
                     }
                 }
                 else
                 {
-                    Buffer.BlockCopy(_byteBuffer, _bufferIndex, Output, 0, Output.Length);
-                    _bufferIndex += Output.Length;
+                    Buffer.BlockCopy(m_byteBuffer, m_bufferIndex, Output, 0, Output.Length);
+                    m_bufferIndex += Output.Length;
                 }
             }
         }
@@ -304,33 +304,33 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// </summary>
         public void Reset()
         {
-            if (_rngEngine != null)
+            if (m_rngEngine != null)
             {
-                _rngEngine.Dispose();
-                _rngEngine = null;
+                m_rngEngine.Dispose();
+                m_rngEngine = null;
             }
-            if (_seedGenerator != null)
+            if (m_seedGenerator != null)
             {
-                _seedGenerator.Dispose();
-                _seedGenerator = null;
+                m_seedGenerator.Dispose();
+                m_seedGenerator = null;
             }
-            if (_rngGenerator != null)
+            if (m_rngGenerator != null)
             {
-                _rngGenerator.Dispose();
-                _rngGenerator = null;
+                m_rngGenerator.Dispose();
+                m_rngGenerator = null;
             }
 
-            _rngEngine = GetCipher(_engineType);
-            _seedGenerator = GetSeedGenerator(_seedType);
-            _rngGenerator = new CTRDrbg(_rngEngine, true, _keySize);
+            m_rngEngine = GetCipher(m_engineType);
+            m_seedGenerator = GetSeedGenerator(m_seedType);
+            m_rngGenerator = new CMG(m_rngEngine, true);
 
-            if (_seedGenerator != null)
-                _rngGenerator.Initialize(_seedGenerator.GetBytes(_rngEngine.BlockSize + _keySize));
+            if (m_seedGenerator != null)
+                m_rngGenerator.Initialize(m_seedGenerator.GetBytes(m_rngEngine.BlockSize + m_keySize));
             else
-                _rngGenerator.Initialize(_stateSeed);
+                m_rngGenerator.Initialize(m_stateSeed);
 
-            _rngGenerator.Generate(_byteBuffer);
-            _bufferIndex = 0;
+            m_rngGenerator.Generate(m_byteBuffer);
+            m_bufferIndex = 0;
         }
         #endregion
 
@@ -419,29 +419,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_rngGenerator != null)
+                    if (m_rngGenerator != null)
                     {
-                        _rngGenerator.Dispose();
-                        _rngGenerator = null;
+                        m_rngGenerator.Dispose();
+                        m_rngGenerator = null;
                     }
-                    if (_seedGenerator != null)
+                    if (m_seedGenerator != null)
                     {
-                        _seedGenerator.Dispose();
-                        _seedGenerator = null;
+                        m_seedGenerator.Dispose();
+                        m_seedGenerator = null;
                     }
-                    if (_byteBuffer != null)
+                    if (m_byteBuffer != null)
                     {
-                        Array.Clear(_byteBuffer, 0, _byteBuffer.Length);
-                        _byteBuffer = null;
+                        Array.Clear(m_byteBuffer, 0, m_byteBuffer.Length);
+                        m_byteBuffer = null;
                     }
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

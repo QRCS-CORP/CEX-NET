@@ -30,8 +30,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public class MaMaPe
         {
             #region Fields
-            private GF2Matrix _s, _h;
-            private Permutation _p;
+            private GF2Matrix m_S, m_H;
+            private Permutation m_P;
             #endregion
 
             #region Constructor
@@ -44,9 +44,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             /// <param name="P">The permutation</param>
             public MaMaPe(GF2Matrix S, GF2Matrix H, Permutation P)
             {
-                _s = S;
-                _h = H;
-                _p = P;
+                m_S = S;
+                m_H = H;
+                m_P = P;
             }
             #endregion
 
@@ -56,7 +56,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             /// </summary>
             public GF2Matrix FirstMatrix
             {
-                get { return _s; }
+                get { return m_S; }
             }
 
             /// <summary>
@@ -64,7 +64,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             /// </summary>
             public GF2Matrix SecondMatrix
             {
-                get { return _h; }
+                get { return m_H; }
             }
 
             /// <summary>
@@ -72,7 +72,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             /// </summary>
             public Permutation Permutation
             {
-                get { return _p; }
+                get { return m_P; }
             }
             #endregion
         }
@@ -85,7 +85,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         public class MatrixSet
         {
             #region Fields
-            private GF2Matrix _g;
+            private GF2Matrix m_G;
             private int[] _setJ;
             #endregion
 
@@ -99,7 +99,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             /// consisting of the specified columns is the identity</param>
             public MatrixSet(GF2Matrix G, int[] SetJ)
             {
-                _g = G;
+                m_G = G;
                 _setJ = SetJ;
             }
             #endregion
@@ -110,7 +110,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             /// </summary>
             public GF2Matrix G
             {
-                get { return _g; }
+                get { return m_G; }
             }
 
             /// <summary>

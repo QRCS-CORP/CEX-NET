@@ -15,15 +15,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
     {
         #region Fields
         // Matrix used for fast squaring
-        private GF2Polynomial[] _squaringMatrix;
+        private GF2Polynomial[] m_squaringMatrix;
         // field polynomial is a trinomial
-        private bool _isTrinomial = false;
+        private bool m_isTrinomial = false;
         // field polynomial is a pentanomial
-        private bool _isPentanomial = false;
+        private bool m_isPentanomial = false;
         // middle coefficient of the field polynomial in case it is a trinomial
-        private int _tc;
+        private int m_tc;
         // middle 3 coefficients of the field polynomial in case it is a pentanomial
-        private int[] _pc = new int[3];
+        private int[] m_pc = new int[3];
         #endregion
 
         #region Properties
@@ -32,7 +32,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public bool IsPentanomial
         {
-            get { return _isPentanomial; }
+            get { return m_isPentanomial; }
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public bool IsTrinomial
         {
-            get { return _isTrinomial; }
+            get { return m_isTrinomial; }
         }
 
         /// <summary>
@@ -50,11 +50,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         {
             get
             {
-                if (!_isPentanomial)
+                if (!m_isPentanomial)
                     throw new Exception();
 
                 int[] result = new int[3];
-                Array.Copy(_pc, 0, result, 0, 3);
+                Array.Copy(m_pc, 0, result, 0, 3);
 
                 return result;
             }
@@ -65,7 +65,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public GF2Polynomial[] SquaringMatrix
         {
-            get { return _squaringMatrix; }
+            get { return m_squaringMatrix; }
         }
 
         /// <summary>
@@ -75,10 +75,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         {
             get
             {
-                if (!_isTrinomial)
+                if (!m_isTrinomial)
                     throw new Exception();
 
-                return _tc;
+                return m_tc;
             }
         }
         #endregion
@@ -151,15 +151,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 {
                     k++;
                     if (k == 3)
-                        _tc = j;
+                        m_tc = j;
                     if (k <= 5)
-                        _pc[k - 3] = j;
+                        m_pc[k - 3] = j;
                 }
             }
             if (k == 3)
-                _isTrinomial = true;
+                m_isTrinomial = true;
             if (k == 5)
-                _isPentanomial = true;
+                m_isPentanomial = true;
 
             Fields = new List<GF2nField>();
             Matrices = new List<GF2Polynomial[]>();
@@ -176,7 +176,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns a copy of SquaringMatrix[i]</returns>
         public GF2Polynomial SquaringVector(int Index)
         {
-            return new GF2Polynomial(_squaringMatrix[Index]);
+            return new GF2Polynomial(m_squaringMatrix[Index]);
         }
         #endregion
 
@@ -360,10 +360,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         {
             GF2Polynomial[] d = new GF2Polynomial[DegreeN - 1];
             int i, j;
-            _squaringMatrix = new GF2Polynomial[DegreeN];
+            m_squaringMatrix = new GF2Polynomial[DegreeN];
 
-            for (i = 0; i < _squaringMatrix.Length; i++)
-                _squaringMatrix[i] = new GF2Polynomial(DegreeN, "ZERO");
+            for (i = 0; i < m_squaringMatrix.Length; i++)
+                m_squaringMatrix[i] = new GF2Polynomial(DegreeN, "ZERO");
 
             for (i = 0; i < DegreeN - 1; i++)
                 d[i] = new GF2Polynomial(1, "ONE").ShiftLeft(DegreeN + i).Remainder(FieldPoly);
@@ -373,12 +373,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 for (j = 1; j <= DegreeN; j++)
                 {
                     if (d[DegreeN - (i << 1)].TestBit(DegreeN - j))
-                        _squaringMatrix[j - 1].SetBit(DegreeN - i);
+                        m_squaringMatrix[j - 1].SetBit(DegreeN - i);
                 }
             }
 
             for (i = Math.Abs(DegreeN >> 1) + 1; i <= DegreeN; i++)
-                _squaringMatrix[(i << 1) - DegreeN - 1].SetBit(DegreeN - i);
+                m_squaringMatrix[(i << 1) - DegreeN - 1].SetBit(DegreeN - i);
         }
 
         /// <summary>
@@ -414,10 +414,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                             l++;
                             if (done)
                             {
-                                _isPentanomial = true;
-                                _pc[0] = i;
-                                _pc[1] = j;
-                                _pc[2] = k;
+                                m_isPentanomial = true;
+                                m_pc[0] = i;
+                                m_pc[1] = j;
+                                m_pc[2] = k;
                                 return done;
                             }
                         }
@@ -483,8 +483,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
                 l++;
                 if (done)
                 {
-                    _isTrinomial = true;
-                    _tc = i;
+                    m_isTrinomial = true;
+                    m_tc = i;
                     return done;
                 }
                 FieldPoly.ResetBit(i);

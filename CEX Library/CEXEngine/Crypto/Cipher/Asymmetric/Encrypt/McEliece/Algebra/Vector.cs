@@ -11,7 +11,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
     internal abstract class Vector : List<object>
     {
         #region Fields
-        private int _length;
+        private int m_length;
         #endregion
 
         #region Properties
@@ -20,8 +20,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public int Length
         {
-            get { return _length; }
-            set { _length = value; }
+            get { return m_length; }
+            set { m_length = value; }
         }
         #endregion
 

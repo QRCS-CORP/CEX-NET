@@ -15,7 +15,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
     internal sealed class ProductFormPolynomial : IPolynomial
     {
         #region Fields
-        private SparseTernaryPolynomial _f1, _f2, _f3;
+        private SparseTernaryPolynomial m_f1, m_f2, m_f3;
         #endregion
 
         #region Constructor
@@ -28,9 +28,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <param name="F3">F3 polynomial</param>
         public ProductFormPolynomial(SparseTernaryPolynomial F1, SparseTernaryPolynomial F2, SparseTernaryPolynomial F3)
         {
-            _f1 = F1;
-            _f2 = F2;
-            _f3 = F3;
+            m_f1 = F1;
+            m_f2 = F2;
+            m_f3 = F3;
         }
         #endregion
 
@@ -40,12 +40,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// </summary>
         public void Clear()
         {
-            if (_f1 != null)
-                _f1.Clear();
-            if (_f2 != null)
-                _f2.Clear();
-            if (_f3 != null)
-                _f3.Clear();
+            if (m_f1 != null)
+                m_f1.Clear();
+            if (m_f2 != null)
+                m_f2.Clear();
+            if (m_f3 != null)
+                m_f3.Clear();
         }
 
        /// <summary>
@@ -119,9 +119,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>The encoded polynomial</returns>
         public byte[] ToBinary()
         {
-            byte[] f1Bin = _f1.ToBinary();
-            byte[] f2Bin = _f2.ToBinary();
-            byte[] f3Bin = _f3.ToBinary();
+            byte[] f1Bin = m_f1.ToBinary();
+            byte[] f2Bin = m_f2.ToBinary();
+            byte[] f3Bin = m_f3.ToBinary();
 
             byte[] all = f1Bin.CopyOf(f1Bin.Length + f2Bin.Length + f3Bin.Length);
             Array.Copy(f2Bin, 0, all, f1Bin.Length, f2Bin.Length);
@@ -140,9 +140,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>The product of the two polynomials</returns>
         public IntegerPolynomial Multiply(IntegerPolynomial Factor)
         {
-            IntegerPolynomial c = _f1.Multiply(Factor);
-            c = _f2.Multiply(c);
-            c.Add(_f3.Multiply(Factor));
+            IntegerPolynomial c = m_f1.Multiply(Factor);
+            c = m_f2.Multiply(c);
+            c.Add(m_f3.Multiply(Factor));
 
             return c;
         }
@@ -174,9 +174,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>The product of the two polynomials</returns>
         public BigIntPolynomial Multiply(BigIntPolynomial Factor)
         {
-            BigIntPolynomial c = _f1.Multiply(Factor);
-            c = _f2.Multiply(c);
-            c.Add(_f3.Multiply(Factor));
+            BigIntPolynomial c = m_f1.Multiply(Factor);
+            c = m_f2.Multiply(c);
+            c.Add(m_f3.Multiply(Factor));
 
             return c;
         }
@@ -189,8 +189,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>The polynomial product</returns>
         public IntegerPolynomial ToIntegerPolynomial()
         {
-            IntegerPolynomial i = _f1.Multiply(_f2.ToIntegerPolynomial());
-            i.Add(_f3);
+            IntegerPolynomial i = m_f1.Multiply(m_f2.ToIntegerPolynomial());
+            i.Add(m_f3);
 
             return i;
         }
@@ -204,9 +204,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
         /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
-            int hash = ((_f1 == null) ? 0 : _f1.GetHashCode());
-            hash += ((_f2 == null) ? 0 : _f2.GetHashCode());
-            hash += ((_f3 == null) ? 0 : _f3.GetHashCode());
+            int hash = ((m_f1 == null) ? 0 : m_f1.GetHashCode());
+            hash += ((m_f2 == null) ? 0 : m_f2.GetHashCode());
+            hash += ((m_f3 == null) ? 0 : m_f3.GetHashCode());
 
             return hash;
         }
@@ -226,30 +226,30 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU.Polyno
                 return false;
 
             ProductFormPolynomial other = (ProductFormPolynomial)Obj;
-            if (_f1 == null)
+            if (m_f1 == null)
             {
-                if (other._f1 != null)
+                if (other.m_f1 != null)
                     return false;
             }
-            else if (!_f1.Equals(other._f1))
+            else if (!m_f1.Equals(other.m_f1))
             {
                 return false;
             }
-            if (_f2 == null)
+            if (m_f2 == null)
             {
-                if (other._f2 != null)
+                if (other.m_f2 != null)
                     return false;
             }
-            else if (!_f2.Equals(other._f2))
+            else if (!m_f2.Equals(other.m_f2))
             {
                 return false;
             }
-            if (_f3 == null)
+            if (m_f3 == null)
             {
-                if (other._f3 != null)
+                if (other.m_f3 != null)
                     return false;
             }
-            else if (!_f3.Equals(other._f3))
+            else if (!m_f3.Equals(other.m_f3))
             {
                 return false;
             }

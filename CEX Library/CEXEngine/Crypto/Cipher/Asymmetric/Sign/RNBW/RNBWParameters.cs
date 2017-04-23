@@ -92,9 +92,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
         #region Fields
         private int[] _VI;
-        private byte[] _oId = new byte[3];
-        private bool _isDisposed = false;
-        private Prngs _rndEngine = Prngs.CTRPrng;
+        private byte[] m_oId = new byte[3];
+        private bool m_isDisposed = false;
+        private Prngs m_rndEngine = Prngs.CTRPrng;
         #endregion
 
         #region Properties
@@ -111,8 +111,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         /// </summary>
         public byte[] OId
         {
-            get { return _oId; }
-            private set { _oId = value; }
+            get { return m_oId; }
+            private set { m_oId = value; }
         }
 
         /// <summary>
@@ -144,8 +144,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         /// </summary>
         public Prngs RandomEngine
         {
-            get { return _rndEngine; }
-            private set {_rndEngine = value; }
+            get { return m_rndEngine; }
+            private set {m_rndEngine = value; }
         }
         #endregion
 
@@ -166,9 +166,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
             if (OId[0] != (byte)AsymmetricEngines.Rainbow)
                 throw new CryptoAsymmetricException("RNBWParameters:Ctor", string.Format("The OId is invalid, first byte must be family designator ({0})!", AsymmetricEngines.Rainbow, new ArgumentException()));
 
-            _oId = OId;
+            m_oId = OId;
             _VI = Vi;
-            _rndEngine = Engine;
+            m_rndEngine = Engine;
 
             if (!CheckParams())
                 throw new CryptoAsymmetricException("RNBWParameters:CTor", "The RNBWParameters Vi setting is invalid!", new ArgumentException());
@@ -189,8 +189,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
                 int len;
                 byte[] data;
 
-                _rndEngine = (Prngs)reader.ReadInt32();
-                _oId = reader.ReadBytes(OID_SIZE);
+                m_rndEngine = (Prngs)reader.ReadInt32();
+                m_oId = reader.ReadBytes(OID_SIZE);
                 len = reader.ReadInt32();
                 _VI = new int[len];
                 data = reader.ReadBytes(len * 4);
@@ -269,8 +269,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         {
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
 
-            writer.Write((int)_rndEngine);
-            writer.Write(_oId);
+            writer.Write((int)m_rndEngine);
+            writer.Write(m_oId);
             writer.Write(_VI.Length);
             byte[] data = ArrayUtils.ToBytes(_VI);
             writer.Write(data);
@@ -354,7 +354,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         public override int GetHashCode()
         {
             int  hash = ArrayUtils.GetHashCode(_VI);
-            hash += 31 * (int)_rndEngine;
+            hash += 31 * (int)m_rndEngine;
             return hash;
         }
 
@@ -376,7 +376,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
             if (!Compare.IsEqual(_VI, other.Vi))
                 return false;
-            if (_rndEngine != other.RandomEngine)
+            if (m_rndEngine != other.RandomEngine)
                 return false;
 
             return true;
@@ -391,7 +391,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
         /// <returns>The RNBWParameters copy</returns>
         public object Clone()
         {
-            return new RNBWParameters(_oId, _VI, _rndEngine);
+            return new RNBWParameters(m_oId, _VI, m_rndEngine);
         }
 
         /// <summary>
@@ -417,15 +417,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    _rndEngine = Prngs.CTRPrng;
-                    if (_oId != null)
+                    m_rndEngine = Prngs.CTRPrng;
+                    if (m_oId != null)
                     {
-                        Array.Clear(_oId, 0, _oId.Length);
-                        _oId = null;
+                        Array.Clear(m_oId, 0, m_oId.Length);
+                        m_oId = null;
                     }
                     if (_VI != null)
                     {
@@ -435,7 +435,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.RNBW
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

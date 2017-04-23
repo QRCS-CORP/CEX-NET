@@ -37,11 +37,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <summary>
         /// Number of columns
         /// </summary>
-        protected int _columnCount;
+        protected int m_columnCount;
         /// <summary>
         /// Number of rows
         /// </summary>
-        protected int _rowCount;
+        protected int m_rowCount;
         #endregion
 
         #region Properties
@@ -50,8 +50,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public int ColumnCount
         {
-            get { return _columnCount; }
-            set { _columnCount = value; }
+            get { return m_columnCount; }
+            set { m_columnCount = value; }
         }
 
         /// <summary>
@@ -59,8 +59,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// </summary>
         public int RowCount
         {
-            get { return _rowCount; }
-            set { _rowCount = value; }
+            get { return m_rowCount; }
+            set { m_rowCount = value; }
         }
         #endregion
 

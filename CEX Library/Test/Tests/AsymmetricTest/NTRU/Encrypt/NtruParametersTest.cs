@@ -88,7 +88,7 @@ namespace VTDev.Projects.CEX.Test.Tests.AsymmetricTest.NTRU.Encrypt
             if (param.GetHashCode() != param.GetHashCode())
                 throw new Exception("Parameters: parameters hash test failed!");
 
-            param2.Digest = Digests.Blake512;
+            param2.Digest = Digests.Blake2B512;
             if (Evaluate.Equals(param, param2))
                 throw new Exception("NtruParameters: cloned copy is not equal!");
             if (param.GetHashCode() != param.GetHashCode())

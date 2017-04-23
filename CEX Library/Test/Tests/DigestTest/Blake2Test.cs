@@ -5,6 +5,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Common;
 using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Helper;
+using VTDev.Libraries.CEXEngine.Crypto.Mac;
 using VTDev.Libraries.CEXEngine.Tools;
 #endregion
 
@@ -65,11 +66,11 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
 
                 DigestTest(Digests.Blake2B512, path + KAT2B);
                 OnProgress(new TestEventArgs("Passed Blake2B 512 vector tests.."));
-                DigestTest(Digests.Blake2BP512, path + KAT2BP);
+                DigestTest(Digests.Blake2B512, path + KAT2BP, true);
                 OnProgress(new TestEventArgs("Passed Blake2BP 512 vector tests.."));
                 DigestTest(Digests.Blake2S256, path + KAT2S);
                 OnProgress(new TestEventArgs("Passed Blake2S 256 vector tests.."));/**/
-                DigestTest(Digests.Blake2SP256, path + KAT2SP);
+                DigestTest(Digests.Blake2S256, path + KAT2SP, true);
                 OnProgress(new TestEventArgs("Passed Blake2SP 256 vector tests.."));
 
                 return SUCCESS;
@@ -83,7 +84,7 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
         #endregion
 
         #region Tests
-        private void DigestTest(Digests DigestType, string Path)
+        private void DigestTest(Digests DigestType, string Path, bool Parallel = false)
         {
             int hashSize = DigestFromName.GetDigestSize(DigestType);
 
@@ -113,12 +114,12 @@ namespace VTDev.Projects.CEX.Test.Tests.DigestTest
                         if (line.Length - sze > 0)
                             expect = HexConverter.Decode(line.Substring(sze, line.Length - sze));
 
-                        IDigest dgt = DigestFromName.GetInstance(DigestType);
+                        IDigest dgt = DigestFromName.GetInstance(DigestType, Parallel);
 
-                        if (dgt.Enumeral == Digests.Blake2B512 || dgt.Enumeral == Digests.Blake2BP512)
-                            ((Blake2Bp512)dgt).LoadMacKey(new MacParams(key));
+                        if (dgt.Enumeral == Digests.Blake2B512)
+                            ((Blake2B512)dgt).LoadMacKey(new MacParams(key));
                         else
-                            ((Blake2Sp256)dgt).LoadMacKey(new MacParams(key));
+                            ((Blake2S256)dgt).LoadMacKey(new MacParams(key));
 
                         hash = dgt.ComputeHash(input);
                         //16,235

@@ -55,10 +55,10 @@ namespace VTDev.Libraries.CEXEngine.Security
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
-        private byte[] _rndBuffer = new byte[BUFFER_SIZE];
-        private byte[] _revBuffer = new byte[BUFFER_SIZE];
-        private byte[] _zerBuffer = new byte[BUFFER_SIZE];
+        private bool m_isDisposed = false;
+        private byte[] m_rndBuffer = new byte[BUFFER_SIZE];
+        private byte[] m_revBuffer = new byte[BUFFER_SIZE];
+        private byte[] m_zerBuffer = new byte[BUFFER_SIZE];
         #endregion
 
         #region Properties
@@ -76,11 +76,11 @@ namespace VTDev.Libraries.CEXEngine.Security
         {
             // get random buffer
             using (System.Security.Cryptography.RNGCryptoServiceProvider rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
-                rng.GetBytes(_rndBuffer);
+                rng.GetBytes(m_rndBuffer);
 
             // create reverse random buffer
-            Buffer.BlockCopy(_rndBuffer, 0, _revBuffer, 0, _revBuffer.Length);
-            Array.Reverse(_revBuffer);
+            Buffer.BlockCopy(m_rndBuffer, 0, m_revBuffer, 0, m_revBuffer.Length);
+            Array.Reverse(m_revBuffer);
         }
 
         /// <summary>
@@ -115,10 +115,10 @@ namespace VTDev.Libraries.CEXEngine.Security
                 return false;
 
             // three overwrite passes are more than enough..
-            //OverWrite(FilePath, _zerBuffer);    // 0x0
-            OverWrite(FilePath, _rndBuffer);    // random
-            OverWrite(FilePath, _revBuffer);    // reverse random
-            OverWrite(FilePath, _zerBuffer);    // 0x0
+            //OverWrite(FilePath, m_zerBuffer);    // 0x0
+            OverWrite(FilePath, m_rndBuffer);    // random
+            OverWrite(FilePath, m_revBuffer);    // reverse random
+            OverWrite(FilePath, m_zerBuffer);    // 0x0
 
             // rename 30 times
             Rename(ref FilePath);
@@ -228,29 +228,29 @@ namespace VTDev.Libraries.CEXEngine.Security
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_revBuffer != null)
+                    if (m_revBuffer != null)
                     {
-                        Array.Clear(_revBuffer, 0, _revBuffer.Length);
-                        _revBuffer = null;
+                        Array.Clear(m_revBuffer, 0, m_revBuffer.Length);
+                        m_revBuffer = null;
                     }
-                    if (_rndBuffer != null)
+                    if (m_rndBuffer != null)
                     {
-                        Array.Clear(_rndBuffer, 0, _rndBuffer.Length);
-                        _rndBuffer = null;
+                        Array.Clear(m_rndBuffer, 0, m_rndBuffer.Length);
+                        m_rndBuffer = null;
                     }
-                    if (_zerBuffer != null)
+                    if (m_zerBuffer != null)
                     {
-                        Array.Clear(_zerBuffer, 0, _zerBuffer.Length);
-                        _zerBuffer = null;
+                        Array.Clear(m_zerBuffer, 0, m_zerBuffer.Length);
+                        m_zerBuffer = null;
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

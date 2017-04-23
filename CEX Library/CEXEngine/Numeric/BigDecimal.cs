@@ -170,16 +170,16 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         #region Private Fields
         // The string representation is cached
         [NonSerialized]
-        private string _toStringImage;
+        private string m_toStringImage;
         // Cache for the hash code
         [NonSerialized]
-        private int _hashCode;
+        private int m_hashCode;
         // An array with powers of five that fit in the type long (5^0,5^1,...,5^27).
-        private static readonly BigInteger[] _fivePow;
+        private static readonly BigInteger[] m_fivePow;
         // An array with powers of ten that fit in the type long (10^0,10^1,...,10^18).
-        private static readonly BigInteger[] _tenPow;
+        private static readonly BigInteger[] m_tenPow;
         // An array with powers of ten that fit in the type long (10^0,10^1,...,10^18).
-        private static readonly long[] _longTenPow = {
+        private static readonly long[] m_longTenPow = {
                                                         1L, 10L, 100L, 1000L, 10000L, 100000L, 1000000L, 10000000L, 
                                                         100000000L, 1000000000L, 10000000000L, 100000000000L, 
                                                         1000000000000L, 10000000000000L, 100000000000000L, 
@@ -187,7 +187,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                                                         1000000000000000000L, 
                                                     };
         // The long five pow.
-        private static readonly long[] _longFivePow = {
+        private static readonly long[] m_longFivePow = {
                                                          1L, 5L, 25L, 125L, 625L, 3125L, 15625L, 78125L, 390625L, 
                                                          1953125L, 9765625L, 48828125L, 244140625L, 1220703125L, 
                                                          6103515625L, 30517578125L, 152587890625L, 762939453125L, 
@@ -198,28 +198,28 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                                                      };
 
         // The long five pow bit length.
-        private static readonly int[] _longFivePowBitLength = new int[_longFivePow.Length];
+        private static readonly int[] m_longFivePowBitLength = new int[m_longFivePow.Length];
         // The long ten pow bit length
-        private static readonly int[] _longTenPowBitLength = new int[_longTenPow.Length];
+        private static readonly int[] m_longTenPowBitLength = new int[m_longTenPow.Length];
         // An array with the first BigInteger scaled by zero ([0,0],[1,0],...,[10,0]).
-        private static readonly BigDecimal[] _biScaledByZero = new BigDecimal[BISCALEDZERO_LEN];
+        private static readonly BigDecimal[] m_biScaledByZero = new BigDecimal[BISCALEDZERO_LEN];
         // An array with the zero number scaled by the first positive scales. (0*10^0, 0*10^1, ..., 0*10^10).
-        private static readonly BigDecimal[] _zeroScaledBy = new BigDecimal[11];
+        private static readonly BigDecimal[] m_zeroScaledBy = new BigDecimal[11];
         // An array filled with character '0'
-        private static readonly char[] _chZeros = new char[100];
+        private static readonly char[] m_chZeros = new char[100];
         // The arbitrary precision integer (unscaled value) in the internal representation of BigDecimal
-        private BigInteger _intVal;
+        private BigInteger m_intVal;
         // The bit length.
         [NonSerialized]
-        private int _bitLength;
+        private int m_bitLength;
         // The small value
         [NonSerialized]
-        private long _smallValue;
+        private long m_smallValue;
         // The 32-bit integer scale in the internal representation of BigDecimal
-        private int _scale;
+        private int m_scale;
         // Represent the number of decimal digits in the unscaled value.
         [NonSerialized]
-        private int _precision = 0;
+        private int m_precision = 0;
         #endregion
 
         #region Properies
@@ -234,10 +234,10 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             get
             {
                 // Checking if the precision already was calculated
-                if (_precision > 0)
-                    return _precision;
+                if (m_precision > 0)
+                    return m_precision;
 
-                int bitLength = _bitLength;
+                int bitLength = m_bitLength;
                 int decimalDigits = 1; // the precision to be calculated
                 double doubleUnsc = 1; // intVal in 'double'
 
@@ -247,7 +247,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                     if (bitLength >= 64)
                         doubleUnsc = GetUnscaledValue().ToDouble();
                     else if (bitLength >= 1)
-                        doubleUnsc = _smallValue;
+                        doubleUnsc = m_smallValue;
 
                     var val = (int)Math.Round(System.Math.Log10(System.Math.Abs(doubleUnsc)));
                     decimalDigits = val == 0 ? 1 : val + 1;
@@ -263,8 +263,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                         decimalDigits++;
                 }
 
-                _precision = decimalDigits;
-                return _precision;
+                m_precision = decimalDigits;
+                return m_precision;
             }
         }
 
@@ -276,7 +276,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </summary>
         public int Scale
         {
-            get { return _scale; }
+            get { return m_scale; }
         }
 
         /// <summary>
@@ -298,25 +298,25 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             // To fill all static arrays.
             int i = 0;
 
-            for (; i < _zeroScaledBy.Length; i++)
+            for (; i < m_zeroScaledBy.Length; i++)
             {
-                _biScaledByZero[i] = new BigDecimal(i, 0);
-                _zeroScaledBy[i] = new BigDecimal(0, i);
-                _chZeros[i] = '0';
+                m_biScaledByZero[i] = new BigDecimal(i, 0);
+                m_zeroScaledBy[i] = new BigDecimal(0, i);
+                m_chZeros[i] = '0';
             }
 
-            for (; i < _chZeros.Length; i++)
-                _chZeros[i] = '0';
+            for (; i < m_chZeros.Length; i++)
+                m_chZeros[i] = '0';
 
-            for (int j = 0; j < _longFivePowBitLength.Length; j++)
-                _longFivePowBitLength[j] = BitLength(_longFivePow[j]);
+            for (int j = 0; j < m_longFivePowBitLength.Length; j++)
+                m_longFivePowBitLength[j] = BitLength(m_longFivePow[j]);
 
-            for (int j = 0; j < _longTenPowBitLength.Length; j++)
-                _longTenPowBitLength[j] = BitLength(_longTenPow[j]);
+            for (int j = 0; j < m_longTenPowBitLength.Length; j++)
+                m_longTenPowBitLength[j] = BitLength(m_longTenPow[j]);
 
             // Taking the references of useful powers.
-            _tenPow = Multiplication.bigTenPows;
-            _fivePow = Multiplication.bigFivePows;
+            m_tenPow = Multiplication.m_bigTenPows;
+            m_fivePow = Multiplication.m_bigFivePows;
         }
 
         /// <summary>
@@ -390,13 +390,13 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                     }
                 }
 
-                _scale = Offset - begin;
-                bufLength += _scale;
-                unscaledBuffer.Append(Data, begin, _scale);
+                m_scale = Offset - begin;
+                bufLength += m_scale;
+                unscaledBuffer.Append(Data, begin, m_scale);
             }
             else
             {
-                _scale = 0;
+                m_scale = 0;
             }
 
             // An exponent was found
@@ -417,28 +417,28 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 // Accumulating all remaining digits
                 string scaleString = new String(Data, begin, last + 1 - begin); // buffer for scale
                 // Checking if the scale is defined            
-                long newScale = (long)_scale - int.Parse(scaleString); // the new scale
-                _scale = (int)newScale;
+                long newScale = (long)m_scale - int.Parse(scaleString); // the new scale
+                m_scale = (int)newScale;
 
-                if (newScale != _scale)
+                if (newScale != m_scale)
                     throw new FormatException("Scale out of range!");
             }
 
             // Parsing the unscaled value
             if (bufLength < 19)
             {
-                _smallValue = long.Parse(unscaledBuffer.ToString());
-                _bitLength = BitLength(_smallValue);
+                m_smallValue = long.Parse(unscaledBuffer.ToString());
+                m_bitLength = BitLength(m_smallValue);
             }
             else
             {
                 SetUnscaledValue(new BigInteger(unscaledBuffer.ToString()));
             }
 
-            _precision = unscaledBuffer.Length - counter;
+            m_precision = unscaledBuffer.Length - counter;
 
             if (unscaledBuffer[0] == '-')
-                _precision--;
+                m_precision--;
         }
 
         /// <summary>
@@ -537,26 +537,26 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             int trailingZeros;
 
             // Extracting the exponent, note that the bias is 1023
-            _scale = 1075 - (int)((bits >> 52) & 0x7FFL);
+            m_scale = 1075 - (int)((bits >> 52) & 0x7FFL);
 
             // Extracting the 52 bits of the mantisa.
-            mantisa = (_scale == 1075) ?
+            mantisa = (m_scale == 1075) ?
                 (bits & 0xFFFFFFFFFFFFFL) << 1 :
                 (bits & 0xFFFFFFFFFFFFFL) | 0x10000000000000L;
 
             if (mantisa == 0)
             {
-                _scale = 0;
-                _precision = 1;
+                m_scale = 0;
+                m_precision = 1;
             }
 
             // To simplify all factors '2' in the mantisa 
-            if (_scale > 0)
+            if (m_scale > 0)
             {
-                trailingZeros = System.Math.Min(_scale, IntUtils.NumberOfTrailingZeros(mantisa));
+                trailingZeros = System.Math.Min(m_scale, IntUtils.NumberOfTrailingZeros(mantisa));
                 long mantisa2 = (long)(((ulong)mantisa) >> trailingZeros);
                 mantisa = IntUtils.URShift(mantisa, trailingZeros);
-                _scale -= trailingZeros;
+                m_scale -= trailingZeros;
             }
 
             // Calculating the new unscaled value and the new scale
@@ -564,35 +564,35 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 mantisa = -mantisa;
 
             int mantisaBits = BitLength(mantisa);
-            if (_scale < 0)
+            if (m_scale < 0)
             {
-                _bitLength = mantisaBits == 0 ? 0 : mantisaBits - _scale;
+                m_bitLength = mantisaBits == 0 ? 0 : mantisaBits - m_scale;
 
-                if (_bitLength < 64)
-                    _smallValue = mantisa << (-_scale);
+                if (m_bitLength < 64)
+                    m_smallValue = mantisa << (-m_scale);
                 else
-                    _intVal = BigInteger.ValueOf(mantisa).ShiftLeft(-_scale);
+                    m_intVal = BigInteger.ValueOf(mantisa).ShiftLeft(-m_scale);
 
-                _scale = 0;
+                m_scale = 0;
             }
-            else if (_scale > 0)
+            else if (m_scale > 0)
             {
                 // m * 2^e =  (m * 5^(-e)) * 10^e
-                if (_scale < _longFivePow.Length && mantisaBits + _longFivePowBitLength[_scale] < 64)
+                if (m_scale < m_longFivePow.Length && mantisaBits + m_longFivePowBitLength[m_scale] < 64)
                 {
-                    _smallValue = mantisa * _longFivePow[_scale];
-                    _bitLength = BitLength(_smallValue);
+                    m_smallValue = mantisa * m_longFivePow[m_scale];
+                    m_bitLength = BitLength(m_smallValue);
                 }
                 else
                 {
-                    SetUnscaledValue(Multiplication.MultiplyByFivePow(BigInteger.ValueOf(mantisa), _scale));
+                    SetUnscaledValue(Multiplication.MultiplyByFivePow(BigInteger.ValueOf(mantisa), m_scale));
                 }
             }
             else
             {
                 // scale == 0
-                _smallValue = mantisa;
-                _bitLength = mantisaBits;
+                m_smallValue = mantisa;
+                m_bitLength = mantisaBits;
             }
         }
 
@@ -653,7 +653,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             if (UnscaledValue == null)
                 throw new NullReferenceException("UnscaledValue can not be null or empty!");
 
-            _scale = Scale;
+            m_scale = Scale;
             SetUnscaledValue(UnscaledValue);
         }
 
@@ -729,9 +729,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <param name="Scale">The scale</param>
         private BigDecimal(long SmallValue, int Scale)
         {
-            _smallValue = SmallValue;
-            _scale = Scale;
-            _bitLength = BitLength(SmallValue);
+            m_smallValue = SmallValue;
+            m_scale = Scale;
+            m_bitLength = BitLength(SmallValue);
         }
 
         /// <summary>
@@ -742,9 +742,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <param name="Scale">The scale</param>
         private BigDecimal(int SmallValue, int Scale)
         {
-            _smallValue = SmallValue;
-            _scale = Scale;
-            _bitLength = BitLength(SmallValue);
+            m_smallValue = SmallValue;
+            m_scale = Scale;
+            m_bitLength = BitLength(SmallValue);
         }
         #endregion
 
@@ -791,7 +791,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <exception cref="ArgumentNullException">Thrown if the given <paramref name="Augend"/> is <c>null</c>.</exception>
         public BigDecimal Add(BigDecimal Augend)
         {
-            int diffScale = _scale - Augend._scale;
+            int diffScale = m_scale - Augend.m_scale;
 
             // Fast return when some operand is zero
             if (IsZero())
@@ -811,10 +811,10 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             if (diffScale == 0)
             {
                 // case s1 == s2: [u1 + u2 , s1]
-                if (System.Math.Max(_bitLength, Augend._bitLength) + 1 < 64)
-                    return ValueOf(_smallValue + Augend._smallValue, _scale);
+                if (System.Math.Max(m_bitLength, Augend.m_bitLength) + 1 < 64)
+                    return ValueOf(m_smallValue + Augend.m_smallValue, m_scale);
 
-                return new BigDecimal(GetUnscaledValue().Add(Augend.GetUnscaledValue()), _scale);
+                return new BigDecimal(GetUnscaledValue().Add(Augend.GetUnscaledValue()), m_scale);
             }
 
             // case s1 > s2 : [(u1 + u2) * 10 ^ (s1 - s2) , s1]
@@ -843,7 +843,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             BigDecimal larger; // operand with the largest unscaled value
             BigDecimal smaller; // operand with the smallest unscaled value
             BigInteger tempBI;
-            long diffScale = (long)_scale - Augend._scale;
+            long diffScale = (long)m_scale - Augend.m_scale;
             int largerSignum;
 
             // Some operand is zero or the precision is infinity  
@@ -884,7 +884,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             }
 
             // Rounding the improved adding 
-            larger = new BigDecimal(tempBI, larger._scale + 1);
+            larger = new BigDecimal(tempBI, larger.m_scale + 1);
 
             return larger.Round(Context);
         }
@@ -902,10 +902,10 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         private static BigDecimal AddAndMult10(BigDecimal Value, BigDecimal Augend, int DiffScale)
         {
-            if (DiffScale < _longTenPow.Length && System.Math.Max(Value._bitLength, Augend._bitLength + _longTenPowBitLength[DiffScale]) + 1 < 64)
-                return ValueOf(Value._smallValue + Augend._smallValue * _longTenPow[DiffScale], Value._scale);
+            if (DiffScale < m_longTenPow.Length && System.Math.Max(Value.m_bitLength, Augend.m_bitLength + m_longTenPowBitLength[DiffScale]) + 1 < 64)
+                return ValueOf(Value.m_smallValue + Augend.m_smallValue * m_longTenPow[DiffScale], Value.m_scale);
 
-            return new BigDecimal(Value.GetUnscaledValue().Add(Multiplication.MultiplyByTenPow(Augend.GetUnscaledValue(), DiffScale)), Value._scale);
+            return new BigDecimal(Value.GetUnscaledValue().Add(Multiplication.MultiplyByTenPow(Augend.GetUnscaledValue(), DiffScale)), Value.m_scale);
         }
 
         /// <summary>
@@ -929,12 +929,12 @@ namespace VTDev.Libraries.CEXEngine.Numeric
 
             if (thisSign == valueSign)
             {
-                if (_scale == Value._scale && _bitLength < 64 && Value._bitLength < 64)
+                if (m_scale == Value.m_scale && m_bitLength < 64 && Value.m_bitLength < 64)
                 {
-                    return (_smallValue < Value._smallValue) ? -1 : (_smallValue > Value._smallValue) ? 1 : 0;
+                    return (m_smallValue < Value.m_smallValue) ? -1 : (m_smallValue > Value.m_smallValue) ? 1 : 0;
                 }
 
-                long diffScale = (long)_scale - Value._scale;
+                long diffScale = (long)m_scale - Value.m_scale;
                 int diffPrecision = AproxPrecision() - Value.AproxPrecision();
                 if (diffPrecision > diffScale + 1)
                 {
@@ -994,7 +994,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             // greatest common divisor between 'p' and 'q'
             BigInteger gcd;
             BigInteger[] quotAndRem;
-            long diffScale = (long)_scale - Divisor._scale;
+            long diffScale = (long)m_scale - Divisor.m_scale;
             // the new scale for  quotient
             int newScale;
             // number of factors "2" in 'q'
@@ -1002,7 +1002,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             // number of factors "5" in 'q'
             int l = 0;
             int i = 1;
-            int lastPow = _fivePow.Length - 1;
+            int lastPow = m_fivePow.Length - 1;
 
             if (Divisor.IsZero())
                 throw new ArithmeticException("Division by zero");
@@ -1021,7 +1021,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             // To simplify all "5" factors of q, dividing by 5^l
             do
             {
-                quotAndRem = q.DivideAndRemainder(_fivePow[i]);
+                quotAndRem = q.DivideAndRemainder(m_fivePow[i]);
                 if (quotAndRem[1].Signum() == 0)
                 {
                     l += i;
@@ -1074,11 +1074,11 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             // Calculating how many zeros must be append to 'dividend'
             // to obtain a  quotient with at least 'mc.precision()' digits 
             long traillingZeros = Context.Precision + 2L + Divisor.AproxPrecision() - AproxPrecision();
-            long diffScale = (long)_scale - Divisor._scale;
+            long diffScale = (long)m_scale - Divisor.m_scale;
             long newScale = diffScale; // scale of the  quotient
             int compRem; // to compare the remainder
             int i = 1; // index   
-            int lastPow = _tenPow.Length - 1; // last power of ten
+            int lastPow = m_tenPow.Length - 1; // last power of ten
             BigInteger integerQuot; // for temporal results
             BigInteger[] quotAndRem = { GetUnscaledValue() };
 
@@ -1110,7 +1110,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 // To strip trailing zeros until the preferred scale is reached
                 while (!integerQuot.TestBit(0))
                 {
-                    quotAndRem = integerQuot.DivideAndRemainder(_tenPow[i]);
+                    quotAndRem = integerQuot.DivideAndRemainder(m_tenPow[i]);
                     if ((quotAndRem[1].Signum() == 0) && (newScale - i >= diffScale))
                     {
                         newScale -= i;
@@ -1152,7 +1152,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             if (!Enum.IsDefined(typeof(RoundingModes), RoundMode))
                 throw new ArgumentException("Invalid rounding mode!");
 
-            return Divide(Divisor, _scale, (RoundingModes)RoundMode);
+            return Divide(Divisor, m_scale, (RoundingModes)RoundMode);
         }
 
         /// <summary>
@@ -1187,7 +1187,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         public BigDecimal Divide(BigDecimal Divisor, RoundingModes RoundingMode)
         {
-            return Divide(Divisor, _scale, RoundingMode);
+            return Divide(Divisor, m_scale, RoundingMode);
         }
 
         /// <summary>
@@ -1211,22 +1211,22 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             if (Divisor.IsZero())
                 throw new ArithmeticException("Division by zero!");
 
-            long diffScale = ((long)_scale - Divisor._scale) - Scale;
-            if (_bitLength < 64 && Divisor._bitLength < 64)
+            long diffScale = ((long)m_scale - Divisor.m_scale) - Scale;
+            if (m_bitLength < 64 && Divisor.m_bitLength < 64)
             {
                 if (diffScale == 0)
-                    return DividePrimitiveLongs(_smallValue, Divisor._smallValue, Scale, RoundingMode);
+                    return DividePrimitiveLongs(m_smallValue, Divisor.m_smallValue, Scale, RoundingMode);
 
                 if (diffScale > 0)
                 {
-                    if (diffScale < _longTenPow.Length && Divisor._bitLength + _longTenPowBitLength[(int)diffScale] < 64)
-                        return DividePrimitiveLongs(_smallValue, Divisor._smallValue * _longTenPow[(int)diffScale], Scale, RoundingMode);
+                    if (diffScale < m_longTenPow.Length && Divisor.m_bitLength + m_longTenPowBitLength[(int)diffScale] < 64)
+                        return DividePrimitiveLongs(m_smallValue, Divisor.m_smallValue * m_longTenPow[(int)diffScale], Scale, RoundingMode);
                 }
                 else
                 {
                     // diffScale < 0
-                    if (-diffScale < _longTenPow.Length && _bitLength + _longTenPowBitLength[(int)-diffScale] < 64)
-                        return DividePrimitiveLongs(_smallValue * _longTenPow[(int)-diffScale], Divisor._smallValue, Scale, RoundingMode);
+                    if (-diffScale < m_longTenPow.Length && m_bitLength + m_longTenPowBitLength[(int)-diffScale] < 64)
+                        return DividePrimitiveLongs(m_smallValue * m_longTenPow[(int)-diffScale], Divisor.m_smallValue, Scale, RoundingMode);
                 }
             }
 
@@ -1302,10 +1302,10 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             BigInteger integralValue; // the integer of result
             BigInteger powerOfTen; // some power of ten
             BigInteger[] quotAndRem = { GetUnscaledValue() };
-            long newScale = (long)_scale - Divisor._scale;
+            long newScale = (long)m_scale - Divisor.m_scale;
             long tempScale = 0;
             int i = 1;
-            int lastPow = _tenPow.Length - 1;
+            int lastPow = m_tenPow.Length - 1;
 
             if (Divisor.IsZero())
                 throw new ArithmeticException("Division by zero!");
@@ -1335,7 +1335,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 // To strip trailing zeros approximating to the preferred scale
                 while (!integralValue.TestBit(0))
                 {
-                    quotAndRem = integralValue.DivideAndRemainder(_tenPow[i]);
+                    quotAndRem = integralValue.DivideAndRemainder(m_tenPow[i]);
                     if ((quotAndRem[1].Signum() == 0) && (tempScale - i >= newScale))
                     {
                         tempScale -= i;
@@ -1378,8 +1378,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             int mcPrecision = Context.Precision;
             int diffPrecision = Precision - Divisor.Precision;
-            int lastPow = _tenPow.Length - 1;
-            long diffScale = (long)_scale - Divisor._scale;
+            int lastPow = m_tenPow.Length - 1;
+            long diffScale = (long)m_scale - Divisor.m_scale;
             long newScale = diffScale;
             long quotPrecision = diffPrecision - diffScale + 1;
             BigInteger[] quotAndRem = new BigInteger[2];
@@ -1450,7 +1450,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             // To strip trailing zeros until the specified precision is reached
             while (!strippedBI.TestBit(0))
             {
-                quotAndRem = strippedBI.DivideAndRemainder(_tenPow[i]);
+                quotAndRem = strippedBI.DivideAndRemainder(m_tenPow[i]);
                 if ((quotAndRem[1].Signum() == 0) && ((resultPrecision - i >= mcPrecision) || (newScale - i >= diffScale)))
                 {
                     resultPrecision -= i;
@@ -1473,7 +1473,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             if (resultPrecision > mcPrecision)
                 throw new ArithmeticException("Division impossible");
 
-            integralValue._scale = ToIntScale(newScale);
+            integralValue.m_scale = ToIntScale(newScale);
             integralValue.SetUnscaledValue(strippedBI);
 
             return integralValue;
@@ -1522,7 +1522,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         public BigDecimal MovePointLeft(int N)
         {
-            return MovePoint(_scale + (long)N);
+            return MovePoint(m_scale + (long)N);
         }
 
         /// <summary>
@@ -1540,7 +1540,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         public BigDecimal MovePointRight(int N)
         {
-            return MovePoint(_scale - (long)N);
+            return MovePoint(m_scale - (long)N);
         }
 
         /// <summary>
@@ -1555,15 +1555,15 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         public BigDecimal Multiply(BigDecimal Multiplicand)
         {
-            long newScale = (long)_scale + Multiplicand._scale;
+            long newScale = (long)m_scale + Multiplicand.m_scale;
 
             if (IsZero() || (Multiplicand.IsZero()))
                 return GetZeroScaledBy(newScale);
 
             // Let be: this = [u1,s1] and multiplicand = [u2,s2] so:
             // this x multiplicand = [ s1 * s2 , s1 + s2 ]
-            if (_bitLength + Multiplicand._bitLength < 64)
-                return ValueOf(_smallValue * Multiplicand._smallValue, ToIntScale(newScale));
+            if (m_bitLength + Multiplicand.m_bitLength < 64)
+                return ValueOf(m_smallValue * Multiplicand.m_smallValue, ToIntScale(newScale));
 
             return new BigDecimal(GetUnscaledValue().Multiply(Multiplicand.GetUnscaledValue()), ToIntScale(newScale));
         }
@@ -1596,10 +1596,10 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         public BigDecimal Negate()
         {
-            if (_bitLength < 63 || (_bitLength == 63 && _smallValue != long.MinValue))
-                return ValueOf(-_smallValue, _scale);
+            if (m_bitLength < 63 || (m_bitLength == 63 && m_smallValue != long.MinValue))
+                return ValueOf(-m_smallValue, m_scale);
 
-            return new BigDecimal(GetUnscaledValue().Negate(), _scale);
+            return new BigDecimal(GetUnscaledValue().Negate(), m_scale);
         }
 
         /// <summary>
@@ -1663,7 +1663,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             if ((N < 0) || (N > 999999999))
                 throw new ArithmeticException("Invalid Operation");
 
-            long newScale = _scale * (long)N;
+            long newScale = m_scale * (long)N;
 
             // Let be: this = [u,s]   so:  this^n = [u^n, s*n]
             return (IsZero()) ? GetZeroScaledBy(newScale) : new BigDecimal(GetUnscaledValue().Pow(N), ToIntScale(newScale));
@@ -1771,7 +1771,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         public BigDecimal Round(MathContext Context)
         {
-            BigDecimal thisBD = new BigDecimal(GetUnscaledValue(), _scale);
+            BigDecimal thisBD = new BigDecimal(GetUnscaledValue(), m_scale);
             thisBD.InplaceRound(Context);
 
             return thisBD;
@@ -1791,14 +1791,14 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         public BigDecimal ScaleByPowerOfTen(int N)
         {
-            long newScale = _scale - (long)N;
-            if (_bitLength < 64)
+            long newScale = m_scale - (long)N;
+            if (m_bitLength < 64)
             {
                 // Taking care when a 0 is to be scaled
-                if (_smallValue == 0)
+                if (m_smallValue == 0)
                     return GetZeroScaledBy(newScale);
 
-                return ValueOf(_smallValue, ToIntScale(newScale));
+                return ValueOf(m_smallValue, ToIntScale(newScale));
             }
 
             return new BigDecimal(GetUnscaledValue(), ToIntScale(newScale));
@@ -1839,7 +1839,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         public BigDecimal SetScale(int NewScale, RoundingModes RoundingMode)
         {
-            long diffScale = NewScale - (long)_scale;
+            long diffScale = NewScale - (long)m_scale;
 
             // Let be:  'this' = [u,s]        
             if (diffScale == 0)
@@ -1848,16 +1848,16 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             if (diffScale > 0)
             {
                 // return  [u * 10^(s2 - s), newScale]
-                if (diffScale < _longTenPow.Length && (_bitLength + _longTenPowBitLength[(int)diffScale]) < 64)
-                    return ValueOf(_smallValue * _longTenPow[(int)diffScale], NewScale);
+                if (diffScale < m_longTenPow.Length && (m_bitLength + m_longTenPowBitLength[(int)diffScale]) < 64)
+                    return ValueOf(m_smallValue * m_longTenPow[(int)diffScale], NewScale);
 
                 return new BigDecimal(Multiplication.MultiplyByTenPow(GetUnscaledValue(), (int)diffScale), NewScale);
             }
 
             // diffScale < 0
             // return  [u,s] / [1,newScale]  with the appropriate scale and rounding
-            if (_bitLength < 64 && -diffScale < _longTenPow.Length)
-                return DividePrimitiveLongs(_smallValue, _longTenPow[(int)-diffScale], NewScale, RoundingMode);
+            if (m_bitLength < 64 && -diffScale < m_longTenPow.Length)
+                return DividePrimitiveLongs(m_smallValue, m_longTenPow[(int)-diffScale], NewScale, RoundingMode);
 
             return DivideBigIntegers(GetUnscaledValue(), Multiplication.PowerOf10(-diffScale), NewScale, RoundingMode);
         }
@@ -1898,8 +1898,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         public int Signum()
         {
-            if (_bitLength < 64)
-                return System.Math.Sign(_smallValue);
+            if (m_bitLength < 64)
+                return System.Math.Sign(m_smallValue);
 
             return GetUnscaledValue().Signum();
         }
@@ -1918,8 +1918,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         public BigDecimal StripTrailingZeros()
         {
             int i = 1; // 1 <= i <= 18
-            int lastPow = _tenPow.Length - 1;
-            long newScale = _scale;
+            int lastPow = m_tenPow.Length - 1;
+            long newScale = m_scale;
 
             if (IsZero())
                 return new BigDecimal("0");
@@ -1931,7 +1931,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             while (!strippedBI.TestBit(0))
             {
                 // To divide by 10^i
-                quotAndRem = strippedBI.DivideAndRemainder(_tenPow[i]);
+                quotAndRem = strippedBI.DivideAndRemainder(m_tenPow[i]);
 
                 // To look the remainder
                 if (quotAndRem[1].Signum() == 0)
@@ -1970,7 +1970,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         public BigDecimal Subtract(BigDecimal Subtrahend)
         {
-            int diffScale = _scale - Subtrahend._scale;
+            int diffScale = m_scale - Subtrahend.m_scale;
 
             // Fast return when some operand is zero
             if (IsZero())
@@ -1990,27 +1990,27 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             if (diffScale == 0)
             {
                 // case s1 = s2 : [u1 - u2 , s1]
-                if (System.Math.Max(_bitLength, Subtrahend._bitLength) + 1 < 64)
-                    return ValueOf(_smallValue - Subtrahend._smallValue, _scale);
+                if (System.Math.Max(m_bitLength, Subtrahend.m_bitLength) + 1 < 64)
+                    return ValueOf(m_smallValue - Subtrahend.m_smallValue, m_scale);
 
-                return new BigDecimal(GetUnscaledValue().Subtract(Subtrahend.GetUnscaledValue()), _scale);
+                return new BigDecimal(GetUnscaledValue().Subtract(Subtrahend.GetUnscaledValue()), m_scale);
             }
 
             if (diffScale > 0)
             {
                 // case s1 > s2 : [ u1 - u2 * 10 ^ (s1 - s2) , s1 ]
-                if (diffScale < _longTenPow.Length && System.Math.Max(_bitLength, Subtrahend._bitLength + _longTenPowBitLength[diffScale]) + 1 < 64)
-                    return ValueOf(_smallValue - Subtrahend._smallValue * _longTenPow[diffScale], _scale);
+                if (diffScale < m_longTenPow.Length && System.Math.Max(m_bitLength, Subtrahend.m_bitLength + m_longTenPowBitLength[diffScale]) + 1 < 64)
+                    return ValueOf(m_smallValue - Subtrahend.m_smallValue * m_longTenPow[diffScale], m_scale);
 
-                return new BigDecimal(GetUnscaledValue().Subtract(Multiplication.MultiplyByTenPow(Subtrahend.GetUnscaledValue(), diffScale)), _scale);
+                return new BigDecimal(GetUnscaledValue().Subtract(Multiplication.MultiplyByTenPow(Subtrahend.GetUnscaledValue(), diffScale)), m_scale);
             }
 
             // case s2 > s1 : [ u1 * 10 ^ (s2 - s1) - u2 , s2 ]
             diffScale = -diffScale;
-            if (diffScale < _longTenPow.Length && System.Math.Max(_bitLength + _longTenPowBitLength[diffScale], Subtrahend._bitLength) + 1 < 64)
-                return ValueOf(_smallValue * _longTenPow[diffScale] - Subtrahend._smallValue, Subtrahend._scale);
+            if (diffScale < m_longTenPow.Length && System.Math.Max(m_bitLength + m_longTenPowBitLength[diffScale], Subtrahend.m_bitLength) + 1 < 64)
+                return ValueOf(m_smallValue * m_longTenPow[diffScale] - Subtrahend.m_smallValue, Subtrahend.m_scale);
 
-            return new BigDecimal(Multiplication.MultiplyByTenPow(GetUnscaledValue(), diffScale).Subtract(Subtrahend.GetUnscaledValue()), Subtrahend._scale);
+            return new BigDecimal(Multiplication.MultiplyByTenPow(GetUnscaledValue(), diffScale).Subtract(Subtrahend.GetUnscaledValue()), Subtrahend.m_scale);
         }
 
         /// <summary>
@@ -2026,7 +2026,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         public BigDecimal Subtract(BigDecimal Subtrahend, MathContext Context)
         {
-            long diffScale = Subtrahend._scale - (long)_scale;
+            long diffScale = Subtrahend.m_scale - (long)m_scale;
             int thisSignum;
             BigDecimal leftOperand; // it will be only the left operand (this) 
             BigInteger tempBI;
@@ -2053,7 +2053,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                     }
 
                     // Rounding the improved subtracting
-                    leftOperand = new BigDecimal(tempBI, _scale + 1);
+                    leftOperand = new BigDecimal(tempBI, m_scale + 1);
                     return leftOperand.Round(Context);
                 }
             }
@@ -2072,12 +2072,12 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         public BigInteger ToBigInteger()
         {
-            if ((_scale == 0) || IsZero())
+            if ((m_scale == 0) || IsZero())
                 return GetUnscaledValue();
-            else if (_scale < 0)
-                return GetUnscaledValue().Multiply(Multiplication.PowerOf10(-(long)_scale));
+            else if (m_scale < 0)
+                return GetUnscaledValue().Multiply(Multiplication.PowerOf10(-(long)m_scale));
             else // (scale > 0)
-                return GetUnscaledValue().Divide(Multiplication.PowerOf10(_scale));
+                return GetUnscaledValue().Divide(Multiplication.PowerOf10(m_scale));
         }
 
         /// <summary>
@@ -2092,13 +2092,13 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <exception cref="ArithmeticException">Thrown if rounding is necessary</exception>
         public BigInteger ToBigIntegerExact()
         {
-            if ((_scale == 0) || IsZero())
+            if ((m_scale == 0) || IsZero())
             {
                 return GetUnscaledValue();
             }
-            else if (_scale < 0)
+            else if (m_scale < 0)
             {
-                return GetUnscaledValue().Multiply(Multiplication.PowerOf10(-(long)_scale));
+                return GetUnscaledValue().Multiply(Multiplication.PowerOf10(-(long)m_scale));
             }
             else
             {
@@ -2106,10 +2106,10 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 BigInteger[] integerAndFraction;
 
                 // An optimization before do a heavy division
-                if ((_scale > AproxPrecision()) || (_scale > GetUnscaledValue().LowestSetBit))
+                if ((m_scale > AproxPrecision()) || (m_scale > GetUnscaledValue().LowestSetBit))
                     throw new ArithmeticException("Rounding necessary");
 
-                integerAndFraction = GetUnscaledValue().DivideAndRemainder(Multiplication.PowerOf10(_scale));
+                integerAndFraction = GetUnscaledValue().DivideAndRemainder(Multiplication.PowerOf10(m_scale));
 
                 // It exists a non-zero fractional part 
                 if (integerAndFraction[1].Signum() != 0)
@@ -2158,7 +2158,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             int exponent = 1076; // bias + 53
             int lowestSetBit;
             int discardedSize;
-            long powerOfTwo = _bitLength - (long)(_scale / LOG10_2);
+            long powerOfTwo = m_bitLength - (long)(m_scale / LOG10_2);
             long bits; // IEEE-754 Standard
             long tempBits; // for temporal calculations     
             BigInteger mantisa;
@@ -2173,16 +2173,16 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             mantisa = GetUnscaledValue().Abs();
 
             // Let be:  this = [u,s], with s > 0
-            if (_scale <= 0)
+            if (m_scale <= 0)
             {
                 // mantisa = abs(u) * 10^s
-                mantisa = mantisa.Multiply(Multiplication.PowerOf10(-_scale));
+                mantisa = mantisa.Multiply(Multiplication.PowerOf10(-m_scale));
             }
             else
             {
                 // (scale > 0)
                 BigInteger[] quotAndRem;
-                BigInteger powerOfTen = Multiplication.PowerOf10(_scale);
+                BigInteger powerOfTen = Multiplication.PowerOf10(m_scale);
                 int k = 100 - (int)powerOfTwo;
                 int compRem;
 
@@ -2295,26 +2295,26 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         public string ToEngineeringString()
         {
             string intString = GetUnscaledValue().ToString();
-            if (_scale == 0)
+            if (m_scale == 0)
             {
                 return intString;
             }
 
             int begin = (GetUnscaledValue().Signum() < 0) ? 2 : 1;
             int end = intString.Length;
-            long exponent = -(long)_scale + end - begin;
+            long exponent = -(long)m_scale + end - begin;
             StringBuilder result = new StringBuilder(intString);
 
-            if ((_scale > 0) && (exponent >= -6))
+            if ((m_scale > 0) && (exponent >= -6))
             {
                 if (exponent >= 0)
                 {
-                    result.Insert(end - _scale, '.');
+                    result.Insert(end - m_scale, '.');
                 }
                 else
                 {
                     result.Insert(begin - 1, "0."); // $NON-NLS-1$
-                    result.Insert(begin + 1, _chZeros, 0, -(int)exponent - 1);
+                    result.Insert(begin + 1, m_chZeros, 0, -(int)exponent - 1);
                 }
             }
             else
@@ -2395,7 +2395,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             // If scale <= -32 there are at least 32 trailing bits zero in 10^(-scale).
             // If the scale is positive and very large the long value could be zero.
-            return (_scale <= -32) || (_scale > AproxPrecision()) ? 0 : ToBigInteger().ToInt32();
+            return (m_scale <= -32) || (m_scale > AproxPrecision()) ? 0 : ToBigInteger().ToInt32();
         }
 
         /// <summary>
@@ -2425,7 +2425,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         {
             // If scale <= -64 there are at least 64 trailing bits zero in 10^(-scale).
             // If the scale is positive and very large the long value could be zero.
-            return (_scale <= -64) || (_scale > AproxPrecision()) ? 0L : ToBigInteger().ToInt64();
+            return (m_scale <= -64) || (m_scale > AproxPrecision()) ? 0L : ToBigInteger().ToInt64();
         }
 
         /// <summary>
@@ -2456,16 +2456,16 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         public string ToPlainString()
         {
             string intStr = GetUnscaledValue().ToString();
-            if ((_scale == 0) || (IsZero() && (_scale < 0)))
+            if ((m_scale == 0) || (IsZero() && (m_scale < 0)))
             {
                 return intStr;
             }
 
             int begin = (Signum() < 0) ? 1 : 0;
-            int delta = _scale;
+            int delta = m_scale;
 
             // We take space for all digits, plus a possible decimal point, plus 'scale'
-            StringBuilder result = new StringBuilder(intStr.Length + 1 + System.Math.Abs(_scale));
+            StringBuilder result = new StringBuilder(intStr.Length + 1 + System.Math.Abs(m_scale));
 
             if (begin == 1)
             {
@@ -2473,7 +2473,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 result.Append('-');
             }
 
-            if (_scale > 0)
+            if (m_scale > 0)
             {
                 delta -= intStr.Length - begin;
                 if (delta >= 0)
@@ -2481,12 +2481,12 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                     result.Append("0."); // $NON-NLS-1$
 
                     // To append zeros after the decimal point
-                    for (; delta > _chZeros.Length; delta -= _chZeros.Length)
+                    for (; delta > m_chZeros.Length; delta -= m_chZeros.Length)
                     {
-                        result.Append(_chZeros);
+                        result.Append(m_chZeros);
                     }
 
-                    result.Append(_chZeros, 0, delta);
+                    result.Append(m_chZeros, 0, delta);
                     result.Append(intStr.Substring(begin));
                 }
                 else
@@ -2503,12 +2503,12 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 result.Append(intStr.Substring(begin));
 
                 // To append trailing zeros
-                for (; delta < -_chZeros.Length; delta += _chZeros.Length)
+                for (; delta < -m_chZeros.Length; delta += m_chZeros.Length)
                 {
-                    result.Append(_chZeros);
+                    result.Append(m_chZeros);
                 }
 
-                result.Append(_chZeros, 0, -delta);
+                result.Append(m_chZeros, 0, -delta);
             }
 
             return result.ToString();
@@ -2537,7 +2537,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             /* A similar code like in ToDouble() could be repeated here,
              * but this simple implementation is quite efficient. */
             float floatResult = Signum();
-            long powerOfTwo = _bitLength - (long)(_scale / LOG10_2);
+            long powerOfTwo = m_bitLength - (long)(m_scale / LOG10_2);
             if ((powerOfTwo < -149) || (floatResult == 0.0f))
             {
                 // Cases which 'this' is very small
@@ -2573,7 +2573,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </remarks>
         public BigDecimal Ulp()
         {
-            return ValueOf(1, _scale);
+            return ValueOf(1, m_scale);
         }
 
         /// <summary>
@@ -2613,7 +2613,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         public static BigDecimal ValueOf(long UnscaledVal)
         {
             if ((UnscaledVal >= 0) && (UnscaledVal < BISCALEDZERO_LEN))
-                return _biScaledByZero[(int)UnscaledVal];
+                return m_biScaledByZero[(int)UnscaledVal];
 
             return new BigDecimal(UnscaledVal, 0);
         }
@@ -2635,8 +2635,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             if (Scale == 0)
                 return ValueOf(UnscaledVal);
 
-            if ((UnscaledVal == 0) && (Scale >= 0) && (Scale < _zeroScaledBy.Length))
-                return _zeroScaledBy[Scale];
+            if ((UnscaledVal == 0) && (Scale >= 0) && (Scale < m_zeroScaledBy.Length))
+                return m_zeroScaledBy[Scale];
 
             return new BigDecimal(UnscaledVal, Scale);
         }
@@ -2652,7 +2652,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         private int AproxPrecision()
         {
-            return ((_precision > 0) ? _precision : (int)((_bitLength - 1) * LOG10_2)) + 1;
+            return ((m_precision > 0) ? m_precision : (int)((m_bitLength - 1) * LOG10_2)) + 1;
         }
 
         /// <summary>
@@ -2856,10 +2856,10 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         private BigInteger GetUnscaledValue()
         {
-            if (_intVal == null)
-                _intVal = BigInteger.ValueOf(_smallValue);
+            if (m_intVal == null)
+                m_intVal = BigInteger.ValueOf(m_smallValue);
 
-            return _intVal;
+            return m_intVal;
         }
 
         /// <summary>
@@ -2901,7 +2901,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 return;
 
             // When the number is small perform an efficient rounding
-            if (_bitLength < 64)
+            if (m_bitLength < 64)
             {
                 SmallRound(Context, discardedPrecision);
                 return;
@@ -2910,7 +2910,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             // Getting the integer part and the discarded fraction
             BigInteger sizeOfFraction = Multiplication.PowerOf10(discardedPrecision);
             BigInteger[] integerAndFraction = GetUnscaledValue().DivideAndRemainder(sizeOfFraction);
-            long newScale = (long)_scale - discardedPrecision;
+            long newScale = (long)m_scale - discardedPrecision;
             int compRem;
             BigDecimal tempBD;
 
@@ -2939,8 +2939,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             }
 
             // To update all internal fields
-            _scale = ToIntScale(newScale);
-            _precision = mcPrecision;
+            m_scale = ToIntScale(newScale);
+            m_precision = mcPrecision;
             SetUnscaledValue(integerAndFraction[0]);
         }
 
@@ -2979,7 +2979,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         private bool IsZero()
         {
             // Watch out: -1 has a bitLength=0
-            return _bitLength == 0 && _smallValue != -1;
+            return m_bitLength == 0 && m_smallValue != -1;
         }
 
         /// <summary>
@@ -3015,14 +3015,14 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             // since  -Integer.MIN_VALUE == Integer.MIN_VALUE
             if (NewScale >= 0)
             {
-                if (_bitLength < 64)
-                    return ValueOf(_smallValue, ToIntScale(NewScale));
+                if (m_bitLength < 64)
+                    return ValueOf(m_smallValue, ToIntScale(NewScale));
 
                 return new BigDecimal(GetUnscaledValue(), ToIntScale(NewScale));
             }
 
-            if (-NewScale < _longTenPow.Length && _bitLength + _longTenPowBitLength[(int)-NewScale] < 64)
-                return ValueOf(_smallValue * _longTenPow[(int)-NewScale], 0);
+            if (-NewScale < m_longTenPow.Length && m_bitLength + m_longTenPowBitLength[(int)-NewScale] < 64)
+                return ValueOf(m_smallValue * m_longTenPow[(int)-NewScale], 0);
 
             return new BigDecimal(Multiplication.MultiplyByTenPow(GetUnscaledValue(), (int)-NewScale), 0);
         }
@@ -3085,11 +3085,11 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </param>
         private void SetUnscaledValue(BigInteger unscaledValue)
         {
-            _intVal = unscaledValue;
-            _bitLength = unscaledValue.BitLength;
+            m_intVal = unscaledValue;
+            m_bitLength = unscaledValue.BitLength;
 
-            if (_bitLength < 64)
-                _smallValue = unscaledValue.ToInt64();
+            if (m_bitLength < 64)
+                m_smallValue = unscaledValue.ToInt64();
         }
 
         /// <summary>
@@ -3100,9 +3100,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <param name="DiscardedPrecision">The number of decimal digits that are discarded</param>
         private void SmallRound(MathContext Context, int DiscardedPrecision)
         {
-            long sizeOfFraction = _longTenPow[DiscardedPrecision];
-            long newScale = (long)_scale - DiscardedPrecision;
-            long unscaledVal = _smallValue;
+            long sizeOfFraction = m_longTenPow[DiscardedPrecision];
+            long newScale = (long)m_scale - DiscardedPrecision;
+            long unscaledVal = m_smallValue;
             // Getting the integer part and the discarded fraction
             long integer = unscaledVal / sizeOfFraction;
             long fraction = unscaledVal % sizeOfFraction;
@@ -3125,11 +3125,11 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             }
 
             // update all internal fields
-            _scale = ToIntScale(newScale);
-            _precision = Context.Precision;
-            _smallValue = integer;
-            _bitLength = BitLength(integer);
-            _intVal = null;
+            m_scale = ToIntScale(newScale);
+            m_precision = Context.Precision;
+            m_smallValue = integer;
+            m_bitLength = BitLength(integer);
+            m_intVal = null;
         }
 
         /// <summary>
@@ -3161,32 +3161,32 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         private string ToStringInternal()
         {
-            if (_bitLength < 32)
+            if (m_bitLength < 32)
             {
-                _toStringImage = Conversion.ToDecimalScaledString(_smallValue, _scale);
-                return _toStringImage;
+                m_toStringImage = Conversion.ToDecimalScaledString(m_smallValue, m_scale);
+                return m_toStringImage;
             }
 
             string intString = GetUnscaledValue().ToString();
-            if (_scale == 0)
+            if (m_scale == 0)
                 return intString;
 
             int begin = (GetUnscaledValue().Signum() < 0) ? 2 : 1;
             int end = intString.Length;
-            long exponent = -(long)_scale + end - begin;
+            long exponent = -(long)m_scale + end - begin;
             StringBuilder result = new StringBuilder();
 
             result.Append(intString);
-            if ((_scale > 0) && (exponent >= -6))
+            if ((m_scale > 0) && (exponent >= -6))
             {
                 if (exponent >= 0)
                 {
-                    result.Insert(end - _scale, '.');
+                    result.Insert(end - m_scale, '.');
                 }
                 else
                 {
                     result.Insert(begin - 1, "0."); // $NON-NLS-1$
-                    result.Insert(begin + 1, _chZeros, 0, -(int)exponent - 1);
+                    result.Insert(begin + 1, m_chZeros, 0, -(int)exponent - 1);
                 }
             }
             else
@@ -3204,9 +3204,9 @@ namespace VTDev.Libraries.CEXEngine.Numeric
                 result.Insert(++end, Convert.ToString(exponent));
             }
 
-            _toStringImage = result.ToString();
+            m_toStringImage = result.ToString();
 
-            return _toStringImage;
+            return m_toStringImage;
         }
 
         /// <summary>
@@ -3250,7 +3250,7 @@ namespace VTDev.Libraries.CEXEngine.Numeric
             if (Obj is BigDecimal)
             {
                 BigDecimal x1 = (BigDecimal)Obj;
-                return x1._scale == _scale && (_bitLength < 64 ? (x1._smallValue == _smallValue) : _intVal.Equals(x1._intVal));
+                return x1.m_scale == m_scale && (m_bitLength < 64 ? (x1.m_smallValue == m_smallValue) : m_intVal.Equals(x1.m_intVal));
             }
 
             return false;
@@ -3265,20 +3265,20 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         public override int GetHashCode()
         {
-            if (_hashCode != 0)
-                return _hashCode;
+            if (m_hashCode != 0)
+                return m_hashCode;
 
-            if (_bitLength < 64)
+            if (m_bitLength < 64)
             {
-                _hashCode = (int)(_smallValue & 0xffffffff);
-                _hashCode = 33 * _hashCode + (int)((_smallValue >> 32) & 0xffffffff);
-                _hashCode = 17 * _hashCode + _scale;
-                return _hashCode;
+                m_hashCode = (int)(m_smallValue & 0xffffffff);
+                m_hashCode = 33 * m_hashCode + (int)((m_smallValue >> 32) & 0xffffffff);
+                m_hashCode = 17 * m_hashCode + m_scale;
+                return m_hashCode;
             }
 
-            _hashCode = 17 * _intVal.GetHashCode() + _scale;
+            m_hashCode = 17 * m_intVal.GetHashCode() + m_scale;
 
-            return _hashCode;
+            return m_hashCode;
         }
 
         /// <summary>
@@ -3293,8 +3293,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// </returns>
         public override string ToString()
         {
-            if (_toStringImage != null)
-                return _toStringImage;
+            if (m_toStringImage != null)
+                return m_toStringImage;
 
             return ToStringInternal();
         }
@@ -3309,12 +3309,12 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         /// <param name="Context">The context</param>
         private BigDecimal(SerializationInfo Info, StreamingContext Context)
         {
-            _intVal = (BigInteger)Info.GetValue("intVal", typeof(BigInteger));
-            _scale = Info.GetInt32("scale");
-            _bitLength = _intVal.BitLength;
+            m_intVal = (BigInteger)Info.GetValue("intVal", typeof(BigInteger));
+            m_scale = Info.GetInt32("scale");
+            m_bitLength = m_intVal.BitLength;
 
-            if (_bitLength < 64)
-                _smallValue = _intVal.ToInt64();
+            if (m_bitLength < 64)
+                m_smallValue = m_intVal.ToInt64();
         }
 
         /// <summary>
@@ -3325,8 +3325,8 @@ namespace VTDev.Libraries.CEXEngine.Numeric
         void ISerializable.GetObjectData(SerializationInfo Info, StreamingContext Context)
         {
             GetUnscaledValue();
-            Info.AddValue("intVal", _intVal, typeof(BigInteger));
-            Info.AddValue("scale", _scale);
+            Info.AddValue("intVal", m_intVal, typeof(BigInteger));
+            Info.AddValue("scale", m_scale);
         }
         #endregion
 

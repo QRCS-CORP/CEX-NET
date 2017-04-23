@@ -66,8 +66,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
-        private RNGCryptoServiceProvider _rngCrypto;
+        private bool m_isDisposed = false;
+        private RNGCryptoServiceProvider m_rngCrypto;
         #endregion
 
         #region Properties
@@ -98,11 +98,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         {
             try
             {
-                _rngCrypto = new RNGCryptoServiceProvider();
+                m_rngCrypto = new RNGCryptoServiceProvider();
             }
             catch (Exception ex)
             {
-                if (_rngCrypto == null)
+                if (m_rngCrypto == null)
                     throw new CryptoRandomException("CSPPrng:Ctor", "RNGCrypto could not be initialized!", ex);
             }
         }
@@ -128,7 +128,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         {
             byte[] data = new byte[Size];
 
-            _rngCrypto.GetBytes(data);
+            m_rngCrypto.GetBytes(data);
 
             return data;
         }
@@ -140,7 +140,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="Output">Array to fill with random bytes</param>
         public void GetBytes(byte[] Output)
         {
-            _rngCrypto.GetBytes(Output);
+            m_rngCrypto.GetBytes(Output);
         }
 
         /// <summary>
@@ -240,13 +240,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// </summary>
         public void Reset()
         {
-            if (_rngCrypto != null)
+            if (m_rngCrypto != null)
             {
-                _rngCrypto.Dispose();
-                _rngCrypto = null;
+                m_rngCrypto.Dispose();
+                m_rngCrypto = null;
             }
 
-            _rngCrypto = new RNGCryptoServiceProvider();
+            m_rngCrypto = new RNGCryptoServiceProvider();
         }
         #endregion
 
@@ -306,19 +306,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_rngCrypto != null)
+                    if (m_rngCrypto != null)
                     {
-                        _rngCrypto.Dispose();
-                        _rngCrypto = null;
+                        m_rngCrypto.Dispose();
+                        m_rngCrypto = null;
                     }
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

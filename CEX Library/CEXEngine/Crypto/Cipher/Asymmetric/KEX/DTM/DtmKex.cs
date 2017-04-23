@@ -444,7 +444,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         private object _fileLock = new object();                        // locks file transfer container
         private DtmForwardKeyStruct _fwdSessionKey;                     // the key forwarding transmission key
         private bool _isDisconnecting = false;                          // dispose flag
-        private bool _isDisposed = false;                               // dispose flag
+        private bool m_isDisposed = false;                               // dispose flag
         private bool _isEstablished = false;                            // session established
         private bool _isForwardSession = false;                         // the forward session constructor was used, the kex will be skipped
         private bool _isServer = false;                                 // server if we granted the session
@@ -459,7 +459,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         private DtmClientStruct _remoteIdentity;                        // the public and private id fields of the remote host
         private int _resendThreshold = 10;                              // the number of queued message packets before a resend is triggered
         private DtmForwardKeyStruct _retSessionKey;                     // the key forwarding receiving key
-        private IRandom _rndGenerator;                                  // the random generator
+        private IRandom m_rndGenerator;                                  // the random generator
         private object _sendLock = new object();                        // locks the transmission queue
         private int _seqCounter = 0;                                    // tracks high sequence
         private PacketBuffer _sndBuffer;                                // the send packet buffer
@@ -830,7 +830,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             _exchangeState = DtmExchangeFlags.Connect;
             _rcvBuffer = new PacketBuffer(BufferCount);
             _sndBuffer = new PacketBuffer(BufferCount);
-            _rndGenerator = GetPrng(_dtmParameters.RandomEngine);
+            m_rndGenerator = GetPrng(_dtmParameters.RandomEngine);
             _bufferCount = BufferCount;
         }
 
@@ -852,7 +852,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             _exchangeState = DtmExchangeFlags.Connect;
             _rcvBuffer = new PacketBuffer(BufferCount);
             _sndBuffer = new PacketBuffer(BufferCount);
-            _rndGenerator = Generator;
+            m_rndGenerator = Generator;
             _bufferCount = BufferCount;
         }
 
@@ -884,7 +884,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             _exchangeState = DtmExchangeFlags.Established;
             _rcvBuffer = new PacketBuffer(BufferCount);
             _sndBuffer = new PacketBuffer(BufferCount);
-            _rndGenerator = GetPrng(_dtmParameters.RandomEngine);
+            m_rndGenerator = GetPrng(_dtmParameters.RandomEngine);
             _bufferCount = BufferCount;
 
             LoadSession(ForwardSession, ReturnSession);
@@ -3245,7 +3245,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// </summary>
         private KeyParams GenerateSymmetricKey(DtmSessionStruct Session)
         {
-            return new KeyParams(_rndGenerator.GetBytes(Session.KeySize), _rndGenerator.GetBytes(Session.IvSize));
+            return new KeyParams(m_rndGenerator.GetBytes(Session.KeySize), m_rndGenerator.GetBytes(Session.IvSize));
         }
 
         /// <summary>
@@ -3496,9 +3496,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
             {
                 int max;
                 if (WaitMinMs > 0 && WaitMinMs < WaitMaxMs)
-                    max  = _rndGenerator.Next(WaitMaxMs);
+                    max  = m_rndGenerator.Next(WaitMaxMs);
                 else
-                    max = _rndGenerator.Next(WaitMinMs, WaitMaxMs);
+                    max = m_rndGenerator.Next(WaitMinMs, WaitMaxMs);
 
                 if (_evtSendWait == null)
                     _evtSendWait = new ManualResetEvent(false);
@@ -3513,10 +3513,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
         /// </summary>
         private void TearDown()
         {
-            if (_rndGenerator != null)
+            if (m_rndGenerator != null)
             {
-                _rndGenerator.Dispose();
-                _rndGenerator = null;
+                m_rndGenerator.Dispose();
+                m_rndGenerator = null;
             }
             if (_authKeyPair != null)
             {
@@ -3638,17 +3638,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
                 if (MaxAppend > 0)
                 {
                     min = MaxAppend / 2; // min is half
-                    apl = _rndGenerator.Next(min, MaxAppend);
+                    apl = m_rndGenerator.Next(min, MaxAppend);
                 }
                 if (MaxPrepend > 0)
                 {
                     min = MaxPrepend / 2;
-                    ppl = _rndGenerator.Next(min, MaxPrepend);
+                    ppl = m_rndGenerator.Next(min, MaxPrepend);
                 }
 
                 int len = apl + ppl;
                 if (len > 0)
-                    rand = _rndGenerator.GetBytes(len);
+                    rand = m_rndGenerator.GetBytes(len);
 
                 if (ppl > 0 && apl > 0)
                 {
@@ -3692,10 +3692,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.KEX.DTM
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 Disconnect();
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion

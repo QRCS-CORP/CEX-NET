@@ -20,7 +20,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Utility
         private IDigest _msgDigestOTS;
         //The length of the message digest and private key
         private int _mdsize;
-        private int _keysize;
+        private int m_keySize;
         // The private key
         private byte[][] _privateKeyOTS;
         // The Winternitz parameter
@@ -50,15 +50,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Utility
             int mdsizeBit = _mdsize << 3;
             _msgSize = (int)Math.Ceiling((double)(mdsizeBit) / (double)W);
             _ckmSize = GetLog((_msgSize << W) + 1);
-            _keysize = _msgSize + (int)Math.Ceiling((double)_ckmSize / (double)W);
+            m_keySize = _msgSize + (int)Math.Ceiling((double)_ckmSize / (double)W);
             // define the private key messagesize
-            _privateKeyOTS = ArrayUtils.CreateJagged<byte[][]>(_keysize, _mdsize);
+            _privateKeyOTS = ArrayUtils.CreateJagged<byte[][]>(m_keySize, _mdsize);
             // gmssRandom.setSeed(seed0);
             byte[] dummy = new byte[_mdsize];
             Array.Copy(Seed, 0, dummy, 0, dummy.Length);
 
             // generate random bytes and assign them to the private key
-            for (int i = 0; i < _keysize; i++)
+            for (int i = 0; i < m_keySize; i++)
                 _privateKeyOTS[i] = _gmssRandom.NextSeed(dummy);
         }
         #endregion
@@ -81,11 +81,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Utility
         /// <returns>The public key</returns>
         public byte[] GetPublicKey()
         {
-            byte[] helppubKey = new byte[_keysize * _mdsize];
+            byte[] helppubKey = new byte[m_keySize * _mdsize];
             byte[] help = new byte[_mdsize];
             int two_power_t = 1 << _W;
 
-            for (int i = 0; i < _keysize; i++)
+            for (int i = 0; i < m_keySize; i++)
             {
                 // hash w-1 time the private key and assign it to the public key
                 _msgDigestOTS.BlockUpdate(_privateKeyOTS[i], 0, _privateKeyOTS[i].Length);
@@ -118,7 +118,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Sign.GMSS.Utility
         /// <returns>The signature code</returns>
         public byte[] GetSignature(byte[] Message)
         {
-            byte[] sign = new byte[_keysize * _mdsize];
+            byte[] sign = new byte[m_keySize * _mdsize];
             // byte [] message; // message m as input
             byte[] hash = new byte[_mdsize]; // hash of message m
             int counter = 0;

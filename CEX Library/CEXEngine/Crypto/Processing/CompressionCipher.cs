@@ -118,9 +118,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
     public class CompressionCipher : CipherStream
     {
         #region Fields
-        private Compressor _cmpEngine;
-        private Compressor.CompressionFormats _cmpFormat = Compressor.CompressionFormats.Deflate;
-        private bool _isInitialized =  false;
+        private Compressor m_cmpEngine;
+        private Compressor.CompressionFormats m_cmpFormat = Compressor.CompressionFormats.Deflate;
+        private bool m_isInitialized =  false;
         #endregion
 
         #region Properties
@@ -129,8 +129,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// </summary>
         public Compressor.CompressionFormats CompressionFormat 
         {
-            get { return _cmpFormat; }
-            set { _cmpFormat = value; }
+            get { return m_cmpFormat; }
+            set { m_cmpFormat = value; }
         }
         #endregion
 
@@ -191,9 +191,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// <param name="Format">The compression algorithm</param>
         public void Initialize(bool Encryption, KeyParams KeyParam, Compressor.CompressionFormats Format = Compressor.CompressionFormats.Deflate)
         {
-            _cmpEngine = new Compressor(Format);
+            m_cmpEngine = new Compressor(Format);
             base.Initialize(Encryption, KeyParam);
-            _isInitialized = true;
+            m_isInitialized = true;
         }
 
         /// <summary>
@@ -205,11 +205,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// <returns>The encrypted and compressed stream</returns>
         public Stream Compress(Stream InStream)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoProcessingException("CompressionCipher:Compress", "The class is not be Initialized!", new ArgumentException());
 
             // compress
-            MemoryStream inStream = _cmpEngine.CompressStream(InStream);
+            MemoryStream inStream = m_cmpEngine.CompressStream(InStream);
             inStream.Seek(0, SeekOrigin.Begin);
             MemoryStream outStream =  new MemoryStream();
             // encrypt
@@ -228,7 +228,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// <returns>The decrypted and decompressed stream</returns>
         public Stream DeCompress(Stream InStream)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoProcessingException("CompressionCipher:Compress", "The class is not be Initialized!", new ArgumentException());
 
             // decrypt
@@ -236,7 +236,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             base.Write(InStream, outStream);
             outStream.Seek(0, SeekOrigin.Begin);
             // decompress
-            MemoryStream retStream = _cmpEngine.DeCompressStream(outStream);
+            MemoryStream retStream = m_cmpEngine.DeCompressStream(outStream);
             retStream.Seek(0, SeekOrigin.Begin);
 
             return retStream;
@@ -250,7 +250,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// <param name="OutStream">The stream receiving the compressed and encrypted archive</param>
         public void Deflate(string DirectoryPath, Stream OutStream)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoProcessingException("CompressionCipher:Compress", "The class is not be Initialized!", new ArgumentException());
             if (!DirectoryTools.Exists(DirectoryPath))
                 throw new CryptoProcessingException("CompressionCipher:Deflate", "The directory does not exist!", new ArgumentException());
@@ -258,7 +258,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
                 throw new CryptoProcessingException("CompressionCipher:Deflate", "There are no files in this directory!", new ArgumentException());
 
             // compress
-            MemoryStream inStream = _cmpEngine.CompressArchive(DirectoryPath);
+            MemoryStream inStream = m_cmpEngine.CompressArchive(DirectoryPath);
             inStream.Seek(0, SeekOrigin.Begin);
             // encrypt output
             base.Write(inStream, OutStream);
@@ -273,7 +273,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// <param name="InStream">The stream containing the compressed archive</param>
         public void Inflate(string DirectoryPath, Stream InStream)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoProcessingException("CompressionCipher:Compress", "The class is not be Initialized!", new ArgumentException());
             if (!DirectoryTools.Exists(DirectoryPath))
                 Directory.CreateDirectory(DirectoryPath);
@@ -285,7 +285,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             base.Write(InStream, outStream);
             outStream.Seek(0, SeekOrigin.Begin);
             // decompress
-            _cmpEngine.DeCompressArchive(outStream, DirectoryPath);
+            m_cmpEngine.DeCompressArchive(outStream, DirectoryPath);
         }
         #endregion
     }

@@ -131,15 +131,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         #endregion
 
         #region Fields
-        private int _blockSize;
-        private IDigest _digestEngine;
-        private bool _disposeEngine = false;
-        private bool _disposeStream = false;
-        private Stream _inStream;
-        private bool _isConcurrent = true;
-        private bool _isDisposed = false;
-        private bool _isInitialized = false;
-        private long _progressInterval;
+        private int m_blockSize;
+        private IDigest m_digestEngine;
+        private bool m_disposeEngine = false;
+        private bool m_disposeStream = false;
+        private Stream m_inStream;
+        private bool m_isConcurrent = true;
+        private bool m_isDisposed = false;
+        private bool m_isInitialized = false;
+        private long m_progressInterval;
         #endregion
 
         #region Properties
@@ -150,8 +150,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// </summary>
         public bool IsConcurrent
         {
-            get { return _isConcurrent; }
-            set { _isConcurrent = value; }
+            get { return m_isConcurrent; }
+            set { m_isConcurrent = value; }
         }
         #endregion
 
@@ -170,9 +170,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             if (Digest == null)
                 throw new CryptoProcessingException("DigestStream:CTor", "The Digest can not be null!", new ArgumentNullException());
 
-            _digestEngine = Digest;
-            _blockSize = _digestEngine.BlockSize;
-            _disposeEngine = DisposeEngine;
+            m_digestEngine = Digest;
+            m_blockSize = m_digestEngine.BlockSize;
+            m_disposeEngine = DisposeEngine;
         }
 
         /// <summary>
@@ -185,9 +185,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// <exception cref="System.ArgumentNullException">Thrown if a null Digest is used</exception>
         public DigestStream(Digests Digest, bool DisposeEngine = false)
         {
-            _digestEngine = GetDigest(Digest);
-            _blockSize = _digestEngine.BlockSize;
-            _disposeEngine = DisposeEngine;
+            m_digestEngine = GetDigest(Digest);
+            m_blockSize = m_digestEngine.BlockSize;
+            m_disposeEngine = DisposeEngine;
         }
 
         private DigestStream()
@@ -217,9 +217,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             if (InStream == null)
                 throw new CryptoProcessingException("DigestStream:Initialize", "The Input stream can not be null!", new ArgumentNullException());
 
-            _disposeStream = DisposeStream;
-            _inStream = InStream;
-            _isInitialized = true;
+            m_disposeStream = DisposeStream;
+            m_inStream = InStream;
+            m_isInitialized = true;
         }
 
         /// <summary>
@@ -231,15 +231,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// <exception cref="CryptoProcessingException">Thrown if ComputeHash is called before Initialize(), or if Size + Offset is longer than Input stream</exception>
         public byte[] ComputeHash()
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoProcessingException("DigestStream:ComputeHash", "Initialize() must be called before a write operation can be performed!", new InvalidOperationException());
-            if (_inStream.Length < 1)
+            if (m_inStream.Length < 1)
                 throw new CryptoProcessingException("DigestStream:ComputeHash", "The Input stream is too short!", new ArgumentOutOfRangeException());
 
-            if (_inStream.Length < BUFFER_SIZE || !_inStream.GetType().Equals(typeof(FileStream)))
-                _isConcurrent = false;
+            if (m_inStream.Length < BUFFER_SIZE || !m_inStream.GetType().Equals(typeof(FileStream)))
+                m_isConcurrent = false;
 
-            long dataLen = _inStream.Length - _inStream.Position;
+            long dataLen = m_inStream.Length - m_inStream.Position;
             CalculateInterval(dataLen);
 
             return Compute(dataLen);
@@ -257,17 +257,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         /// <exception cref="CryptoProcessingException">Thrown if ComputeHash is called before Initialize(), or if Size + Offset is longer than Input stream</exception>
         public byte[] ComputeHash(long Length, long Offset)
         {
-            if (!_isInitialized)
+            if (!m_isInitialized)
                 throw new CryptoProcessingException("DigestStream:ComputeHash", "Initialize() must be called before a ComputeHash operation can be performed!", new InvalidOperationException());
-            if (Length - Offset < 1 || Length - Offset > _inStream.Length)
+            if (Length - Offset < 1 || Length - Offset > m_inStream.Length)
                 throw new CryptoProcessingException("DigestStream:ComputeHash", "The Input stream is too short!", new ArgumentOutOfRangeException());
 
-            if (_inStream.Length - Offset < BUFFER_SIZE || !_inStream.GetType().Equals(typeof(FileStream)))
-                _isConcurrent = false;
+            if (m_inStream.Length - Offset < BUFFER_SIZE || !m_inStream.GetType().Equals(typeof(FileStream)))
+                m_isConcurrent = false;
 
             long dataLen = Length - Offset;
             CalculateInterval(dataLen);
-            _inStream.Position = Offset;
+            m_inStream.Position = Offset;
 
             return Compute(dataLen);
         }
@@ -276,15 +276,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         #region Private Methods
         private void CalculateInterval(long Offset)
         {
-            long interval = (_inStream.Length - Offset) / 100;
+            long interval = (m_inStream.Length - Offset) / 100;
 
-            if (interval < _blockSize)
-                _progressInterval = _blockSize;
+            if (interval < m_blockSize)
+                m_progressInterval = m_blockSize;
             else
-                _progressInterval = interval - (interval % _blockSize);
+                m_progressInterval = interval - (interval % m_blockSize);
 
-            if (_progressInterval == 0)
-                _progressInterval = _blockSize;
+            if (m_progressInterval == 0)
+                m_progressInterval = m_blockSize;
         }
 
         private void CalculateProgress(long Size)
@@ -292,13 +292,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
             if (ProgressPercent == null)
                 return;
 
-            if (Size == _inStream.Length)
+            if (Size == m_inStream.Length)
             {
                 ProgressPercent(this, new ProgressEventArgs(Size, 100));
             }
-            else if (Size % _progressInterval == 0)
+            else if (Size % m_progressInterval == 0)
             {
-                double progress = 100.0 * (double)Size / _inStream.Length;
+                double progress = 100.0 * (double)Size / m_inStream.Length;
                 ProgressPercent(this, new ProgressEventArgs(Size, (int)progress));
             }
         }
@@ -306,18 +306,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
         private byte[] Compute(long Length)
         {
             long bytesTotal = 0;
-            byte[] chkSum = new byte[_digestEngine.DigestSize];
+            byte[] chkSum = new byte[m_digestEngine.DigestSize];
 
-            if (!_isConcurrent)
+            if (!m_isConcurrent)
             {
                 int bytesRead = 0;
-                byte[] buffer = new byte[_blockSize];
-                long maxBlocks = Length / _blockSize;
+                byte[] buffer = new byte[m_blockSize];
+                long maxBlocks = Length / m_blockSize;
 
                 for (int i = 0; i < maxBlocks; i++)
                 {
-                    bytesRead = _inStream.Read(buffer, 0, _blockSize);
-                    _digestEngine.BlockUpdate(buffer, 0, bytesRead);
+                    bytesRead = m_inStream.Read(buffer, 0, m_blockSize);
+                    m_digestEngine.BlockUpdate(buffer, 0, bytesRead);
                     bytesTotal += bytesRead;
                     CalculateProgress(bytesTotal);
                 }
@@ -326,18 +326,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
                 if (bytesTotal < Length)
                 {
                     buffer = new byte[Length - bytesTotal];
-                    bytesRead = _inStream.Read(buffer, 0, buffer.Length);
-                    _digestEngine.BlockUpdate(buffer, 0, bytesRead);
+                    bytesRead = m_inStream.Read(buffer, 0, buffer.Length);
+                    m_digestEngine.BlockUpdate(buffer, 0, bytesRead);
                     bytesTotal += bytesRead;
                 }
             }
             else
             {
-                bytesTotal = ConcurrentStream(_inStream, Length);
+                bytesTotal = ConcurrentStream(m_inStream, Length);
             }
 
             // get the hash
-            _digestEngine.DoFinal(chkSum, 0);
+            m_digestEngine.DoFinal(chkSum, 0);
             CalculateProgress(bytesTotal);
 
             return chkSum;
@@ -400,7 +400,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
             Task hasher = Task.Factory.StartNew(() =>
             {
-                IDigest h = (IDigest)_digestEngine;
+                IDigest h = (IDigest)m_digestEngine;
                 long total = 0;
 
                 for (; ; )
@@ -472,30 +472,30 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Processing
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_disposeEngine)
+                    if (m_disposeEngine)
                     {
-                        if (_digestEngine != null)
+                        if (m_digestEngine != null)
                         {
-                            _digestEngine.Dispose();
-                            _digestEngine = null;
+                            m_digestEngine.Dispose();
+                            m_digestEngine = null;
                         }
                     }
-                    if (_disposeStream)
+                    if (m_disposeStream)
                     {
-                        if (_inStream != null)
+                        if (m_inStream != null)
                         {
-                            _inStream.Dispose();
-                            _inStream = null;
+                            m_inStream.Dispose();
+                            m_inStream = null;
                         }
                     }
                 }
                 finally
                 {
-                    _isDisposed = true;
+                    m_isDisposed = true;
                 }
             }
         }

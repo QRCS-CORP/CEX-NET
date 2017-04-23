@@ -13,9 +13,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
     {
         #region Fields
         // holds a pointer to this element's corresponding field.
-        protected GF2nField mField;
+        protected GF2nField m_Field;
         // holds the extension degree <c>n</c> of this element's corresponding field.
-        protected int mDegree;
+        protected int m_Degree;
         #endregion
 
         #region Abstract Methods
@@ -191,7 +191,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>Returns this element in the representation of <c>basis</c></returns>
         public GF2nElement Convert(GF2nField Basis)
         {
-            return mField.Convert(this, Basis);
+            return m_Field.Convert(this, Basis);
         }
 
         /// <summary>
@@ -201,7 +201,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
         /// <returns>The field of this element</returns>
         public GF2nField GetField()
         {
-            return mField;
+            return m_Field;
         }
 
         /// <summary>

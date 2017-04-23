@@ -49,9 +49,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         #endregion
 
         #region Fields
-        private bool _isDisposed = false;
-        private NTRUPrivateKey _privateKey;
-        private NTRUPublicKey _publicKey;
+        private bool m_isDisposed = false;
+        private NTRUPrivateKey m_privateKey;
+        private NTRUPublicKey m_publicKey;
         #endregion
 
         #region Properties
@@ -68,7 +68,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// </summary>
         public IAsymmetricKey PrivateKey
         {
-            get { return _privateKey; }
+            get { return m_privateKey; }
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <returns>The public key</returns>
         public IAsymmetricKey PublicKey
         {
-            get { return _publicKey; }
+            get { return m_publicKey; }
         }
         #endregion
 
@@ -98,8 +98,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
             if (!(PrivateKey is NTRUPrivateKey))
                 throw new CryptoAsymmetricException("NTRUKeyPair:CTor", "Not a valid NTRU Private key!", new InvalidDataException());
 
-            _publicKey = (NTRUPublicKey)PublicKey;
-            _privateKey = (NTRUPrivateKey)PrivateKey;
+            m_publicKey = (NTRUPublicKey)PublicKey;
+            m_privateKey = (NTRUPrivateKey)PrivateKey;
         }
 
         /// <summary>
@@ -112,9 +112,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         public NTRUKeyPair(IAsymmetricKey Key)
         {
             if (Key is NTRUPublicKey)
-                _publicKey = (NTRUPublicKey)Key;
+                m_publicKey = (NTRUPublicKey)Key;
             else if (Key is NTRUPrivateKey)
-                _privateKey = (NTRUPrivateKey)Key;
+                m_privateKey = (NTRUPrivateKey)Key;
             else
                 throw new CryptoAsymmetricException("NTRUKeyPair:CTor", "Not a valid NTRU key!", new InvalidDataException());
         }
@@ -127,8 +127,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <param name="KeyStream">An input stream containing an encoded key pair</param>
         public NTRUKeyPair(MemoryStream KeyStream)
         {
-            _publicKey = new NTRUPublicKey(KeyStream);
-            _privateKey = new NTRUPrivateKey(KeyStream);
+            m_publicKey = new NTRUPublicKey(KeyStream);
+            m_privateKey = new NTRUPrivateKey(KeyStream);
         }
 
         /// <summary>
@@ -349,7 +349,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
         /// <returns>The IAsymmetricKeyPair copy</returns>
         public object Clone()
         {
-            return new NTRUKeyPair((IAsymmetricKey)_publicKey.Clone(), (IAsymmetricKey)_privateKey.Clone());
+            return new NTRUKeyPair((IAsymmetricKey)m_publicKey.Clone(), (IAsymmetricKey)m_privateKey.Clone());
         }
         #endregion
 
@@ -365,18 +365,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.NTRU
 
         private void Dispose(bool Disposing)
         {
-            if (!_isDisposed && Disposing)
+            if (!m_isDisposed && Disposing)
             {
                 try
                 {
-                    if (_privateKey != null)
-                        ((NTRUPrivateKey)_privateKey).Dispose();
-                    if (_publicKey != null)
-                        ((NTRUPublicKey)_publicKey).Dispose();
+                    if (m_privateKey != null)
+                        ((NTRUPrivateKey)m_privateKey).Dispose();
+                    if (m_publicKey != null)
+                        ((NTRUPublicKey)m_publicKey).Dispose();
                 }
                 catch { }
 
-                _isDisposed = true;
+                m_isDisposed = true;
             }
         }
         #endregion
