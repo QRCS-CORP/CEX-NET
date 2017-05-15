@@ -92,7 +92,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Al
             }
             else
             {
-                for (int i = 0; i < numColumns >> 1; i++)
+                for (int i = 0; i < (numColumns >> 1); i++)
                 {
                     int[] monomCoeffs = new int[(i << 1) + 1];
                     monomCoeffs[i << 1] = 1;
