@@ -233,16 +233,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <returns>Random int</returns>
         public int Next(int Maximum)
         {
-            byte[] rand;
-            int[] num = new int[1];
+            int max = (Int32.MaxValue - (Int32.MaxValue % Maximum));
+            int x;
+            int ret;
 
             do
             {
-                rand = GetByteRange(Maximum);
-                Buffer.BlockCopy(rand, 0, num, 0, rand.Length);
-            } while (num[0] > Maximum);
+                x = Next();
+                ret = x % Maximum;
+            }
+            while (x >= max || ret < 0);
 
-            return num[0];
+            return ret;
         }
 
         /// <summary>
@@ -255,9 +257,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <returns>Random int</returns>
         public int Next(int Minimum, int Maximum)
         {
-            int num = 0;
-            while ((num = Next(Maximum)) < Minimum) { }
-            return num;
+            int range = (Maximum - Minimum + 1);
+            int max = (Int32.MaxValue - (Int32.MaxValue % range));
+            int x;
+            int ret;
+
+            do
+            {
+                x = Next();
+                ret = x % range;
+            }
+            while (x >= max || ret < 0);
+
+            return Minimum + ret;
         }
 
         /// <summary>
@@ -282,16 +294,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <returns>Random long</returns>
         public long NextLong(long Maximum)
         {
-            byte[] rand;
-            long[] num = new long[1];
+            long max = (Int64.MaxValue - (Int64.MaxValue % Maximum));
+            long x;
+            long ret;
 
             do
             {
-                rand = GetByteRange(Maximum);
-                Buffer.BlockCopy(rand, 0, num, 0, rand.Length);
-            } while (num[0] > Maximum);
+                x = NextLong();
+                ret = x % Maximum;
+            }
+            while (x >= max || ret < 0);
 
-            return num[0];
+            return ret;
         }
 
         /// <summary>
@@ -304,9 +318,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <returns>Random long</returns>
         public long NextLong(long Minimum, long Maximum)
         {
-            long num = 0;
-            while ((num = NextLong(Maximum)) < Minimum) { }
-            return num;
+            long range = (Maximum - Minimum + 1);
+            long max = (Int64.MaxValue - (Int64.MaxValue % range));
+            long x;
+            long ret;
+
+            do
+            {
+                x = NextLong();
+                ret = x % range;
+            }
+            while (x >= max || ret < 0);
+
+            return Minimum + ret;
         }
 
         /// <summary>
@@ -319,48 +343,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         #endregion
 
         #region Private Methods
-        private byte[] GetByteRange(long Maximum)
-        {
-            byte[] data;
-
-            if (Maximum < 256)
-                data = GetBytes(1);
-            else if (Maximum < 65536)
-                data = GetBytes(2);
-            else if (Maximum < 16777216)
-                data = GetBytes(3);
-            else if (Maximum < 4294967296)
-                data = GetBytes(4);
-            else if (Maximum < 1099511627776)
-                data = GetBytes(5);
-            else if (Maximum < 281474976710656)
-                data = GetBytes(6);
-            else if (Maximum < 72057594037927936)
-                data = GetBytes(7);
-            else
-                data = GetBytes(8);
-
-            return GetBits(data, Maximum);
-        }
-
-        private byte[] GetBits(byte[] Data, long Maximum)
-        {
-            ulong[] val = new ulong[1];
-            Buffer.BlockCopy(Data, 0, val, 0, Data.Length);
-            int bits = Data.Length * 8;
-
-            while (val[0] > (ulong)Maximum && bits > 0)
-            {
-                val[0] >>= 1;
-                bits--;
-            }
-
-            byte[] ret = new byte[Data.Length];
-            Buffer.BlockCopy(val, 0, ret, 0, Data.Length);
-
-            return ret;
-        }
-
         private void Initialize(int BitLength)
         {
             // get primes P and Q

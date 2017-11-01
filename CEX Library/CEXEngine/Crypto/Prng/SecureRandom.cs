@@ -181,7 +181,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// </summary>
         /// 
         /// <returns>Random Int16</returns>
-        public Int16 NextInt16()
+        public short NextInt16()
         {
             return BitConverter.ToInt16(GetBytes(2), 0);
         }
@@ -192,21 +192,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// 
         /// <param name="Maximum">Maximum value</param>
         /// <returns>Random Int16</returns>
-        public Int16 NextInt16(Int16 Maximum)
+        public short NextInt16(short Maximum)
         {
-            byte[] rand;
-            Int16[] num = new Int16[1];
+            short max = (short)(Int16.MaxValue - (Int16.MaxValue % Maximum));
+            short x;
+            short ret;
 
             do
             {
-                rand = GetByteRange(Maximum);
-                Buffer.BlockCopy(rand, 0, num, 0, rand.Length);
-            } while (num[0] > Maximum);
+                x = NextInt16();
+                ret = (short)(x % Maximum);
+            }
+            while (x >= max || ret < 0);
 
-            if (num[0] == -1)
-                num[0] = 0;
-
-            return num[0];
+            return ret;
         }
 
         /// <summary>
@@ -217,11 +216,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="Maximum">Maximum value</param>
         /// 
         /// <returns>Random Int16</returns>
-        public Int16 NextInt16(Int16 Minimum, Int16 Maximum)
+        public short NextInt16(short Minimum, short Maximum)
         {
-            Int16 num = 0;
-            while ((num = NextInt16(Maximum)) < Minimum) { }
-            return num;
+            short range = (short)(Maximum - Minimum + 1);
+            short max = (short)(Int16.MaxValue - (Int16.MaxValue % range));
+            short x;
+            short ret;
+
+            do
+            {
+                x = NextInt16();
+                ret = (short)(x % range);
+            }
+            while (x >= max || ret < 0);
+
+            return (short)(Minimum + ret);
         }
         #endregion
 
@@ -232,7 +241,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// 
         /// <returns>Random UInt16</returns>
         [CLSCompliant(false)]
-        public UInt16 NextUInt16()
+        public ushort NextUInt16()
         {
             return BitConverter.ToUInt16(GetBytes(2), 0);
         }
@@ -245,18 +254,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// 
         /// <returns>Random UInt16</returns>
         [CLSCompliant(false)]
-        public UInt16 NextUInt16(UInt16 Maximum)
+        public ushort NextUInt16(ushort Maximum)
         {
-            byte[] rand;
-            UInt16[] num = new UInt16[1];
+            ushort max = (ushort)(UInt16.MaxValue - (UInt16.MaxValue % Maximum));
+            ushort x;
+            ushort ret;
 
             do
             {
-                rand = GetByteRange(Maximum);
-                Buffer.BlockCopy(rand, 0, num, 0, rand.Length);
-            } while (num[0] > Maximum);
+                x = NextUInt16();
+                ret = (ushort)(x % Maximum);
+            }
+            while (x >= max || ret < 0);
 
-            return num[0];
+            return ret;
         }
 
         /// <summary>
@@ -268,11 +279,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// 
         /// <returns>Random uint</returns>
         [CLSCompliant(false)]
-        public UInt16 NextUInt16(UInt16 Minimum, UInt16 Maximum)
+        public ushort NextUInt16(ushort Minimum, ushort Maximum)
         {
-            UInt16 num = 0;
-            while ((num = NextUInt16(Maximum)) < Minimum) { }
-            return num;
+            ushort range = (ushort)(Maximum - Minimum + 1);
+            ushort max = (ushort)(UInt16.MaxValue - (UInt16.MaxValue % range));
+            ushort x;
+            ushort ret;
+
+            do
+            {
+                x = NextUInt16();
+                ret = (ushort)(x % range);
+            }
+            while (x >= max && ret < 0);
+
+            return (ushort)(Minimum + ret);
         }
         #endregion
 
@@ -306,19 +327,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <returns>Random int</returns>
         public int NextInt32(int Maximum)
         {
-            byte[] rand;
-            int[] num = new int[1];
+            int max = (Int32.MaxValue - (Int32.MaxValue % Maximum));
+            int x;
+            int ret;
 
             do
             {
-                rand = GetByteRange(Maximum);
-                Buffer.BlockCopy(rand, 0, num, 0, rand.Length);
-            } while (num[0] > Maximum);
+                x = NextInt32();
+                ret = (x % Maximum);
+            }
+            while (x >= max || ret < 0);
 
-            if (num[0] == -1)
-                num[0] = 0;
-
-            return num[0];
+            return ret;
         }
 
         /// <summary>
@@ -331,9 +351,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <returns>Random int</returns>
         public int NextInt32(int Minimum, int Maximum)
         {
-            int num = 0;
-            while ((num = NextInt32(Maximum)) < Minimum) { }
-            return num;
+            int range = (Maximum - Minimum + 1);
+            int max = (Int32.MaxValue - (Int32.MaxValue % range));
+            int x;
+            int ret;
+
+            do
+            {
+                x = NextInt32();
+                ret = (x % range);
+            }
+            while (x >= max || ret < 0);
+
+            return (Minimum + ret);
         }
         #endregion
 
@@ -359,16 +389,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         [CLSCompliant(false)]
         public uint NextUInt32(uint Maximum)
         {
-            byte[] rand;
-            uint[] num = new uint[1];
+            uint max = (UInt32.MaxValue - (UInt32.MaxValue % Maximum));
+            uint x;
+            uint ret;
 
             do
             {
-                rand = GetByteRange(Maximum);
-                Buffer.BlockCopy(rand, 0, num, 0, rand.Length);
-            } while (num[0] > Maximum);
+                x = NextUInt32();
+                ret = x % Maximum;
+            }
+            while (x >= max || ret < 0);
 
-            return num[0];
+            return ret;
         }
 
         /// <summary>
@@ -382,9 +414,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         [CLSCompliant(false)]
         public uint NextUInt32(uint Minimum, uint Maximum)
         {
-            uint num = 0;
-            while ((num = NextUInt32(Maximum)) < Minimum) { }
-            return num;
+            uint range = (Maximum - Minimum + 1);
+            uint max = (UInt32.MaxValue - (UInt32.MaxValue % range));
+            uint x;
+            uint ret;
+
+            do
+            {
+                x = NextUInt32();
+                ret = x % range;
+            }
+            while (x >= max || ret < 0);
+
+            return Minimum + ret;
         }
         #endregion
 
@@ -408,19 +450,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <returns>Random long</returns>
         public long NextInt64(long Maximum)
         {
-            byte[] rand;
-            long[] num = new long[1];
+            long max = (Int64.MaxValue - (Int64.MaxValue % Maximum));
+            long x;
+            long ret;
 
             do
             {
-                rand = GetByteRange((long)Maximum);
-                Buffer.BlockCopy(rand, 0, num, 0, rand.Length);
-            } while (num[0] > Maximum);
+                x = NextInt64();
+                ret = x % Maximum;
+            }
+            while (x >= max || ret < 0);
 
-            if (num[0] == -1)
-                num[0] = 0;
-
-            return num[0];
+            return ret;
         }
 
         /// <summary>
@@ -433,9 +474,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <returns>Random long</returns>
         public long NextInt64(long Minimum, long Maximum)
         {
-            long num = 0;
-            while ((num = NextInt64(Maximum)) < Minimum) { }
-            return num;
+            long range = (Maximum - Minimum + 1);
+            long max = (Int64.MaxValue - (Int64.MaxValue % range));
+            long x;
+            long ret;
+
+            do
+            {
+                x = NextInt64();
+                ret = (x % range);
+            }
+            while (x >= max || ret < 0);
+
+            return (Minimum + ret);
         }
         #endregion
 
@@ -461,16 +512,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         [CLSCompliant(false)]
         public ulong NextUInt64(ulong Maximum)
         {
-            byte[] rand = GetByteRange((long)Maximum);
-            ulong[] num = new ulong[1];
+            ulong max = (UInt64.MaxValue - (UInt64.MaxValue % Maximum));
+            ulong x;
+            ulong ret;
 
             do
             {
-                rand = GetByteRange((long)Maximum);
-                Buffer.BlockCopy(rand, 0, num, 0, rand.Length);
-            } while (num[0] > Maximum);
+                x = NextUInt64();
+                ret = x % Maximum;
+            }
+            while (x >= max || ret < 0);
 
-            return num[0];
+            return ret;
         }
 
         /// <summary>
@@ -484,9 +537,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         [CLSCompliant(false)]
         public ulong NextUInt64(ulong Minimum, ulong Maximum)
         {
-            ulong num = 0;
-            while ((num = NextUInt64(Maximum)) < Minimum) { }
-            return num;
+            ulong range = (Maximum - Minimum + 1);
+            ulong max = (UInt64.MaxValue - (UInt64.MaxValue % range));
+            ulong x;
+            ulong ret;
+
+            do
+            {
+                x = NextUInt64();
+                ret = x % range;
+            }
+            while (x >= max || ret < 0);
+
+            return Minimum + ret;
         }
         #endregion
 
@@ -590,57 +653,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
             char[] data = new char[Size];
             Buffer.BlockCopy(GetBytes(Size * 2), 0, data, 0, Size);
             return data;
-        }
-        #endregion
-
-        #region Private Methods
-        /// <remarks>
-        /// Returns the number of bytes needed to build 
-        /// an integer existing within a byte range
-        /// </remarks>
-        private byte[] GetByteRange(long Maximum)
-        {
-            byte[] data;
-
-            if (Maximum < 256)
-                data = GetBytes(1);
-            else if (Maximum < 65536)
-                data = GetBytes(2);
-            else if (Maximum < 16777216)
-                data = GetBytes(3);
-            else if (Maximum < 4294967296)
-                data = GetBytes(4);
-            else if (Maximum < 1099511627776)
-                data = GetBytes(5);
-            else if (Maximum < 281474976710656)
-                data = GetBytes(6);
-            else if (Maximum < 72057594037927936)
-                data = GetBytes(7);
-            else
-                data = GetBytes(8);
-
-            return GetBits(data, Maximum);
-        }
-
-        /// <remarks>
-        /// If you need a dice roll, use the Random class (smaller range = reduced entropy)
-        /// </remarks>
-        private byte[] GetBits(byte[] Data, long Maximum)
-        {
-            ulong[] val = new ulong[1];
-            Buffer.BlockCopy(Data, 0, val, 0, Data.Length);
-            int bits = Data.Length * 8;
-
-            while (val[0] > (ulong)Maximum && bits > 0)
-            {
-                val[0] >>= 1;
-                bits--;
-            }
-
-            byte[] ret = new byte[Data.Length];
-            Buffer.BlockCopy(val, 0, ret, 0, Data.Length);
-
-            return ret;
         }
         #endregion
 
