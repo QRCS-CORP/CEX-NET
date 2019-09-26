@@ -21,9 +21,13 @@ Library has tripled in size from the last release (now 46k+ lines), too much to 
 Update v1.57, all variants of Blake2 added, sequential and parallel; 2B, 2BP, 2S, and 2SP.
 
 CEX++: https://github.com/Steppenwolfe65/CEX
+
 Article: http://www.codeproject.com/Articles/828477/Cipher-EX-V
+
 API Help: http://www.vtdev.com/CEX/Help/index.html
+
 Homepage: http://www.vtdev.com/cexhome.html
+
 
 This project contains strong cryptography, before downloading the source files, 
 it is your responsibility to check if these extended symmetric cipher key lengths (512 bit and higher), and algorithms are legal in your country. 
