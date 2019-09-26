@@ -10,7 +10,7 @@ this work should now be considered as only relevant for historical purposes.
 
 
 
-Version 1.5
+### Version 1.5
 This is version 1.5; Asymmetric ciphers have been added, along with preliminary work on the DTM-KEX.
 Dual License: NTRU and DTM-KEX are GPLv3, everything else is MIT.
 
