@@ -8,7 +8,6 @@ and that library contains many other changes and additions, and should now be co
 Because of these changes, and because a better alternative is available, 
 this work should now be considered as only relevant for historical purposes.
 Not to worry .net people, I haven't forgotten you.. expect a wrapper class for CEX++ in the next few months.
-J
 
 
 ### Version 1.5
