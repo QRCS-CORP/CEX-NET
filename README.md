@@ -1,4 +1,5 @@
-###This library is officially retired!
+## This library is officially retired!
+
 I haven't updated this in years, and it was only ever supposed to be a prototype, and served its purpose well..
 Many of the asymmetric ciphers and signature schemes contained in this library have changed, 
 undergoing analysis and improvement during the NIST Post Quantum competition.
