@@ -7,7 +7,7 @@ These primitives have been installed in the new library CEX++: https://github.co
 and that library contains many other changes and additions, and should now be considered the official version of the CEX library.
 Because of these changes, and because a better alternative is available, 
 this work should now be considered as only relevant for historical purposes.
-Not to worry .net people, I haven't forgotten you.. expect a wrapper class for CEX++ in the next few months.
+Not to worry .NET people, I haven't forgotten you.. expect a wrapper class for CEX++ in the next few months.
 
 
 ### Version 1.5
