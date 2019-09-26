@@ -3,7 +3,7 @@
 I haven't updated this in years, and it was only ever supposed to be a prototype, and served its purpose well..
 Many of the asymmetric ciphers and signature schemes contained in this library have changed, 
 undergoing analysis and improvement during the NIST Post Quantum competition: https://csrc.nist.gov/projects/post-quantum-cryptography.
-These primitives have been installed in the new library CEX++: https://github.com/Steppenwolfe65/CEX, which took up where this one ended, 
+These primitives have been installed in the new library, CEX++: https://github.com/Steppenwolfe65/CEX, which took up where this one ended, 
 and that library contains many other changes and additions, and should now be considered the official version of the CEX library.
 Because of these changes, and because a better alternative is available, 
 this work should now be considered as only relevant for historical purposes.
